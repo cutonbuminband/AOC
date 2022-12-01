@@ -1,5 +1,15 @@
-#+PROPERTY: header-args:jupyter-python  :session py :kernel python
+#+PROPERTY: header-args:jupyter-python  :session aoc :kernel python
 #+PROPERTY: header-args    :pandoc t
+
+* Imports
+#+begin_src jupyter-python
+import pandas as pd
+import numpy as np
+from collections import defaultdict
+from pathlib import Path
+import functools
+datadir = Path("data/2022")
+#+end_src
 
 * Day 1
 ** Text
@@ -9,7 +19,7 @@ The Elves take turns writing down the number of Calories contained by the variou
 Find the Elf carrying the most Calories. How many total Calories is that Elf carrying?
 
 #+begin_src jupyter-python
-  elves = [x.split("\n") for x in open("data/1.txt", "r").read().split("\n\n")]
+  elves = [x.split("\n") for x in open(datadir / "1.txt", "r", encoding="utf8").read().split("\n\n")]
   max([sum([int(y) for y in x if y]) for x in elves])
 #+end_src
 
@@ -21,3 +31,4 @@ To avoid this unacceptable situation, the Elves would instead like to know the t
 #+begin_src jupyter-python
   sum(sorted([sum([int(y) for y in x if y]) for x in elves])[-3:])
 #+end_src
+

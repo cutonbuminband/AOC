@@ -1,4 +1,4 @@
-#+PROPERTY: header-args:jupyter-python  :session py :kernel python
+#+PROPERTY: header-args:jupyter-python  :session aoc :kernel python
 #+PROPERTY: header-args    :pandoc t
 
 * Imports
@@ -6,13 +6,16 @@
 import pandas as pd
 import numpy as np
 from collections import defaultdict
+from pathlib import Path
+import functools
+datadir = Path("data/2021")
 #+end_src
 
 * Day 1: Sonar Sweep
 ** Part 1
 To do this, count the number of times a depth measurement increases from the previous measurement. (There is no measurement before the first measurement.)
 #+begin_src jupyter-python
-  data = pd.read_csv('data/1.csv', names=['depth'])
+  data = pd.read_csv(datadir / '1.csv', names=['depth'])
   (data.diff() > 0).sum()
 #+end_src
 
@@ -32,7 +35,7 @@ It seems like the submarine can take a series of commands like forward 1, down 2
 
 Calculate the horizontal position and depth you would have after following the planned course. What do you get if you multiply your final horizontal position by your final depth?
 #+begin_src jupyter-python
-  data = pd.read_csv('data/2.csv', sep=' ', names=['instruction', 'amount'])
+  data = pd.read_csv(datadir / '2.csv', sep=' ', names=['instruction', 'amount'])
   totals = data.groupby('instruction').sum()
   totals.loc['forward'] * (totals.loc['down'] - totals.loc['up'])
 #+end_src
@@ -68,7 +71,7 @@ Each bit in the gamma rate can be determined by finding the most common bit in t
 Use the binary numbers in your diagnostic report to calculate the gamma rate and epsilon rate, then multiply them together.
 
 #+begin_src jupyter-python
-df = pd.read_fwf('data/3.csv', widths=[1]*12, header=None)
+df = pd.read_fwf(datadir / '3.csv', widths=[1]*12, header=None)
 def binarize(array):
     return int(''.join(str(x) for x in array.reshape(-1)), 2)
 bits = df.median().to_numpy(dtype=int)
@@ -109,8 +112,8 @@ The score of the winning board can now be calculated. Start by finding the sum o
 To guarantee victory against the giant squid, figure out which board will win first. What will your final score be if you choose that board?
 
 #+begin_src jupyter-python
-  numbers = np.loadtxt('data/4.txt', delimiter=',', max_rows=1)
-  boards = np.loadtxt('data/4.txt', skiprows=2).reshape(-1, 5, 5)
+  numbers = np.loadtxt(datadir / '4.txt', delimiter=',', max_rows=1)
+  boards = np.loadtxt(datadir / '4.txt', skiprows=2).reshape(-1, 5, 5)
 
   def winning_array(boards):
       return ((boards == -1).all(axis=2) | (boards == -1).all(axis=1)).any(axis=1)
@@ -154,7 +157,7 @@ To avoid the most dangerous areas, you need to determine the number of points wh
 
 Consider only horizontal and vertical lines. At how many points do at least two lines overlap?
 #+begin_src jupyter-python
-  data = pd.read_csv('data/5.txt', names=['x1', 'middle', 'y2'])
+  data = pd.read_csv(datadir / '5.txt', names=['x1', 'middle', 'y2'])
   data[['y1', 'x2']] = data['middle'].apply(lambda x: pd.Series(x.split('->')).astype('int'))
   grid = np.zeros((1000, 1000))
 
@@ -200,7 +203,7 @@ Each day, a 0 becomes a 6 and adds a new 8 to the end of the list, while each ot
 
 Find a way to simulate lanternfish. How many lanternfish would there be after 80 days?
 #+begin_src jupyter-python
-  data = np.loadtxt('data/6.txt', delimiter=',', dtype=int)
+  data = np.loadtxt(datadir / '6.txt', delimiter=',', dtype=int)
   population, _ = np.histogram(data, range(10))
   transition_matrix = np.roll(np.eye(9, dtype=int), 1, axis=1)
   transition_matrix[6, 0] = 1
@@ -214,6 +217,7 @@ How many lanternfish would there be after 256 days?
 #+begin_src jupyter-python
     (np.linalg.matrix_power(transition_matrix, 256) @ population).sum()
 #+end_src
+
 * Day 7: The Treachery of Whales
 ** Part 1
 A giant whale has decided your submarine is its next meal, and it's much faster than you are. There's nowhere to run!
@@ -230,9 +234,10 @@ Each change of 1 step in horizontal position of a single crab costs 1 fuel.
 
 Determine the horizontal position that the crabs can align to using the least fuel possible. How much fuel must they spend to align to that position?
 #+begin_src jupyter-python
-  data = np.loadtxt('data/7.csv', delimiter=',', dtype=int)
+  data = np.loadtxt(datadir / '7.csv', delimiter=',', dtype=int)
   np.abs(data - np.median(data)).sum()
 #+end_src
+
 ** Part 2
 The crabs don't seem interested in your proposed solution. Perhaps you misunderstand crab engineering?
 
@@ -247,10 +252,11 @@ Determine the horizontal position that the crabs can align to using the least fu
   options = [cost(int(data.mean())), cost(int(data.mean() + 0.5))]
   min(options)
 #+end_src
+
 * Day 8: Seven Segment Search
 ** Part 1
 #+begin_src jupyter-python
-  with open('data/8.txt', encoding='utf8') as f:
+  with open(datadir / '8.txt', encoding='utf8') as f:
       data = f.readlines()
   segments = [line.split("|")[1].strip().split() for line in data]
   mylen = np.vectorize(len)
@@ -263,7 +269,7 @@ This is an obvious task for constraint programming. It feels a bit like cheating
 
 The solution below works, but it's fairly slow.
 #+begin_src jupyter-python
-  import constraints
+  import constraint
   digits = {
       (1,2,3,5,6,7):   0,
       (3,6):           1,
@@ -324,7 +330,7 @@ We know that every digit occurs before the pipe for every row in our input.
 * Day 9: Smoke Basin
 ** Part 1
 #+begin_src jupyter-python
-  data = pd.read_fwf('data/9.txt', widths=[1]*100, header=None).to_numpy()
+  data = pd.read_fwf(datadir / '9.txt', widths=[1]*100, header=None).to_numpy()
   data = np.pad(data, pad_width=1, mode='constant', constant_values=9)
   mask = ((data < np.roll(data, -1, axis=0))
           & (data < np.roll(data, 1, axis=0))
@@ -365,7 +371,7 @@ We know that every digit occurs before the pipe for every row in our input.
 ** Part 1
 
 #+begin_src jupyter-python
-  with open('data/10.txt', encoding='utf8') as f:
+  with open(datadir / '10.txt', encoding='utf8') as f:
       lines = f.readlines()
 
   pairs = ["[]", "()", "<>", "{}"]
@@ -394,6 +400,7 @@ We know that every digit occurs before the pipe for every row in our input.
 
 
 ** Part 2
+
 #+begin_src jupyter-python
   delimiters = " ([{<"
   scores = []
@@ -431,7 +438,7 @@ We know that every digit occurs before the pipe for every row in our input.
       return flashed.sum()
 
     result = 0
-    data = pd.read_fwf('data/11.txt', widths=[1]*10, header=None).to_numpy(dtype=float)
+    data = pd.read_fwf(datadir / '11.txt', widths=[1]*10, header=None).to_numpy(dtype=float)
     data = np.pad(data, pad_width=1, mode='constant', constant_values=-np.inf)
     arr = data.copy()
     for i in range(100):
@@ -481,13 +488,14 @@ We know that every digit occurs before the pipe for every row in our input.
       return [(node,) + x for x in flatten([paths(new_tree, neighbor, end) for neighbor in tree[node]])]
 
 
-  with open("data/12.txt", encoding="utf8") as f:
+  with open(datadir / "12.txt", encoding="utf8") as f:
       data = f.readlines()
   edges = [line.strip().split("-") for line in data]
   tree = edges_to_tree(edges)
   len(paths(tree, "start", "end"))
 
 #+end_src
+
 ** Part 2
 #+begin_src jupyter-python
   def paths(tree):
@@ -505,11 +513,12 @@ We know that every digit occurs before the pipe for every row in our input.
       return inner(tree, "start", "end", 1)
   len(set(paths(tree)))
 #+end_src
+
 * Day 13: Transparent Origami
 ** Part 1
 
 #+begin_src jupyter-python
-  start = np.loadtxt('data/13.txt', delimiter=',', dtype=int)
+  start = np.loadtxt(datadir / '13.txt', delimiter=',', dtype=int)
   arr = np.zeros(start.max(axis=0) + 1, dtype=bool)
   arr[start[:, 0], start[:, 1]] = 1
 
@@ -549,7 +558,7 @@ A rule like CH -> B should be interpreted as state "CH" produces states "CB" and
 ** Part 1
 #+begin_src jupyter-python
   state_string = "VCOPVNKPFOOVPVSBKCOF"
-  with open('data/14.txt', encoding='utf8') as f:
+  with open(datadir / '14.txt', encoding='utf8') as f:
       data = f.readlines()
   transition_elements = ''.join(line.strip().replace(" -> ", "") for line in data)
   elements = sorted(set(state_string + transition_elements))
@@ -578,15 +587,17 @@ A rule like CH -> B should be interpreted as state "CH" produces states "CB" and
   totals = count(initial_state.T @ (np.linalg.matrix_power(transition_matrix, 10)))
   pd.Series(totals).max() - pd.Series(totals).min()
 #+end_src
+
 ** Part 2
 #+begin_src jupyter-python
   totals = count(initial_state.T @ (np.linalg.matrix_power(transition_matrix, 40)))
   pd.Series(totals).max() - pd.Series(totals).min()
 #+end_src
+
 * Day 15: Chiton
 This is a shortest path search, which I really don't remember how to do. Here goes nothing
 #+begin_src jupyter-python
-  data = pd.read_fwf('data/15.txt', widths=[1]*100, header=None).to_numpy(dtype=float)
+  data = pd.read_fwf(datadir / '15.txt', widths=[1]*100, header=None).to_numpy(dtype=float)
   data = np.pad(data, 1, constant_values = np.inf)
   auxiliary = np.zeros(data.shape)
   start = (1, 1)
@@ -606,9 +617,10 @@ This is a shortest path search, which I really don't remember how to do. Here go
           break
   auxiliary[-2, -2]
 #+end_src
+
 This worked, but is almost too slow for part 2, which runs in about 60 s. Oh well
 #+begin_src jupyter-python
-  data = pd.read_fwf('data/15.txt', widths=[1]*100, header=None).to_numpy(dtype=float)
+  data = pd.read_fwf(datadir / '15.txt', widths=[1]*100, header=None).to_numpy(dtype=float)
   x, y = data.shape
   arr = np.zeros([5  * x, 5 * y])
   for i in range(5):
@@ -632,6 +644,7 @@ This worked, but is almost too slow for part 2, which runs in about 60 s. Oh wel
       neighbors = [x for x in neighbors if x[0] < np.inf]
   auxiliary[-2, -2]
 #+end_src
+
 * Day 16: Packet Decoder
 
 #+begin_src jupyter-python
@@ -670,7 +683,7 @@ This worked, but is almost too slow for part 2, which runs in about 60 s. Oh wel
               offset += do
           return version, offset
 
-  with open ('data/16.txt') as f:
+  with open (datadir / '16.txt') as f:
       data = f.readline().strip()
   # data = "A0016C880162017C3686B18A3D4780"
   bits = ''.join(nybbles[x.lower()] for x in data)
@@ -717,6 +730,7 @@ For part 2, we have to completely ignore the version number and actually do some
       return operators[type_id](operands), offset
   print(evaluate_one_packet(bits)[0])
 #+end_src
+
 * Day 17: Trick Shot
 ** Part 1
 First pen and paper solution for this year.
@@ -846,7 +860,7 @@ Things to note:
           return False
 
   snumbers = []
-  with open('data/18.txt') as f:
+  with open(datadir / '18.txt') as f:
       for line in f:
           snumbers.append(eval(line.strip()))
   result = Pair(*snumbers[0])
@@ -883,7 +897,7 @@ We'll start by generating the 24 rotation matrices. There are six possible ways 
 Then we find overlapping scanners in the input and populate a map (x, y) with the matrices to convert from y coordinates to x coordinates
 #+begin_src jupyter-python
   from scipy.spatial.distance import pdist, squareform
-  foo = open('data/19.txt').read()[:-1]
+  foo = open(datadir / '19.txt').read()[:-1]
   scanners = foo.split('\n\n')
   scanners = [np.array([list(map(int, line.split(','))) for line in scanner.split('\n')[1:]], dtype=int) for scanner in scanners]
 
@@ -938,6 +952,8 @@ And then we convert all the initial coordinates to one representation and find i
   print(len(set(coords)))
 #+end_src
 
+** Part 2
+What is the largest Manhattan distance between any two scanners?
 #+begin_src jupyter-python
   maxval = 0
   for i, j in itertools.combinations(range(len(scanners)), 2):
@@ -950,7 +966,7 @@ And then we convert all the initial coordinates to one representation and find i
 * Day 20: Trench Map
 ** Part 1 and 2
 #+begin_src jupyter-python
-  data = open('data/20.txt').read()
+  data = open(datadir / '20.txt').read()
   pixel_map = {".": 0, "#": 1}
   key, array = data.split('\n\n')
   key = np.array([pixel_map[x] for x in key.strip()], dtype=bool)
@@ -966,6 +982,7 @@ And then we convert all the initial coordinates to one representation and find i
       if n == 2 or n == 50:
           print(new.sum())
 #+end_src
+
 * Day 21: Dirac Dice
 ** Part 1
 Players take turns moving. On each player's turn, the player rolls the die three times and adds up the results. Then, the player moves that many times forward around the track.
@@ -986,6 +1003,7 @@ Play a practice game using the deterministic 100-sided die. The moment either pl
       i = 1 - i
   count * min(scores)
 #+end_src
+
 ** Part 2
 A second compartment opens, this time labeled Dirac dice. Out of it falls a single three-sided die.
 
@@ -1019,7 +1037,8 @@ The game is played the same as before, although to prevent things from getting t
 
   max(wins)
 #+end_src
-* Day 22
+
+* Day 22: Reactor Reboot
 ** Part 1
 #+begin_src jupyter-python
   offset = 50
@@ -1030,7 +1049,7 @@ The game is played the same as before, although to prevent things from getting t
       indices = [x.split("..") for x in line.strip().split(",")]
       return command, [[int(x[0][2:]), int(x[1]) + 1] for x in indices]
 
-  lines = open("data/22.txt").readlines()
+  lines = open(datadir / "22.txt").readlines()
   values = {"on": 1, "off": 0}
   maxval = 0
   for line in lines:
@@ -1043,6 +1062,7 @@ The game is played the same as before, although to prevent things from getting t
       board[idx[0]:idx[1], idx[2]:idx[3], idx[4]:idx[5]] = values[command]
   board.sum()
 #+end_src
+
 ** Part 2
 #+begin_src jupyter-python
 
