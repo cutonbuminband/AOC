@@ -1019,4 +1019,31 @@ The game is played the same as before, although to prevent things from getting t
 
   max(wins)
 #+end_src
+* Day 22
+** Part 1
+#+begin_src jupyter-python
+  offset = 50
+  board = np.zeros((101, 101, 101), dtype=int)
 
+  def parse_line(line):
+      command, line = line.split(" ")
+      indices = [x.split("..") for x in line.strip().split(",")]
+      return command, [[int(x[0][2:]), int(x[1]) + 1] for x in indices]
+
+  lines = open("data/22.txt").readlines()
+  values = {"on": 1, "off": 0}
+  maxval = 0
+  for line in lines:
+      command, indices = parse_line(line)
+      idx = np.ravel(indices) + offset
+      if max(abs(idx)) > maxval:
+          maxval = max(abs(idx))
+      if (idx < 0).any() or (idx > 100).any():
+          continue
+      board[idx[0]:idx[1], idx[2]:idx[3], idx[4]:idx[5]] = values[command]
+  board.sum()
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+
+#+end_src
