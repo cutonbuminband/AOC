@@ -1,0 +1,969 @@
+#+PROPERTY: header-args:jupyter-python  :session py :kernel python
+#+PROPERTY: header-args    :pandoc t
+
+* Imports
+#+begin_src jupyter-python
+import pandas as pd
+import numpy as np
+from collections import defaultdict
+#+end_src
+
+* Day 1: Sonar Sweep
+** Part 1
+To do this, count the number of times a depth measurement increases from the previous measurement. (There is no measurement before the first measurement.)
+#+begin_src jupyter-python
+  data = pd.read_csv('data/1.csv', names=['depth'])
+  (data.diff() > 0).sum()
+#+end_src
+
+** Part 2
+Instead, consider sums of a three-measurement sliding window.  Your goal now is to count the number of times the sum of measurements in this sliding window increases from the previous sum. So, compare A with B, then compare B with C, then C with D, and so on. Stop when there aren't enough measurements left to create a new three-measurement sum.
+#+begin_src jupyter-python
+(data.rolling(3).sum().diff() > 0).sum()
+#+end_src
+
+* Day 2: Dive!
+** Part 1
+It seems like the submarine can take a series of commands like forward 1, down 2, or up 3:
+
+    - forward X increases the horizontal position by X units.
+    - down X increases the depth by X units.
+    - up X decreases the depth by X units.
+
+Calculate the horizontal position and depth you would have after following the planned course. What do you get if you multiply your final horizontal position by your final depth?
+#+begin_src jupyter-python
+  data = pd.read_csv('data/2.csv', sep=' ', names=['instruction', 'amount'])
+  totals = data.groupby('instruction').sum()
+  totals.loc['forward'] * (totals.loc['down'] - totals.loc['up'])
+#+end_src
+
+** Part 2
+In addition to horizontal position and depth, you'll also need to track a third value, aim, which also starts at 0. The commands also mean something entirely different than you first thought:
+
+    - down X increases your aim by X units.
+    - up X decreases your aim by X units.
+    - forward X does two things:
+        - It increases your horizontal position by X units.
+        - It increases your depth by your aim multiplied by X.
+
+Using this new interpretation of the commands, calculate the horizontal position and depth you would have after following the planned course. What do you get if you multiply your final horizontal position by your final depth?
+#+begin_src jupyter-python
+  state = (0, 0, 0)
+  ops = {'down': lambda x, y: (x[0] + y, x[1], x[2]),
+         'up': lambda x, y: (x[0] - y, x[1], x[2]),
+         'forward': lambda x, y: (x[0], x[1] + y, x[2] + x[0]*y)}
+  for row in data.itertuples():
+      state = ops[row.instruction](state, row.amount)
+  print(state[1] * state[2])
+#+end_src
+
+* Day 3: Binary Diagnostic
+** Part 1
+The diagnostic report (your puzzle input) consists of a list of binary numbers which, when decoded properly, can tell you many useful things about the conditions of the submarine. The first parameter to check is the power consumption.
+
+You need to use the binary numbers in the diagnostic report to generate two new binary numbers (called the gamma rate and the epsilon rate). The power consumption can then be found by multiplying the gamma rate by the epsilon rate.
+
+Each bit in the gamma rate can be determined by finding the most common bit in the corresponding position of all numbers in the diagnostic report. The epsilon rate is calculated in a similar way; rather than use the most common bit, the least common bit from each position is used.
+
+Use the binary numbers in your diagnostic report to calculate the gamma rate and epsilon rate, then multiply them together.
+
+#+begin_src jupyter-python
+df = pd.read_fwf('data/3.csv', widths=[1]*12, header=None)
+def binarize(array):
+    return int(''.join(str(x) for x in array.reshape(-1)), 2)
+bits = df.median().to_numpy(dtype=int)
+binarize(bits) * binarize(1 - bits)
+#+end_src
+
+** Part 2
+Both the oxygen generator rating and the CO2 scrubber rating are values that can be found in your diagnostic report - finding them is the tricky part. Both values are located using a similar process that involves filtering out values until only one remains. Before searching for either rating value, start with the full list of binary numbers from your diagnostic report and consider just the first bit of those numbers. Then:
+
+    - Keep only numbers selected by the bit criteria for the type of rating value for which you are searching. Discard numbers which do not match the bit criteria.
+    - If you only have one number left, stop; this is the rating value for which you are searching.
+    - Otherwise, repeat the process, considering the next bit to the right.
+
+The bit criteria depends on which type of rating value you want to find:
+
+    - To find oxygen generator rating, determine the most common value (0 or 1) in the current bit position, and keep only numbers with that bit in that position. If 0 and 1 are equally common, keep values with a 1 in the position being considered.
+    - To find CO2 scrubber rating, determine the least common value (0 or 1) in the current bit position, and keep only numbers with that bit in that position. If 0 and 1 are equally common, keep values with a 0 in the position being considered.
+
+Use the binary numbers in your diagnostic report to calculate the oxygen generator rating and CO2 scrubber rating, then multiply them together.
+
+#+begin_src jupyter-python
+oxygen = df
+co2 = df
+for column in df.columns:
+    oxygen = oxygen[oxygen[column] == int(oxygen[column].median() + 0.5)]
+    if len(co2) > 1:
+        co2 = co2[co2[column] != int(co2[column].median() + 0.5)]
+binarize(oxygen.to_numpy()) * binarize(co2.to_numpy())
+#+end_src
+
+* Day 4: Giant Squid
+
+** Part 1
+Bingo is played on a set of boards each consisting of a 5x5 grid of numbers. Numbers are chosen at random, and the chosen number is marked on all boards on which it appears. (Numbers may not appear on all boards.) If all numbers in any row or any column of a board are marked, that board wins. (Diagonals don't count.)
+
+The score of the winning board can now be calculated. Start by finding the sum of all unmarked numbers on that board. Then, multiply that sum by the number that was just called when the board won, to get the final score
+
+To guarantee victory against the giant squid, figure out which board will win first. What will your final score be if you choose that board?
+
+#+begin_src jupyter-python
+  numbers = np.loadtxt('data/4.txt', delimiter=',', max_rows=1)
+  boards = np.loadtxt('data/4.txt', skiprows=2).reshape(-1, 5, 5)
+
+  def winning_array(boards):
+      return ((boards == -1).all(axis=2) | (boards == -1).all(axis=1)).any(axis=1)
+
+  for number in numbers:
+      boards[np.where(boards == number)] = -1
+      if winning_array(boards).any():
+          break
+  index = np.where(winning_array(boards))
+  np.sum(np.ma.array(boards, mask=(boards == -1))[index]) * number
+#+end_src
+
+** Part 2
+Figure out which board will win last. Once it wins, what would its final score be?
+
+#+begin_src jupyter-python
+  for number in numbers:
+      boards[np.where(boards == number)] = -1
+      wins = winning_array(boards)
+      if wins.sum() == len(boards) - 1:
+          index = np.where(~wins)[0]
+      if wins.all():
+          break
+  np.sum(np.ma.array(boards, mask=(boards == -1))[index]) * number
+#+end_src
+
+* Day 5: Hydrothermal Venture
+** Part 1
+You come across a field of hydrothermal vents on the ocean floor! These vents constantly produce large, opaque clouds, so it would be best to avoid them if possible.
+
+They tend to form in lines; the submarine helpfully produces a list of nearby lines of vents (your puzzle input) for you to review.
+
+Each line of vents is given as a line segment in the format x1,y1 -> x2,y2 where x1,y1 are the coordinates of one end the line segment and x2,y2 are the coordinates of the other end. These line segments include the points at both ends. In other words:
+
+    An entry like 1,1 -> 1,3 covers points 1,1, 1,2, and 1,3.
+    An entry like 9,7 -> 7,7 covers points 9,7, 8,7, and 7,7.
+
+For now, only consider horizontal and vertical lines: lines where either x1 = x2 or y1 = y2.
+
+To avoid the most dangerous areas, you need to determine the number of points where at least two lines overlap.
+
+Consider only horizontal and vertical lines. At how many points do at least two lines overlap?
+#+begin_src jupyter-python
+  data = pd.read_csv('data/5.txt', names=['x1', 'middle', 'y2'])
+  data[['y1', 'x2']] = data['middle'].apply(lambda x: pd.Series(x.split('->')).astype('int'))
+  grid = np.zeros((1000, 1000))
+
+  def endpoints_to_line(x1, x2, y1, y2):
+      steps = max(abs(x1 - x2), abs(y1- y2))
+      delta = np.array([np.sign(x2 - x1), np.sign(y2 - y1)])
+      points = [np.array([x1, y1]) + delta * n for n in range(steps + 1)]
+      return tuple(np.array(points).T.tolist())
+
+  on_axis = data[(data['x1'] == data['x2']) | (data['y1'] == data['y2'])]
+  for row in on_axis.itertuples():
+      grid[endpoints_to_line(row.x1, row.x2, row.y1, row.y2)] += 1
+
+  (grid > 1).sum()
+#+end_src
+
+** Part 2
+Unfortunately, considering only horizontal and vertical lines doesn't give you the full picture; you need to also consider diagonal lines.
+
+Consider all of the lines. At how many points do at least two lines overlap?
+#+begin_src jupyter-python
+  skewed = data[(data['x1'] != data['x2']) & (data['y1'] != data['y2'])]
+  for row in skewed.itertuples():
+      grid[endpoints_to_line(row.x1, row.x2, row.y1, row.y2)] += 1
+
+  (grid > 1).sum()
+#+end_src
+
+* Day 6: Lanternfish
+
+** Part 1
+Although you know nothing about this specific species of lanternfish, you make some guesses about their attributes. Surely, each lanternfish creates a new lanternfish once every 7 days.
+
+However, this process isn't necessarily synchronized between every lanternfish - one lanternfish might have 2 days left until it creates another lanternfish, while another might have 4. So, you can model each fish as a single number that represents the number of days until it creates a new lanternfish.
+
+Furthermore, you reason, a new lanternfish would surely need slightly longer before it's capable of producing more lanternfish: two more days for its first cycle.
+
+A lanternfish that creates a new fish resets its timer to 6, not 7 (because 0 is included as a valid timer value). The new lanternfish starts with an internal timer of 8 and does not start counting down until the next day.
+
+Realizing what you're trying to do, the submarine automatically produces a list of the ages of several hundred nearby lanternfish (your puzzle input).
+
+Each day, a 0 becomes a 6 and adds a new 8 to the end of the list, while each other number decreases by 1 if it was present at the start of the day.
+
+Find a way to simulate lanternfish. How many lanternfish would there be after 80 days?
+#+begin_src jupyter-python
+  data = np.loadtxt('data/6.txt', delimiter=',', dtype=int)
+  population, _ = np.histogram(data, range(10))
+  transition_matrix = np.roll(np.eye(9, dtype=int), 1, axis=1)
+  transition_matrix[6, 0] = 1
+  (np.linalg.matrix_power(transition_matrix, 80) @ population).sum()
+#+end_src
+
+** Part 2
+Suppose the lanternfish live forever and have unlimited food and space. Would they take over the entire ocean?
+
+How many lanternfish would there be after 256 days?
+#+begin_src jupyter-python
+    (np.linalg.matrix_power(transition_matrix, 256) @ population).sum()
+#+end_src
+* Day 7: The Treachery of Whales
+** Part 1
+A giant whale has decided your submarine is its next meal, and it's much faster than you are. There's nowhere to run!
+
+Suddenly, a swarm of crabs (each in its own tiny submarine - it's too deep for them otherwise) zooms in to rescue you! They seem to be preparing to blast a hole in the ocean floor; sensors indicate a massive underground cave system just beyond where they're aiming!
+
+The crab submarines all need to be aligned before they'll have enough power to blast a large enough hole for your submarine to get through. However, it doesn't look like they'll be aligned before the whale catches you! Maybe you can help?
+
+There's one major catch - crab submarines can only move horizontally.
+
+You quickly make a list of the horizontal position of each crab (your puzzle input). Crab submarines have limited fuel, so you need to find a way to make all of their horizontal positions match while requiring them to spend as little fuel as possible.
+
+Each change of 1 step in horizontal position of a single crab costs 1 fuel.
+
+Determine the horizontal position that the crabs can align to using the least fuel possible. How much fuel must they spend to align to that position?
+#+begin_src jupyter-python
+  data = np.loadtxt('data/7.csv', delimiter=',', dtype=int)
+  np.abs(data - np.median(data)).sum()
+#+end_src
+** Part 2
+The crabs don't seem interested in your proposed solution. Perhaps you misunderstand crab engineering?
+
+As it turns out, crab submarine engines don't burn fuel at a constant rate. Instead, each change of 1 step in horizontal position costs 1 more unit of fuel than the last: the first step costs 1, the second step costs 2, the third step costs 3, and so on.
+
+Determine the horizontal position that the crabs can align to using the least fuel possible so they can make you an escape route! How much fuel must they spend to align to that position?
+#+begin_src jupyter-python
+  def cost(position):
+      delta = np.abs(data - position)
+      return ((delta) * (delta + 1) / 2).sum()
+
+  options = [cost(int(data.mean())), cost(int(data.mean() + 0.5))]
+  min(options)
+#+end_src
+* Day 8: Seven Segment Search
+** Part 1
+#+begin_src jupyter-python
+  with open('data/8.txt', encoding='utf8') as f:
+      data = f.readlines()
+  segments = [line.split("|")[1].strip().split() for line in data]
+  mylen = np.vectorize(len)
+  np.isin(mylen(segments), [2, 3, 4, 7]).sum()
+#+end_src
+
+** Part 2
+This is an obvious task for constraint programming. It feels a bit like cheating, so I'll see if I can come up with a home-grown approach at a later stage. I'll start by describing the segment pattern of each digit. I'm deliberately using numbers for the segment positions and letters for the segment names so that I don't get confused.
+
+
+The solution below works, but it's fairly slow.
+#+begin_src jupyter-python
+  import constraints
+  digits = {
+      (1,2,3,5,6,7):   0,
+      (3,6):           1,
+      (1,3,4,5,7):     2,
+      (1,3,4,6,7):     3,
+      (2,3,4,6):       4,
+      (1,2,4,6,7):     5,
+      (1,2,4,5,6,7):   6,
+      (1,3,6):         7,
+      (1,2,3,4,5,6,7): 8,
+      (1,2,3,4,6,7):   9,
+  }
+
+  def generate_constraint(display_string):
+      segments = [candidate for candidate in digits.keys() if len(candidate) == len(display_string)]
+      def inner(a, b, c, d, e, f, g):
+          scope = locals()
+          variables = [eval(x, scope) for x in display_string]
+          for value in segments:
+              if set(variables) == set(value):
+                  return True
+      return inner
+  total = 0
+  for line in data:
+      clues = line.replace(" | ", " ").split()
+      output = line.split(" | ")[1].split()
+      problem = constraint.Problem()
+      problem.addVariables("abcdefg", range(1, 8))
+      problem.addConstraint(constraint.AllDifferentConstraint())
+      for item in clues:
+          problem.addConstraint(generate_constraint(item), 'abcdefg')
+      solution = problem.getSolutions()[0]
+      total += int(''.join(str(digits[tuple(sorted(solution[x] for x in number))]) for number in output))
+
+  total
+#+end_src
+
+We can be a bit cleverer than this by exploiting the structure in our data.
+
+We know that every digit occurs before the pipe for every row in our input.
+
+ Using that, we can immediately identify segment 1, segments {36} segments {24} and segments {57}.
+
+ The three five segment numbers let us disambiguate {147}, {25}, {36}. 147 occur in every group, 25 in only 1 and 36 in two
+
+ The three six segment numbers let us disambiguate {1267}, {345}.
+
+ 1 is the segment present in 3 but not in 2.
+ 2 is the segment present in 4, not present in 2, and present in every 6
+ 3 is the segment present in 2 which is not present in every 6
+ 4 is the segment present in 4, not present in 2, and not present in every 6
+ 5 is the segment not present in 4 which only occurs once in 5
+ 6 is the segment which is present in 2 and is present in every 6
+ 7 is the segment present in every 5, not present in every 6, not present in 4
+
+ It's not super elegant, and I kind of prefer just using the generalised constraints programming.
+
+* Day 9: Smoke Basin
+** Part 1
+#+begin_src jupyter-python
+  data = pd.read_fwf('data/9.txt', widths=[1]*100, header=None).to_numpy()
+  data = np.pad(data, pad_width=1, mode='constant', constant_values=9)
+  mask = ((data < np.roll(data, -1, axis=0))
+          & (data < np.roll(data, 1, axis=0))
+          & (data < np.roll(data, -1))
+          & (data < np.roll(data, 1)))
+  np.ma.array(data + 1, mask=~mask).sum()
+#+end_src
+
+** Part 2
+#+begin_src jupyter-python
+  def up(x, y): return x, y + 1
+  def down(x, y): return x, y - 1
+  def left(x, y): return x - 1, y
+  def right(x, y): return x + 1, y
+  moves = [up, down, left, right]
+
+  def basin(x ,y):
+      visited = np.zeros(data.shape, dtype=bool)
+      neighbors = [(x, y)]
+      result = 0
+      while neighbors:
+          x, y = neighbors.pop()
+          if data[x, y] == 9 or visited[x, y]:
+              continue
+          result += 1
+          visited[x, y] = True
+          for move in moves:
+              new_x, new_y = move(x, y)
+              if not visited[new_x, new_y]:
+                  neighbors.append((new_x, new_y))
+      return result
+  low_points = zip(*np.where(mask))
+  sizes = list(map(lambda x: basin(*x), low_points))
+  print(np.product(sorted(sizes)[-3:]))
+#+end_src
+
+* Day 10: Syntax Scoring
+** Part 1
+
+#+begin_src jupyter-python
+  with open('data/10.txt', encoding='utf8') as f:
+      lines = f.readlines()
+
+  pairs = ["[]", "()", "<>", "{}"]
+
+  def normalize(string):
+      old_string = string
+      while True:
+          for pair in pairs:
+              string = string.replace(pair, "")
+          if string == old_string:
+              break
+          old_string = string
+      return string
+
+  scores = {")": 3, "]": 57, "}": 1197, ">": 25137}
+  total = 0
+  for line in lines:
+      normalized = normalize(line)
+      indices = np.array([normalized.find(pair[1]) for pair in pairs])
+      if (indices == -1).all():
+          continue
+      index = min(index for index in indices if index != -1)
+      total += scores[normalized[index]]
+  print(total)
+#+end_src
+
+
+** Part 2
+#+begin_src jupyter-python
+  delimiters = " ([{<"
+  scores = []
+  for line in lines:
+      normalized = normalize(line.strip())
+      indices = np.array([normalized.find(pair[1]) for pair in pairs])
+      if (indices != -1).any():
+          continue
+      scores.append(functools.reduce(lambda x, y: 5 * x + delimiters.find(y), normalized[::-1], 0))
+  int(np.median(scores))
+#+end_src
+
+* Day 11: Dumbo Octopus
+** Part 1
+#+begin_src jupyter-python
+    def find_neighbors(x, y):
+        return ((x - 1, x - 1, x - 1, x, x, x + 1, x + 1, x + 1),
+                (y - 1, y, y + 1, y - 1, y + 1, y - 1, y, y + 1))
+
+    def step(board):
+      board += 1
+      flashed = np.zeros(board.shape, dtype=bool)
+      indices = list(zip(*np.where(board > 9)))
+      while indices:
+          x, y = indices.pop()
+          if flashed[x, y]:
+              continue
+          flashed[x, y] = True
+          neighbors = find_neighbors(x, y)
+          board[neighbors] += 1
+          for neighbor in zip(*neighbors):
+              if board[neighbor] > 9:
+                  indices.append(neighbor)
+      board[np.where(flashed)] = 0
+      return flashed.sum()
+
+    result = 0
+    data = pd.read_fwf('data/11.txt', widths=[1]*10, header=None).to_numpy(dtype=float)
+    data = np.pad(data, pad_width=1, mode='constant', constant_values=-np.inf)
+    arr = data.copy()
+    for i in range(100):
+        result += step(arr)
+    print(result)
+
+#+end_src
+
+** Part 2
+#+begin_src jupyter-python
+  count = 0
+  arr = data.copy()
+  while arr[1:-1, 1:-1].sum() > 0:
+      step(arr)
+      count += 1
+  count
+
+#+end_src
+
+* Day 12: Passage Pathing
+** Part 1
+#+begin_src jupyter-python
+  def flatten(mylist):
+      return (element for sublist in mylist for element in sublist)
+
+  def edges_to_tree(edges, repeat_visits = 0):
+      tree = defaultdict(set)
+      for e1, e2 in edges:
+          tree[e1].add(e2)
+          tree[e2].add(e1)
+      return tree
+
+  def remove_node(tree, node):
+      tree = tree.copy()
+      neighbors = tree[node]
+      del tree[node]
+      for neighbor in neighbors:
+          tree[neighbor] = tree[neighbor] - set([node])
+      return tree
+
+  def paths(tree, node, end):
+      if node == end:
+          return [(end,)]
+      if not tree[node]:
+          return []
+      new_tree = tree if node == node.upper() else remove_node(tree, node)
+      return [(node,) + x for x in flatten([paths(new_tree, neighbor, end) for neighbor in tree[node]])]
+
+
+  with open("data/12.txt", encoding="utf8") as f:
+      data = f.readlines()
+  edges = [line.strip().split("-") for line in data]
+  tree = edges_to_tree(edges)
+  len(paths(tree, "start", "end"))
+
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  def paths(tree):
+      def inner(subtree, node, end, state):
+          if node == end:
+              return [(end,)]
+          if not subtree[node]:
+              return []
+          new_tree = subtree if node == node.upper() else remove_node(subtree, node)
+          tail = [inner(new_tree, neighbor, end, state) for neighbor in subtree[node]]
+          if state == 1 and node != "start":
+              tail += [inner(subtree, neighbor, end, 0) for neighbor in subtree[node]]
+          return [(node,) + x for x in flatten(tail)]
+
+      return inner(tree, "start", "end", 1)
+  len(set(paths(tree)))
+#+end_src
+* Day 13: Transparent Origami
+** Part 1
+
+#+begin_src jupyter-python
+  start = np.loadtxt('data/13.txt', delimiter=',', dtype=int)
+  arr = np.zeros(start.max(axis=0) + 1, dtype=bool)
+  arr[start[:, 0], start[:, 1]] = 1
+
+  top  = arr[:655]
+  bottom = arr[656:]
+  bottom = np.pad(bottom, ((0, top.shape[0] - bottom.shape[0]), (0, 0)))
+  print((top | np.flip(bottom, 0)).sum())
+#+end_src
+
+** Part 2
+#+begin_src jupyter-python
+  replacement = np.vectorize(lambda x: "#" if x else " ")
+  instructions = ["x=655", "y=447", "x=327", "y=223", "x=163", "y=111", "x=81", "y=55", "x=40", "y=27", "y=13", "y=6"]
+  for instruction in instructions:
+      direction, position = instruction.split("=")
+      position = int(position)
+      arr = arr.T if direction == "y" else arr
+      top = arr[:position]
+      bottom = arr[position + 1:]
+      if top.shape[0] < bottom.shape[0]:
+          top = np.pad(top, ((bottom.shape[0] - top.shape[0], 0), (0, 0)))
+      else:
+          bottom = np.pad(bottom, ((0, top.shape[0] - bottom.shape[0]), (0, 0)))
+      arr = np.flip(bottom, 0) | top
+      arr = arr.T if direction == "y" else arr
+  for row in replacement(arr.T):
+      print(''.join(row))
+
+#+end_src
+
+* Day 14: Extended Polymerization
+
+Here's another puzzle that seems tailor made for a transition matrix based approach. We are given an initial state, and a set of rules for producing the next state from the current state. The rules are all phrased in terms of pairs, so we should work in the basis of pairs of elements.
+
+A rule like CH -> B should be interpreted as state "CH" produces states "CB" and "BH" in the next generation.
+
+** Part 1
+#+begin_src jupyter-python
+  state_string = "VCOPVNKPFOOVPVSBKCOF"
+  with open('data/14.txt', encoding='utf8') as f:
+      data = f.readlines()
+  transition_elements = ''.join(line.strip().replace(" -> ", "") for line in data)
+  elements = sorted(set(state_string + transition_elements))
+  n = len(elements)
+  def encode(pair):
+      return elements.index(pair[0]) * n + elements.index(pair[1])
+  initial_pairs = [encode(state_string[i:i+2]) for i in range(len(state_string) - 1)]
+  initial_state = np.zeros(n ** 2, dtype=np.int64)
+  for pair in initial_pairs:
+      initial_state[pair] += 1
+  transition_matrix = np.zeros((n**2, n**2), dtype=np.int64)
+  for line in data:
+      source, target = line.strip().split(" -> ")
+      transition_matrix[encode(source), encode(source[0] + target)] = 1
+      transition_matrix[encode(source), encode(target + source[1])] = 1
+
+  def count(state):
+      result = defaultdict(int)
+      result[state_string[0]] += 1
+      result[state_string[-1]] += 1
+      for index, number in enumerate(state):
+          result[elements[int(index % n)]] += number
+          result[elements[int(index // n)]] += number
+      return {k : int(v / 2) for k, v in result.items()}
+
+  totals = count(initial_state.T @ (np.linalg.matrix_power(transition_matrix, 10)))
+  pd.Series(totals).max() - pd.Series(totals).min()
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  totals = count(initial_state.T @ (np.linalg.matrix_power(transition_matrix, 40)))
+  pd.Series(totals).max() - pd.Series(totals).min()
+#+end_src
+* Day 15: Chiton
+This is a shortest path search, which I really don't remember how to do. Here goes nothing
+#+begin_src jupyter-python
+  data = pd.read_fwf('data/15.txt', widths=[1]*100, header=None).to_numpy(dtype=float)
+  data = np.pad(data, 1, constant_values = np.inf)
+  auxiliary = np.zeros(data.shape)
+  start = (1, 1)
+  def get_neighbors(x, y):
+      coords = [(x-1, y), (x + 1, y), (x, y - 1), (x, y + 1)]
+      return[[data[coord], coord] for coord in coords]
+  neighbors = sorted(get_neighbors(*start), key=lambda x: x[0])
+  while neighbors:
+      cost, (x, y) = neighbors.pop(0)
+      if auxiliary[x, y]:
+          continue
+      auxiliary[x, y] = cost
+      new_neighbors = [[cell[0] + cost, cell[1]] for cell in get_neighbors(x, y)]
+      neighbors = sorted(neighbors + new_neighbors, key = lambda x: x[0])
+      neighbors = [x for x in neighbors if x[0] < np.inf]
+      if x == -2 and y == -2:
+          break
+  auxiliary[-2, -2]
+#+end_src
+This worked, but is almost too slow for part 2, which runs in about 60 s. Oh well
+#+begin_src jupyter-python
+  data = pd.read_fwf('data/15.txt', widths=[1]*100, header=None).to_numpy(dtype=float)
+  x, y = data.shape
+  arr = np.zeros([5  * x, 5 * y])
+  for i in range(5):
+      for j in range(5):
+          arr[i * x: (i + 1) * x, j * y : (j + 1) * y] = data + i + j
+  def get_neighbors(x, y):
+      coords = [(x-1, y), (x + 1, y), (x, y - 1), (x, y + 1)]
+      return[[arr[coord], coord] for coord in coords]
+  arr = ((arr - 1) % 9) + 1
+  arr = np.pad(arr, 1, constant_values = np.inf)
+  start = (1, 1)
+  neighbors = sorted(get_neighbors(*start), key=lambda x: x[0])
+  auxiliary = np.zeros(arr.shape)
+  while neighbors:
+      cost, (x, y) = neighbors.pop(0)
+      if auxiliary[x, y]:
+          continue
+      auxiliary[x, y] = cost
+      new_neighbors = [[cell[0] + cost, cell[1]] for cell in get_neighbors(x, y)]
+      neighbors = sorted(neighbors + new_neighbors, key = lambda x: x[0])
+      neighbors = [x for x in neighbors if x[0] < np.inf]
+  auxiliary[-2, -2]
+#+end_src
+* Day 16: Packet Decoder
+
+#+begin_src jupyter-python
+  nybbles = {hex(i)[2:]: bin(i)[2:].rjust(4, '0') for i in range(16)}
+  def parse(bitstring):
+      if len(bitstring) == 0 or set(bitstring) == set("0"):
+          return 0, 0
+      version = int(bitstring[:3], 2)
+      offset = 3
+      type_id = int(bitstring[offset:offset + 3], 2)
+      offset +=  3
+      if type_id == 4:
+          while True:
+              chunk = bitstring[offset:offset + 5]
+              offset += 5
+              if chunk[0] != "1":
+                  break
+          return version, offset
+      kind = bitstring[offset]
+      offset += 1
+      if kind == "0":
+          length = int(bitstring[offset: offset + 15], 2)
+          offset += 15
+          target = offset + length
+          while offset != target:
+              dv, do = parse(bitstring[offset:])
+              version += dv
+              offset += do
+          return version, target
+      if kind == "1":
+          n_operators = int(bitstring[offset: offset + 11], 2)
+          offset += 11
+          for i in range(n_operators):
+              dv, do = parse(bitstring[offset:])
+              version += dv
+              offset += do
+          return version, offset
+
+  with open ('data/16.txt') as f:
+      data = f.readline().strip()
+  # data = "A0016C880162017C3686B18A3D4780"
+  bits = ''.join(nybbles[x.lower()] for x in data)
+  parse(bits)
+#+end_src
+
+For part 2, we have to completely ignore the version number and actually do something with the data associated with each packet. Actually moving through the packet happens in the same way, but what we have to do at each level is sufficiently different that it's not worth it to try and reuse the parsing function.
+
+#+begin_src jupyter-python
+  def evaluate_one_packet(bitstring):
+      offset = 3
+      type_id = int(bitstring[offset:offset + 3], 2)
+      offset +=  3
+      if type_id == 4:
+          result = ""
+          while True:
+              chunk = bitstring[offset:offset + 5]
+              result += chunk[1:]
+              offset += 5
+              if chunk[0] == "0":
+                  break
+          return int(result, 2), offset
+      kind = bitstring[offset]
+      offset += 1
+      operands = []
+      if kind == "0":
+          length = int(bitstring[offset: offset + 15], 2)
+          offset += 15
+          target = offset + length
+          while offset < target:
+              operand, do = evaluate_one_packet(bitstring[offset:])
+              operands.append(operand)
+              offset += do
+      elif kind == "1":
+          n_operators = int(bitstring[offset: offset + 11], 2)
+          offset += 11
+          for i in range(n_operators):
+              operand, do = evaluate_one_packet(bitstring[offset:])
+              operands.append(operand)
+              offset += do
+      operators = [sum, np.product, min, max,
+                   None,
+                   lambda x: x[0] > x[1], lambda x: x[0] < x[1], lambda x: x[0] == x[1]]
+      return operators[type_id](operands), offset
+  print(evaluate_one_packet(bits)[0])
+#+end_src
+* Day 17: Trick Shot
+** Part 1
+First pen and paper solution for this year.
+
+Things to note:
+
+1. x and y are completely decoupled
+2. There exists a time velocity x_0 such that the probe will be within the target area for all t > some t_i
+3. As long as the up velocity is greater than this, then by the time the probe reaches the baseline in y, it will have stopped in x.
+4. The arc up and down is symmetric; a probe launched from y=0 at t=0 with v=v0 will hit y=0 at t=2v0 + 1
+5. This probe will have velocity (-v0 - 1) at that point
+6. If  -v0 - 1 < bottom of target, then the probe will entirely miss the target in the next step
+7. The greater v0 is, the higher the probe will go; ymax = ½ v0 (v0 + 1)
+8. So we just set -v0 - 1 = -126 => v0 = 125
+9. So ymax = 125 * 126 / 2 = 7875.
+10. ∎
+
+** Part 2
+
+#+begin_src jupyter-python
+  xmin, xmax =  217, 240
+  ymin, ymax = -126, -69
+  parabola = lambda v, t: (t * v - int(t * (t - 1) / 2))
+
+  time_map = defaultdict(list)
+  for vy in range(ymin, -ymin):
+      for time in [t for t in range(1, 3 - 2*ymin) if parabola(vy, t) in range(ymin, ymax + 1)]:
+          time_map[time].append(vy)
+
+  def x_times(vx):
+      times = [t for t in range(1, vx) if parabola(vx, t) in range(xmin, xmax + 1)]
+      if vx - 1 in times:
+          times += list(range(max(times) + 1, max(time_map.keys()) + 1))
+      return times
+
+  result = []
+  for vx in range(int(0.5 + np.sqrt(0.25 + 2 * xmin)), xmax + 1):
+      times = x_times(vx)
+      for time in times:
+          for vy in time_map[time]:
+              result.append((vx, vy))
+  print(len(set(result)))
+#+end_src
+
+* Day 18: Snailfish
+** Part 1
+#+begin_src jupyter-python
+
+  def to_node(thing, depth):
+      if isinstance(thing, int):
+          return thing
+      elif isinstance(thing, Pair):
+          for node in thing.traverse():
+              node.depth += 1
+          return thing
+      else:
+          return Pair(thing[0], thing[1], depth+1)
+
+  class Pair:
+      def __init__(self, left, right, depth=0):
+          self.depth = depth
+          self.left = to_node(left, depth)
+          self.right = to_node(right, depth)
+
+      def leftmost(self):
+          return self if isinstance(self.left, int) else self.left.leftmost()
+
+      def rightmost(self):
+          return self if isinstance(self.right, int) else self.right.rightmost()
+
+      def sum(self):
+          left = self.left if isinstance(self.left, int) else self.left.sum()
+          right = self.right if isinstance(self.right, int) else self.right.sum()
+          return 3*left + 2*right
+
+      def traverse(self):
+          left = [] if isinstance(self.left, int) else self.left.traverse()
+          right = [] if isinstance(self.right, int) else self.right.traverse()
+          return left + [self] + right
+
+      def reduce(self):
+          while True:
+              altered = False
+              altered = self.explode()
+              if not altered:
+                  altered = self.split()
+                  if not altered:
+                      return self
+
+      def split(self):
+          for node in self.traverse():
+              for d in ['left', 'right']:
+                  val  = getattr(node, d)
+                  if isinstance(val, int) and val >= 10:
+                      setattr(node, d, Pair(val // 2, val // 2 + val % 2, node.depth + 1))
+                      return True
+          return False
+
+      def explode(self):
+          traversal = self.traverse()
+          for idx, node in enumerate(traversal):
+              if node.depth == 4:
+                  if idx == len(traversal) - 1:
+                      parent = traversal[idx - 1]
+                      direction = "right"
+                  elif traversal[idx + 1].left == node:
+                      parent = traversal[idx + 1]
+                      direction = "left"
+                  else:
+                      parent = traversal[idx - 1]
+                      direction = "right"
+                  setattr(parent, direction, 0)
+                  if idx != 0:
+                      if isinstance(traversal[idx - 1].left, int):
+                          traversal[idx - 1].left += node.left
+                      else:
+                          left_neighbor = traversal[idx -1].left.rightmost()
+                          left_neighbor.right += node.left
+
+                  if idx != len(traversal) - 1:
+                      if isinstance(traversal[idx + 1].right, int):
+                          traversal[idx + 1].right += node.right
+                      else:
+                          right_neighbor = traversal[idx + 1].right.leftmost()
+                          right_neighbor.left += node.right
+                  return True
+          return False
+
+  snumbers = []
+  with open('data/18.txt') as f:
+      for line in f:
+          snumbers.append(eval(line.strip()))
+  result = Pair(*snumbers[0])
+  for snumber in snumbers[1:]:
+      result = Pair(result, Pair(*snumber)).reduce()
+  print(result.sum())
+#+end_src
+
+** Part 2
+#+begin_src jupyter-python
+  import itertools
+  maxval = 0
+  for left, right in itertools.permutations(snumbers, 2):
+      total = (Pair(left, right).reduce()).sum()
+      maxval = total if total > maxval else maxval
+  maxval
+#+end_src
+
+* Day 19: Beacon Scanner
+
+
+We'll start by generating the 24 rotation matrices. There are six possible ways of permuting the axes, and eight possible sign conventions. Half of the sign conventions will be left-handed, so we discard them
+#+begin_src jupyter-python
+  rotations = []
+  for permutation in (itertools.permutations([0,1,2], 3)):
+      arr = np.zeros((3, 3), dtype=int)
+      arr[np.array([0,1,2]), permutation] = 1
+      for sign in itertools.product([-1, 1], repeat=3):
+          rotation = arr.copy() * sign
+          if np.linalg.det(rotation) > 0:
+              rotations.append(rotation)
+#+end_src
+
+Then we find overlapping scanners in the input and populate a map (x, y) with the matrices to convert from y coordinates to x coordinates
+#+begin_src jupyter-python
+  from scipy.spatial.distance import pdist, squareform
+  foo = open('data/19.txt').read()[:-1]
+  scanners = foo.split('\n\n')
+  scanners = [np.array([list(map(int, line.split(','))) for line in scanner.split('\n')[1:]], dtype=int) for scanner in scanners]
+
+  distances = [squareform(pdist(scanner)) for scanner in scanners]
+  mapping = {}
+  for a, b in itertools.combinations(range(len(scanners)), 2):
+      pairs = []
+      d0 = distances[a]
+      d1 = distances[b]
+      for i in range(len(d0)):
+          for j in range(len(d1)):
+              if len(np.intersect1d(d1[j], d0[i])) >= 12:
+                  pairs.append((i, j))
+      pairs = np.array(pairs)
+      if len(pairs) < 12:
+          continue
+      x0 = scanners[a][pairs[:, 0]]
+      y0 = scanners[b][pairs[:, 1]]
+      for rotation in rotations:
+          c = x0[0] - y0[0] @ rotation
+          if (x0[1:] == (y0[1:] @ rotation + c)).all():
+              mapping[(a, b)] = [rotation, c]
+              mapping[(b, a)] = [rotation.T, -c @ rotation.T]
+              break
+
+
+#+end_src
+
+We do some linear algebra to extend this map to all the scanners
+#+begin_src jupyter-python
+  while True:
+      done = True
+      for x in range(len(scanners)):
+          columns = [pair[1] for pair in mapping.keys() if pair[0] == x]
+          for y, z in itertools.combinations(columns, 2):
+              if (y, z) not in mapping:
+                  done = False
+                  Q1, a1 = mapping[(x, y)]
+                  Q2, a2 = mapping[(x, z)]
+                  mapping[(z, y)] = [Q1 @ Q2.T, (a1 - a2) @ Q2.T]
+                  mapping[(y, z)] = [Q2 @ Q1.T, (a2 - a1) @ Q1.T]
+      if done:
+          break
+#+end_src
+
+And then we convert all the initial coordinates to one representation and find its length
+#+begin_src jupyter-python
+  coords = [tuple(x) for x in scanners[0]]
+  for idx in range(1, len(scanners)):
+      Q, a = mapping[0, idx]
+      coords += [tuple(x) for x in (np.array(scanners[idx]) @ Q + a)]
+  print(len(set(coords)))
+#+end_src
+
+#+begin_src jupyter-python
+  maxval = 0
+  for i, j in itertools.combinations(range(len(scanners)), 2):
+      total = sum(abs(mapping[(i, j)][1]))
+      if total > maxval:
+          maxval = total
+  maxval
+#+end_src
+
+* Day 20: Trench Map
+** Part 1 and 2
+#+begin_src jupyter-python
+  data = open('data/20.txt').read()
+  pixel_map = {".": 0, "#": 1}
+  key, array = data.split('\n\n')
+  key = np.array([pixel_map[x] for x in key.strip()], dtype=bool)
+  new = np.array([[pixel_map[x] for x in line.strip()] for line in array.split('\n')[:-1]])
+  for n in range(1, 51):
+      old = np.pad(new, 2, constant_values = (n % 2 == 0))
+      new = old.copy()
+      for i in range(1, len(old) - 1):
+          for j in range(1, len(old) - 1):
+              index = sum((2 ** np.arange(9)) * old[i-1:i+2, j-1:j+2].ravel()[::-1] )
+              new[i, j] = key[index]
+      new = new[1:-1, 1:-1]
+      if n == 2 or n == 50:
+          print(new.sum())
+#+end_src
+* Day 21: Dirac Dice
