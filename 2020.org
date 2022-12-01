@@ -1,0 +1,27 @@
+#+PROPERTY: header-args:jupyter-python  :session aoc-2020 :kernel python
+#+PROPERTY: header-args    :pandoc t
+
+* Imports
+#+begin_src jupyter-python
+import pandas as pd
+import numpy as np
+from collections import defaultdict
+import itertools
+from pathlib import Path
+import functools
+datadir = Path("data/2020/")
+#+end_src
+
+* Day 1: Report Repair
+** Part 1
+Specifically, they need you to find the two entries that sum to 2020 and then multiply those two numbers together.
+#+begin_src jupyter-python
+data = np.loadtxt(datadir / "1.txt", dtype=int)
+[pair[0] * pair[1] for pair in itertools.product(data, data) if sum(pair) == 2020][0]
+#+end_src
+** Part 2
+In your expense report, what is the product of the three entries that sum to 2020?
+#+begin_src jupyter-python
+[triple[0] * triple[1] * triple[2] for triple in itertools.product(data, data, data) if sum(triple) == 2020][0]
+#+end_src
+* Day 2: Password Philosophy
