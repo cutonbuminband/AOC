@@ -5,3 +5,6 @@ Each year is structured as a single `org` file, with text and code blocks mixed 
 - [2022](/2022/solutions.org)
 - [2021](/2021/solutions.org)
 
+# License
+
+Not that it particularly matters but the repository is licensed under the terms of the GNU GPL v 3.0, or at your discretion, any later version.  You can read the license terms in [LICENSE.md](/LICENSE.md)
