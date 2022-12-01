@@ -8,6 +8,7 @@ import numpy as np
 from collections import defaultdict
 from pathlib import Path
 import functools
+import itertools
 datadir = Path("data/2021")
 #+end_src
 
@@ -1050,10 +1051,10 @@ The game is played the same as before, although to prevent things from getting t
       return command, [[int(x[0][2:]), int(x[1]) + 1] for x in indices]
 
   lines = open(datadir / "22.txt").readlines()
+  commands = [parse_line(line) for line in lines]
   values = {"on": 1, "off": 0}
   maxval = 0
-  for line in lines:
-      command, indices = parse_line(line)
+  for command, indices in commands:
       idx = np.ravel(indices) + offset
       if max(abs(idx)) > maxval:
           maxval = max(abs(idx))
@@ -1064,6 +1065,106 @@ The game is played the same as before, although to prevent things from getting t
 #+end_src
 
 ** Part 2
+
+The above approach doesn't work for part two since the field of play is too large; we have ~ 100k elements in each direction, which give ~10**15 elements in total; far too much to keep in memory.
+
+The first step is to realise that the vast majority of the empty space is never touched -- so there's no reason to store all those zeros.
+
+What we can do instead is to store a set containing only the coordinates which are turned on. Turning on more coordinates corresponds to making the union with the new coordinate, while turning off coordinates is a set difference. This automatically accounts for not lighting coordinates which are already lit, and not turning off coordinates which are already off.
+
+Unfortunately, this is still too memory intensive -- from the example solution, we see that at the end of the process, 2,758,514,936,282,235 coordinates are on, which is way too many to store individually.
+
+We need an approach that only looks at corners of cuboids, and doesn't need to store the individual coordinates at all.
+
+If there were only "on" instructions, we could use the inclusion-exclusion principle, along with the fact that the intersection of two cuboids is always another cuboid, or empty.
+
+That is, the volume lit by one "on" instruction is just the volume of the cuboid it represents. The volume lit by two is the sum of the volumes of each, minus the volume of their intersection. The volume lit by three is:
+
+- The volume of the individual cuboids
+- Minus the volume of all the pairwise intersections
+- Plus the volume of the triple intersection
+
+And this extends to the general case. The volume lit after the n^th instruction, N, is:
+
+The volume lit after the (n-1)th instruction plus the volume of N, minus the sum of the volumes of the pairwise intersection of N with all previous instructions, plus the sum of the volumes of intersection of N with all previously calculated pairs, and so on.
+
+The off instructions can be handled by restricting our sphere of interest to the cube indicated by the off instruction. The effect of the off instruction must be the difference between running the whole sequence but skipping that instruction, and running the whole sequence starting just after the instruction.
+
+We're going to need a way of calculating the intersection of two cuboids. But that's just the intersection of 3 pairs of lines, since the cuboids are axis-aligned. And we can intersect two line segments as follows
 #+begin_src jupyter-python
+def intersect_segments(x1, x2):
+    pair = [max(x1[0], x2[0]), min(x1[1], x2[1])]
+    return pair if pair[1] > pair[0] else False
+#+end_src
+
+From there, we calculate the intersection of two cuboids, and define a helper method to clip an instruction to a cuboid
+#+begin_src jupyter-python
+  def intersect_cuboids(c1, c2):
+      result = [intersect_segments(*pair) for pair in zip(c1, c2)]
+      return result if all(result) else False
+
+  def clip_instruction(instruction, cuboid):
+      new_region = intersect_cuboids(instruction[1], cuboid)
+      return (instruction[0], new_region) if new_region else False
+#+end_src
+
+The segments were given as closed intervals, but the parsing converted them to open intervals. The length of each is thus the endpoint minus the starting point. The volume of a cuboid is just the product the three lengths:
+#+begin_src jupyter-python
+  def cuboid_volume(cuboid):
+    return np.product([[line[1] - line[0]] for line in cuboid])
+#+end_src
+
+The approach we'll take is to process the list of instructions sequentially, calculating the various intersections as we go. Afterwards, going from intersections to the total score can be accomplished as follows
+#+begin_src jupyter-python
+  def calculate_score(state):
+      result = 0
+      sign = 1
+      for level in state:
+          result += sign * sum(map(cuboid_volume, level))
+          sign *= -1
+      return result
+#+end_src
+
+We also need a way of clipping a state to a cuboid to handle the "off" instructions, and a way of combining two different sets of states
+#+begin_src jupyter-python
+  def clip_state(state, cuboid):
+      state = state.copy()
+      result = []
+      for level in state:
+          new_level = [clipped for c in level if (clipped := intersect_cuboids(c, cuboid))]
+          if not new_level:
+              break
+          result.append(new_level)
+      return result
+
+  def combine_states(state1, state2):
+      result = []
+      for l1, l2 in itertools.zip_longest(state1, state2, fillvalue=[]):
+          result.append(l1 + l2)
+      return result
+#+end_src
+
+And now we can put it all together
+#+begin_src jupyter-python
+  def reboot(instructions, state=None):
+      if state is None:
+          state = []
+      if not instructions:
+          return calculate_score(state)
+      instruction, region = instructions.pop(0)
+      if instruction == "on":
+          new_state = [[region]] + clip_state(state, region)
+          new_state = combine_states(state, new_state)
+          return reboot(instructions, new_state)
+      if instruction == "off":
+          clipped_instructions = [c for i in instructions if (c := clip_instruction(i, region))]
+          return (reboot(instructions, state)
+                  + reboot(clipped_instructions)
+                  - reboot(clipped_instructions, clip_state(state, region)))
+  reboot(commands.copy())
 
 #+end_src
+
+In this approach, we tracked a lot of state for the intersections in the reboot function itself, and then had a very simple scoring function. An alternative approach would have been to track only which cuboids were participating in the various combinations, and then calculated all the intersections in the scoring function.
+
+I'm not sure which approach is better.
