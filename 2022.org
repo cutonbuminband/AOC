@@ -32,8 +32,10 @@ To avoid this unacceptable situation, the Elves would instead like to know the t
   sum(sorted([sum([int(y) for y in x if y]) for x in elves])[-3:])
 #+end_src
 
-* Day 2
-*Rock Paper Scissors*
+* Day 2: Rock Paper Scissors
+:PROPERTIES:
+:CUSTOM_ID: 2
+:END:
 
 ** Part 1
 #+begin_src jupyter-python
