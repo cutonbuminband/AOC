@@ -3,12 +3,13 @@
 
 * Imports
 #+begin_src jupyter-python
-import pandas as pd
-import numpy as np
-from collections import defaultdict
-from pathlib import Path
-import functools
-datadir = Path("data/2022")
+  import pandas as pd
+  import numpy as np
+  from collections import defaultdict
+  from pathlib import Path
+  import functools
+  import more_itertools
+  datadir = Path("data/2022")
 #+end_src
 
 * Day 1
@@ -32,7 +33,8 @@ To avoid this unacceptable situation, the Elves would instead like to know the t
   sum(sorted([sum([int(y) for y in x if y]) for x in elves])[-3:])
 #+end_src
 
-* Day 2: Rock Paper Scissors
+* Day 2:
+*Rock Paper Scissors*
 
 ** Part 1
 #+begin_src jupyter-python
@@ -44,4 +46,25 @@ sum([line[1] + 1 + 3 * ((line[1] - line[0] + 1) % 3) for line in lines])
 ** Part 2
 #+begin_src jupyter-python
 sum([(line[1] + line[0] - 1) % 3 + 1 + 3 * line[1] for line in lines])
+#+end_src
+
+* Day 3:
+*Rucksack Reorganization*
+** Part 1
+#+begin_src jupyter-python
+  total = 0
+  lines = list(map(str.strip, open(datadir / "3.txt", encoding="utf8")))
+  for l in lines:
+      letter = set(l[:len(l) // 2]).intersection(set(l[len(l) // 2:])).pop()
+      total += ord(letter.upper()) - ord("A") + 1 + 26 * letter.isupper()
+  total
+#+end_src
+
+** Part 2
+#+begin_src jupyter-python
+  total = 0
+  for chunk in more_itertools.chunked(lines, 3):
+      letter = functools.reduce(lambda x, y: set(x).intersection(set(y)), chunk).pop()
+      total += ord(letter.upper()) - ord("A") + 1 + 26 * letter.isupper()
+  total
 #+end_src
