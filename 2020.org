@@ -12,7 +12,8 @@ import functools
 datadir = Path("data/2020/")
 #+end_src
 
-* Day 1: Report Repair
+* Day 1:
+*Report Repair*
 ** Part 1
 Specifically, they need you to find the two entries that sum to 2020 and then multiply those two numbers together.
 #+begin_src jupyter-python
@@ -24,4 +25,24 @@ In your expense report, what is the product of the three entries that sum to 202
 #+begin_src jupyter-python
 [triple[0] * triple[1] * triple[2] for triple in itertools.product(data, data, data) if sum(triple) == 2020][0]
 #+end_src
-* Day 2: Password Philosophy
+* Day 2:
+*Password Philosophy*
+** Part 1
+#+begin_src jupyter-python
+  def is_valid(interval, letters, password):
+      interval = [int(x) for x in interval.split('-')]
+      occurrences = password.count(letters[0])
+      return interval[0] <= occurrences <= interval[1]
+
+  lines = list(map(str.split, open(datadir / "2.txt", encoding="utf8").readlines()))
+  sum([is_valid(*line) for line in lines])
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  from operator import xor
+
+  def is_valid(interval, letters, password):
+      lower, upper = [int(x) - 1 for x in interval.split('-')]
+      return xor(password[lower] == letters[0], password[upper] == letters[0])
+  sum([is_valid(*line) for line in lines])
+#+end_src
