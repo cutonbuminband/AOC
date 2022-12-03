@@ -73,3 +73,30 @@ result
           break
   pid
 #+end_src
+* Day 4
+[[https://adventofcode.com/2018/day/4][Repose Record]]
+** Part 1
+#+begin_src jupyter-python
+  from time import strptime
+  events = [event[1:].strip().split("] ") for event in open(datadir / "4.txt").readlines()]
+  date_format = "%Y-%m-%d %H:%M"
+  events = sorted(events, key = lambda event : strptime(event[0], date_format))
+  guards = {}
+  while events:
+      event = events.pop(0)
+      if "Guard" in event[1]:
+          active_guard = event[1][7:-13]
+          if active_guard not in guards:
+              guards[active_guard] = np.zeros(60)
+          continue
+      end = events.pop(0)
+      guards[active_guard][int(event[0][-2:]):int(end[0][-2:])] += 1
+
+  sleepiest_guard = sorted(guards.keys(), key = lambda x: - guards[x].sum())[0]
+  int(sleepiest_guard) * guards[sleepiest_guard].argmax()
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  sleepiest_guard = sorted(guards.keys(), key = lambda x: - max(guards[x]))[0]
+  int(sleepiest_guard) * guards[sleepiest_guard].argmax()
+#+end_src

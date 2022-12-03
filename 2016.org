@@ -100,3 +100,33 @@ Then, you notice the instructions continue on the back of the Recruiting Documen
 #+begin_src jupyter-python
 sum(map(is_valid, data.T.ravel().reshape(-1, 3)))
 #+end_src
+* Day 4
+[[https://adventofcode.com/2016/day/4][Security Through Obscurity]]
+** Part 1
+
+#+begin_src jupyter-python
+  def parse_line(room):
+      checksum = room[-6:-1]
+      sector_id = int(room[:-7].split("-")[-1])
+      name = '-'.join(room.split("-")[:-1])
+      return name, sector_id, checksum
+
+  def calculate_checksum(name):
+      occurrences = list(zip(*np.unique(list(name.replace("-", "")), return_counts=True)))
+      return ''.join(x[0] for x in sorted(occurrences, key = lambda x: [-x[1], x[0]])[:5])
+
+  data = [parse_line(l.strip()) for l in open(datadir / "4.txt").readlines()]
+  sum(sector_id for name, sector_id, checksum in data if calculate_checksum(name) == checksum)
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  real_rooms = [room[:2] for room in data if calculate_checksum(room[0]) == room[2]]
+  def decrypt(name, offset):
+      alphabet = "abcdefghijklmnopqrstuvwxyz"
+      shifted_alphabet = ''.join(x for x in np.roll(list(alphabet), -offset % 26))
+      return name.translate(str.maketrans(alphabet, shifted_alphabet)), offset
+
+  [answer for room in real_rooms if "north" in (answer := decrypt(*room))[0]]
+
+#+end_src
+

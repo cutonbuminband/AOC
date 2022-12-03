@@ -68,3 +68,23 @@ sum([ x * y * z + 2 * (x + y) for x,y,z in map(sorted, boxes)])
   houses = execute_instructions(instructions[::2])
   len(execute_instructions(instructions[1::2], houses))
 #+end_src
+* Day 4
+[[https://adventofcode.com/2015/day/4][The Ideal Stocking Stuffer]]
+** Part 1
+#+begin_src jupyter-python
+  import hashlib
+  h = hashlib.md5()
+  prefix = "iwrupvqb"
+  def brute_force(n):
+      i = 0
+      while i := i + 1:
+          md5 = hashlib.md5((prefix + str(i)).encode(encoding="UTF-8")).hexdigest()
+          if md5[:n] == n * "0":
+              return i
+  brute_force(5)
+#+end_src
+
+** Part 2
+#+begin_src jupyter-python
+  brute_force(6)
+#+end_src

@@ -123,3 +123,35 @@ That gives this plot for the two different wires
 
 [[graphs/2019-3.png]]
 
+* Day 4
+[[https://adventofcode.com/2019/day/4][Secure Container]]
+** Part 1
+#+begin_src jupyter-python
+  low = 231832
+  high = 767346
+  total = 0
+  for i in range(low, high + 1):
+      s = str(i)
+      if list(s) == sorted(s):
+          for digit in '0123456789':
+              if s.count(digit) > 1:
+                  total += 1
+                  break
+  total
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  total = 0
+  for i in range(low, high + 1):
+      s = str(i)
+      if list(s) == sorted(s):
+          if (s[0] == s[1] != s[2]) or (s[-1] == s[-2] != s[-3]):
+              total += 1
+              continue
+          for idx in range(1, len(s) - 2):
+              if s[idx - 1] != s[idx] == s[idx + 1] != s[idx + 2]:
+                  total += 1
+                  break
+  total
+
+#+end_src

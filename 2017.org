@@ -79,3 +79,18 @@
       spiral[coord] = tmp
   tmp
 #+end_src
+* Day 4
+[[https://adventofcode.com/2017/day/4][High-Entropy Passphrases]]
+** Part 1
+A new system policy has been put in place that requires all accounts to use a passphrase instead of simply a password. A passphrase consists of a series of words (lowercase letters) separated by spaces.
+
+To ensure security, a valid passphrase must contain no duplicate words.
+#+begin_src jupyter-python
+  lines = [x.split() for x in open(datadir / "4.txt").readlines()]
+  sum(len(l) == len(set(l)) for l in lines)
+#+end_src
+** Part 2
+For added security, yet another system policy has been put in place. Now, a valid passphrase must contain no two words that are anagrams of each other.
+#+begin_src jupyter-python
+  sum(len(l) == len(set([''.join(sorted(w)) for w in l])) for l in lines)
+#+end_src
