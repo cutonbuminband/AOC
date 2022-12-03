@@ -12,7 +12,8 @@ import itertools
 datadir = Path("data/2021")
 #+end_src
 
-* Day 1: Sonar Sweep
+* Day 1
+*Sonar Sweep*
 ** Part 1
 To do this, count the number of times a depth measurement increases from the previous measurement. (There is no measurement before the first measurement.)
 #+begin_src jupyter-python
@@ -26,7 +27,8 @@ Instead, consider sums of a three-measurement sliding window.  Your goal now is 
 (data.rolling(3).sum().diff() > 0).sum()
 #+end_src
 
-* Day 2: Dive!
+* Day 2
+*Dive!*
 ** Part 1
 It seems like the submarine can take a series of commands like forward 1, down 2, or up 3:
 
@@ -61,7 +63,8 @@ Using this new interpretation of the commands, calculate the horizontal position
   print(state[1] * state[2])
 #+end_src
 
-* Day 3: Binary Diagnostic
+* Day 3
+*Binary Diagnostic*
 ** Part 1
 The diagnostic report (your puzzle input) consists of a list of binary numbers which, when decoded properly, can tell you many useful things about the conditions of the submarine. The first parameter to check is the power consumption.
 
@@ -103,7 +106,8 @@ for column in df.columns:
 binarize(oxygen.to_numpy()) * binarize(co2.to_numpy())
 #+end_src
 
-* Day 4: Giant Squid
+* Day 4
+*Giant Squid*
 
 ** Part 1
 Bingo is played on a set of boards each consisting of a 5x5 grid of numbers. Numbers are chosen at random, and the chosen number is marked on all boards on which it appears. (Numbers may not appear on all boards.) If all numbers in any row or any column of a board are marked, that board wins. (Diagonals don't count.)
@@ -141,7 +145,8 @@ Figure out which board will win last. Once it wins, what would its final score b
   np.sum(np.ma.array(boards, mask=(boards == -1))[index]) * number
 #+end_src
 
-* Day 5: Hydrothermal Venture
+* Day 5
+*Hydrothermal Venture*
 ** Part 1
 You come across a field of hydrothermal vents on the ocean floor! These vents constantly produce large, opaque clouds, so it would be best to avoid them if possible.
 
@@ -187,7 +192,8 @@ Consider all of the lines. At how many points do at least two lines overlap?
   (grid > 1).sum()
 #+end_src
 
-* Day 6: Lanternfish
+* Day 6
+*Lanternfish*
 
 ** Part 1
 Although you know nothing about this specific species of lanternfish, you make some guesses about their attributes. Surely, each lanternfish creates a new lanternfish once every 7 days.
@@ -219,7 +225,8 @@ How many lanternfish would there be after 256 days?
     (np.linalg.matrix_power(transition_matrix, 256) @ population).sum()
 #+end_src
 
-* Day 7: The Treachery of Whales
+* Day 7
+*The Treachery of Whales*
 ** Part 1
 A giant whale has decided your submarine is its next meal, and it's much faster than you are. There's nowhere to run!
 
@@ -254,7 +261,8 @@ Determine the horizontal position that the crabs can align to using the least fu
   min(options)
 #+end_src
 
-* Day 8: Seven Segment Search
+* Day 8
+*Seven Segment Search*
 ** Part 1
 #+begin_src jupyter-python
   with open(datadir / '8.txt', encoding='utf8') as f:
@@ -328,7 +336,8 @@ We know that every digit occurs before the pipe for every row in our input.
 
  It's not super elegant, and I kind of prefer just using the generalised constraints programming.
 
-* Day 9: Smoke Basin
+* Day 9
+*Smoke Basin*
 ** Part 1
 #+begin_src jupyter-python
   data = pd.read_fwf(datadir / '9.txt', widths=[1]*100, header=None).to_numpy()
@@ -368,7 +377,8 @@ We know that every digit occurs before the pipe for every row in our input.
   print(np.product(sorted(sizes)[-3:]))
 #+end_src
 
-* Day 10: Syntax Scoring
+* Day 10
+*Syntax Scoring*
 ** Part 1
 
 #+begin_src jupyter-python
@@ -459,7 +469,8 @@ We know that every digit occurs before the pipe for every row in our input.
 
 #+end_src
 
-* Day 12: Passage Pathing
+* Day 12
+*Passage Pathing*
 ** Part 1
 #+begin_src jupyter-python
   def flatten(mylist):
@@ -515,7 +526,8 @@ We know that every digit occurs before the pipe for every row in our input.
   len(set(paths(tree)))
 #+end_src
 
-* Day 13: Transparent Origami
+* Day 13
+*Transparent Origami*
 ** Part 1
 
 #+begin_src jupyter-python
@@ -550,7 +562,8 @@ We know that every digit occurs before the pipe for every row in our input.
 
 #+end_src
 
-* Day 14: Extended Polymerization
+* Day 14
+*Extended Polymerization*
 
 Here's another puzzle that seems tailor made for a transition matrix based approach. We are given an initial state, and a set of rules for producing the next state from the current state. The rules are all phrased in terms of pairs, so we should work in the basis of pairs of elements.
 
@@ -595,7 +608,8 @@ A rule like CH -> B should be interpreted as state "CH" produces states "CB" and
   pd.Series(totals).max() - pd.Series(totals).min()
 #+end_src
 
-* Day 15: Chiton
+* Day 15
+*Chiton*
 This is a shortest path search, which I really don't remember how to do. Here goes nothing
 #+begin_src jupyter-python
   data = pd.read_fwf(datadir / '15.txt', widths=[1]*100, header=None).to_numpy(dtype=float)
@@ -646,7 +660,8 @@ This worked, but is almost too slow for part 2, which runs in about 60 s. Oh wel
   auxiliary[-2, -2]
 #+end_src
 
-* Day 16: Packet Decoder
+* Day 16
+*Packet Decoder*
 
 #+begin_src jupyter-python
   nybbles = {hex(i)[2:]: bin(i)[2:].rjust(4, '0') for i in range(16)}
@@ -732,7 +747,8 @@ For part 2, we have to completely ignore the version number and actually do some
   print(evaluate_one_packet(bits)[0])
 #+end_src
 
-* Day 17: Trick Shot
+* Day 17
+*Trick Shot*
 ** Part 1
 First pen and paper solution for this year.
 
@@ -776,7 +792,8 @@ Things to note:
   print(len(set(result)))
 #+end_src
 
-* Day 18: Snailfish
+* Day 18
+*Snailfish*
 ** Part 1
 #+begin_src jupyter-python
 
@@ -880,8 +897,8 @@ Things to note:
   maxval
 #+end_src
 
-* Day 19: Beacon Scanner
-
+* Day 19
+*Beacon Scanner*
 
 We'll start by generating the 24 rotation matrices. There are six possible ways of permuting the axes, and eight possible sign conventions. Half of the sign conventions will be left-handed, so we discard them
 #+begin_src jupyter-python
@@ -964,7 +981,8 @@ What is the largest Manhattan distance between any two scanners?
   maxval
 #+end_src
 
-* Day 20: Trench Map
+* Day 20
+*Trench Map*
 ** Part 1 and 2
 #+begin_src jupyter-python
   data = open(datadir / '20.txt').read()
@@ -984,7 +1002,8 @@ What is the largest Manhattan distance between any two scanners?
           print(new.sum())
 #+end_src
 
-* Day 21: Dirac Dice
+* Day 21
+*Dirac Dice*
 ** Part 1
 Players take turns moving. On each player's turn, the player rolls the die three times and adds up the results. Then, the player moves that many times forward around the track.
 
@@ -1039,7 +1058,8 @@ The game is played the same as before, although to prevent things from getting t
   max(wins)
 #+end_src
 
-* Day 22: Reactor Reboot
+* Day 22
+*Reactor Reboot*
 ** Part 1
 
 The first part can be solved trivially by using numpy's indexing
