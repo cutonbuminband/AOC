@@ -47,3 +47,24 @@ sum([ x * y * z + 2 * (x + y) for x,y,z in map(sorted, boxes)])
 * Day 3
 *Perfectly Spherical Houses in a Vacuum*
 ** Part 1
+#+begin_src jupyter-python
+  instructions = open(datadir / "3.txt", encoding="utf8").readline().strip()
+  commands = {"^": lambda x, y: (x, y + 1), "v": lambda x, y: (x, y - 1),
+              ">": lambda x, y: (x + 1, y), "<": lambda x, y: (x - 1, y),}
+
+  def execute_instructions(instructions, houses=None):
+      position = 0, 0
+      if houses is None:
+          houses = {(0, 0): 1}
+      for instruction in instructions:
+          position = commands[instruction](*position)
+          houses[position] = 1
+      return houses
+
+  len(execute_instructions(instructions))
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  houses = execute_instructions(instructions[::2])
+  len(execute_instructions(instructions[1::2], houses))
+#+end_src
