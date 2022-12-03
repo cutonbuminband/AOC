@@ -1,0 +1,75 @@
+#+PROPERTY: header-args:jupyter-python  :session aoc :kernel python
+#+PROPERTY: header-args    :pandoc t
+
+* Imports
+#+begin_src jupyter-python
+  import pandas as pd
+  import numpy as np
+  from collections import defaultdict
+  from pathlib import Path
+  import functools
+  import itertools
+  import more_itertools
+  datadir = Path("data/2018")
+#+end_src
+
+* Day 1
+[[https://adventofcode.com/2018/day/1][Chronal Calibration]]
+** Part 1
+#+begin_src jupyter-python
+data = np.loadtxt(datadir / "1.txt", dtype=int)
+data.sum()
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  i = 0
+  value = 0
+  seen = {}
+  while True:
+      if value in seen:
+          break
+      seen[value] = 1
+      value += data[i % len(data)]
+      i += 1
+  value
+#+end_src
+* Day 2
+[[https://adventofcode.com/2018/day/2][Inventory Managment System]]
+** Part 1
+#+begin_src jupyter-python
+  lines = [np.array([ord(y) for y in x.strip()]) for x in open(datadir / "2.txt").readlines()]
+  twos = sum([2 in np.unique(list(line), return_counts=True)[1] for line in lines])
+  twos * sum([3 in np.unique(list(line), return_counts=True)[1] for line in lines])
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  for s1 in lines:
+      for s2 in lines:
+          if len(s2) != len(s1): continue
+          if (s2 - s1 != 0).sum() == 1:
+              result = ''.join(chr(x) for x in s1[np.where(s1 == s2)])
+              break
+      else:
+          continue
+      break
+result
+#+end_src
+* Day 3
+[[https://adventofcode.com/2018/day/3][No Matter How You Slice It]]
+** Part 1
+#+begin_src jupyter-python
+  import re
+  num = re.compile(r"\d+")
+  data = np.array([[int(x) for x in re.findall(num, line)] for line in open(datadir / "3.txt").readlines()])
+  field = np.zeros([1000, 1000])
+  for pid, x, y, w, h in data:
+      field[x:x+w, y:y+h] += 1
+  (field > 1).sum()
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  for pid, x, y, w, h in data:
+      if (field[x:x+w, y:y+h] == 1).all():
+          break
+  pid
+#+end_src

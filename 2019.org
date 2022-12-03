@@ -1,0 +1,125 @@
+#+PROPERTY: header-args:jupyter-python  :session aoc :kernel python
+#+PROPERTY: header-args    :pandoc t
+
+* Imports
+#+begin_src jupyter-python
+  import pandas as pd
+  import numpy as np
+  from collections import defaultdict
+  from pathlib import Path
+  import functools
+  import itertools
+  import more_itertools
+  datadir = Path("data/2019")
+#+end_src
+
+* Day 1
+[[https://adventofcode.com/2019/day/1][The Tyranny of the Rocket Equation]]
+** Part 1
+#+begin_src jupyter-python
+data = [int(x) for x in open(datadir / "1.txt").readlines()]
+sum([x//3 - 2 for x in data])
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  total = 0
+  for val in data:
+      fuel = max(val // 3 - 2, 0)
+      total += fuel
+      if fuel:
+          data.append(fuel)
+  total
+#+end_src
+* Day 2
+[[https://adventofcode.com/2019/day/2][1202 Program Alarm]]
+** Part 1
+#+begin_src jupyter-python
+  program = [int(x) for x in open(datadir / "2.txt").readline().split(',')]
+  def run(program, ip=0, noun=12, verb=2):
+      program = program.copy()
+      program[1] = noun
+      program[2] = verb
+      ops = {1: lambda x, y: x + y, 2: lambda x, y: x * y}
+      while True:
+          op = program[ip]
+          if op == 99:
+              return program[0]
+          left, right, destination = program[ip + 1: ip + 4]
+          program[destination] = ops[op](program[left], program[right])
+          ip += 4
+  run(program)
+#+end_src
+#+begin_src jupyter-python
+  for noun, verb in itertools.product(range(100), range(100)):
+      result = run(program, 0, noun, verb)
+      if result == 19690720:
+          result = 100 * noun + verb
+          break
+  result
+#+end_src
+* Day 3
+[[https://adventofcode.com/2019/day/3][Crossed Wires]]
+
+** Part 1
+#+begin_src jupyter-python
+    with open(datadir / '3.txt') as f:
+        lines = [x.strip().split(',') for x in f.readlines()]
+
+    def path_to_segments(path):
+        directions = {"U": 1j, "D": -1j, "R": 1 , "L": -1}
+        deltas = [int(p[1:]) * directions[p[0]] for p in path]
+        ends = np.cumsum(deltas)
+        lengths = np.cumsum(np.abs(deltas))
+        result = np.vstack([np.roll(ends, 1), ends, np.roll(lengths, 1)]).T
+        result[0, 0] = 0
+        result[0, 2] = 0
+        return result
+
+    def intersection(s1, s2):
+        if ((s1[1] - s1[0]) * (s2[1] - s2[0])).imag == 0:
+            return False
+        if (s1[0] - s1[1]).imag == 0:
+            s2, s1 = s1, s2
+        if ((s1[0].real - s2[0].real) * (s1[1].real - s2[1].real) < 0
+            and (s1[0].imag - s2[0].imag) * (s1[1].imag - s2[1].imag) < 0):
+            intersection_point = s1[0].real + 1j * s2[0].imag
+            total_length = (s1[2] + s2[2]
+                            + abs((s1[0] - intersection_point).imag)
+                            + abs((s2[0] - intersection_point).real))
+            return intersection_point, total_length
+        return False
+
+    l1 = path_to_segments(lines[0])
+    l2 = path_to_segments(lines[1])
+    intersections = [i for s1, s2 in itertools.product(l1, l2) if (i := intersection(s1, s2))]
+    int(min( abs(x[0].real) + abs(x[0].imag) for x in intersections))
+#+end_src
+
+** Part 2
+#+begin_src jupyter-python
+min(x[1] for x in intersections)
+
+#+end_src
+
+** Bonus
+As a bonus, we can visualize the walk through space
+#+begin_src jupyter-python
+
+  import matplotlib.pyplot as plt
+  plt.style.use("seaborn")
+
+  def plot_path(segments, **kwargs):
+      x = segments[:, 0].real
+      y = segments[:, 0].imag
+      plt.plot(x, y, **kwargs)
+  plot_path(l1)
+  plot_path(l2)
+  ax = plt.gca()
+  plt.savefig("graphs/2019-3.png", bbox_inches="tight")
+
+#+end_src
+
+That gives this plot for the two different wires
+
+[[graphs/2019-3.png]]
+
