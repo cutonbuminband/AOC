@@ -71,3 +71,44 @@ In your expense report, what is the product of the three entries that sum to 202
   slopes = [[1, 1], [3, 1], [5, 1], [7, 1], [1, 2]]
   np.prod([count_trees(data, slope[0], slope[1]) for slope in slopes])
 #+end_src
+
+* Day 4
+*Passport Processing*
+#+begin_src jupyter-python
+  data = open(datadir / "4.txt").read()
+  passports = data.split("\n\n")
+  passport_dicts = [dict(list(map(lambda x: x.split(":"), p.replace("\n", " ").split()))) for p in passports]
+  sum([len(set(p.keys()) - set(["cid"])) == 7 for p in passport_dicts])
+#+end_src
+
+#+begin_src jupyter-python
+  def validate_key(key, value):
+      year_limits = {'byr': [1920, 2002],
+                     'eyr': [2020, 2030],
+                     'iyr': [2010, 2020]}
+      try:
+          if key in ['byr', 'eyr', 'iyr']:
+              minval, maxval = year_limits[key]
+              return minval <= int(value) <= maxval
+          if key == 'hgt':
+              value, unit = int(value[:-2]), value[-2:]
+              return ((unit == 'cm' and (150 <= value <= 193))
+                      or (unit == 'in' and (59 <= value <= 76)))
+          if key == 'hcl':
+              return (value[0] == "#"
+                      and len(value) == 7
+                      and not (set(value[1:]) - set("0123456789abcdef")))
+          if key == 'ecl':
+              return value in ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"]
+          if key == 'pid':
+              test = int(value)
+              return len(value) == 9
+          return True
+      except ValueError:
+          return False
+
+  def is_valid_passport(p):
+      return len(set(p.keys()) - set(["cid"])) == 7 and all([validate_key(key, p[key]) for key in p])
+
+  sum([is_valid_passport(p) for p in passport_dicts])
+#+end_src
