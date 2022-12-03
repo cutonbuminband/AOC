@@ -13,7 +13,7 @@ datadir = Path("data/2020/")
 #+end_src
 
 * Day 1:
-*Report Repair*
+[[https://adventofcode.com/2020/day/1][Report Repair]]
 ** Part 1
 Specifically, they need you to find the two entries that sum to 2020 and then multiply those two numbers together.
 #+begin_src jupyter-python
@@ -26,7 +26,7 @@ In your expense report, what is the product of the three entries that sum to 202
 [triple[0] * triple[1] * triple[2] for triple in itertools.product(data, data, data) if sum(triple) == 2020][0]
 #+end_src
 * Day 2:
-*Password Philosophy*
+[[https://adventofcode.com/2020/day/2][Password Philosophy]]
 ** Part 1
 #+begin_src jupyter-python
   def is_valid(interval, letters, password):
@@ -47,7 +47,7 @@ In your expense report, what is the product of the three entries that sum to 202
   sum([is_valid(*line) for line in lines])
 #+end_src
 * Day 3
-*Toboggan Trajectory*
+[[https://adventofcode.com/2020/day/3][Toboggan Trajectory]]
 ** Part 1
 #+begin_src jupyter-python
   def read(myfile):
@@ -67,13 +67,15 @@ In your expense report, what is the product of the three entries that sum to 202
 
   count_trees(data, 3, 1)
 #+end_src
+** Part 2
 #+begin_src jupyter-python
   slopes = [[1, 1], [3, 1], [5, 1], [7, 1], [1, 2]]
   np.prod([count_trees(data, slope[0], slope[1]) for slope in slopes])
 #+end_src
 
 * Day 4
-*Passport Processing*
+[[https://adventofcode.com/2020/day/4][Passport Processing]]
+** Part 1
 #+begin_src jupyter-python
   data = open(datadir / "4.txt").read()
   passports = data.split("\n\n")
@@ -81,6 +83,7 @@ In your expense report, what is the product of the three entries that sum to 202
   sum([len(set(p.keys()) - set(["cid"])) == 7 for p in passport_dicts])
 #+end_src
 
+** Part 2
 #+begin_src jupyter-python
   def validate_key(key, value):
       year_limits = {'byr': [1920, 2002],

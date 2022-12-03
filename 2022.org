@@ -13,6 +13,7 @@
 #+end_src
 
 * Day 1
+[[https://adventofcode.com/2022/day/1][Calorie Counting]]
 ** Text
 The Elves take turns writing down the number of Calories contained by the various meals, snacks, rations, etc. that they've brought with them, one item per line. Each Elf separates their own inventory from the previous Elf's inventory (if any) by a blank line.
 
@@ -34,7 +35,7 @@ To avoid this unacceptable situation, the Elves would instead like to know the t
 #+end_src
 
 * Day 2:
-*Rock Paper Scissors*
+[[https://adventofcode.com/2022/day/2][Rock Paper Scissors]]
 
 ** Part 1
 #+begin_src jupyter-python
@@ -49,7 +50,7 @@ sum([(line[1] + line[0] - 1) % 3 + 1 + 3 * line[1] for line in lines])
 #+end_src
 
 * Day 3:
-*Rucksack Reorganization*
+[[https://adventofcode.com/2022/day/3][Rucksack Reorganization]]
 ** Part 1
 #+begin_src jupyter-python
   total = 0

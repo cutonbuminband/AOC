@@ -14,7 +14,7 @@
 #+end_src
 
 * Day 1
-*Not Quite Lisp*
+[[https://adventofcode.com/2015/day/1][Not Quite Lisp]]
 
 ** Part 1
 #+begin_src jupyter-python
@@ -33,7 +33,7 @@
 #+end_src
 
 * Day 2
-*I Was Told There Would Be No Math*
+[[https://adventofcode.com/2015/day/2][I Was Told There Would Be No Math]]
 ** Part 1
 #+begin_src jupyter-python
 with open(datadir / '2.txt') as f:

@@ -13,7 +13,7 @@ datadir = Path("data/2021")
 #+end_src
 
 * Day 1
-*Sonar Sweep*
+[[https://adventofcode.com/2021/day/1][Sonar Sweep]]
 ** Part 1
 To do this, count the number of times a depth measurement increases from the previous measurement. (There is no measurement before the first measurement.)
 #+begin_src jupyter-python
@@ -28,7 +28,7 @@ Instead, consider sums of a three-measurement sliding window.  Your goal now is 
 #+end_src
 
 * Day 2
-*Dive!*
+[[https://adventofcode.com/2021/day/2][Dive!]]
 ** Part 1
 It seems like the submarine can take a series of commands like forward 1, down 2, or up 3:
 
@@ -64,7 +64,7 @@ Using this new interpretation of the commands, calculate the horizontal position
 #+end_src
 
 * Day 3
-*Binary Diagnostic*
+[[https://adventofcode.com/2021/day/3][Binary Diagnostic]]
 ** Part 1
 The diagnostic report (your puzzle input) consists of a list of binary numbers which, when decoded properly, can tell you many useful things about the conditions of the submarine. The first parameter to check is the power consumption.
 
@@ -107,8 +107,7 @@ binarize(oxygen.to_numpy()) * binarize(co2.to_numpy())
 #+end_src
 
 * Day 4
-*Giant Squid*
-
+[[https://adventofcode.com/2021/day/4][Giant Squid]]
 ** Part 1
 Bingo is played on a set of boards each consisting of a 5x5 grid of numbers. Numbers are chosen at random, and the chosen number is marked on all boards on which it appears. (Numbers may not appear on all boards.) If all numbers in any row or any column of a board are marked, that board wins. (Diagonals don't count.)
 
@@ -146,7 +145,7 @@ Figure out which board will win last. Once it wins, what would its final score b
 #+end_src
 
 * Day 5
-*Hydrothermal Venture*
+[[https://adventofcode.com/2021/day/5][Hydrothermal Venture]]
 ** Part 1
 You come across a field of hydrothermal vents on the ocean floor! These vents constantly produce large, opaque clouds, so it would be best to avoid them if possible.
 
@@ -193,8 +192,7 @@ Consider all of the lines. At how many points do at least two lines overlap?
 #+end_src
 
 * Day 6
-*Lanternfish*
-
+[[https://adventofcode.com/2021/day/6][Lanternfish]]
 ** Part 1
 Although you know nothing about this specific species of lanternfish, you make some guesses about their attributes. Surely, each lanternfish creates a new lanternfish once every 7 days.
 
@@ -226,7 +224,7 @@ How many lanternfish would there be after 256 days?
 #+end_src
 
 * Day 7
-*The Treachery of Whales*
+[[https://adventofcode.com/2021/day/7][The Treachery of Whales]]
 ** Part 1
 A giant whale has decided your submarine is its next meal, and it's much faster than you are. There's nowhere to run!
 
@@ -262,7 +260,7 @@ Determine the horizontal position that the crabs can align to using the least fu
 #+end_src
 
 * Day 8
-*Seven Segment Search*
+[[https://adventofcode.com/2021/day/8][Seven Segment Search]]
 ** Part 1
 #+begin_src jupyter-python
   with open(datadir / '8.txt', encoding='utf8') as f:
@@ -337,7 +335,7 @@ We know that every digit occurs before the pipe for every row in our input.
  It's not super elegant, and I kind of prefer just using the generalised constraints programming.
 
 * Day 9
-*Smoke Basin*
+[[https://adventofcode.com/2021/day/9][Smoke Basin]]
 ** Part 1
 #+begin_src jupyter-python
   data = pd.read_fwf(datadir / '9.txt', widths=[1]*100, header=None).to_numpy()
@@ -378,7 +376,7 @@ We know that every digit occurs before the pipe for every row in our input.
 #+end_src
 
 * Day 10
-*Syntax Scoring*
+[[https://adventofcode.com/2021/day/10][Syntax Scoring]]
 ** Part 1
 
 #+begin_src jupyter-python
@@ -409,7 +407,6 @@ We know that every digit occurs before the pipe for every row in our input.
   print(total)
 #+end_src
 
-
 ** Part 2
 
 #+begin_src jupyter-python
@@ -424,7 +421,8 @@ We know that every digit occurs before the pipe for every row in our input.
   int(np.median(scores))
 #+end_src
 
-* Day 11: Dumbo Octopus
+* Day 11:
+[[https://adventofcode.com/2021/day/11][Dumbo Octopus]]
 ** Part 1
 #+begin_src jupyter-python
     def find_neighbors(x, y):
@@ -470,7 +468,7 @@ We know that every digit occurs before the pipe for every row in our input.
 #+end_src
 
 * Day 12
-*Passage Pathing*
+[[https://adventofcode.com/2021/day/12][Passage Pathing]]
 ** Part 1
 #+begin_src jupyter-python
   def flatten(mylist):
@@ -527,7 +525,7 @@ We know that every digit occurs before the pipe for every row in our input.
 #+end_src
 
 * Day 13
-*Transparent Origami*
+[[https://adventofcode.com/2021/day/13][Transparent Origami]]
 ** Part 1
 
 #+begin_src jupyter-python
@@ -563,7 +561,7 @@ We know that every digit occurs before the pipe for every row in our input.
 #+end_src
 
 * Day 14
-*Extended Polymerization*
+[[https://adventofcode.com/2021/day/14][Extended Polymerization]]
 
 Here's another puzzle that seems tailor made for a transition matrix based approach. We are given an initial state, and a set of rules for producing the next state from the current state. The rules are all phrased in terms of pairs, so we should work in the basis of pairs of elements.
 
@@ -609,7 +607,9 @@ A rule like CH -> B should be interpreted as state "CH" produces states "CB" and
 #+end_src
 
 * Day 15
-*Chiton*
+[[https://adventofcode.com/2021/day/15][Chiton]]
+
+** Part 1
 This is a shortest path search, which I really don't remember how to do. Here goes nothing
 #+begin_src jupyter-python
   data = pd.read_fwf(datadir / '15.txt', widths=[1]*100, header=None).to_numpy(dtype=float)
@@ -633,6 +633,7 @@ This is a shortest path search, which I really don't remember how to do. Here go
   auxiliary[-2, -2]
 #+end_src
 
+** Part 2
 This worked, but is almost too slow for part 2, which runs in about 60 s. Oh well
 #+begin_src jupyter-python
   data = pd.read_fwf(datadir / '15.txt', widths=[1]*100, header=None).to_numpy(dtype=float)
@@ -661,8 +662,8 @@ This worked, but is almost too slow for part 2, which runs in about 60 s. Oh wel
 #+end_src
 
 * Day 16
-*Packet Decoder*
-
+[[https://adventofcode.com/2021/day/16][Packet Decoder]]
+** Part 1
 #+begin_src jupyter-python
   nybbles = {hex(i)[2:]: bin(i)[2:].rjust(4, '0') for i in range(16)}
   def parse(bitstring):
@@ -706,6 +707,7 @@ This worked, but is almost too slow for part 2, which runs in about 60 s. Oh wel
   parse(bits)
 #+end_src
 
+** Part 2
 For part 2, we have to completely ignore the version number and actually do something with the data associated with each packet. Actually moving through the packet happens in the same way, but what we have to do at each level is sufficiently different that it's not worth it to try and reuse the parsing function.
 
 #+begin_src jupyter-python
@@ -748,7 +750,7 @@ For part 2, we have to completely ignore the version number and actually do some
 #+end_src
 
 * Day 17
-*Trick Shot*
+[[https://adventofcode.com/2021/day/17][Trick Shot]]
 ** Part 1
 First pen and paper solution for this year.
 
@@ -793,7 +795,7 @@ Things to note:
 #+end_src
 
 * Day 18
-*Snailfish*
+[[https://adventofcode.com/2021/day/18][Snailfish]]
 ** Part 1
 #+begin_src jupyter-python
 
@@ -898,8 +900,8 @@ Things to note:
 #+end_src
 
 * Day 19
-*Beacon Scanner*
-
+[[https://adventofcode.com/2021/day/19][Beacon Scanner]]
+** Part 1
 We'll start by generating the 24 rotation matrices. There are six possible ways of permuting the axes, and eight possible sign conventions. Half of the sign conventions will be left-handed, so we discard them
 #+begin_src jupyter-python
   rotations = []
@@ -982,7 +984,7 @@ What is the largest Manhattan distance between any two scanners?
 #+end_src
 
 * Day 20
-*Trench Map*
+[[https://adventofcode.com/2021/day/20][Trench Map]]
 ** Part 1 and 2
 #+begin_src jupyter-python
   data = open(datadir / '20.txt').read()
@@ -1003,7 +1005,7 @@ What is the largest Manhattan distance between any two scanners?
 #+end_src
 
 * Day 21
-*Dirac Dice*
+[[https://adventofcode.com/2021/day/21][Dirac Dice]]
 ** Part 1
 Players take turns moving. On each player's turn, the player rolls the die three times and adds up the results. Then, the player moves that many times forward around the track.
 
@@ -1059,7 +1061,7 @@ The game is played the same as before, although to prevent things from getting t
 #+end_src
 
 * Day 22
-*Reactor Reboot*
+[[https://adventofcode.com/2021/day/22][Reactor Reboot]]
 ** Part 1
 
 The first part can be solved trivially by using numpy's indexing
