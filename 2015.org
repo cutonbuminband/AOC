@@ -13,8 +13,6 @@
   datadir = Path("data/2015")
 #+end_src
 
-#+RESULTS:
-
 * Day 1
 *Not Quite Lisp*
 
@@ -23,9 +21,6 @@
   line = open(datadir / "1.txt", encoding="utf8").readline()
   line.count("(") - line.count(")")
 #+end_src
-
-#+RESULTS:
-: 74
 
 ** Part 2
 #+begin_src jupyter-python
@@ -37,5 +32,18 @@
   idx + 1
 #+end_src
 
-#+RESULTS:
-: 1795
+* Day 2
+*I Was Told There Would Be No Math*
+** Part 1
+#+begin_src jupyter-python
+with open(datadir / '2.txt') as f:
+    boxes = [[int(x) for x in y.split('x')] for y in f.readlines()]
+sum([(3*x*y + 2*x*z + 2*y*z) for x,y,z in map(sorted, boxes)])
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+sum([ x * y * z + 2 * (x + y) for x,y,z in map(sorted, boxes)])
+#+end_src
+* Day 3
+*Perfectly Spherical Houses in a Vacuum*
+** Part 1
