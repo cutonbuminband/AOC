@@ -1,0 +1,41 @@
+#+PROPERTY: header-args:jupyter-python  :session aoc :kernel python
+#+PROPERTY: header-args    :pandoc t
+
+* Imports
+#+begin_src jupyter-python
+  import pandas as pd
+  import numpy as np
+  from collections import defaultdict
+  from pathlib import Path
+  import functools
+  import itertools
+  import more_itertools
+  datadir = Path("data/2015")
+#+end_src
+
+#+RESULTS:
+
+* Day 1
+*Not Quite Lisp*
+
+** Part 1
+#+begin_src jupyter-python
+  line = open(datadir / "1.txt", encoding="utf8").readline()
+  line.count("(") - line.count(")")
+#+end_src
+
+#+RESULTS:
+: 74
+
+** Part 2
+#+begin_src jupyter-python
+  position = 0
+  for idx, character in enumerate(line):
+      position = position + (1 if character == "(" else -1)
+      if position < 0:
+          break
+  idx + 1
+#+end_src
+
+#+RESULTS:
+: 1795
