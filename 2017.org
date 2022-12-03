@@ -1,0 +1,81 @@
+#+PROPERTY: header-args:jupyter-python  :session aoc :kernel python
+#+PROPERTY: header-args    :pandoc t
+
+* Imports
+#+begin_src jupyter-python
+  import pandas as pd
+  import numpy as np
+  from collections import defaultdict
+  from pathlib import Path
+  import functools
+  import itertools
+  import more_itertools
+  datadir = Path("data/2017")
+#+end_src
+
+* Day 1
+[[https://adventofcode.com/2017/day/1][Inverse Captcha]]
+** Part 1
+#+begin_src jupyter-python
+  data = np.array([int(x) for x in open(datadir / "1.txt").readline().strip()], dtype=int)
+  data[np.where(data == np.roll(data, 1))].sum()
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  data[np.where(data == np.roll(data, len(data) // 2))].sum()
+#+end_src
+* Day 2
+[[https://adventofcode.com/2017/day/2][Corruption Checksum]]
+** Part 1
+#+begin_src jupyter-python
+  data = [sorted(map(lambda x: int(x), x.split()))
+          for x in open(datadir / '2.txt').readlines()]
+  sum(a[-1] - a[0] for a in data)
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  total = 0
+  for line in data:
+      for idx, value in enumerate(line):
+          for j in range(idx + 1, len(line)):
+              total += line[j] // value if line[j] % value == 0 else 0
+  total
+#+end_src
+* Day 3
+[[https://adventofcode.com/2017/day/3][Spiral Memory]]
+** Part 1
+#+begin_src jupyter-python
+  puzzle_input = 368078
+  completed_squares = (int(np.sqrt(puzzle_input) - 1) // 2 * 2) + 1
+  remainder = (puzzle_input - completed_squares ** 2) % (completed_squares + 1)
+  (completed_squares // 2 + 1) + abs((completed_squares // 2) + 1 - remainder)
+#+end_src
+
+** Part 2
+#+begin_src jupyter-python
+  coord, current_side, side_length, remainder = 0, 0, 0, 0
+  spiral = defaultdict(int)
+  spiral[coord] = 1
+  direction = 1
+  while True:
+      if remainder == side_length:
+          if current_side % 4 == 0:
+              coord = coord + direction - 1j * direction
+              side_length += 2
+          direction = 1j * direction
+          coord = coord + direction
+          current_side += 1
+          remainder = 1
+      else:
+          coord = coord + direction
+          remainder += 1
+      tmp = 0
+      for x, y in itertools.product([-1, 0, 1], [-1j, 0, 1j]):
+          if not x and not y: continue
+          target = coord + x + y
+          tmp += spiral[target]
+      if tmp > puzzle_input:
+          break
+      spiral[coord] = tmp
+  tmp
+#+end_src
