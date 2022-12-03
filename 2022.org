@@ -14,10 +14,9 @@
 
 * Day 1
 [[https://adventofcode.com/2022/day/1][Calorie Counting]]
-** Text
+** Part 1
 The Elves take turns writing down the number of Calories contained by the various meals, snacks, rations, etc. that they've brought with them, one item per line. Each Elf separates their own inventory from the previous Elf's inventory (if any) by a blank line.
 
-** Part 1
 Find the Elf carrying the most Calories. How many total Calories is that Elf carrying?
 
 #+begin_src jupyter-python
