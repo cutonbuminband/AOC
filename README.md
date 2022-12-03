@@ -4,16 +4,16 @@ Each year is structured as a single `org` file, with text and code blocks mixed 
 
 Here's a table with my solutions for each year. The links take you to the rendered solution file for each year
 
-|      Year      | Stars |
-|:--------------:|------:|
-|[2022](2022.org)|  6/50 |
-|[2021](2021.org)| 44/50 |
-|[2020](2020.org)|  8/50 |
-|[2019](2019.org)|  8/50 |
-|[2018](2018.org)|  8/50 |
-|[2017](2017.org)|  8/50 |
-|[2016](2016.org)|  8/50 |
-|[2015](2015.org)|  8/50 |
+|      Year      |  Stars  |
+|:--------------:|--------:|
+|[2022](2022.org)|  6/50⭐ |
+|[2021](2021.org)| 44/50⭐ |
+|[2020](2020.org)|  8/50⭐ |
+|[2019](2019.org)|  8/50⭐ |
+|[2018](2018.org)|  8/50⭐ |
+|[2017](2017.org)|  8/50⭐ |
+|[2016](2016.org)|  8/50⭐ |
+|[2015](2015.org)|  8/50⭐ |
 
 # License
 
