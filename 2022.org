@@ -9,6 +9,7 @@
   from pathlib import Path
   import functools
   import more_itertools
+  import re
   datadir = Path("data/2022")
 #+end_src
 
@@ -67,4 +68,20 @@ sum([(line[1] + line[0] - 1) % 3 + 1 + 3 * line[1] for line in lines])
       letter = functools.reduce(lambda x, y: set(x).intersection(set(y)), chunk).pop()
       total += ord(letter.upper()) - ord("A") + 1 + 26 * letter.isupper()
   total
+#+end_src
+
+* Day 4
+[[https://adventofcode.com/2022/day/4][Camp Cleanup]]
+** Part 1
+#+begin_src jupyter-python
+  assignments = [x.strip() for x in open(datadir / "4.txt", encoding="utf8").readlines()]
+  regex = re.compile("\d+")
+  assignments = map(lambda x: [int(y) for y in re.findall(regex, x)], assignments)
+  assignments = [sorted([a[:2], a[2:]]) for a in assignments]
+  sum((a[1] >= b[1] or a[0] == b[0]) for a, b in assignments)
+#+end_src
+
+** Part 2
+#+begin_src jupyter-python
+  sum((a[1] >= b[0] or a[0] == b[0]) for a, b in assignments)
 #+end_src
