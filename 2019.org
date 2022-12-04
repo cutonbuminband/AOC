@@ -155,3 +155,67 @@ That gives this plot for the two different wires
   total
 
 #+end_src
+* Day 5
+[[https://adventofcode.com/2019/day/5][Sunny with a Chance of Asteroids]]
+#+begin_src jupyter-python
+  binops = {1: lambda x, y: x + y,
+            2: lambda x, y: x * y,
+            7: lambda x, y: x < y,
+            8: lambda x, y: x == y}
+
+
+  def step(program, ip, inputs=None, outputs=None):
+      op = program[ip]
+      instruction = op % 100
+      mode = [int(x) for x in str(op).rjust(5, '0')[:-2]][::-1]
+      if instruction in binops:
+          assert mode[2] != 1, "Incorrect mode for destination"
+          binargs = [val if mode[idx] == 1 else program[val]
+                     for idx, val in enumerate(program[ip + 1: ip + 3])]
+          program[program[ip + 3]] = binops[instruction](*binargs)
+          ip += 4
+      elif instruction == 3:
+          if inputs is None:
+              val = int(input("Please input the parameter\n"))
+          else:
+              val = inputs.pop(0)
+          program[program[ip + 1]] = val
+          ip += 2
+      elif instruction == 4:
+          val = program[ip + 1] if mode[0] else program[program[ip + 1]]
+          if outputs is None:
+              print("Program output: {}".format(val))
+          else:
+              outputs.append(val)
+          ip += 2
+      elif instruction == 5 or instruction == 6:
+          r = program[ip + 1: ip + 3].copy()
+          for idx, value in enumerate(r):
+              if not mode[idx]:
+                  r[idx] = program[r[idx]]
+          if (instruction == 5 and r[0] != 0) or (instruction == 6 and r[0] == 0):
+              ip = r[1]
+          else:
+              ip += 3
+      return program, ip
+
+  ip = 0
+  program = np.loadtxt(datadir / "5.txt", dtype=int, delimiter=",")
+  inputs = [1]
+  while True:
+      opcode = program[ip]
+      if opcode == 99:
+          break
+      program, ip = step(program, ip, inputs)
+#+end_src
+
+#+begin_src jupyter-python
+  ip = 0
+  program = np.loadtxt(datadir / "5.txt", dtype=int, delimiter=",")
+  inputs = [5]
+  while True:
+      opcode = program[ip]
+      if opcode == 99:
+          break
+      program, ip = step(program, ip, inputs)
+#+end_src

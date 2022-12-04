@@ -94,3 +94,27 @@ For added security, yet another system policy has been put in place. Now, a vali
 #+begin_src jupyter-python
   sum(len(l) == len(set([''.join(sorted(w)) for w in l])) for l in lines)
 #+end_src
+* Day 5
+[[https://adventofcode.com/2017/day/5][A Maze of Twisty Trampolines, All Alike]]
+** Part 1
+#+begin_src jupyter-python
+  instructions = np.loadtxt(datadir / "5.txt", dtype=int)
+  ip, count = 0, 0
+  while ip >= 0 and ip < len(instructions):
+      instructions[ip] += 1
+      ip += instructions[ip] - 1
+      count += 1
+  count
+
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  instructions = np.loadtxt(datadir / "5.txt", dtype=int)
+  ip, count = 0, 0
+  while ip >= 0 and ip < len(instructions):
+      instruction = instructions[ip]
+      instructions[ip] += 1 if instruction < 3 else -1
+      ip += instruction
+      count += 1
+  count
+#+end_src

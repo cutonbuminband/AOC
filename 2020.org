@@ -115,3 +115,21 @@ In your expense report, what is the product of the three entries that sum to 202
 
   sum([is_valid_passport(p) for p in passport_dicts])
 #+end_src
+
+* Day 5
+[[https://adventofcode.com/2020/day/5][Binary Boarding]]
+** Part 1
+#+begin_src jupyter-python
+  # "BFFFBBFRRR" -> 70, column 7 -> 567
+  def seat_id(instruction):
+      return int(instruction.translate(str.maketrans("BFRL", "1010")), 2)
+
+  seat_ids = [seat_id(x.strip()) for x in open(datadir / "5.txt").readlines()]
+  max(seat_ids)
+
+#+end_src
+
+** Part 2
+#+begin_src jupyter-python
+  (set(range(min(seat_ids), max(seat_ids) + 1)) - set(seat_ids)).pop()
+#+end_src

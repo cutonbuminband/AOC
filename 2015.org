@@ -88,3 +88,23 @@ sum([ x * y * z + 2 * (x + y) for x,y,z in map(sorted, boxes)])
 #+begin_src jupyter-python
   brute_force(6)
 #+end_src
+
+* Day 5
+[[https://adventofcode.com/2015/day/5][Doesn't He Have Intern-Elves For This?]]
+** Part 1
+#+begin_src jupyter-python
+  def is_nice(s):
+      sufficient_vowels = len(re.findall("[aeiou]", s)) >= 3
+      contains_double = (np.array(list(s))[1:] == np.roll(list(s), 1)[1:]).any()
+      contains_forbidden = any(val in s for val in ["ab", "cd", "pq", "xy"])
+      return sufficient_vowels and contains_double and not contains_forbidden
+  sum(is_nice(x) for x in open(datadir / "5.txt").readlines())
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  def is_nice(s):
+      contains_double = (np.array(list(s))[2:] == np.roll(list(s), 2)[2:]).any()
+      contains_double_pair = bool(re.findall("(..).*\\1", s))
+      return contains_double and contains_double_pair
+  sum(is_nice(x) for x in open(datadir / "5.txt").readlines())
+#+end_src

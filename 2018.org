@@ -100,3 +100,23 @@ result
   sleepiest_guard = sorted(guards.keys(), key = lambda x: - max(guards[x]))[0]
   int(sleepiest_guard) * guards[sleepiest_guard].argmax()
 #+end_src
+* Day 5
+[[https://adventofcode.com/2018/day/5][Alchemical Reduction]]
+** Part 1
+#+begin_src jupyter-python
+  import string
+  s = open(datadir / "5.txt").readline().strip()
+
+  def reduce(s):
+      l = len(s)
+      for char in string.ascii_lowercase:
+          s = s.replace(f"{char + char.swapcase()}", "")
+          s = s.replace(f"{char.swapcase() + char}", "")
+      return l if l == len(s) else reduce(s)
+  reduce(s)
+#+end_src
+
+** Part 2
+#+begin_src jupyter-python
+  min(reduce(s.replace(c, "").replace(c.upper(), "")) for c in string.ascii_lowercase)
+#+end_src
