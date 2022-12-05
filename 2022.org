@@ -85,3 +85,31 @@ sum([(line[1] + line[0] - 1) % 3 + 1 + 3 * line[1] for line in lines])
 #+begin_src jupyter-python
   sum((a[1] >= b[0] or a[0] == b[0]) for a, b in assignments)
 #+end_src
+
+* Day 5
+[[https://adventofcode.com/2022/day/5][Supply Stacks]]
+
+** Part 1
+#+begin_src jupyter-python
+  lines = [line.strip() for line in open(datadir / "5.txt").readlines()]
+  numbers = [re.findall("\d+", line) for line in lines]
+  split = np.argmax([len(x) for x in numbers])
+  instructions = [[int(y) for y in x] for x in numbers[split + 1:] if x]
+  initial_state = list(itertools.zip_longest(*lines[:split]))
+
+  letters = [re.findall("[A-Z]", ''.join(column)) for column in initial_state]
+  p1 = [x[::-1] for x in letters.copy() if x]
+  for n, source, dest in instructions:
+      for i in range(n):
+          p1[dest - 1].append(p1[source - 1].pop())
+  ''.join(x[-1] if x else ' ' for x in p1)
+#+end_src
+
+** Part 2
+#+begin_src jupyter-python
+  p2 = [x[::-1] for x in letters.copy() if x]
+  for n, source, dest in instructions:
+      p2[dest - 1] += p2[source - 1][-n:]
+      p2[source - 1] = p2[source - 1][:-n]
+  ''.join(x[-1] if x else ' ' for x in p2)
+#+end_src
