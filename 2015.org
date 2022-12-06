@@ -108,3 +108,29 @@ sum([ x * y * z + 2 * (x + y) for x,y,z in map(sorted, boxes)])
       return contains_double and contains_double_pair
   sum(is_nice(x) for x in open(datadir / "5.txt").readlines())
 #+end_src
+* Day 6
+[[https://adventofcode.com/2015/day/6][Probably a Fire Hazard]]
+** Part 1
+#+begin_src jupyter-python
+  lines = open(datadir / "6.txt").readlines()
+  numbers = [[int(x) for x in re.findall("\d+", line)] for line in lines]
+  instructions = [line.replace("turn ", "").split()[0] for line in lines]
+  field = np.zeros([1000, 1000], dtype=int)
+  for (x1, y1, x2, y2), instruction in zip(numbers, instructions):
+      if instruction == "toggle":
+          field[x1:x2 + 1, y1:y2 + 1] ^= 1
+      else:
+          field[x1:x2 + 1, y1:y2 + 1] = int(instruction == "on")
+  field.sum()
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  field = np.zeros([1000, 1000], dtype=int)
+  for (x1, y1, x2, y2), instruction in zip(numbers, instructions):
+      if instruction == "toggle":
+          field[x1:x2 + 1, y1:y2 + 1] += 2
+      else:
+          field[x1:x2 + 1, y1:y2 + 1] += 2 * int(instruction == "on") - 1
+      field[np.where(field < 0)] = 0
+  field.sum()
+#+end_src
