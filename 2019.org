@@ -157,6 +157,7 @@ That gives this plot for the two different wires
 #+end_src
 * Day 5
 [[https://adventofcode.com/2019/day/5][Sunny with a Chance of Asteroids]]
+** Part 1
 #+begin_src jupyter-python
   binops = {1: lambda x, y: x + y,
             2: lambda x, y: x * y,
@@ -199,7 +200,7 @@ That gives this plot for the two different wires
           break
       program, ip = step(program, ip, inputs)
 #+end_src
-
+** Part 2
 #+begin_src jupyter-python
   ip = 0
   program = np.loadtxt(datadir / "5.txt", dtype=int, delimiter=",")
@@ -209,4 +210,33 @@ That gives this plot for the two different wires
       if opcode == 99:
           break
       program, ip = step(program, ip, inputs)
+#+end_src
+* Day 6
+[[https://adventofcode.com/2019/day/6][Universal Orbit Map]]
+** Part 1
+We construct the DAG as a dictionary, where graph[node] corresponds to node.parent. We use a second dictionary to memoize the counts of how far each node is from the COM
+#+begin_src jupyter-python
+  data = open(datadir / "6.txt").readlines()
+  graph = {}
+  for i, line in enumerate(data):
+      parent, child = line.strip().split(")")
+      graph[child] = parent
+  orbit_counts = {"COM": 0}
+  def count_orbits(node):
+      if node not in orbit_counts:
+          orbit_counts[node] = 1 + count_orbits(graph[node])
+      return orbit_counts[node]
+  sum(count_orbits(x) for x in graph)
+#+end_src
+** Part 2
+Moving from orbit A to orbit B can be accomplished by moving to the last common ancestor of each node, and then switching branches. So we get the full ancestry of one of the nodes, and then traverse the other one upwards until we get a match.
+#+begin_src jupyter-python
+  orbit_counts = {"COM": 0}
+  end = count_orbits("YOU")
+  result = 0
+  node = "SAN"
+  while node not in orbit_counts:
+      result += 1
+      node = graph[node]
+  end - orbit_counts[node] + result - 2
 #+end_src
