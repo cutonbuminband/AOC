@@ -15,10 +15,6 @@ Here's a table with my solutions for each year. The links take you to the render
 |[2016](2016.org)| 12/50⭐ |
 |[2015](2015.org)| 12/50⭐ |
 
-# License
-
-Not that it particularly matters but the repository is licensed under the terms of the GNU GPL v 3.0, or at your discretion, any later version.  You can read the license terms in [LICENSE.md](/LICENSE.md)
-
 # TODO
 
 Get syntax highlighting to work on the source code blocks.
