@@ -148,3 +148,68 @@ The numbers involved are small enough that brute force is a viable approach. It'
 
   (board < 10000).sum()
 #+end_src
+
+** Bonus
+#+begin_src jupyter-python
+  import matplotlib.pyplot as plt
+  board = np.zeros([xmax + 1, ymax + 1], dtype=int)
+  def expand_one(cells, idx, to_paint):
+      new_cells = []
+      for neighbor in get_neighbors(cells):
+          if board[neighbor] == 0:
+              if neighbor in to_paint:
+                  del to_paint[neighbor]
+                  board[neighbor] = -1
+              else:
+                  to_paint[neighbor] = idx + 1
+                  new_cells.append(neighbor)
+
+      return new_cells
+
+  def get_neighbors(cells):
+      neighbors = []
+      for x, y in cells:
+          candidates = [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)]
+          neighbors += [(x,y) for x,y in candidates if (0 <= x <= xmax) and (0 <= y <= ymax)]
+      return set(neighbors)
+
+  to_paint = {tuple(x): idx + 1 for idx, x in enumerate(coordinates)}
+  system = [[x] for x in to_paint.keys()]
+  boards = []
+  while to_paint:
+      for key in to_paint:
+          board[key] = to_paint[key]
+      to_paint = {}
+      for idx, cells in enumerate(system):
+          system[idx] = expand_one(cells, idx, to_paint)
+      image = board.astype(float).copy()
+      image[image == 0] = np.nan
+      boards.append(image)
+
+  import matplotlib.animation as animation
+
+  s = 3.0
+  fig = plt.figure(figsize=(s, s*ymax/xmax))
+  l = len(boards)
+  i=0
+  im = plt.imshow(boards[0], animated=True, cmap="inferno")
+  plt.xticks([])
+  plt.yticks([])
+  def updatefig(*args):
+      global i
+      if i < len(boards) - 1:
+          i += 1
+      else:
+          i=0
+      im.set_array(boards[i])
+      return im,
+  a = animation.FuncAnimation(fig, updatefig,  blit=True, frames=len(boards))
+  a.save('graphs/2018-06.gif', fps=30)
+
+#+end_src
+
+That gives this plot of how the different seed locations expand through space
+
+[[https://github.com/cutonbuminband/AOC/blob/main/graphs/2018-06.gif]]
+
+Pretty cool!
