@@ -133,3 +133,19 @@ In your expense report, what is the product of the three entries that sum to 202
 #+begin_src jupyter-python
   (set(range(min(seat_ids), max(seat_ids) + 1)) - set(seat_ids)).pop()
 #+end_src
+
+* Day 6
+[[https://adventofcode.com/2020/day/6][Custom Customs]]
+** Part 1
+#+begin_src jupyter-python
+  data = open(datadir / "6.txt").read()
+  groups = data.split("\n\n")
+  sum(len(set(list(group.replace("\n", "")))) for group in groups)
+#+end_src
+
+** Part 2
+#+begin_src jupyter-python
+  sum(len(functools.reduce(lambda x, y: set(x) & set(y), (group.splitlines())))
+      for group in groups)
+#+end_src
+
