@@ -118,3 +118,33 @@ For added security, yet another system policy has been put in place. Now, a vali
       count += 1
   count
 #+end_src
+* Day 6
+[[https://adventofcode.com/2017/day/6][Memory Reallocation]]
+** Part 1
+#+begin_src jupyter-python
+  data = np.array([0, 5, 10, 0, 11, 14, 13, 4, 11, 8, 8, 7, 1, 4, 12, 11])
+  l = len(data)
+  seen = {}
+  i = 0
+  def step(data):
+      idx, maxval = data.argmax(), data.max()
+      data[idx] = 0
+      delta = np.ones(len(data), dtype=int) * (maxval // l)
+      delta[:maxval % l] += 1
+      data += np.roll(delta, idx + 1)
+      return data
+
+  while tuple(data) not in seen:
+      seen[tuple(data)] = i
+      data = step(data)
+      i += 1
+  i
+
+#+end_src
+I was getting the wrong answer for this for the longest time until I realised I'd left off a "0" at the start of my input when I copied it over.
+
+** Part 2
+This was made trivial by tracking when a given configuration was seen.
+#+begin_src jupyter-python
+  i - seen[(tuple(data))]
+#+end_src
