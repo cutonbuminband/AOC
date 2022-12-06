@@ -10,7 +10,7 @@ Here's a table with my solutions for each year. The links take you to the render
 |[2021](2021.org)| 44/50⭐ |
 |[2020](2020.org)| 10/50⭐ |
 |[2019](2019.org)| 10/50⭐ |
-|[2018](2018.org)| 10/50⭐ |
+|[2018](2018.org)| 12/50⭐ |
 |[2017](2017.org)| 12/50⭐ |
 |[2016](2016.org)| 12/50⭐ |
 |[2015](2015.org)| 12/50⭐ |

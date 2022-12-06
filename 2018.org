@@ -120,3 +120,31 @@ result
 #+begin_src jupyter-python
   min(reduce(s.replace(c, "").replace(c.upper(), "")) for c in string.ascii_lowercase)
 #+end_src
+
+* Day 6
+[[https://adventofcode.com/2018/day/6][Chronal Coordinates]]
+
+** Part 1
+The numbers involved are small enough that brute force is a viable approach. It's ugly, but it works. The question is basically asking for the voronoi diagram of the initial points using the L1 metric, but I'm too slow to see an efficient way of calculating that. The approach would have to be something like determining the boundary line between each pair of points, and then intersecting all of those half planes to get the voronoi cell.
+#+begin_src jupyter-python
+  with open(datadir / '6.txt') as f:
+      data = f.readlines()
+  coordinates = np.array([list(map(int, re.findall("\d+", line))) for line in data])
+  xmax, ymax = coordinates.max(axis=0)
+  board = np.zeros([xmax, ymax], dtype=int)
+  for x, y in itertools.product(range(xmax), range(ymax)):
+      distances = (np.abs(coordinates - np.array([x, y]))).sum(axis=1)
+      values, counts = np.unique(distances, return_counts=True)
+      board[x, y] = distances.argmin() if counts[0] == 1 else -1
+  infinite = functools.reduce(lambda x, y: set(x) | set(y), [board[0], board[:, 0], board[-1], board[:, -1]])
+  max([(board == seed).sum() if seed not in infinite else 0 for seed in range(len(coordinates))])
+#+end_src
+
+** Part 2
+#+begin_src jupyter-python
+  board = np.zeros([xmax, ymax], dtype=int)
+  for x,y in itertools.product(range(xmax), range(ymax)):
+      board[x, y] = (np.abs(coordinates - np.array([x, y]))).sum()
+
+  (board < 10000).sum()
+#+end_src
