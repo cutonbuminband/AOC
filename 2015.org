@@ -134,3 +134,41 @@ sum([ x * y * z + 2 * (x + y) for x,y,z in map(sorted, boxes)])
       field[np.where(field < 0)] = 0
   field.sum()
 #+end_src
+* Day 7
+[[https://adventofcode.com/2015/day/7][Some Assembly Required]]
+** Part 1
+#+begin_src jupyter-python
+  lines = open(datadir / "7.txt").readlines()
+  circuit = {target: source for source, target in map(lambda x: x.strip().split(" -> "), lines)}
+  memo = {}
+  binops = {"AND": lambda x, y: x & y,
+            "OR": lambda x, y: x | y,
+            "LSHIFT": lambda x, y: x << y,
+            "RSHIFT": lambda x, y: x >> y}
+  def evaluate(symbol):
+      try:
+          result = int(symbol)
+          return result
+      except ValueError:
+          pass
+      if symbol not in memo:
+          operation = circuit[symbol].split()
+          if len(operation) == 1:
+              memo[symbol] = evaluate(operation[0])
+          elif len(operation) == 2:
+              memo[symbol] = evaluate(operation[1]) ^ (2**16 - 1)
+          else:
+              arg1, op, arg2 = operation
+              memo[symbol] = binops[op](evaluate(arg1), evaluate(arg2))
+      return memo[symbol]
+  evaluate("a")
+#+end_src
+** Part 2
+We can reset everything by clearing out the memo dict, and setting a wire to a specific value (or expression) can be accomplished by modifying the circuit.
+
+That gives
+#+begin_src jupyter-python
+  circuit["b"] = str(evaluate("a"))
+  memo = {}
+  evaluate("a")
+#+end_src

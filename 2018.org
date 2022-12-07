@@ -150,6 +150,7 @@ The numbers involved are small enough that brute force is a viable approach. It'
 #+end_src
 
 ** Bonus
+I haven't figured out the cleanest way of solving part 1, but here's an approach that's slightly better than brute force. We can basically flood fill the grid, starting with the seed locations given in the input, and then expanding one step at a time. That way we end up considering the effect of at most four (and usually only one or two) seeds on each location, and we avoid having to calculate the distance from the point to every single seed.
 #+begin_src jupyter-python
   import matplotlib.pyplot as plt
   board = np.zeros([xmax + 1, ymax + 1], dtype=int)
@@ -172,7 +173,10 @@ The numbers involved are small enough that brute force is a viable approach. It'
           candidates = [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)]
           neighbors += [(x,y) for x,y in candidates if (0 <= x <= xmax) and (0 <= y <= ymax)]
       return set(neighbors)
+#+end_src
+We can animate the process of expanding each seed
 
+#+begin_src jupyter-python
   to_paint = {tuple(x): idx + 1 for idx, x in enumerate(coordinates)}
   system = [[x] for x in to_paint.keys()]
   boards = []
@@ -205,11 +209,63 @@ The numbers involved are small enough that brute force is a viable approach. It'
       return im,
   a = animation.FuncAnimation(fig, updatefig,  blit=True, frames=len(boards))
   a.save('graphs/2018-06.gif', fps=30)
-
 #+end_src
 
-That gives this plot of how the different seed locations expand through space
+That gives this pretty cool plot
 
 [[https://github.com/cutonbuminband/AOC/blob/main/graphs/2018-06.gif]]
 
-Pretty cool!
+* Day 7
+[[https://adventofcode.com/2018/day/7][The Sum of Its Parts]]
+** Part 1
+#+begin_src jupyter-python
+  constraints = {}
+  lines = open(datadir / "7.txt").readlines()
+  for tokens in map(str.split, lines):
+      parent, child = tokens[1], tokens[-3]
+      if parent not in constraints:
+          constraints[parent] = ['', '']
+      if child not in constraints:
+          constraints[child] = ['', '']
+      constraints[parent][0] += child
+      constraints[child][1] += parent
+  executed = ''
+  available = []
+
+  def pop_node(node, ordering):
+      for child in ordering[node][0]:
+          idx = ordering[child][1].index(node)
+          ordering[child] = [ordering[child][0], ordering[child][1][:idx] + ordering[child][1][idx + 1:]]
+      del ordering[node]      
+
+  part1 = constraints.copy()
+  while part1:
+      available = sorted(set(available + [key for key in part1 if not part1[key][1]]))
+      current = available.pop(0)
+      executed += current
+      pop_node(current, part1)
+
+  executed
+
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  active = []
+  n_workers = 5
+  part2 = constraints.copy()
+  time = -1
+  while part2:
+      new_active = []
+      for key, count in active:
+          if count:
+              new_active += [[key, count - 1]]
+          else:
+              pop_node(key, part2)
+      active = new_active
+      available = sorted(set(key for key in part2 if not part2[key][1]) - set(x[0] for x in active))
+      while available and len(active) < n_workers:
+          key = available.pop(0)
+          active += [[key, ord(key) - ord('A') + 60]]
+      time += 1
+  time
+#+end_src

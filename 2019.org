@@ -178,10 +178,12 @@ That gives this plot for the two different wires
           program[program[ip + 3]] = binops[instruction](*params[:-1])
       elif instruction == 3:
           if inputs is None:
-              val = int(input("Please input the parameter\n"))
+              program[program[ip + 1]] = int(input("Please input the parameter\n"))
+          elif inputs:
+              program[program[ip + 1]] = inputs.pop(0)
           else:
-              val = inputs.pop(0)
-          program[program[ip + 1]] = val
+              ip -= l
+
       elif instruction == 4:
           if outputs is None:
               print("Program output: {}".format(params[0]))
@@ -200,6 +202,7 @@ That gives this plot for the two different wires
           break
       program, ip = step(program, ip, inputs)
 #+end_src
+
 ** Part 2
 #+begin_src jupyter-python
   ip = 0
@@ -239,4 +242,49 @@ Moving from orbit A to orbit B can be accomplished by moving to the last common 
       result += 1
       node = graph[node]
   end - orbit_counts[node] + result - 2
+#+end_src
+* Day 7
+[[https://adventofcode.com/2019/day/7][Amplification Circuit]]
+** Part 1
+#+begin_src jupyter-python
+  l = list(map(int, open(datadir / "7.txt").readline().split(',')))
+  input_sequences = itertools.permutations(range(5))
+  maxval = 0
+  for input_sequence in input_sequences:
+      current = list(input_sequence)
+      outputs = [0]
+      while current:
+          inputs = [current.pop(0), outputs.pop(0)]
+          p = l.copy()
+          ip = 0
+          op = p[ip]
+          while op % 100 != 99:
+              p, ip = step(p, ip, inputs, outputs)
+              op = p[ip]
+      if outputs[0] > maxval:
+          maxval = outputs[0]
+  maxval
+
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  input_sequences = itertools.permutations(range(5, 10))
+  maxval = 0
+  for seq in input_sequences:
+      inputs = [[seq[0], 0], [seq[1]], [seq[2]], [seq[3]], [seq[4]]]
+      programs = [[l.copy(), 0], [l.copy(), 0], [l.copy(), 0], [l.copy(), 0], [l.copy(), 0]]
+      done = False
+      while not done:
+          done = True
+          for i in range(5):
+              p, ip = programs[i]
+              op = p[ip]
+              if op % 100 != 99:
+                  p, ip = step(p, ip,
+                               inputs=inputs[i], outputs=inputs[(i + 1) % 5])
+                  programs[i] = [p, ip]
+                  done = False
+      if inputs[0][0] > maxval:
+          maxval = inputs[0][0]
+  maxval
 #+end_src

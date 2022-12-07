@@ -9,6 +9,8 @@
   from pathlib import Path
   import functools
   import itertools
+  import collections
+  import re
   import more_itertools
   datadir = Path("data/2017")
 #+end_src
@@ -147,4 +149,41 @@ I was getting the wrong answer for this for the longest time until I realised I'
 This was made trivial by tracking when a given configuration was seen.
 #+begin_src jupyter-python
   i - seen[(tuple(data))]
+#+end_src
+
+* Day 7
+[[https://adventofcode.com/2017/day/7][Recursive Circus]]
+** Part 1
+#+begin_src jupyter-python
+  data = map(str.strip, open(datadir / "7.txt").readlines())
+  tree = {}
+  for line in data:
+      name = line.split(" ")[0]
+      children  = line.split(" -> ")[1].split(", ") if " -> " in line else []
+      weight = int(re.findall("\d+", line)[0])
+      tree[name] = {"weight": weight, "children": children}
+  parents = {}
+  for node in tree:
+      for child in tree[node]["children"]:
+          parents[child] = node
+  node = (set(tree.keys()) - set(parents.keys())).pop()
+  node
+#+end_src
+
+#+begin_src jupyter-python
+  def weight(node):
+    return tree[node]["weight"] + sum(map(weight, tree[node]["children"]))
+
+  def is_balanced(node):
+    return (not tree[node]["children"] or
+            len(set(map(weight, tree[node]["children"]))) == 1)
+
+  while not is_balanced(node):
+    weights = [weight(x) for x in tree[node]["children"]]
+    counts = collections.Counter(weights)
+    wrong_weight = min(counts, key=counts.get)
+    node = tree[node]["children"][weights.index(wrong_weight)]
+
+  delta = max(counts, key=counts.get) - wrong_weight
+  tree[node]["weight"] + delta
 #+end_src
