@@ -3,13 +3,14 @@
 
 * Imports
 #+begin_src jupyter-python
-import pandas as pd
-import numpy as np
-from collections import defaultdict
-import itertools
-from pathlib import Path
-import functools
-datadir = Path("data/2020/")
+  import pandas as pd
+  import numpy as np
+  from collections import defaultdict
+  import itertools
+  from pathlib import Path
+  import functools
+  import re
+  datadir = Path("data/2020/")
 #+end_src
 
 * Day 1:
@@ -149,3 +150,40 @@ In your expense report, what is the product of the three entries that sum to 202
       for group in groups)
 #+end_src
 
+* Day 7
+[[https://adventofcode.com/2020/day/7][Handy Haversacks]]
+
+** Part 1
+Nothing super groundbreaking for part one. I thought of using a regex to parse the input, but splitting on commas and then into words works just fine.
+#+begin_src jupyter-python
+  data = open(datadir / "7.txt").readlines()
+  tree = {}
+  for line in data:
+      bag, contents = line.strip().split(" bags contain ")
+      if "no other" in contents:
+          contents = {}
+      else:
+          elements = contents.split(", ")
+          contents = {' '.join(words[1:-1]): int(words[0]) for words in map(str.split, elements)}
+      tree[bag] = contents
+
+  memo_contains = {}
+  def contains_gold(key):
+      if key not in memo_contains:
+          memo_contains[key] = ("shiny gold" in tree[key] or
+                                any(contains_gold(child) for child in tree[key]))
+      return memo_contains[key]
+
+  sum(contains_gold(key) for key in tree)
+#+end_src
+
+** Part 2
+The key thing to remember is to include the bag itself, as well as the bags it contains, when calculating the total. That's what the "+1" is for in the sum
+#+begin_src jupyter-python
+  memo_counts = {}
+  def count_bags(bag):
+      if bag not in memo_counts:
+          memo_counts[bag] = sum(tree[bag][key] * (count_bags(key) + 1) for key in tree[bag])
+      return memo_counts[bag]
+  count_bags("shiny gold")
+#+end_src
