@@ -223,3 +223,19 @@ There are a couple of gotchas:
       scenic_scores.append(np.rot90(scenic_score(np.rot90(data, i)), 4-i))
   np.product(scenic_scores, axis = 0).max()
 #+end_src
+
+** Bonus
+The grid here invites plotting. One thing we can plot is the shortest tree which would be visible at each location
+#+begin_src jupyter-python
+  import matplotlib.pyplot as plt
+  plt.imshow(mask + 1)
+  plt.xticks([]), plt.yticks([])
+  plt.colorbar()
+  plt.title('The shortest visible tree at each location')
+  plt.savefig('graphs/2022-08.png', bbox_inches='tight')
+#+end_src
+That gives the following plot
+
+[[graphs/2022-08.png]]
+
+We can see how at the edges of the forest shorter trees are visible, but towards the center they've all been shadowed by taller trees.
