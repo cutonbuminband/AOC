@@ -244,31 +244,24 @@ We can see how at the edges of the forest shorter trees are visible, but towards
 [[https://adventofcode.com/2022/day/9][Rope Bridge]]
 ** Part 1
 #+begin_src jupyter-python
-  base = {0 : 0, 1: 0, 1 + 1j: 0, 2: 1, 2 + 1j: 1 + 1j, 1 + 2j: 1 + 1j, 2+2j: 1 +1j}
-  deltas = {key * 1j**k: value * 1j**k
-            for key, value in base.items() for k in range(4)}
+  base = {2: 1, 2 + 1j: 1 + 1j, 2 + 2j: 1 + 1j, 1 + 2j: 1 + 1j}
+  deltas = {k * 1j**i: v * 1j**i for k, v in base.items() for i in range(4)}
   directions = {"R" : 1, "L": -1, "U": 1j, "D": -1j}
   instructions = [x.split() for x in open(datadir / "9.txt").readlines()]
-  head = 0
-  tail = 0
-  seen = []
-  for direction, count in instructions:
-      for i in range(int(count)):
-          head += directions[direction]
-          tail += deltas[head - tail]
-          seen.append(tail)
-  len(set(seen))
+  def tail_moves(rope_length):
+      seen = []
+      rope = [0] * rope_length
+      for direction, count in instructions:
+          for _ in range(int(count)):
+              rope[0] += directions[direction]
+              for i in range(1, len(rope)):
+                  rope[i] += deltas[rope[i - 1] - rope[i]] if abs(rope[i - 1] - rope[i]) >= 2 else 0
+              seen.append(rope[-1])
+      return seen
+  len(set(tail_moves(2)))
 #+end_src
+
 ** Part 2
 #+begin_src jupyter-python
-  rope = [0] * 10
-  seen = []
-  for direction, count in instructions:
-      for i in range(int(count)):
-          rope[0] += directions[direction]
-          for idx in range(1, len(rope)):
-              rope[idx] += deltas[rope[idx - 1] - rope[idx]]
-          seen.append(rope[-1])
-  len(set(seen))
-
+  len(set(tail_moves(10)))
 #+end_src
