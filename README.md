@@ -6,7 +6,7 @@ Here's a table with my solutions for each year. The links take you to the render
 
 |       Year       |   Stars |
 |:----------------:|--------:|
-| [2022](2022.org) | 16/50⭐ |
+| [2022](2022.org) | 18/50⭐ |
 | [2021](2021.org) | 44/50⭐ |
 | [2020](2020.org) | 14/50⭐ |
 | [2019](2019.org) | 14/50⭐ |
