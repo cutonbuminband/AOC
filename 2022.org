@@ -272,22 +272,20 @@ We can see how at the edges of the forest shorter trees are visible, but towards
 ** Part 1
 #+begin_src jupyter-python
   instructions = open(datadir / '10.txt').readlines()
-  def run(f, result, x=1, cycle=1):
-      for instruction in instructions:
-          result += f(x, cycle)
-          cycle += 1
-          if "noop" not in instruction:
-              result += f(x, cycle)
-              cycle += 1
-              x += int(instruction.split()[1])
-      return result
+  deltas = [int(element) if element[-1].isdigit() else 0
+            for line in instructions for element in line.strip().split()]
+  def run(f, result):
+        for cycle, x in enumerate(np.cumsum([1] + deltas)):
+            result += f(x, cycle + 1)
+        return result
   run(lambda x, y: x * y if y % 40 == 20 else 0, 0)
 #+end_src
 
 ** Part 2
 #+begin_src jupyter-python
   def draw_sprite(sprite_position, cycle):
-      return '#' if abs(sprite_position - ((cycle - 1) % 40)) <= 1 else '.'
+      return '█' if abs(sprite_position - ((cycle - 1) % 40)) <= 1 else ' '
 
   print(*[run(draw_sprite, '')[40 * i:40*(i + 1)] for i in range(6)], sep='\n')
 #+end_src
+
