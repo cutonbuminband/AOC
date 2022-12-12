@@ -340,7 +340,7 @@ We can see how at the edges of the forest shorter trees are visible, but towards
   source = tuple(x[0] for x in np.where(elevations == ord('S') - ord('a')))
   target = tuple(x[0] for x in np.where(elevations == ord('E') - ord('a')))
   elevations[source] = 0
-  elevations[target] = 26
+  elevations[target] = 25
 
   xmax, ymax = elevations.shape
   def grid_neighbors(x, y):
