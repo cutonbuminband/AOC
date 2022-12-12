@@ -350,17 +350,17 @@ We can see how at the edges of the forest shorter trees are visible, but towards
       return [n for n in grid_neighbors(x ,y) if elevations[n] - elevations[x, y] <= 1]
 
   def navigate(source, neighbor_func, stop_condition):
-      active = collections.deque([(source, 0)])
+      active = collections.deque([(0, source)])
       seen = set()
       while active:
-          current, steps = active.popleft()
+          steps, current = active.popleft()
           if stop_condition(current):
               return steps
           if current in seen:
               continue
           seen.add(current)
           for neighbor in neighbor_func(*current):
-              active.append((neighbor, steps + 1))
+              active.append((steps + 1, neighbor))
       return np.inf
 
   navigate(source, find_neighbors, lambda x: x == target)
