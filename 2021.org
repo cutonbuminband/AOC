@@ -1271,5 +1271,35 @@ After all that, luckily part 2 is trivial
   min(int(x[0]) for x in states)
 
 #+end_src
+* Day 25
+🎄
+[[https://adventofcode.com/2021/day/25][Sea Cucumber]]
+#+begin_src jupyter-python
+  lookup = {".": 0, ">": 1, "v": -1}
+  reverse = {v: k for k, v in lookup.items()}
+  data = open(datadir / "25.txt").readlines()
+  array = np.array([[lookup[char] for char in line.strip()] for line in data], dtype=int)
+  def move_one(array, direction=1):
+      critter = 2 * direction - 1
+      critters = np.where(array == critter)
 
+      filtered = np.roll(array, -1, axis=direction)[critters] == 0
+      old_positions = (critters[0][filtered], critters[1][filtered])
+      new_positions = [x.copy() for x in old_positions]
+      new_positions[direction] = (new_positions[direction] + 1) % array.shape[direction]
+      array[old_positions] = 0
+      array[tuple(new_positions)] = critter
+      return not filtered.any()
 
+  def to_string(array):
+      return '\n'.join([''.join([reverse[value] for value in line]) for line in array])
+
+  i = 0
+  while True:
+      m1 = move_one(array, 1)
+      m2 = move_one(array, 0)
+      i += 1
+      if m1 and m2:
+          break
+  i
+#+end_src
