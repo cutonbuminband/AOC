@@ -1231,3 +1231,45 @@ And then for part 2
   d = tuple(letter_to_value[x] for x in "AAAABBBBCCCCDDDD       ")
   navigate(s, d)
 #+end_src
+* Day 24
+[[https://adventofcode.com/2021/day/24][Arithmetic Logic Unit]]
+** Part 1
+Rarely in AOC have I had a worse ratio of thinking employed to code written - this code looks way simpler than for day 23, but getting there was a real challenge.
+
+I think this is the intended approach, since it uses the realisation that if we multiply z by 26 6 times, then to get back below zero, we need to divide 7 times. So each time there's a divide, the value of w is fixed.
+#+begin_src jupyter-python
+  data = open(datadir / "24.txt").read()
+  chunks = [[y.split() for y in x.split("\n") if y] for x in data.split("inp w\n")][1:]
+
+  indices = [3, 4, 14]
+  table = [[chunk[index][2] for index in indices] for chunk in chunks]
+  triples = [[int(n) for n in row] for row in table]
+
+  def run(triple, state, w):
+      a, b, c = triple
+      y, z = state
+      if w == z % 26 + b:
+          return (0, z // a)
+      return (w + c, (z // a) * 26 + w + c)
+
+  states = [['', (0, 0)]]
+  for triple in triples:
+      new_states = []
+      for prefix, state in states:
+          if triple[0] == 26:
+              w = state[-1] % 26 + triple[1]
+              ws = [w] if 1 <= w < 10 else []
+          else:
+              ws = range(1, 10)
+          new_states += [(prefix + str(w), run(triple, state, w)) for w in ws]
+      states = new_states
+  max(int(x[0]) for x in states)
+#+end_src
+** Part 2
+After all that, luckily part 2 is trivial
+#+begin_src jupyter-python
+  min(int(x[0]) for x in states)
+
+#+end_src
+
+
