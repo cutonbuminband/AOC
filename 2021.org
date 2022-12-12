@@ -1265,6 +1265,9 @@ I think this is the intended approach, since it uses the realisation that if we 
   max(x[0] for x in zs)
 #+end_src
 
+We can be slightly smarter with pen and paper. The test is always z % 26 + something, which means that we always get out w_n + c_n for some n, since (z // a) * 26 % 26 = 0. Keeping track of the order in which the a = 1 and a = 26 instructions arrive, we can match each of the 14 instructions to exactly one other, giving a series of relationships like w_1 = w_14 + 8. Then it's just a question of forcing the early digit of each pair to the highest possible allowed value.
+
+
 ** Part 2
 After all that, luckily part 2 is trivial
 #+begin_src jupyter-python
