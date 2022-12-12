@@ -1132,3 +1132,102 @@ The approach we'll take is to process the list of instructions sequentially, cal
   reboot(commands)
 
 #+end_src
+
+* Day 23
+** Part 1
+This is definitely not pretty, and takes a bunch of time to run as well, but it works. This is a pathfinding problem: Given some initial state, our goal is to move to the final state with as small a cost as possible.
+
+The tricky thing is to find the neighboring positions that can be reached from a given position with a valid move. There are only two types of moves
+
+- Room to hallway
+- Hallway to room
+
+The third type (room straight to final room) is just the composition of the above two moves.
+
+Once we have a method for finding neighbors, actually running the pathfinding is comparatively simple. This could probably be improved by including a heuristic for how far away a given state is from the finish, but getting finding and calculating a suitable heuristic is fiddly.
+#+begin_src jupyter-python
+  value_to_letter = {0: " ", 1: "A", 10: "B", 100: "C", 1000: "D"}
+  letter_to_value = {v: k for k, v in value_to_letter.items()}
+  number_to_room = {10**i: i for i in range(4)}
+  room_to_number = {v: k for k, v in number_to_room.items()}
+
+  def find_blockers(room, n):
+      top_row = list(range(4*n, 4 * n + 7))
+      distances = [1, 2, 2, 2, 2, 2, 1]
+      left = top_row[:room + 2][::-1], np.cumsum(distances[:room + 2][::-1])
+      right = top_row[room + 2:], np.cumsum(distances[room + 2:])
+      return left, right
+
+  def find_moves(position, n=2):
+        position = np.array(position)
+        def is_endgame(room):
+              return set(position[n * room: n * (room + 1)]) <= set([0, room_to_number[room]])
+
+        possible_moves = []
+        for i in [idx + 4*n for idx, val in enumerate(position[4*n:]) if val != 0]:
+
+              room = number_to_room[position[i]]
+              if not is_endgame(room):
+                    continue
+
+              left, right = find_blockers(room, n)
+              moves, costs = left if i in left[0] else right
+
+              index = moves.index(i)
+              if (position[moves[:index]] != 0).any():
+                    continue
+
+              offset = np.argwhere(position[n * room: n*(room + 1)] == 0)[0][0]
+              new_position = n * room + offset
+              cost = costs[index] + n - 1 - offset
+              possible_moves.append((i, new_position, cost))
+        for room in range(4):
+              target = room * n
+              if is_endgame(room):
+                    continue
+              offset = np.argwhere(position[target: target + n])[-1][-1]
+              moves, costs = [], []
+              for block, steps in find_blockers(room, n):
+                    free = np.maximum.accumulate(position[block]) == 0
+                    if not free.any():
+                          continue
+                    n_free = np.argwhere(free)[-1][-1] + 1
+                    moves += block[:n_free]
+                    costs += list(steps[:n_free] + n - offset - 1)
+              possible_moves += [(target + offset, move, cost) for move, cost in zip(moves, costs)]
+        return possible_moves
+
+  def navigate(source, destination):
+      n = (len(source) - 7) // 4
+      q = queue.PriorityQueue()
+      q.put((0, source))
+      seen = set()
+      while q:
+          cost, position = q.get()
+          if position == destination:
+              return cost
+          if position in seen:
+              continue
+          seen.add(tuple(position))
+          for source_index, target_index, distance in find_moves(position, n):
+              new_position = list(position)
+              value = position[source_index]
+              new_position[source_index] = 0
+              new_position[target_index] = value
+              q.put((cost + value * distance, tuple(new_position)))
+      return np.inf
+
+#+end_src
+With all of that out of the way, actually solving the puzzle is just a question of calling the navigate function. First for part 1
+#+begin_src jupyter-python
+  source = tuple(letter_to_value[x] for x in "CDCABABD       ")
+  destination = tuple(letter_to_value[x] for x in 'AABBCCDD       ')
+  navigate(source, destination)
+#+end_src
+** Part 2
+And then for part 2
+#+begin_src jupyter-python
+  s = tuple(letter_to_value[x] for x in "CDDDCBCABABABCAD       ")
+  d = tuple(letter_to_value[x] for x in "AAAABBBBCCCCDDDD       ")
+  navigate(s, d)
+#+end_src
