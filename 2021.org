@@ -3,13 +3,14 @@
 
 * Imports
 #+begin_src jupyter-python
-import pandas as pd
-import numpy as np
-from collections import defaultdict
-from pathlib import Path
-import functools
-import itertools
-datadir = Path("data/2021")
+  import pandas as pd
+  import numpy as np
+  from collections import defaultdict
+  from pathlib import Path
+  import functools
+  import itertools
+  import queue
+  datadir = Path("data/2021")
 #+end_src
 
 * Day 1
@@ -610,55 +611,41 @@ A rule like CH -> B should be interpreted as state "CH" produces states "CB" and
 [[https://adventofcode.com/2021/day/15][Chiton]]
 
 ** Part 1
-This is a shortest path search, which I really don't remember how to do. Here goes nothing
+This is a shortest path search, where we'll use a priority queue to store the items and their cost. Reimplementing Dijkstra's algorithm then gives
 #+begin_src jupyter-python
-  data = pd.read_fwf(datadir / '15.txt', widths=[1]*100, header=None).to_numpy(dtype=float)
-  data = np.pad(data, 1, constant_values = np.inf)
-  auxiliary = np.zeros(data.shape)
-  start = (1, 1)
-  def get_neighbors(x, y):
-      coords = [(x-1, y), (x + 1, y), (x, y - 1), (x, y + 1)]
-      return[[data[coord], coord] for coord in coords]
-  neighbors = sorted(get_neighbors(*start), key=lambda x: x[0])
-  while neighbors:
-      cost, (x, y) = neighbors.pop(0)
-      if auxiliary[x, y]:
-          continue
-      auxiliary[x, y] = cost
-      new_neighbors = [[cell[0] + cost, cell[1]] for cell in get_neighbors(x, y)]
-      neighbors = sorted(neighbors + new_neighbors, key = lambda x: x[0])
-      neighbors = [x for x in neighbors if x[0] < np.inf]
-      if x == -2 and y == -2:
-          break
-  auxiliary[-2, -2]
+  data = pd.read_fwf(datadir / '15.txt', widths=[1]*100, header=None).to_numpy(dtype=int)
+  start = (0, 0)
+  def get_neighbors(data, x, y):
+      xmax, ymax = data.shape
+      candidates = [(x-1, y), (x + 1, y), (x, y - 1), (x, y + 1)]
+      return[[data[c], c] for c in candidates if 0 <= c[0] < xmax and 0 <= c[1] < ymax]
+
+  def navigate(data, start, end):
+      q = queue.PriorityQueue()
+      q.put((0, start))
+      seen = set()
+      while q:
+          cost, coords = q.get()
+          if coords in seen:
+              continue
+          seen.add(coords)
+          if coords == end:
+              return cost
+          for neighbor in [(n[0] + cost, n[1]) for n in get_neighbors(data, *coords)]:
+              q.put(neighbor)
+      return np.inf
+  navigate(data, start, (99, 99))
 #+end_src
 
 ** Part 2
-This worked, but is almost too slow for part 2, which runs in about 60 s. Oh well
 #+begin_src jupyter-python
-  data = pd.read_fwf(datadir / '15.txt', widths=[1]*100, header=None).to_numpy(dtype=float)
   x, y = data.shape
-  arr = np.zeros([5  * x, 5 * y])
+  arr = np.zeros([5  * x, 5 * y], dtype=int)
   for i in range(5):
       for j in range(5):
           arr[i * x: (i + 1) * x, j * y : (j + 1) * y] = data + i + j
-  def get_neighbors(x, y):
-      coords = [(x-1, y), (x + 1, y), (x, y - 1), (x, y + 1)]
-      return[[arr[coord], coord] for coord in coords]
   arr = ((arr - 1) % 9) + 1
-  arr = np.pad(arr, 1, constant_values = np.inf)
-  start = (1, 1)
-  neighbors = sorted(get_neighbors(*start), key=lambda x: x[0])
-  auxiliary = np.zeros(arr.shape)
-  while neighbors:
-      cost, (x, y) = neighbors.pop(0)
-      if auxiliary[x, y]:
-          continue
-      auxiliary[x, y] = cost
-      new_neighbors = [[cell[0] + cost, cell[1]] for cell in get_neighbors(x, y)]
-      neighbors = sorted(neighbors + new_neighbors, key = lambda x: x[0])
-      neighbors = [x for x in neighbors if x[0] < np.inf]
-  auxiliary[-2, -2]
+  navigate(arr, start, (499, 499))
 #+end_src
 
 * Day 16
