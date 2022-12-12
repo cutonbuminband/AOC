@@ -289,3 +289,43 @@ We can see how at the edges of the forest shorter trees are visible, but towards
   print(*[run(draw_sprite, '')[40 * i:40*(i + 1)] for i in range(6)], sep='\n')
 #+end_src
 
+* Day 11
+[[https://adventofcode.com/2022/day/11][Monkey in the Middle]]
+** Part 1
+#+begin_src jupyter-python
+  data = open(datadir / "11.txt").read()
+  monkeys = data.split('\n\n')
+
+  class Monkey:
+      def __init__(self, update, test):
+          self.update = update
+          self.factor = test[0]
+          self.target = lambda x: test[1] if x % self.factor == 0 else test[2]
+  monkeys = []
+  initial_items = []
+  for monkey in data.split('\n\n'):
+        lines = [line for line in monkey.split('\n') if line]
+        update = eval("lambda old: " + lines[2].split(" = ")[1])
+        digits = [[int(x) for x in re.findall("\d+", line)] for line in lines]
+        monkeys.append(Monkey(update, [x[0] for x in digits[-3:]]))
+        initial_items.append(digits[1])
+
+  def run(rounds, function):
+      examined = [0] * len(monkeys)
+      for monkey, items in zip(monkeys, initial_items):
+          monkey.items = items.copy()
+      for _ in range(rounds):
+          for idx, monkey in enumerate(monkeys):
+              examined[idx] += len(monkey.items)
+              for i in range(len(monkey.items)):
+                  item = function((monkey.update(monkey.items.pop())))
+                  monkeys[monkey.target(item)].items.append(item)
+      return examined
+  np.product(sorted(run(20, lambda x: x // 3))[-2:])
+#+end_src
+
+** Part 2
+#+begin_src jupyter-python
+  common_multiple = np.product([x.factor for x in monkeys])
+  np.product(sorted(run(10000, lambda x: x % common_multiple))[-2:])
+#+end_src
