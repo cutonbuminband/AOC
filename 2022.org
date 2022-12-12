@@ -10,6 +10,7 @@
   import functools
   import more_itertools
   import re
+  import collections
   datadir = Path("data/2022")
 #+end_src
 
@@ -328,4 +329,47 @@ We can see how at the edges of the forest shorter trees are visible, but towards
 #+begin_src jupyter-python
   common_multiple = np.product([x.factor for x in monkeys])
   np.product(sorted(run(10000, lambda x: x % common_multiple))[-2:])
+#+end_src
+
+* Day 12
+[[https://adventofcode.com/2022/day/12][Hill Climbing Algorithm]]
+** Part 1
+#+begin_src jupyter-python
+  data = [list(x.strip()) for x in open(datadir / "12.txt").readlines()]
+  elevations = np.array([[ord(char) - ord('a') for char in line] for line in data])
+  source = tuple(x[0] for x in np.where(elevations == ord('S') - ord('a')))
+  target = tuple(x[0] for x in np.where(elevations == ord('E') - ord('a')))
+  elevations[source] = 0
+  elevations[target] = 26
+
+  xmax, ymax = elevations.shape
+  def grid_neighbors(x, y):
+      candidates = [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)]
+      return [c for c in candidates if 0 <= c[0] < xmax and 0 <= c[1] < ymax]
+  def find_neighbors(x, y):
+      return [n for n in grid_neighbors(x ,y) if elevations[n] - elevations[x, y] <= 1]
+
+  def navigate(source, neighbor_func, stop_condition):
+      active = collections.deque([(source, 0)])
+      seen = set()
+      while active:
+          current, steps = active.popleft()
+          if stop_condition(current):
+              return steps
+          if current in seen:
+              continue
+          seen.add(current)
+          for neighbor in neighbor_func(*current):
+              active.append((neighbor, steps + 1))
+      return np.inf
+
+  navigate(source, find_neighbors, lambda x: x == target)
+#+end_src
+
+** Part 2
+#+begin_src jupyter-python
+  def reversed_neighbors(x, y):
+      return [n for n in grid_neighbors(x, y) if elevations[x, y] - elevations[n] <= 1]
+
+  navigate(target, reversed_neighbors, lambda x: elevations[x] == 0)
 #+end_src
