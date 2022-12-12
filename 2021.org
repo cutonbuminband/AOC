@@ -1245,32 +1245,33 @@ I think this is the intended approach, since it uses the realisation that if we 
   table = [[chunk[index][2] for index in indices] for chunk in chunks]
   triples = [[int(n) for n in row] for row in table]
 
-  def run(triple, state, w):
+  def run(triple, z, w):
       a, b, c = triple
-      y, z = state
       if w == z % 26 + b:
-          return (0, z // a)
-      return (w + c, (z // a) * 26 + w + c)
+          return z // a
+      return (z // a) * 26 + w + c
 
-  states = [['', (0, 0)]]
+  zs = [[0, 0]]
   for triple in triples:
-      new_states = []
-      for prefix, state in states:
+      new_zs = []
+      for prefix, z in zs:
           if triple[0] == 26:
-              w = state[-1] % 26 + triple[1]
+              w = z % 26 + triple[1]
               ws = [w] if 1 <= w < 10 else []
           else:
               ws = range(1, 10)
-          new_states += [(prefix + str(w), run(triple, state, w)) for w in ws]
-      states = new_states
-  max(int(x[0]) for x in states)
+          new_zs += [(10 * prefix + w, run(triple, z, w)) for w in ws]
+      zs = new_zs
+  max(x[0] for x in zs)
 #+end_src
+
 ** Part 2
 After all that, luckily part 2 is trivial
 #+begin_src jupyter-python
-  min(int(x[0]) for x in states)
+  min(int(x[0]) for x in zs)
 
 #+end_src
+
 * Day 25
 🎄
 [[https://adventofcode.com/2021/day/25][Sea Cucumber]]
