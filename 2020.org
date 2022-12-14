@@ -187,3 +187,38 @@ The key thing to remember is to include the bag itself, as well as the bags it c
       return memo_counts[bag]
   count_bags("shiny gold")
 #+end_src
+
+* Day 8
+[[https://adventofcode.com/2020/day/8][Handheld Halting]]
+** Part 1
+#+begin_src jupyter-python
+  data = [x.strip().split() for x in open(datadir / "8.txt").readlines()]
+  data = [(x[0], int(x[1])) for x in data]
+  def terminal_run(program):
+      ip, accumulator = 0, 0
+      seen = {}
+      while ip != len(program):
+          if ip in seen:
+              return False, accumulator
+          seen[ip] = 1
+          instruction, operand = program[ip]
+          ip += 1
+          if instruction == "jmp":
+              ip += operand - 1
+          if instruction == "acc":
+              accumulator += operand
+      return True, accumulator
+
+  terminal_run(data)[1]
+
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  instruction_map = {"acc": "acc", "jmp": "nop", "nop": "jmp"}
+  for idx, instruction in enumerate(data):
+      new_instruction = (instruction_map[instruction[0]], instruction[1])
+      status, value = terminal_run(data[:idx] + [new_instruction] + data[idx + 1:])
+      if status:
+          break
+  value
+#+end_src

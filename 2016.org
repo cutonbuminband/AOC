@@ -204,4 +204,27 @@ Part two is more regex wrangling, except the patterns can overlap now. We could 
   sum(supports_ssl(line) for line in data)
 
 #+end_src
-
+* Day 8
+[[https://adventofcode.com/2016/day/8][Two-Factor Authentication]]
+** Part 1
+#+begin_src jupyter-python
+  array = np.zeros((6, 50), dtype=int)
+  lines = [x.strip().split() for x in open(datadir / '8.txt').readlines()]
+  for instructions in lines:
+      if instructions[0] == 'rect':
+          row, col = [int(a) for a in instructions[1].split("x")]
+          array[:col, :row] = 1
+          continue
+      row = int(instructions[2].split("=")[1])
+      amount = int(instructions[-1])
+      if instructions[1] == "column":
+          array = array.T
+      array[row] = np.roll(array[row], amount)
+      if instructions[1] == "column":
+          array = array.T
+  array.sum()
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  [[''.join('█' if char else ' ' for char in line)] for line in array]
+#+end_src

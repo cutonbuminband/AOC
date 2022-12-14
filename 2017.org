@@ -169,7 +169,7 @@ This was made trivial by tracking when a given configuration was seen.
   node = (set(tree.keys()) - set(parents.keys())).pop()
   node
 #+end_src
-
+** Part 2
 #+begin_src jupyter-python
   def weight(node):
     return tree[node]["weight"] + sum(map(weight, tree[node]["children"]))
@@ -186,4 +186,30 @@ This was made trivial by tracking when a given configuration was seen.
 
   delta = max(counts, key=counts.get) - wrong_weight
   tree[node]["weight"] + delta
+#+end_src
+* Day 8
+[[https://adventofcode.com/2017/day/8][I Heard You Like Registers]]
+** Part 1
+#+begin_src jupyter-python
+  import operator as op
+  registers = defaultdict(int)
+  instructions = [x.strip().split() for x in open(datadir / "8.txt").readlines()]
+  ops = {"<": op.lt, "<=": op.le, "==": op.eq, ">=": op.ge, ">": op.gt, "!=": op.ne}
+  signs = {"dec": -1, "inc": 1}
+  for target, sign, inc_amount, _, comparator, comparison, cmp_value in instructions:
+      if ops[comparison](registers[comparator], int(cmp_value)):
+          registers[target] += signs[sign] * int(inc_amount)
+  max(registers.values())
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  maxval = 0
+  registers = defaultdict(int)
+  for target, sign, inc_amount, _, comparator, comparison, cmp_value in instructions:
+      if ops[comparison](registers[comparator], int(cmp_value)):
+          registers[target] += signs[sign] * int(inc_amount)
+      current_max = max(registers.values())
+      if current_max > maxval:
+          maxval = current_max
+  maxval
 #+end_src

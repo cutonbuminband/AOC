@@ -288,3 +288,24 @@ Moving from orbit A to orbit B can be accomplished by moving to the last common 
           maxval = inputs[0][0]
   maxval
 #+end_src
+* Day 8
+[[https://adventofcode.com/2019/day/8][Space Image Format]]
+** Part 1
+#+begin_src jupyter-python
+  data = open(datadir / "8.txt").read().strip()
+  result = []
+  for i in range(len(data) // (25 * 6))[::-1]:
+      substring = data[25*6*i: 25*6*(i+1)]
+      result.append((substring.count("0"), substring.count("1") * substring.count("2")))
+  min(result)[1]
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  result = list("1" * 25 * 6)
+  for i in range(len(data) // (25 * 6))[::-1]:
+      substring = data[25*6*i: 25*6*(i+1)]
+      result = [bottom if top == "2" else top for top, bottom in zip(substring, result)]
+
+  print("\n".join(["".join(["█" if char != "0" else " " for char in line])
+                   for line in  np.array(result).reshape(6, 25)]))
+#+end_src

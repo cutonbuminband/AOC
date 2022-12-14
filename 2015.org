@@ -172,3 +172,14 @@ That gives
   memo = {}
   evaluate("a")
 #+end_src
+* Day 8
+[[https://adventofcode.com/2015/day/8][Matchsticks]]
+** Part 1
+#+begin_src jupyter-python
+  lines = [x[:-1] for x in open(datadir / "8.txt").readlines()]
+  sum(len(line) - len(eval(line)) for line in lines)
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  sum(2 + len([x for x in line if x in ["\"", "\\"]]) for line in lines)
+#+end_src

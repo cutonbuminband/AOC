@@ -269,3 +269,38 @@ That gives this pretty cool plot
       time += 1
   time
 #+end_src
+* Day 8
+[[https://adventofcode.com/2018/day/8][Memory Maneuver]]
+** Part 1
+#+begin_src jupyter-python
+  data = [int(x) for x in open(datadir / "8.txt").read().split()]
+  def parse(tree_list):
+      result = {"children": []}
+      n_children, n_metadata = tree_list[:2]
+      tree_list = tree_list[2:]
+      for _ in range(n_children):
+          tree_list, child = parse(tree_list)
+          result["children"] += [child]
+      result["metadata"] = tree_list[:n_metadata]
+      return tree_list[n_metadata:], result
+
+  def weigh(tree):
+      if not tree['children']:
+          return sum(tree["metadata"])
+      return sum(tree["metadata"]) + sum(map(weigh, tree['children']))
+
+  tree = parse(data)[1]
+  weigh(tree)
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  def value(node):
+      children = node['children']
+      if not children:
+          return sum(node["metadata"])
+      return sum(value(children[idx - 1]) for idx in node["metadata"]
+                 if idx <= len(children))
+  value(tree)
+
+#+end_src
+
