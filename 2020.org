@@ -222,3 +222,72 @@ The key thing to remember is to include the bag itself, as well as the bags it c
           break
   value
 #+end_src
+* Day 9
+[[https://adventofcode.com/2020/day/9][Encoding Error]]
+** Part 1
+#+begin_src jupyter-python
+  data = [int(x) for x in open(datadir / "9.txt").readlines()]
+  end = len(data) - 25
+  for window_start in range(end):
+      target = data[window_start + 25]
+      if min(map(lambda x: abs(target - sum(x)), itertools.combinations(data[window_start: window_start + 25], 2))) != 0:
+          break
+  invalid_number = target
+  invalid_number
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  start_idx, end_idx = 0, 1
+  while start_idx < len(data):
+      total = sum(data[start_idx: end_idx])
+      if total == invalid_number:
+          break
+      if total < invalid_number:
+          end_idx += 1
+      if total > invalid_number:
+          start_idx += 1
+          end_idx = start_idx + 1
+  min(data[start_idx:end_idx]) + max(data[start_idx:end_idx])
+#+end_src
+* Day 10
+[[https://adventofcode.com/2020/day/10][Adapter Array]]
+** Part 1
+#+begin_src jupyter-python
+  data = [0] + sorted([int(x) for x in open(datadir / "10.txt").readlines()])
+  (np.diff(data) == 1).sum() * ((np.diff(data) == 3).sum() + 1)
+#+end_src
+
+** Part 2
+Sorting the values, we see a series of jumps of 1 and jumps of 3. If the value is allowed to jump by at most 3 every time, then we have to include both sides of every jump of 3.
+
+The only interesting thing is then what to do with runs of 1 jumps. In general, we can count the number of ways, f, as follows
+
+f(n) = f(n - 1) + g(n-1)
+
+The first term comes from saying that we pick the first element, leaving us with a run of length (n - 1), exactly as before. The second comes from saying that we skip the first element, and now have to find the number of ways of choosing for a series of gaps starting with 2, followed by n - 2 ones. Similarly
+
+g(n - 1) = f(n - 2) + f(n - 3)
+
+If we pick the element that resulted in a gap of two, then we just have to choose from a run of n - 2 ones, which is the f we are looking at. If we don't pick it, we've created a gap of size 3 - but then we are forced to pick the next element, leaving us with a run of length n - 3 to distribute.
+
+Putting everything together gives the recurrence
+
+f(n) = f(n - 1) + f(n - 2) + f(n - 3),
+
+with initial conditions f(0) = 1, f(-1) = 0, f(-2) = 0.
+
+That recurrence can be written in matrix form as
+
+$$\begin{pmatrix}
+1 & 1 & 1 \\
+1 & 0 & 0 \\
+0 & 1 & 0 \\
+\end{pmatrix}$$
+
+And iterating the function is then just a question of matrix powers
+#+begin_src jupyter-python
+  def total_ways(n_ones):
+      matrix = np.array([[1, 1, 1], [1, 0, 0], [0, 1, 0]])
+      return (np.linalg.matrix_power(matrix, n_ones) @ [1, 0, 0])[0]
+  np.product([total_ways(len(x)) for x in ''.join(str(x) for x in np.diff(data)).split("3")])
+#+end_src
