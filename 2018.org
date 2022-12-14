@@ -5,7 +5,7 @@
 #+begin_src jupyter-python
   import pandas as pd
   import numpy as np
-  from collections import defaultdict
+  from collections import defaultdict, deque
   from pathlib import Path
   import functools
   import itertools
@@ -303,4 +303,28 @@ That gives this pretty cool plot
   value(tree)
 
 #+end_src
+* Day 9
+[[https://adventofcode.com/2018/day/9][https://adventofcode.com/2018/day/9]]
+** Part 1
+#+begin_src jupyter-python
+  n_players = 419
+  n_marbles = 72164
 
+  def run(n_players, n_marbles):
+      scores = defaultdict(int)
+      circle = deque([0])
+      for marble in range(1, n_marbles + 1):
+          if marble % 23 == 0:
+              circle.rotate(7)
+              scores[marble % n_players] += marble + circle.pop()
+              circle.rotate(-1)
+          else:
+              circle.rotate(-1)
+              circle.append(marble)
+      return max(scores.values())
+  run(n_players, n_marbles)
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  run(n_players, n_marbles * 100)
+#+end_src

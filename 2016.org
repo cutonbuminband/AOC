@@ -228,3 +228,32 @@ Part two is more regex wrangling, except the patterns can overlap now. We could 
 #+begin_src jupyter-python
   [[''.join('█' if char else ' ' for char in line)] for line in array]
 #+end_src
+* Day 9
+[[https://adventofcode.com/2016/day/9][Explosives in Cyberspace]]
+** Part 1
+#+begin_src jupyter-python
+  data = open(datadir / "9.txt").read().strip()
+  part1 = data
+
+  def count(s, part2 = False):
+      total = 0
+      while s:
+          if s[0] != "(":
+              total += 1
+              s = s[1:]
+              continue
+          end = s.index(")")
+          chars, repeat = map(int, s[1:end].split("x"))
+          s = s[end + 1:]
+          if part2:
+              total += repeat * count(s[:chars], True)
+          else:
+              total += repeat * chars
+          s = s[chars:]
+      return total
+  count(data)
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  count(data, part2=True)
+#+end_src

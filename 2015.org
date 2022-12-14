@@ -183,3 +183,21 @@ That gives
 #+begin_src jupyter-python
   sum(2 + len([x for x in line if x in ["\"", "\\"]]) for line in lines)
 #+end_src
+* Day 9
+[[https://adventofcode.com/2015/day/9][All in a Single Night]]
+** Part 1
+#+begin_src jupyter-python
+  d = {}
+  data = [x.split() for x in open(datadir / "9.txt").readlines()]
+  for source, _, destination, __, distance in data:
+      d[(source, destination)] = int(distance)
+      d[(destination, source)] = int(distance)
+  cities = set(x[0] for x in distances.keys())
+  tours = [sum(d[route[start], route[start + 1]] for start in range(len(cities) - 1))
+           for route in itertools.permutations(cities)]
+  min(tours)
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  max(tours)
+#+end_src

@@ -213,3 +213,45 @@ This was made trivial by tracking when a given configuration was seen.
           maxval = current_max
   maxval
 #+end_src
+* Day 9
+** Part 1
+#+begin_src jupyter-python
+def canonical_form(sequence):
+    count = 0
+    replacements = {'{': '[', ',': ',', '}': ']'}
+    mode = 'group'
+    skip = False
+    result = ''
+    for char in sequence:
+        if skip:
+            skip = False
+        elif char == '!':
+            skip = True
+        elif mode == 'group' and char == '<':
+            mode = 'garbage'
+        elif mode == 'garbage' and char == '>':
+            mode = 'group'
+        elif mode == 'garbage':
+            count += 1
+        elif mode == 'group':
+            if char == '}':
+                result += replacements[char]
+            if char == '{':
+                result += replacements[char]
+    return result, count
+
+data = open(datadir / '9.txt').readline().strip()
+data, count = canonical_form(data)
+total, counter = 0, 0
+for char in data:
+    if char == "[":
+        counter += 1
+    else:
+        total += counter
+        counter -= 1
+total
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+count
+#+end_src
