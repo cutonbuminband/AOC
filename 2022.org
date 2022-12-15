@@ -373,3 +373,40 @@ We can see how at the edges of the forest shorter trees are visible, but towards
 
   navigate(target, reversed_neighbors, lambda x: elevations[x] == 0)
 #+end_src
+
+* Day 13
+[[https://adventofcode.com/2022/day/13][Distress Signal]]
+** Part 1
+#+begin_src jupyter-python
+  import ast
+  def compare(left, right):
+      if isinstance(left, int) and isinstance(right, int):
+          return (left > right) + (left >= right)
+      if isinstance(left, int):
+          return compare([left], right)
+      if isinstance(right, int):
+          return compare(left, [right])
+      if not left and not right:
+          return 1
+      if not left:
+          return 0
+      if not right:
+          return 2
+      val = compare(left[0], right[0])
+      return val if (val == 0 or val == 2) else compare(left[1:], right[1:])
+
+  total = 0
+  s = open(datadir / "13.txt").read()[:-1]
+  for idx, (left, right) in enumerate(map(lambda x: x.split("\n"), s.split("\n\n"))):
+      val = compare(ast.literal_eval(left), ast.literal_eval(right))
+      if val == 0:
+          total += idx + 1
+  total
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  dividers = [[2]], [[6]]
+  packets = [ast.literal_eval(packet) for pair in s.split("\n\n") for packet in pair.split("\n")]
+  positions = [sum(compare(divider, packet) == 2 for packet in packets) for divider in dividers]
+  (positions[0] + 1) * (positions[1] + 2)
+#+end_src
