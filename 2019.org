@@ -226,29 +226,26 @@ That gives this plot for the two different wires
 We construct the DAG as a dictionary, where graph[node] corresponds to node.parent. We use a second dictionary to memoize the counts of how far each node is from the COM
 #+begin_src jupyter-python
   data = open(datadir / "6.txt").readlines()
-  graph = {}
-  for i, line in enumerate(data):
-      parent, child = line.strip().split(")")
-      graph[child] = parent
-  orbit_counts = {"COM": 0}
+  graph = {child: parent for parent, child in map(lambda x: x.strip().split(")"), data)}
+
+  @functools.cache
   def count_orbits(node):
-      if node not in orbit_counts:
-          orbit_counts[node] = 1 + count_orbits(graph[node])
-      return orbit_counts[node]
-  sum(count_orbits(x) for x in graph)
+      if node == "COM":
+          return 0, ()
+      previous = count_orbits(graph[node])
+      return previous[0] + 1, (graph[node],) + previous[1]
+  sum(count_orbits(x)[0] for x in graph)
 #+end_src
+
 ** Part 2
-Moving from orbit A to orbit B can be accomplished by moving to the last common ancestor of each node, and then switching branches. So we get the full ancestry of one of the nodes, and then traverse the other one upwards until we get a match.
+Moving from orbit A to orbit B can be accomplished by moving to the last common ancestor of each node, and then switching branches. And that's the same as getting the full ancestry of both nodes, minus anything they might have in common.
 #+begin_src jupyter-python
-  orbit_counts = {"COM": 0}
-  end = count_orbits("YOU")
-  result = 0
-  node = "SAN"
-  while node not in orbit_counts:
-      result += 1
-      node = graph[node]
-  end - orbit_counts[node] + result - 2
+  _, p1 = count_orbits("YOU")
+  _, p2 = count_orbits("SAN")
+
+  len(set(p1) ^ set(p2))
 #+end_src
+
 * Day 7
 [[https://adventofcode.com/2019/day/7][Amplification Circuit]]
 ** Part 1
