@@ -202,3 +202,22 @@ That gives
 #+begin_src jupyter-python
   max(tours)
 #+end_src
+* Day 10
+[[https://adventofcode.com/2015/day/10][Elves Look, Elves Say]]
+** Part 1
+#+begin_src jupyter-python
+  message = "3113322113"
+  regex = re.compile(r"(([123])\2*)")
+  for _ in range(40):
+      runs = re.findall(regex, message)
+      message = ''.join([str(len(run)) + run[0] for run in map(lambda x: x[0], runs)])
+  len(message)
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  for _ in range(10):
+      runs = re.findall(regex, message)
+      message = ''.join([str(len(run)) + run[0] for run in map(lambda x: x[0], runs)])
+  len(message)
+
+#+end_src
