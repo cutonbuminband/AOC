@@ -167,12 +167,9 @@ Nothing super groundbreaking for part one. I thought of using a regex to parse t
           contents = {' '.join(words[1:-1]): int(words[0]) for words in map(str.split, elements)}
       tree[bag] = contents
 
-  memo_contains = {}
+  @functools.cache
   def contains_gold(key):
-      if key not in memo_contains:
-          memo_contains[key] = ("shiny gold" in tree[key] or
-                                any(contains_gold(child) for child in tree[key]))
-      return memo_contains[key]
+      return ("shiny gold" in tree[key] or any(contains_gold(child) for child in tree[key]))
 
   sum(contains_gold(key) for key in tree)
 #+end_src
@@ -180,11 +177,9 @@ Nothing super groundbreaking for part one. I thought of using a regex to parse t
 ** Part 2
 The key thing to remember is to include the bag itself, as well as the bags it contains, when calculating the total. That's what the "+1" is for in the sum
 #+begin_src jupyter-python
-  memo_counts = {}
+  @functools.cache
   def count_bags(bag):
-      if bag not in memo_counts:
-          memo_counts[bag] = sum(tree[bag][key] * (count_bags(key) + 1) for key in tree[bag])
-      return memo_counts[bag]
+      return sum(tree[bag][key] * (count_bags(key) + 1) for key in tree[bag])
   count_bags("shiny gold")
 #+end_src
 
