@@ -1,4 +1,4 @@
-#+PROPERTY: header-args:jupyter-python  :session aoc-2020 :kernel python
+#+PROPERTY: header-args:jupyter-python  :session aoc-2020 :kernel aoc
 #+PROPERTY: header-args    :pandoc t
 
 * Imports
@@ -21,11 +21,13 @@ Specifically, they need you to find the two entries that sum to 2020 and then mu
 data = np.loadtxt(datadir / "1.txt", dtype=int)
 [pair[0] * pair[1] for pair in itertools.product(data, data) if sum(pair) == 2020][0]
 #+end_src
+
 ** Part 2
 In your expense report, what is the product of the three entries that sum to 2020?
 #+begin_src jupyter-python
 [triple[0] * triple[1] * triple[2] for triple in itertools.product(data, data, data) if sum(triple) == 2020][0]
 #+end_src
+
 * Day 2:
 [[https://adventofcode.com/2020/day/2][Password Philosophy]]
 ** Part 1
@@ -38,6 +40,7 @@ In your expense report, what is the product of the three entries that sum to 202
   lines = list(map(str.split, open(datadir / "2.txt", encoding="utf8").readlines()))
   sum([is_valid(*line) for line in lines])
 #+end_src
+
 ** Part 2
 #+begin_src jupyter-python
   from operator import xor
@@ -47,6 +50,7 @@ In your expense report, what is the product of the three entries that sum to 202
       return xor(password[lower] == letters[0], password[upper] == letters[0])
   sum([is_valid(*line) for line in lines])
 #+end_src
+
 * Day 3
 [[https://adventofcode.com/2020/day/3][Toboggan Trajectory]]
 ** Part 1
@@ -68,6 +72,7 @@ In your expense report, what is the product of the three entries that sum to 202
 
   count_trees(data, 3, 1)
 #+end_src
+
 ** Part 2
 #+begin_src jupyter-python
   slopes = [[1, 1], [3, 1], [5, 1], [7, 1], [1, 2]]
@@ -207,6 +212,7 @@ The key thing to remember is to include the bag itself, as well as the bags it c
   terminal_run(data)[1]
 
 #+end_src
+
 ** Part 2
 #+begin_src jupyter-python
   instruction_map = {"acc": "acc", "jmp": "nop", "nop": "jmp"}
@@ -217,6 +223,7 @@ The key thing to remember is to include the bag itself, as well as the bags it c
           break
   value
 #+end_src
+
 * Day 9
 [[https://adventofcode.com/2020/day/9][Encoding Error]]
 ** Part 1
@@ -230,6 +237,7 @@ The key thing to remember is to include the bag itself, as well as the bags it c
   invalid_number = target
   invalid_number
 #+end_src
+
 ** Part 2
 #+begin_src jupyter-python
   start_idx, end_idx = 0, 1
@@ -244,6 +252,7 @@ The key thing to remember is to include the bag itself, as well as the bags it c
           end_idx = start_idx + 1
   min(data[start_idx:end_idx]) + max(data[start_idx:end_idx])
 #+end_src
+
 * Day 10
 [[https://adventofcode.com/2020/day/10][Adapter Array]]
 ** Part 1

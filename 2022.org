@@ -1,4 +1,4 @@
-#+PROPERTY: header-args:jupyter-python  :session aoc :kernel python
+#+PROPERTY: header-args:jupyter-python  :session aoc-2022 :kernel aoc
 #+PROPERTY: header-args    :pandoc t
 
 * Imports
@@ -8,6 +8,7 @@
   from collections import defaultdict
   from pathlib import Path
   import functools
+  import itertools
   import more_itertools
   import re
   import collections
@@ -403,6 +404,7 @@ We can see how at the edges of the forest shorter trees are visible, but towards
           total += idx + 1
   total
 #+end_src
+
 ** Part 2
 #+begin_src jupyter-python
   dividers = [[2]], [[6]]

@@ -1,4 +1,4 @@
-#+PROPERTY: header-args:jupyter-python  :session aoc :kernel python
+#+PROPERTY: header-args:jupyter-python  :session aoc-2015 :kernel aoc
 #+PROPERTY: header-args    :pandoc t
 
 * Imports
@@ -10,6 +10,7 @@
   import functools
   import itertools
   import more_itertools
+  import re
   datadir = Path("data/2015")
 #+end_src
 
@@ -40,10 +41,12 @@ with open(datadir / '2.txt') as f:
     boxes = [[int(x) for x in y.split('x')] for y in f.readlines()]
 sum([(3*x*y + 2*x*z + 2*y*z) for x,y,z in map(sorted, boxes)])
 #+end_src
+
 ** Part 2
 #+begin_src jupyter-python
 sum([ x * y * z + 2 * (x + y) for x,y,z in map(sorted, boxes)])
 #+end_src
+
 * Day 3
 [[https://adventofcode.com/2015/day/3][Perfectly Spherical Houses in a Vacuum]]
 ** Part 1
@@ -63,11 +66,13 @@ sum([ x * y * z + 2 * (x + y) for x,y,z in map(sorted, boxes)])
 
   len(execute_instructions(instructions))
 #+end_src
+
 ** Part 2
 #+begin_src jupyter-python
   houses = execute_instructions(instructions[::2])
   len(execute_instructions(instructions[1::2], houses))
 #+end_src
+
 * Day 4
 [[https://adventofcode.com/2015/day/4][The Ideal Stocking Stuffer]]
 ** Part 1
@@ -100,6 +105,7 @@ sum([ x * y * z + 2 * (x + y) for x,y,z in map(sorted, boxes)])
       return sufficient_vowels and contains_double and not contains_forbidden
   sum(is_nice(x) for x in open(datadir / "5.txt").readlines())
 #+end_src
+
 ** Part 2
 #+begin_src jupyter-python
   def is_nice(s):
@@ -108,6 +114,7 @@ sum([ x * y * z + 2 * (x + y) for x,y,z in map(sorted, boxes)])
       return contains_double and contains_double_pair
   sum(is_nice(x) for x in open(datadir / "5.txt").readlines())
 #+end_src
+
 * Day 6
 [[https://adventofcode.com/2015/day/6][Probably a Fire Hazard]]
 ** Part 1
@@ -123,6 +130,7 @@ sum([ x * y * z + 2 * (x + y) for x,y,z in map(sorted, boxes)])
           field[x1:x2 + 1, y1:y2 + 1] = int(instruction == "on")
   field.sum()
 #+end_src
+
 ** Part 2
 #+begin_src jupyter-python
   field = np.zeros([1000, 1000], dtype=int)
@@ -134,6 +142,7 @@ sum([ x * y * z + 2 * (x + y) for x,y,z in map(sorted, boxes)])
       field[np.where(field < 0)] = 0
   field.sum()
 #+end_src
+
 * Day 7
 [[https://adventofcode.com/2015/day/7][Some Assembly Required]]
 ** Part 1
@@ -180,10 +189,12 @@ That gives
   lines = [x[:-1] for x in open(datadir / "8.txt").readlines()]
   sum(len(line) - len(eval(line)) for line in lines)
 #+end_src
+
 ** Part 2
 #+begin_src jupyter-python
   sum(2 + len([x for x in line if x in ["\"", "\\"]]) for line in lines)
 #+end_src
+
 * Day 9
 [[https://adventofcode.com/2015/day/9][All in a Single Night]]
 ** Part 1
@@ -193,15 +204,17 @@ That gives
   for source, _, destination, __, distance in data:
       d[(source, destination)] = int(distance)
       d[(destination, source)] = int(distance)
-  cities = set(x[0] for x in distances.keys())
+  cities = set(x[0] for x in d.keys())
   tours = [sum(d[route[start], route[start + 1]] for start in range(len(cities) - 1))
            for route in itertools.permutations(cities)]
   min(tours)
 #+end_src
+
 ** Part 2
 #+begin_src jupyter-python
   max(tours)
 #+end_src
+
 * Day 10
 [[https://adventofcode.com/2015/day/10][Elves Look, Elves Say]]
 ** Part 1
@@ -213,6 +226,7 @@ That gives
       message = ''.join([str(len(run)) + run[0] for run in map(lambda x: x[0], runs)])
   len(message)
 #+end_src
+
 ** Part 2
 #+begin_src jupyter-python
   for _ in range(10):

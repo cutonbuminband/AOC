@@ -1,4 +1,4 @@
-#+PROPERTY: header-args:jupyter-python  :session aoc :kernel python
+#+PROPERTY: header-args:jupyter-python  :session aoc-2021 :kernel aoc
 #+PROPERTY: header-args    :pandoc t
 
 * Imports
@@ -274,48 +274,7 @@ Determine the horizontal position that the crabs can align to using the least fu
 ** Part 2
 This is an obvious task for constraint programming. It feels a bit like cheating, so I'll see if I can come up with a home-grown approach at a later stage. I'll start by describing the segment pattern of each digit. I'm deliberately using numbers for the segment positions and letters for the segment names so that I don't get confused.
 
-
-The solution below works, but it's fairly slow.
-#+begin_src jupyter-python
-  import constraint
-  digits = {
-      (1,2,3,5,6,7):   0,
-      (3,6):           1,
-      (1,3,4,5,7):     2,
-      (1,3,4,6,7):     3,
-      (2,3,4,6):       4,
-      (1,2,4,6,7):     5,
-      (1,2,4,5,6,7):   6,
-      (1,3,6):         7,
-      (1,2,3,4,5,6,7): 8,
-      (1,2,3,4,6,7):   9,
-  }
-
-  def generate_constraint(display_string):
-      segments = [candidate for candidate in digits.keys() if len(candidate) == len(display_string)]
-      def inner(a, b, c, d, e, f, g):
-          scope = locals()
-          variables = [eval(x, scope) for x in display_string]
-          for value in segments:
-              if set(variables) == set(value):
-                  return True
-      return inner
-  total = 0
-  for line in data:
-      clues = line.replace(" | ", " ").split()
-      output = line.split(" | ")[1].split()
-      problem = constraint.Problem()
-      problem.addVariables("abcdefg", range(1, 8))
-      problem.addConstraint(constraint.AllDifferentConstraint())
-      for item in clues:
-          problem.addConstraint(generate_constraint(item), 'abcdefg')
-      solution = problem.getSolutions()[0]
-      total += int(''.join(str(digits[tuple(sorted(solution[x] for x in number))]) for number in output))
-
-  total
-#+end_src
-
-We can be a bit cleverer than this by exploiting the structure in our data.
+We can do part 2 by exploiting the structure in our data.
 
 We know that every digit occurs before the pipe for every row in our input.
 
@@ -1218,12 +1177,14 @@ Once we have a method for finding neighbors, actually running the pathfinding is
       return np.inf
 
 #+end_src
+
 With all of that out of the way, actually solving the puzzle is just a question of calling the navigate function. First for part 1
 #+begin_src jupyter-python
   source = tuple(letter_to_value[x] for x in "CDCABABD       ")
   destination = tuple(letter_to_value[x] for x in 'AABBCCDD       ')
   navigate(source, destination)
 #+end_src
+
 ** Part 2
 And then for part 2
 #+begin_src jupyter-python
@@ -1231,6 +1192,7 @@ And then for part 2
   d = tuple(letter_to_value[x] for x in "AAAABBBBCCCCDDDD       ")
   navigate(s, d)
 #+end_src
+
 * Day 24
 [[https://adventofcode.com/2021/day/24][Arithmetic Logic Unit]]
 ** Part 1

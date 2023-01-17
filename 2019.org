@@ -1,4 +1,4 @@
-#+PROPERTY: header-args:jupyter-python  :session aoc :kernel python
+#+PROPERTY: header-args:jupyter-python  :session aoc-2019 :kernel aoc
 #+PROPERTY: header-args    :pandoc t
 
 * Imports
@@ -20,6 +20,7 @@
 data = [int(x) for x in open(datadir / "1.txt").readlines()]
 sum([x//3 - 2 for x in data])
 #+end_src
+
 ** Part 2
 #+begin_src jupyter-python
   total = 0
@@ -30,6 +31,7 @@ sum([x//3 - 2 for x in data])
           data.append(fuel)
   total
 #+end_src
+
 * Day 2
 [[https://adventofcode.com/2019/day/2][1202 Program Alarm]]
 ** Part 1
@@ -49,6 +51,7 @@ sum([x//3 - 2 for x in data])
           ip += 4
   run(program)
 #+end_src
+
 #+begin_src jupyter-python
   for noun, verb in itertools.product(range(100), range(100)):
       result = run(program, 0, noun, verb)
@@ -57,6 +60,7 @@ sum([x//3 - 2 for x in data])
           break
   result
 #+end_src
+
 * Day 3
 [[https://adventofcode.com/2019/day/3][Crossed Wires]]
 
@@ -139,6 +143,7 @@ That gives this plot for the two different wires
                   break
   total
 #+end_src
+
 ** Part 2
 #+begin_src jupyter-python
   total = 0
@@ -155,6 +160,7 @@ That gives this plot for the two different wires
   total
 
 #+end_src
+
 * Day 5
 [[https://adventofcode.com/2019/day/5][Sunny with a Chance of Asteroids]]
 ** Part 1
@@ -220,6 +226,7 @@ That gives this plot for the two different wires
           break
       program, ip = step(program, ip, inputs)
 #+end_src
+
 * Day 6
 [[https://adventofcode.com/2019/day/6][Universal Orbit Map]]
 ** Part 1
@@ -269,6 +276,7 @@ Moving from orbit A to orbit B can be accomplished by moving to the last common 
   maxval
 
 #+end_src
+
 ** Part 2
 #+begin_src jupyter-python
   input_sequences = itertools.permutations(range(5, 10))
@@ -291,6 +299,7 @@ Moving from orbit A to orbit B can be accomplished by moving to the last common 
           maxval = inputs[0][0]
   maxval
 #+end_src
+
 * Day 8
 [[https://adventofcode.com/2019/day/8][Space Image Format]]
 ** Part 1
@@ -302,6 +311,7 @@ Moving from orbit A to orbit B can be accomplished by moving to the last common 
       result.append((substring.count("0"), substring.count("1") * substring.count("2")))
   min(result)[1]
 #+end_src
+
 ** Part 2
 #+begin_src jupyter-python
   result = list("1" * 25 * 6)
@@ -312,6 +322,7 @@ Moving from orbit A to orbit B can be accomplished by moving to the last common 
   print("\n".join(["".join(["█" if char != "0" else " " for char in line])
                    for line in  np.array(result).reshape(6, 25)]))
 #+end_src
+
 * Day 9
 [[https://adventofcode.com/2019/day/9][Sensor Boost]]
 ** Part 1
@@ -330,6 +341,7 @@ Allowing arbitrary final addresses was accomplished by the very dirty hack of ch
   while part1[ip] != 99:
       part1, ip = step(program, ip, inputs=[1])
 #+end_src
+
 ** Part 2
 #+begin_src jupyter-python
   relative_base, ip = 0, 0

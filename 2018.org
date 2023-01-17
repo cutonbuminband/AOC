@@ -1,4 +1,4 @@
-#+PROPERTY: header-args:jupyter-python  :session aoc :kernel python
+#+PROPERTY: header-args:jupyter-python  :session aoc-2018 :kernel aoc
 #+PROPERTY: header-args    :pandoc t
 
 * Imports
@@ -20,6 +20,7 @@
 data = np.loadtxt(datadir / "1.txt", dtype=int)
 data.sum()
 #+end_src
+
 ** Part 2
 #+begin_src jupyter-python
   i = 0
@@ -33,6 +34,7 @@ data.sum()
       i += 1
   value
 #+end_src
+
 * Day 2
 [[https://adventofcode.com/2018/day/2][Inventory Managment System]]
 ** Part 1
@@ -41,6 +43,7 @@ data.sum()
   twos = sum([2 in np.unique(list(line), return_counts=True)[1] for line in lines])
   twos * sum([3 in np.unique(list(line), return_counts=True)[1] for line in lines])
 #+end_src
+
 ** Part 2
 #+begin_src jupyter-python
   for s1 in lines:
@@ -54,6 +57,7 @@ data.sum()
       break
 result
 #+end_src
+
 * Day 3
 [[https://adventofcode.com/2018/day/3][No Matter How You Slice It]]
 ** Part 1
@@ -66,6 +70,7 @@ result
       field[x:x+w, y:y+h] += 1
   (field > 1).sum()
 #+end_src
+
 ** Part 2
 #+begin_src jupyter-python
   for pid, x, y, w, h in data:
@@ -73,6 +78,7 @@ result
           break
   pid
 #+end_src
+
 * Day 4
 [[https://adventofcode.com/2018/day/4][Repose Record]]
 ** Part 1
@@ -95,11 +101,13 @@ result
   sleepiest_guard = sorted(guards.keys(), key = lambda x: - guards[x].sum())[0]
   int(sleepiest_guard) * guards[sleepiest_guard].argmax()
 #+end_src
+
 ** Part 2
 #+begin_src jupyter-python
   sleepiest_guard = sorted(guards.keys(), key = lambda x: - max(guards[x]))[0]
   int(sleepiest_guard) * guards[sleepiest_guard].argmax()
 #+end_src
+
 * Day 5
 [[https://adventofcode.com/2018/day/5][Alchemical Reduction]]
 ** Part 1
@@ -174,6 +182,7 @@ I haven't figured out the cleanest way of solving part 1, but here's an approach
           neighbors += [(x,y) for x,y in candidates if (0 <= x <= xmax) and (0 <= y <= ymax)]
       return set(neighbors)
 #+end_src
+
 We can animate the process of expanding each seed
 
 #+begin_src jupyter-python
@@ -248,6 +257,7 @@ That gives this pretty cool plot
   executed
 
 #+end_src
+
 ** Part 2
 #+begin_src jupyter-python
   active = []
@@ -269,6 +279,7 @@ That gives this pretty cool plot
       time += 1
   time
 #+end_src
+
 * Day 8
 [[https://adventofcode.com/2018/day/8][Memory Maneuver]]
 ** Part 1
@@ -292,6 +303,7 @@ That gives this pretty cool plot
   tree = parse(data)[1]
   weigh(tree)
 #+end_src
+
 ** Part 2
 #+begin_src jupyter-python
   def value(node):
@@ -303,6 +315,7 @@ That gives this pretty cool plot
   value(tree)
 
 #+end_src
+
 * Day 9
 [[https://adventofcode.com/2018/day/9][https://adventofcode.com/2018/day/9]]
 ** Part 1
@@ -324,6 +337,7 @@ That gives this pretty cool plot
       return max(scores.values())
   run(n_players, n_marbles)
 #+end_src
+
 ** Part 2
 #+begin_src jupyter-python
   run(n_players, n_marbles * 100)
