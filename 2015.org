@@ -235,3 +235,60 @@ That gives
   len(message)
 
 #+end_src
+
+* Day 11
+
+[[https://adventofcode.com/2015/day/11][Corporate Policy]]
+
+** Part 1
+So there are two jobs here:
+
+1. Determine whether a candidate password is valid
+2. Iterate over candidate passwords in order, starting with the puzzle input
+
+Is valid is not too difficult to accomplish. The "straight" condition can be rewritten as "1, 1" appears somewhere in the list of differences between neighboring characters. The "double pair" condition can be shortly expressed as matching a simple regex. Forbidding certain characters outright is most easily accomplished by never generating them as candidates
+
+To iterate over candidate passwords, we first construct a helper method to iterate over candidate passwords that keep some prefix string fixed. The full iterator is then a chain over all these with successively shorter prefix strings.
+
+#+begin_src jupyter-python
+  def has_straight(password):
+      if isinstance(password, str):
+          password = np.array([ord(x) for x in password], dtype=int)
+      differences = np.diff(password)
+      return (1, 1) in zip(differences, differences[1:])
+
+
+  r = re.compile(r"(.)\1.*(.)\2")
+  def has_double_pair(password):
+      return bool(re.search(r, "".join(chr(x) for x in password)))
+
+  def is_valid_password(password):
+      return has_double_pair(password) and has_straight(password)
+
+  puzzle_input = tuple(ord(x) for x in "hxbxwxba")
+  password = puzzle_input
+  characters = tuple(ord(x) for x in "abcdefghjkmnpqrstuvwxyz")
+
+  def iterate(string, prefix_length):
+      n_free = len(string) - prefix_length - 1
+      first = characters[characters.index(string[prefix_length]) + 1:]
+
+      suffixes = itertools.product(first, *([characters]*n_free))
+      for suffix in suffixes:
+          yield string[:prefix_length] + suffix
+
+  password_iterator = itertools.chain.from_iterable([iterate(password, l) for l in range(len(password))][::-1])
+  while not is_valid_password(password):
+      password = next(password_iterator)
+  print("".join(chr(x) for x in password))
+#+end_src
+
+** Part 2
+#+begin_src jupyter-python
+  password = next(password_iterator)
+  while not is_valid_password(password):
+      password = next(password_iterator)
+  print("".join(chr(x) for x in password))
+
+#+end_src
+
