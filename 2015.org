@@ -292,3 +292,30 @@ To iterate over candidate passwords, we first construct a helper method to itera
 
 #+end_src
 
+* Day 12
+[[https://adventofcode.com/2015/day/12][JSAbacusFramework.io]]
+** Part 1
+For the first part, we've been promised that integers only appear as integers. So there's no reason to try and read in the json properly - a simple regex does the trick
+#+begin_src jupyter-python
+  s = open(datadir / "12.txt").read()
+  integers = re.findall("-?\d+", f.read())
+  sum(map(int, integers))
+#+end_src
+
+** Part 2
+That approach obviously doesn't work for the second part, so we'll need a json library
+#+begin_src jupyter-python
+  import json
+  s = json.load(open(datadir / "12.txt"))
+  def find_value(structure):
+      if isinstance(structure, str):
+          return 0
+      if isinstance(structure, int):
+          return structure
+      if isinstance(structure, list):
+          return(sum(find_value(x) for x in structure))
+      if "red" in structure.values():
+          return 0
+      return sum(find_value(x) for x in structure.values())
+  find_value(s)
+#+end_src
