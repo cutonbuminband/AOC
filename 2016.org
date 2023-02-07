@@ -5,7 +5,7 @@
 #+begin_src jupyter-python
   import pandas as pd
   import numpy as np
-  from collections import defaultdict
+  from collections import defaultdict, deque
   from pathlib import Path
   import functools
   import itertools
@@ -269,4 +269,53 @@ Part two is more regex wrangling, except the patterns can overlap now. We could 
 ** Part 2
 #+begin_src jupyter-python
   count(data, part2=True)
+#+end_src
+
+* Day 10
+[[https://adventofcode.com/2016/day/10][Balance Bots]]
+
+** Part 1
+#+begin_src jupyter-python
+  import pprint
+  data = open(datadir / "10.txt").readlines()
+  wiring = {}
+  state = defaultdict(list)
+  for line in data:
+      command = re.findall("(bot|value|output) (\d+)", line)
+      numbers = [int(x[1]) for x in command]
+      names = [x[0] for x in command]
+      if len(command) == 2:
+          state[numbers[1]].append(numbers[0])
+      else:
+          wiring[numbers[0]] = [x for x in zip(names[1:], numbers[1:])]
+
+  queue = deque([x for x in start if len(state[x]) == 2])
+  output = [0] * 21
+
+  def step():
+      current = queue.popleft()
+      values = sorted(state[current])
+      state[current] = []
+      left, right = wiring[current]
+      for idx, (name, value) in enumerate(wiring[current]):
+          if name == "bot":
+              state[value].append(values[idx])
+              if len(state[value]) == 2:
+                  queue.append(value)
+          else:
+              output[value] = values[idx]
+      return current, values
+  while True:
+      current, values = step()
+      if values == [17, 61]:
+          break
+  current
+#+end_src
+
+** Part 2
+With Part 1 out of the way, part 2 is just
+#+begin_src jupyter-python
+  while queue:
+      step()
+  np.product(output[:3])
 #+end_src
