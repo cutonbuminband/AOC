@@ -368,8 +368,10 @@ So I think the way to go is A*.
       for new_floor in [floor + 1, floor - 1]:
           if not (0 <= new_floor < n_floors):
               continue
-          for move in itertools.chain([[x] for x in active_indices],
-                                      itertools.combinations(active_indices, 2)):
+          moves = [[x] for x in active_indices]
+          if new_floor == floor + 1:
+              moves = itertools.chain(moves, itertools.combinations(active_indices, 2))
+          for move in moves:
               new_items = list(items)
               for index in move:
                   new_items[index] = new_floor
@@ -384,6 +386,8 @@ So I think the way to go is A*.
 
 ** Part 2
 Extending this to part 2 without changing anything is possible, but the whole thing takes about a minute and a half to run. When I have time, I'll come back and look at it again.
+
+Reducing the search space by only letting the elevator move down with one item at a time reduced the runtime to about half. I'm not 100% convinced the restriction is always valid, but it did work in this case.
 #+begin_src jupyter-python
   state = 0, (0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2)
   target = 3, (3,)*len(state[1])
