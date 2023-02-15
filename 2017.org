@@ -301,3 +301,24 @@ count
   ''.join(['{:0>2x}'.format(x) for x in digits])
 #+end_src
 
+* Day 11
+
+** Part 1
+To describe the hexgrid we'll use two basis vectors: x1, directed southeast, and x2, directed due north. All the other directions can be found as linear combinations of these, and the final position in this basis is just the sum of all the moves. Now, any move of the form (k, 1), with k in [-1, 0, 1] only takes one step, so the number of steps needed to reach the final position is just the value of whichever of the two basis vectors we have more of
+#+begin_src jupyter-python
+  data = open(datadir / "11.txt").read().strip().split(",")
+  coordinates = {"se": np.array((1, 0)),
+                 "s": np.array((0, -1)),
+                 "sw": np.array((-1, -1)),
+                 "nw": np.array((-1, 0)),
+                 "n": np.array((0, 1)),
+                 "ne": np.array((1, 1))}
+  moves = np.array([coordinates[x] for x in data])
+  max(abs(moves.sum(axis=0)))
+#+end_src
+
+** Part 2
+For part 2, instead of finding just the sum of the moves, we look at the running total, and ask what the greatest value of any of the coefficients is at any point in the path.
+#+begin_src jupyter-python
+  abs(moves.cumsum(axis=0)).max()
+#+end_src
