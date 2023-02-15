@@ -348,3 +348,30 @@ Allowing arbitrary final addresses was accomplished by the very dirty hack of ch
   while program[ip] != 99:
       part1, ip = step(program, ip, inputs=[2])
 #+end_src
+
+* Day 10
+[[https://adventofcode.com/2019/day/10][Monitoring Station]]
+** Part 1
+#+begin_src jupyter-python
+  from math import gcd
+  def simplify(x, y):
+      if (x, y) == (0, 0):
+          return 0, 0
+      factor = gcd(x, y)
+      return int(x / factor), int(y / factor)
+
+  data = np.array([[0 if char == '.' else 1 for char in line.strip()]
+                   for line in open(datadir / "10.txt").readlines()]).T
+  ones = np.array(np.where(data)).T
+  scores = [len(set(map(lambda x: simplify(*x), ones - ones[i]))) for i in range(len(ones))]
+  position = ones[np.argmax(scores)]
+  print(max(scores) - 1)
+  print(position)
+#+end_src
+
+** Part 2
+
+There are more than 200 visible asteroids, so we only need to worry about the ones we meet on the first round - but that's exactly the simplified asteroids, as seen from our position. We take these, and sort them according to the angle they make with the negative y axis (negative because we have y increasing as it goes down in this coordinate system). The one we're interested in is the 201st asteroid according to this order (201st because the one we're measuring from will automatically have an angle of zero and should not be counted)
+#+begin_src jupyter-python
+  np.array(sorted(set([simplify(*x) for x in ones - position]), key = lambda x: (np.arctan2(x[0], -x[1])) % (2 * np.pi))[200]) + position
+#+end_src
