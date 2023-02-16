@@ -434,3 +434,41 @@ For the second, it's the Chinese remainder theorem to the rescue. Code shameless
       total += a * M * (N // n)
   total % N
     #+end_src
+
+* Day 14
+[[https://adventofcode.com/2020/day/14][Docking Data]]
+** Part 1
+#+begin_src jupyter-python
+  data = [line.strip().split(" = ") for line in open(datadir / "14.txt").readlines()]
+  result = defaultdict(int)
+  mask = ""
+  for operation, operand in data:
+      if operation == "mask":
+          mask = operand
+      else:
+          new_operand = ''.join([b1 if (b1 != 'X') else b2 for b1, b2 in zip(mask, f"{int(operand):036b}")])
+          result[operation[4:-1]] = int(new_operand, 2)
+  sum(result.values())
+#+end_src
+
+#+begin_src jupyter-python
+  result = defaultdict(int)
+  mask = ""
+  for operation, operand in data:
+      if operation == "mask":
+          mask = operand
+      else:
+          operand = int(operand)
+          operation = operation[4:-1]
+          addresses = [""]
+          for b1, b2 in zip(mask, f"{int(operation):036b}"):
+              if b1 == "X":
+                  addresses = [a + "0" for a in addresses] + [a + "1" for a in addresses]
+              elif b1 == "1":
+                  addresses = [a + "1" for a in addresses]
+              else:
+                  addresses = [a + b2 for a in addresses]
+          for address in addresses:
+              result[int(address, 2)] = operand
+  sum(result.values())
+#+end_src
