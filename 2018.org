@@ -369,3 +369,37 @@ That gives this pretty cool plot
 #+begin_src jupyter-python
   int(((positions[0] - array[0, :2]) / velocities[0])[0])
 #+end_src
+
+* Day 11
+[[https://adventofcode.com/2018/day/11][Chronal Charge]]
+** Part 1
+
+#+begin_src jupyter-python
+  import scipy
+  s = 8772
+  board = np.zeros((300, 300), dtype=int)
+  for row, col in itertools.product(range(300), range(300)):
+      score = ((row + 1 + 10)  * (col + 1) + s) * (row + 1 + 10)
+      board[row, col] = (score // 100) % 10
+  board -= 5
+  best = 0
+  for row, col in itertools.product(range(300 - 2), range(300 - 2)):
+      total = board[row: row+3, col:col+3].sum()
+      if total > best:
+          best = total
+          result = row + 1, col + 1
+  print(",".join(str(x) for x in result))
+#+end_src
+
+** Part 2
+Brute force over all sizes is slow, but works
+#+begin_src jupyter-python
+  best = 0
+  for i in range(3, 301):
+      for row, col in itertools.product(range(301 - i), range(301 - i)):
+          total = board[row:row+i, col:col+i].sum()
+          if total > best:
+              best = total
+              result = row + 1, col + 1, i
+  print(",".join(str(x) for x in result))
+#+end_src
