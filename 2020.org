@@ -295,3 +295,68 @@ And iterating the function is then just a question of matrix powers
       return (np.linalg.matrix_power(matrix, n_ones) @ [1, 0, 0])[0]
   np.product([total_ways(len(x)) for x in ''.join(str(x) for x in np.diff(data)).split("3")])
 #+end_src
+
+* Day 11
+[[https://adventofcode.com/2020/day/11][Seating System]]
+** Part 1
+For the first part, we are taking the convolution of our original grid with a weights array that looks like
+$$
+\begin{pmatrix}
+1 & 1 & 1\\
+1 & 0 & 1\\
+1 & 1 & 1\\
+\end{pmatrix}
+$$
+Scipy has nice routines that handle all that indexing for us, so we'll cheat and use them. The only slight issue is what to do at the edge of the grid, but using a constant value of 0 for any cells that would fall outside the grid works out of the box.
+
+#+begin_src jupyter-python
+  import scipy
+  data = np.array([[1 if char == "." else 0 for char in line.strip()] for line in open(datadir / "11.txt").readlines()])
+  mask = np.where(data)
+  board = np.zeros(data.shape, dtype=int)
+  new_board = np.ones(board.shape, dtype=int)
+  new_board[mask] = 0
+  weights = [[1,1,1], [1,0,1], [1,1,1]]
+  while (board != new_board).any():
+      board = new_board.copy()
+      convolution = scipy.ndimage.convolve(new_board, weights, mode='constant')
+      new_board[np.where(convolution == 0)] = 1
+      new_board[np.where(convolution >= 4)] = 0
+      new_board[mask] = 0
+  board.sum()
+#+end_src
+
+** Part 2
+For part 2 I was unable to find a nice way of expressing the condition of "Look for the first grid position in a given direction which is not floor". That means that I have to manually loop over the grid instead of using the convolution routine - and that really slows down the runtime!
+#+begin_src jupyter-python
+  board = np.zeros(data.shape, dtype=int)
+  new_board = np.ones(board.shape, dtype=int)
+  new_board[mask] = 0
+  def update(board):
+      new_board = board.copy()
+      directions = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]]
+      for row, col in itertools.product(*[range(x) for x in board.shape]):
+          total = 0
+          for direction in directions:
+              done = False
+              new_row, new_col = row, col
+              while not done:
+                  new_row, new_col = new_row + direction[0], new_col + direction[1]
+                  if new_row < 0 or new_row >= board.shape[0] or new_col < 0 or new_col >= board.shape[1]:
+                      break
+                  if not data[new_row, new_col]:
+                      done = True
+              else:  # no break - so a valid position
+                  total += board[new_row, new_col]
+          if total == 0:
+              new_board[row, col] = 1
+          if total >= 5:
+              new_board[row, col] = 0
+      new_board[mask] = 0
+      return new_board
+
+  while (new_board != board).any():
+      board = new_board
+      new_board = update(new_board)
+  new_board.sum()
+#+end_src
