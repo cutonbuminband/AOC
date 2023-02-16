@@ -3,6 +3,7 @@
 
 * Imports
 #+begin_src jupyter-python
+  import math
   import pandas as pd
   import numpy as np
   from collections import defaultdict
@@ -10,6 +11,7 @@
   import functools
   import itertools
   import more_itertools
+  import re
   datadir = Path("data/2019")
 #+end_src
 
@@ -374,4 +376,53 @@ Allowing arbitrary final addresses was accomplished by the very dirty hack of ch
 There are more than 200 visible asteroids, so we only need to worry about the ones we meet on the first round - but that's exactly the simplified asteroids, as seen from our position. We take these, and sort them according to the angle they make with the negative y axis (negative because we have y increasing as it goes down in this coordinate system). The one we're interested in is the 201st asteroid according to this order (201st because the one we're measuring from will automatically have an angle of zero and should not be counted)
 #+begin_src jupyter-python
   np.array(sorted(set([simplify(*x) for x in ones - position]), key = lambda x: (np.arctan2(x[0], -x[1])) % (2 * np.pi))[200]) + position
+#+end_src
+
+* Day 12
+[[https://adventofcode.com/2019/day/12][The N-Body Problem]]
+** Part 1
+#+begin_src jupyter-python
+  data = open(datadir / "12.txt").readlines()
+  regex = r"(-?\d+)"
+  positions = np.array([list(map(int, re.findall(regex, line))) for line in data], dtype=int)
+  velocities = np.zeros(positions.shape, dtype=int)
+  indices = [0, 1, 2, 3]
+  for i in range(1000):
+      for m1, m2 in itertools.combinations([0, 1, 2, 3], 2):
+          dv = 1 * (positions[m2] > positions[m1]) - 1 * (positions[m2] < positions[m1])
+          velocities[m1] += dv
+          velocities[m2] -= dv
+      positions += velocities
+  (np.abs(positions).sum(axis=1) * np.abs(velocities).sum(axis=1)).sum()
+#+end_src
+
+** Part 2
+I don't know what optimizations are possible here, but an obvious one is to realise that the three different directions (x,y and z) are completely independent, and that instead of searching for one global cycle, we can ask if there are shorter cycles for the coordinates separately. The global cycle length is then the lcm of the individual cycle lengths, as long as each cycle starts at the initial state.
+#+begin_src jupyter-python
+  data = open(datadir / "12.txt").readlines()
+  regex = r"(-?\d+)"
+  positions = np.array([list(map(int, re.findall(regex, line))) for line in data], dtype=int)
+  velocities = np.zeros(positions.shape, dtype=int)
+  seen_x = {}
+  seen_y = {}
+  seen_z = {}
+  for axis, seen in zip([0, 1, 2], [seen_x, seen_y, seen_z]):
+      seen[tuple(np.hstack([positions[:, axis], velocities[:, axis]]))] = 0
+  cycles = [False, False, False]
+  for i in range(1_000_000):
+      for m1, m2 in itertools.combinations([0, 1, 2, 3], 2):
+          dv = 1 * (positions[m2] > positions[m1]) - 1 * (positions[m2] < positions[m1])
+          velocities[m1] += dv
+          velocities[m2] -= dv
+      positions += velocities
+      for axis, seen in zip([0, 1, 2], [seen_x, seen_y, seen_z]):
+          if cycles[axis]:
+              continue
+          state = tuple(np.hstack([positions[:, axis], velocities[:, axis]]))
+          if state in seen:
+              cycles[axis] = i + 1
+      if all(cycles):
+          break
+  math.lcm(*cycles)
+
 #+end_src
