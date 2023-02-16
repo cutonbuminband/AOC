@@ -360,3 +360,36 @@ For part 2 I was unable to find a nice way of expressing the condition of "Look 
       new_board = update(new_board)
   new_board.sum()
 #+end_src
+
+* Day 12
+[[https://adventofcode.com/2020/day/12][Rain Risk]]
+
+** Part 1
+I'll use the usual trick of modelling the 2d grid as the complex plane.
+#+begin_src jupyter-python
+  directions = {"N": 1j, "E": 1, "S": -1j, "W": -1}
+  turns = {"L": 1j, "R": -1j}
+  position, direction = 0, 1
+
+  def update_state(position, direction, instruction, value, part=1):
+      if instruction in directions:
+          offset = directions[instruction] * value
+          return (position + offset, direction) if part == 1 else (position, direction + offset)
+      if instruction in turns:
+          return position, direction * turns[instruction]**(int(value // 90))
+      return position + value * direction, direction
+
+  instructions = open(datadir / "12.txt").readlines()
+  for instruction, value in map(lambda x: (x[0], int(x[1:])), instructions):
+      position, direction = update_state(position, direction, instruction, value)
+  int(abs(position.real) + abs(position.imag))
+#+end_src
+
+** Part 2
+Part 2 can be done basically the same way as part 1, with only a small change to the update state function. In part 1, nesw move the ship; in part 2 they move the waypoint. Everything else is the same.
+#+begin_src jupyter-python
+  position, waypoint = 0, 10 + 1j
+  for instruction, value in map(lambda x: (x[0], int(x[1:])), instructions):
+      position, waypoint = update_state(position, waypoint, instruction, value, part=2)
+  int(abs(position.real) + abs(position.imag))
+#+end_src
