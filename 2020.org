@@ -393,3 +393,44 @@ Part 2 can be done basically the same way as part 1, with only a small change to
       position, waypoint = update_state(position, waypoint, instruction, value, part=2)
   int(abs(position.real) + abs(position.imag))
 #+end_src
+
+* Day 13
+[[https://adventofcode.com/2020/day/13][Shuttle Search]]
+** Part 1
+
+This one looks like a bunch of modular arithmetic. The first one is just whichever bus number n has the smallest -x (mod n)
+#+begin_src jupyter-python
+  x = 1006726
+  buses =("23,x,x,x,x,x,x,x,x,x,x,x,x,41,x,x,x,x,x,x,x,x,x,647,"
+          "x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,13,19,x,x,x,x,x,x,x"
+          ",x,x,29,x,557,x,x,x,x,x,37,x,x,x,x,x,x,x,x,x,x,17")
+  bus_moduli = [(int(_), (- idx) % int(_)) for idx, _ in enumerate(buses.split(",")) if _ != "x"]
+  bus_numbers = [n for n, a in bus_moduli]
+  waits = [-x % bus for bus in bus_numbers]
+  min(waits) * bus_numbers[np.argmin(waits)]
+#+end_src
+
+** Part 2
+For the second, it's the Chinese remainder theorem to the rescue. Code shamelessly copied from wikipedia.
+#+begin_src jupyter-python
+  N = np.product([x[0] for x in bus_moduli])
+  # Find numbers m and M such that m*a + M*b = 1 (mod a * b)
+  def bezout(a, b):
+      old_r, r = a, b
+      old_s, s = 1, 0
+      old_t, t = 0, 1
+
+      while r != 0:
+          quotient = old_r // r
+          old_r, r = r, old_r - quotient * r
+          old_s, s = s, old_s - quotient * s
+          old_t, t = t, old_t - quotient * t
+
+      return old_s, old_t
+
+  total = 0
+  for n, a in bus_moduli:
+      m, M = bezout(n, N // n)
+      total += a * M * (N // n)
+  total % N
+    #+end_src
