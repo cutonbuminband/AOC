@@ -302,6 +302,7 @@ count
 #+end_src
 
 * Day 11
+[[https://adventofcode.com/2017/day/11][Hex Ed]]
 
 ** Part 1
 To describe the hexgrid we'll use two basis vectors: x1, directed southeast, and x2, directed due north. All the other directions can be found as linear combinations of these, and the final position in this basis is just the sum of all the moves. Now, any move of the form (k, 1), with k in [-1, 0, 1] only takes one step, so the number of steps needed to reach the final position is just the value of whichever of the two basis vectors we have more of
@@ -322,3 +323,38 @@ For part 2, instead of finding just the sum of the moves, we look at the running
 #+begin_src jupyter-python
   abs(moves.cumsum(axis=0)).max()
 #+end_src
+
+* Day 12
+[[https://adventofcode.com/2017/day/12][Digital Plumber]]
+
+** Part 1
+#+begin_src jupyter-python
+  regex = "(-?\d+)"
+  lines = open(datadir / "12.txt").readlines()
+  data = [[int(number) for number in re.findall(regex, line)] for line in lines]
+  graph = {line[0]: line[1:] for line in data}
+  def find_group(seed):
+      queue = set([seed])
+      visited = set()
+      while queue:
+          current = queue.pop()
+          visited.add(current)
+          for neighbor in graph[current]:
+              if neighbor not in visited:
+                  queue.add(neighbor)
+      return visited
+  len(find_group(0))
+#+end_src
+
+** Part 2
+#+begin_src jupyter-python
+  i = 0
+  while graph:
+      seed = list(graph.keys())[0]
+      visited = find_group(seed)
+      for key in visited:
+          del graph[key]
+      i += 1
+  i
+#+end_src
+
