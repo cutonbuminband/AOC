@@ -393,3 +393,40 @@ Reducing the search space by only letting the elevator move down with one item a
   target = 3, (3,)*len(state[1])
   astar(state, target, constrained_neighbors, unconstrained_distance_estimate)
 #+end_src
+
+* Day 12
+[[https://adventofcode.com/2016/day/12][Leonardo's Monorail]]
+
+** Part 1
+This is a fairly straightforward implementation of the problem description, with no particular cleverness going on. We have two types of instructions - ones that take two operands, and ones that take only one, and we can treat those together.
+#+begin_src jupyter-python
+  def run(program, registers=None):
+      if registers is None:
+          registers = defaultdict(int)
+      ip = 0
+      while ip < len(program):
+          instruction = program[ip]
+          operator, operands = instruction[0], instruction[1:]
+          if operator in ["cpy", "jnz"]:
+              source, destination = operands
+              value = int(source) if source not in 'abcd' else registers[source]
+              if operator == "cpy":
+                  registers[destination] = value
+              if operator == "jnz" and value != 0:
+                  ip += int(destination) - 1
+          elif operator in ["inc", "dec"]:
+              registers[operands[0]] += 2 * (operator == "inc") - 1
+          ip += 1
+      return registers['a']
+
+  data = [line.strip().split(" ")
+          for line in open(datadir / "12.txt").readlines()]
+  run(data)
+#+end_src
+
+** Part 2
+#+begin_src jupyter-python
+  registers = defaultdict(int)
+  registers['c'] = 1
+  run(data, registers)
+#+end_src
