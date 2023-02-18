@@ -403,3 +403,41 @@ Brute force over all sizes is slow, but works
               result = row + 1, col + 1, i
   print(",".join(str(x) for x in result))
 #+end_src
+
+* Day 12
+[[https://adventofcode.com/2018/day/12][Subterranean Sustainability]]
+
+** Part 1
+#+begin_src jupyter-python
+  data = open(datadir / "12.txt").readlines()
+  lookup = {".": 0, "#": 1}
+  generations = 20
+  initial_state = [lookup[char] for char in data[0] if char in lookup]
+  state = np.pad(initial_state, generations)
+  rules = [line.strip().split(' => ') for line in data[2:]]
+  alive = np.array([[lookup[x] for x in rule[0]] for rule in rules if lookup[rule[1]] == 1])
+  def update(cell_neighbors):
+      return 1 * (not abs(np.array(alive) - cell_neighbors).sum(axis=1).min())
+
+  states = [state.copy()]
+  for i in range(generations):
+      state = scipy.ndimage.generic_filter(state, update, footprint=np.ones(5), mode='constant')
+      states.append(state.copy())
+  indices = np.arange(state.shape[0]) - generations
+  (indices * state).sum()
+#+end_src
+
+** Part 2
+Simulating the 50 billion generations is impossible, so something cleverer is needed. My first attempt was to see how the total number of plants changed as the generations progressed, and I noticed that after comparatively gew generations the number was constant. Looking at how the pattern of plants changed after that period made extrapolation to 50 billion generations easy. An off-by-one and an off-by-a-factor-of-ten error later, and the problem was solved.
+#+begin_src jupyter-python
+  generations = 150
+  state = np.pad(initial_state, generations)
+  states = [state.copy()]
+  for i in range(1, generations):
+      new_state = scipy.ndimage.generic_filter(state, update, footprint=np.ones(5), mode='constant')
+      states.append(new_state.copy())
+      if (new_state == np.roll(state, 1)).all():
+          break
+      state = new_state
+  (((np.arange(new_state.shape[0]) - generations) + (50_000_000_000 - i))*new_state).sum()
+#+end_src
