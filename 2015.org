@@ -319,3 +319,46 @@ That approach obviously doesn't work for the second part, so we'll need a json l
       return sum(find_value(x) for x in structure.values())
   find_value(s)
 #+end_src
+
+* Day 13
+[[https://adventofcode.com/2015/day/13][Knights of the Dinner Table]]
+** Part 1
+#+begin_src jupyter-python
+  data = open(datadir / "13.txt").readlines()
+  def parse(line):
+      words = line.strip().split()
+      people = tuple(sorted([words[0], words[-1][:-1]]))
+      amount = int(re.search("(\d+)", line).groups(0)[0])
+      sign = 2 * ("gain" in words) - 1
+      return people, amount * sign
+  scores = defaultdict(int)
+  with open(datadir / "13.txt") as f:
+      for line in f:
+          people, score = parse(line)
+          scores[people] += score
+
+  people = sorted(set([person for pair in scores.keys() for person in pair]))
+  def calculate_score(permutation):
+      score = 0
+      n = len(permutation)
+      for i in range(n):
+          score += scores[tuple(sorted([permutation[i], permutation[(i + 1) % n]]))]
+      return score
+  maxval = 0
+  for permutation in itertools.permutations(people[1:]):
+      score = calculate_score((people[0],) + permutation)
+      if score > maxval:
+          maxval = score
+  maxval
+#+end_src
+
+** Part 2
+Here we see the magic of the defaultdict - since all of the pairs involving "You" have a net score of zero, we don't need to change the scoring dictionary at all. We just add "You" to the people we are permuting over, and run everything exactly as before.
+#+begin_src jupyter-python
+  maxval = 0
+  for permutation in itertools.permutations(people[1:] + ["You"]):
+      score = calculate_score((people[0],) + permutation)
+      if score > maxval:
+          maxval = score
+  maxval
+#+end_src
