@@ -332,7 +332,7 @@ So I think the way to go is A*.
   from more_itertools import grouper
   n_floors = 4
 
-  def distance_estimate(state):
+  def distance_estimate(state, end):
       items = state[1]
       return sum((val / 2) * (n_floors - i - 1) for i, val in enumerate(items))
 
@@ -350,7 +350,7 @@ So I think the way to go is A*.
               current_cost = costs[state] + 1
               if current_cost < costs[neighbor]:
                   costs[neighbor] = current_cost
-                  q.put((current_cost + distance_function(neighbor), neighbor))
+                  q.put((current_cost + distance_function(neighbor, end), neighbor))
       return costs[end]
 
   def is_valid(items):
@@ -381,7 +381,7 @@ So I think the way to go is A*.
 
   state = 0, (0, 0, 0, 0, 1, 1, 1, 1, 1, 2)
   target = 3, (3,)*len(state[1])
-  astar(state, target, constrained_neighbors, unconstrained_distance_estimate)
+  astar(state, target, constrained_neighbors, distance_estimate)
 #+end_src
 
 ** Part 2
@@ -391,7 +391,7 @@ Reducing the search space by only letting the elevator move down with one item a
 #+begin_src jupyter-python
   state = 0, (0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2)
   target = 3, (3,)*len(state[1])
-  astar(state, target, constrained_neighbors, unconstrained_distance_estimate)
+  astar(state, target, constrained_neighbors, distance_estimate)
 #+end_src
 
 * Day 12
@@ -429,4 +429,47 @@ This is a fairly straightforward implementation of the problem description, with
   registers = defaultdict(int)
   registers['c'] = 1
   run(data, registers)
+#+end_src
+
+* Day 13
+[[https://adventofcode.com/2016/day/13][A Maze of Twisty Little Cubicles]]
+
+** Part 1
+#+begin_src jupyter-python
+  def is_valid(x, y, secret=1362):
+      if x < 0 or y < 0:
+          return False
+      val = x*x + 3*x + 2*x*y + y + y*y + secret
+      ones = f"{val:b}".count("1")
+      return (ones % 2) == 0
+
+  def neighbors(state):
+      x, y = state
+      candidates = [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)]
+      return [candidate for candidate in candidates if is_valid(*candidate)]
+
+  def distance_function(point, target):
+      return abs(point[0] - target[0]) + abs(point[1] - target[1])
+  start = (1, 1)
+  target = 31, 39
+  astar(start, target, neighbors, distance_function)
+#+end_src
+
+** Part 2
+#+begin_src jupyter-python
+  active = [(1, 1)]
+  visited = set()
+
+  for i in range(51):
+      new_states = []
+      for state in active:
+          if state in visited:
+              continue
+          visited.add(state)
+          new_neighbors = [neighbor for neighbor in neighbors(state)
+                           if neighbor not in visited]
+          new_states += new_neighbors
+      active = new_states
+  len(visited)
+
 #+end_src
