@@ -472,3 +472,29 @@ For the second, it's the Chinese remainder theorem to the rescue. Code shameless
               result[int(address, 2)] = operand
   sum(result.values())
 #+end_src
+* Day 15
+[[https://adventofcode.com/2020/day/15][Rambunctious Recitation]]
+** Part 1
+#+begin_src jupyter-python
+  prefix = [int(x) for x in open(datadir / "15.txt").read().split(",")]
+  state = {i: idx + 1 for idx, i in enumerate(prefix[:-1])}
+  current = prefix[-1]
+  def update(current, i):
+      if current not in state:
+          next_n = 0
+      else:
+          next_n = i - state[current]
+      state[current] = i
+      return next_n
+  n_turns = 2020
+  for i in range(len(prefix), n_turns):
+      current = update(current, i)
+  current
+#+end_src
+** Part 2
+30 million is just within range where brute force would be plausible. Let's try it:
+#+begin_src jupyter-python
+  for i in range(n_turns, 30_000_000):
+      current = update(current, i)
+  current
+#+end_src
