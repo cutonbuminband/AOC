@@ -480,3 +480,43 @@ For the second, it's the Chinese remainder theorem to the rescue. Code shameless
       current = update(current, i)
   current
 #+end_src
+* Day 16
+[[https://adventofcode.com/2020/day/16][Ticket Translation]]
+** Part 1
+I could do this by trying to merge ranges of valid values. Or I could just instantiate a set with every valid value...
+#+begin_src jupyter-python
+  data = open(datadir / "16.txt").read()
+  rules, own, nearby = data[:-1].split("\n\n")
+  valid = set()
+  for rule in rules.split("\n"):
+      limits = [int(x) for x in re.findall(r"\d+", rule)]
+      for lower, upper in zip(limits[::2], limits[1::2]):
+          valid |= set(range(lower, upper + 1))
+  sum(map(lambda x: 0 if int(x) in valid else int(x), nearby[nearby.index("\n") + 1:].replace("\n", ",").split(",")))
+#+end_src
+
+** Part 2
+I'm not entirely surprised that that's where he went for part 2
+#+begin_src jupyter-python
+  ranges = defaultdict(set)
+  for rule in rules.split("\n"):
+      name, _ = rule.split(":")
+      limits = [int(x) for x in re.findall(r"\d+", rule)]
+      for lower, upper in zip(limits[::2], limits[1::2]):
+          ranges[name] |= set(range(lower, upper + 1))
+  own_ticket = [int(x) for x in own.split("\n")[1].split(",")]
+  nearby_tickets = [[int(x) for x in line.split(",")] for line in nearby.split("\n")[1:]]
+  nearby_tickets = np.array([x for x in nearby_tickets if all(y in valid for y in x)])
+  assignments = [0] * len(own_ticket)
+  while ranges:
+      for column in range(len(assignments)):
+          if assignments[column]:
+              continue
+          candidates = [key for key in ranges.keys()
+                        if all(x in ranges[key] for x in nearby_tickets[:, column])]
+          if len(candidates) == 1:
+              assignments[column] = candidates[0]
+              del ranges[candidates[0]]
+  np.product([own_ticket[idx] for idx, assignment in enumerate(assignments) if "departure" in assignment])
+#+end_src
+
