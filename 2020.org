@@ -413,26 +413,8 @@ This one looks like a bunch of modular arithmetic. The first one is just whichev
 ** Part 2
 For the second, it's the Chinese remainder theorem to the rescue. Code shamelessly copied from wikipedia.
 #+begin_src jupyter-python
-  N = np.product([x[0] for x in bus_moduli])
-  # Find numbers m and M such that m*a + M*b = 1 (mod a * b)
-  def bezout(a, b):
-      old_r, r = a, b
-      old_s, s = 1, 0
-      old_t, t = 0, 1
-
-      while r != 0:
-          quotient = old_r // r
-          old_r, r = r, old_r - quotient * r
-          old_s, s = s, old_s - quotient * s
-          old_t, t = t, old_t - quotient * t
-
-      return old_s, old_t
-
-  total = 0
-  for n, a in bus_moduli:
-      m, M = bezout(n, N // n)
-      total += a * M * (N // n)
-  total % N
+  from utils import crt
+  crt(bus_moduli)
     #+end_src
 
 * Day 14

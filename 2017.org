@@ -358,3 +358,59 @@ For part 2, instead of finding just the sum of the moves, we look at the running
   i
 #+end_src
 
+* Day 13
+[[https://adventofcode.com/2017/day/13][Packet Scanners]]
+** Part 1
+The only slightly tricky thing here is that we have to convert a depth to a cycle length. In each cycle, a scanner of depth d moves down (d - 1) steps, and then back up (d - 1) steps, so the cycle length is 2 * d - 2.
+#+begin_src jupyter-python
+  data = [list(map(int, line.strip().split(": "))) for line in open(datadir / "13.txt").readlines()]
+  sum(map(lambda x: 0 if (x[0] % (x[1] * 2 - 2)) else x[0] * x[1], data))
+#+end_src
+** Part 2
+So, this is another application of the chinese remainder theorem, after a bit of massaging. We have multiple scanners with the same depth at different positions; each such scanner invalidates on congruence class of the integers mod cycle length.
+
+In my input, the depths were almost coprime in the sense that there was one of the scanner depths that divided all the others, and apart from that, the depths were either coprime, or divided one another exactly.
+
+The depths that divide one another exactly can be handled by unfolding the restriction of the smaller number to its higher multiples, and then removing the smaller number from consideration. After that, we can find what numbers would be valid for each depth.
+
+For most of these, there was only one such modulus. Taking all the ones for which that's the case we can use the chinese remainder theorem to solve that system of congruences, and hen manually move to higher congruences to satisfy the remaining scanners.
+#+begin_src jupyter-python
+  import math
+  from utils import crt
+  scanners = defaultdict(list)
+  for position, depth in data:
+      scanners[2 * depth - 2].append((- position) % (2 * depth - 2))
+      scanners[2 * depth - 2].sort()
+  seen = []
+  for s1, s2 in itertools.combinations(scanners.keys(), 2):
+      s2, s1 = sorted([s1, s2])
+      if (s1 % s2) == 0:
+          seen.append(s2)
+          offsets = list(range(0, s1, s2))
+          new_restrictions = list(map(sum, list(itertools.product(offsets, scanners[s2]))))
+          restrictions = sorted(set(new_restrictions + scanners[s1]))
+          scanners[s1] = restrictions
+  for key in set(seen):
+      del scanners[key]
+  valid = {}
+  for scanner in scanners:
+      valid[scanner] = sorted(set(range(scanner)) - set(scanners[scanner]))
+  g = math.gcd(*(list(valid.keys()) + [element for numbers in valid.values() for element in numbers]))
+  congruences = []
+  remainder = {}
+  for modulus in valid:
+      if len(valid[modulus]) == 1:
+          congruences.append((int(modulus / g), int( valid[modulus][0]/ g)))
+      else:
+          remainder[int(modulus / g)] = [int(x / g) for x in valid[modulus] ]
+  N = np.product([x[0] for x in congruences])
+  x = crt(congruences) - N
+  while True:
+      x += N
+      for v in remainder:
+          if (x % v) not in remainder[v]:
+              break
+      else:
+          break
+  2 * x
+#+end_src
