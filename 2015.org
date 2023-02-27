@@ -362,3 +362,29 @@ Here we see the magic of the defaultdict - since all of the pairs involving "You
           maxval = score
   maxval
 #+end_src
+
+* Day 14
+[[https://adventofcode.com/2015/day/14][Reindeer Olympics]]
+** Part 1
+#+begin_src jupyter-python
+  data = open(datadir / "14.txt").readlines()
+  reindeer = [list(map(int, re.findall("-?\d+", line))) for line in data]
+  def score(time, speed, on, off):
+      cycle_length = on + off
+      n_cycles = time // (cycle_length)
+      offset = min(on, n_cycles % cycle_length)
+      return speed * (n_cycles * on + offset)
+  max(map(lambda x: score(2503, *x), reindeer))
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  wins = np.zeros(len(numbers))
+  positions = np.zeros(len(numbers))
+  for i in range(2503):
+      for idx, (speed, on, off) in enumerate(reindeer):
+          cycle_length = on + off
+          if i % cycle_length < on:
+              positions[idx] += speed
+      wins += (positions == max(positions))
+  max(wins)
+#+end_src
