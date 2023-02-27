@@ -40,19 +40,19 @@
 #+begin_src jupyter-python
   from intcode import step
   program = [int(x) for x in open(datadir / "2.txt").readline().split(',')]
-  def run(program, ip=0, noun=12, verb=2):
+  def solve(program, ip=0, noun=12, verb=2):
       program = program.copy()
       program[1] = noun
       program[2] = verb
       while program[ip] != 99:
           program, ip, _ = step(program, ip)
       return program[0]
-  run(program)
+  solve(program)
 #+end_src
 
 #+begin_src jupyter-python
   for noun, verb in itertools.product(range(100), range(100)):
-      result = run(program, 0, noun, verb)
+      result = solve(program, 0, noun, verb)
       if result == 19690720:
           result = 100 * noun + verb
           break
@@ -164,12 +164,9 @@ That gives this plot for the two different wires
 [[https://adventofcode.com/2019/day/5][Sunny with a Chance of Asteroids]]
 ** Part 1
 #+begin_src jupyter-python
-  from intcode import step
-  ip = 0
+  from intcode import run
   program = np.loadtxt(datadir / "5.txt", dtype=int, delimiter=",")
-  inputs = [1]
-  while program[ip] != 99:
-      program, ip, _ = step(program, ip, inputs)
+  list(run(program, [1]))[-1]
 #+end_src
 
 ** Part 2
@@ -177,11 +174,7 @@ That gives this plot for the two different wires
   ip = 0
   program = np.loadtxt(datadir / "5.txt", dtype=int, delimiter=",")
   inputs = [5]
-  while True:
-      opcode = program[ip]
-      if opcode == 99:
-          break
-      program, ip, _ = step(program, ip, inputs)
+  next(run(program, [5]))
 #+end_src
 
 * Day 6
@@ -295,16 +288,12 @@ Allowing arbitrary final addresses was accomplished by the very dirty hack of ch
 
   part1 = program.copy()
   ip = 0
-  while part1[ip] != 99:
-      part1, ip, relative_base = step(part1, ip, inputs=[1], relative_base=relative_base)
+  next(run(part1, inputs=[1]))
 #+end_src
 
 ** Part 2
 #+begin_src jupyter-python
-  relative_base, ip = 0, 0
-  part2 = program
-  while part2[ip] != 99:
-      part2, ip, relative_base = step(part2, ip, inputs=[2], relative_base=relative_base)
+  next(run(program, inputs=[2]))
 #+end_src
 
 * Day 10

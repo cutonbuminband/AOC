@@ -40,3 +40,12 @@ def step(program, ip, inputs=None, outputs=None, relative_base=0):
     elif instruction == 9:
         relative_base += params[0]
     return program, ip + l, relative_base
+
+
+def run(program, inputs=None, relative_base=0):
+    outputs = []
+    ip = 0
+    while (program[ip] % 100) != 99:
+        program, ip, relative_base = step(program, ip, inputs, outputs, relative_base)
+        if outputs:
+            yield outputs.pop()
