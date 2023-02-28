@@ -167,14 +167,16 @@ That gives this plot for the two different wires
 ** Part 1
 #+begin_src jupyter-python
   from intcode import IntCodeProgram
-  program = IntCodeProgram(np.loadtxt(datadir / "5.txt", dtype=int, delimiter=","))
-  list(program.run([1]))[-1]
+  program = IntCodeProgram(np.loadtxt(datadir / "5.txt", dtype=int, delimiter=","),
+                           inputs=[1])
+  list(program.run())[-1]
 #+end_src
 
 ** Part 2
 #+begin_src jupyter-python
   program.reset()
-  next(program.run([5]))
+  program.inputs = [5]
+  next(program.run())
 #+end_src
 
 * Day 6
@@ -215,8 +217,8 @@ Moving from orbit A to orbit B can be accomplished by moving to the last common 
       val = 0
       for item in input_sequence:
           program.reset()
-          inputs = [item, val]
-          val = next(program.run(inputs))
+          program.inputs = [item, val]
+          val = next(program.run())
       results.append(val)
   max(results)
 #+end_src
@@ -227,7 +229,7 @@ Moving from orbit A to orbit B can be accomplished by moving to the last common 
   for seq in itertools.permutations(range(5, 10)):
       inputs = [[x] for x in seq]
       inputs[0].append(0)
-      iterators = [IntCodeProgram(opcodes).run(inputs[i]) for i in range(5)]
+      iterators = [IntCodeProgram(opcodes, inputs=inputs[i]).run() for i in range(5)]
       i = 0
       while True:
           try:
@@ -271,13 +273,15 @@ Adding the required functionality to the intcode compiler wasn't too tricky. Opc
 Allowing arbitrary final addresses was accomplished by the very dirty hack of changing the program type in this problem from a list to defaultdict(int). If it works, it works.
 #+begin_src jupyter-python
   program = IntCodeProgram(np.loadtxt(datadir / "9.txt", dtype=int, delimiter=","))
-  next(program.run([1]))
+  program.inputs = [1]
+  next(program.run())
 #+end_src
 
 ** Part 2
 #+begin_src jupyter-python
   program.reset()
-  next(program.run([2]))
+  program.inputs = [2]
+  next(program.run())
 #+end_src
 
 * Day 10
@@ -318,14 +322,14 @@ There are more than 200 visible asteroids, so we only need to worry about the on
       program.reset()
       field = defaultdict(int)
       count = 0
-      inputs = [startval]
+      program.inputs = [startval]
       painted = set()
-      for colour, turn in more_itertools.chunked(program.run(inputs), 2):
+      for colour, turn in more_itertools.chunked(program.run(), 2):
           field[position] = colour
           painted.add(position)
           direction = direction * (1j * (1 - 2 * turn))
           position += direction
-          inputs.append(field[position])
+          program.inputs.append(field[position])
       return painted, field
   len(solve(0)[0])
 #+end_src
@@ -401,7 +405,7 @@ I don't know what optimizations are possible here, but an obvious one is to real
   from intcode import IntCodeProgram
   program = IntCodeProgram(np.loadtxt(datadir / "13.txt", dtype=int, delimiter=","))
   tiles = set()
-  for x, y, kind in more_itertools.chunked(program.run(0), 3):
+  for x, y, kind in more_itertools.chunked(program.run(), 3):
       if kind == 2:
           tiles.add((x, y))
   len(tiles)
@@ -411,32 +415,18 @@ I don't know what optimizations are possible here, but an obvious one is to real
 #+begin_src jupyter-python
   program.reset()
   program.set(0, 2)
-  states = [(program.copy(), (-1,)), (program.copy(), (0,)), (program.copy(), (1,))]
-  results = []
-  visited_states = set()
-  for i in range(150000):
-      if not states:
-          break
-      program, parameters = states.pop()
-      values = more_itertools.chunked(program.run([parameters[-1]]), 3)
-      while True:
-          try:
-              x, y, kind = next(values)
-              if x == -1 and y == 0:
-                  results.append(kind)
-          except StopIteration:
-              break
-          except IndexError:
-              current_state = hash(program)
-              if current_state not in visited_states:
-                  new_states = [(program.copy(), parameters + (-1,)),
-                                (program.copy(), parameters + (0,)),
-                                (program.copy(), parameters + (1,)),
-                                ]
-                  states += new_states
-                  visited_states.add(current_state)
-              break
-
-  print(max(results))
+  ball, paddle = 0, 0
+  def ai():
+      global ball
+      global paddle
+      return (ball > paddle) - (ball < paddle)
+  program.set_input(ai)
+  values = more_itertools.chunked(program.run(), 3)
+  for x, y, kind  in values:
+      result = result if (x != -1) else kind
+      paddle = paddle if (kind != 3) else x
+      ball = ball if (kind != 4) else x
+  result
 #+end_src
+
 

@@ -11,7 +11,7 @@ instruction_lengths = {1: 4, 2: 4, 3: 2, 4: 2, 5: 3, 6: 3, 7: 4, 8: 4, 9: 2}
 
 
 class IntCodeProgram:
-    def __init__(self, opcodes):
+    def __init__(self, opcodes, inputs=None):
         program = defaultdict(int)
         for idx, opcode in enumerate(opcodes):
             program[idx] = int(opcode)
@@ -19,8 +19,19 @@ class IntCodeProgram:
         self.program = program.copy()
         self.relative_base = 0
         self.ip = 0
+        self.inputs = inputs if inputs is not None else []
+        self.input_function = None
 
-    def step(self, inputs=None):
+    def set_input(self, f):
+        self.input_function = f
+
+    def get_input(self):
+        if self.inputs:
+            return self.inputs.pop(0)
+        elif self.input_function:
+            return self.input_function()
+
+    def step(self):
         op = self.program[self.ip]
         instruction = op % 100
         l = instruction_lengths[instruction]
@@ -35,10 +46,7 @@ class IntCodeProgram:
             self.program[dest] = binops[instruction](*params[:-1])
         elif instruction == 3:
             dest = vals[0] + offsets[0]
-            if inputs is None:
-                self.program[dest] = int(input("Please input the parameter\n"))
-            else:
-                self.program[dest] = inputs.pop(0)
+            self.program[dest] = self.get_input()
 
         elif instruction == 4:
             self.ip += l
@@ -52,11 +60,11 @@ class IntCodeProgram:
         self.ip += l
         return None
 
-    def run(self, inputs=None):
+    def run(self):
         outputs = []
         ip = 0
         while (self.program[self.ip] % 100) != 99:
-            output = self.step(inputs)
+            output = self.step()
             if output is not None:
                 yield output
 
@@ -76,14 +84,3 @@ class IntCodeProgram:
     def set(self, position, value):
         self.program[position] = value
         self.initial_program[position] = value
-
-    def __eq__(self, other):
-        return (self.program, self.ip, self.relative_base) == (
-            other.program,
-            other.ip,
-            other.relative_base,
-        )
-
-    def __hash__(self):
-        program_tuple = tuple(item for item in self.program.items() if item[1] != 0)
-        return hash((self.ip, self.relative_base, program_tuple))
