@@ -373,7 +373,7 @@ In my input, the depths were almost coprime in the sense that there was one of t
 
 The depths that divide one another exactly can be handled by unfolding the restriction of the smaller number to its higher multiples, and then removing the smaller number from consideration. After that, we can find what numbers would be valid for each depth.
 
-For most of these, there was only one such modulus. Taking all the ones for which that's the case we can use the chinese remainder theorem to solve that system of congruences, and hen manually move to higher congruences to satisfy the remaining scanners.
+For most of these, there was only one such modulus. Taking all the ones for which that's the case we can use the chinese remainder theorem to solve that system of congruences, and then manually move to higher congruences to satisfy the remaining scanners.
 #+begin_src jupyter-python
   import math
   from utils import crt
