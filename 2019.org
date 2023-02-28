@@ -38,15 +38,16 @@
 [[https://adventofcode.com/2019/day/2][1202 Program Alarm]]
 ** Part 1
 #+begin_src jupyter-python
-  from intcode import step
-  program = [int(x) for x in open(datadir / "2.txt").readline().split(',')]
+  from intcode import IntCodeProgram
+  program = IntCodeProgram([int(x) for x in open(datadir / "2.txt").readline().split(',')])
   def solve(program, ip=0, noun=12, verb=2):
-      program = program.copy()
-      program[1] = noun
-      program[2] = verb
-      while program[ip] != 99:
-          program, ip, _ = step(program, ip)
-      return program[0]
+      program.reset()
+      program.program[1] = noun
+      program.program[2] = verb
+      try:
+          val = next(program.run())
+      except StopIteration:
+          return program.program[0]
   solve(program)
 #+end_src
 
@@ -164,17 +165,15 @@ That gives this plot for the two different wires
 [[https://adventofcode.com/2019/day/5][Sunny with a Chance of Asteroids]]
 ** Part 1
 #+begin_src jupyter-python
-  from intcode import run
-  program = np.loadtxt(datadir / "5.txt", dtype=int, delimiter=",")
-  list(run(program, [1]))[-1]
+  from intcode import IntCodeProgram
+  program = IntCodeProgram(np.loadtxt(datadir / "5.txt", dtype=int, delimiter=","))
+  list(program.run([1]))[-1]
 #+end_src
 
 ** Part 2
 #+begin_src jupyter-python
-  ip = 0
-  program = np.loadtxt(datadir / "5.txt", dtype=int, delimiter=",")
-  inputs = [5]
-  next(run(program, [5]))
+  program.reset()
+  next(program.run([5]))
 #+end_src
 
 * Day 6
@@ -207,47 +206,37 @@ Moving from orbit A to orbit B can be accomplished by moving to the last common 
 [[https://adventofcode.com/2019/day/7][Amplification Circuit]]
 ** Part 1
 #+begin_src jupyter-python
-  l = list(map(int, open(datadir / "7.txt").readline().split(',')))
-  input_sequences = itertools.permutations(range(5))
-  maxval = 0
-  for input_sequence in input_sequences:
-      current = list(input_sequence)
-      outputs = [0]
-      while current:
-          inputs = [current.pop(0), outputs.pop(0)]
-          p = l.copy()
-          ip = 0
-          op = p[ip]
-          while op % 100 != 99:
-              p, ip, _ = step(p, ip, inputs, outputs)
-              op = p[ip]
-      if outputs[0] > maxval:
-          maxval = outputs[0]
-  maxval
-
+  from intcode import IntCodeProgram
+  opcodes = np.loadtxt(datadir / "7.txt", dtype=int, delimiter=",")
+  program = IntCodeProgram(opcodes)
+  results = []
+  for input_sequence in itertools.permutations(range(5)):
+      val = 0
+      for item in input_sequence:
+          program.reset()
+          inputs = [item, val]
+          val = next(program.run(inputs))
+      results.append(val)
+  max(results)
 #+end_src
 
 ** Part 2
 #+begin_src jupyter-python
-  input_sequences = itertools.permutations(range(5, 10))
-  maxval = 0
-  for seq in input_sequences:
-      inputs = [[seq[0], 0], [seq[1]], [seq[2]], [seq[3]], [seq[4]]]
-      programs = [[l.copy(), 0], [l.copy(), 0], [l.copy(), 0], [l.copy(), 0], [l.copy(), 0]]
-      done = False
-      while not done:
-          done = True
-          for i in range(5):
-              p, ip = programs[i]
-              op = p[ip]
-              if op % 100 != 99:
-                  p, ip, _ = step(p, ip,
-                                  inputs=inputs[i], outputs=inputs[(i + 1) % 5])
-                  programs[i] = [p, ip]
-                  done = False
-      if inputs[0][0] > maxval:
-          maxval = inputs[0][0]
-  maxval
+  results = []
+  for seq in itertools.permutations(range(5, 10)):
+      inputs = [[x] for x in seq]
+      inputs[0].append(0)
+      iterators = [IntCodeProgram(opcodes).run(inputs[i]) for i in range(5)]
+      i = 0
+      while True:
+          try:
+              val = next(iterators[i % 5])
+              inputs[(i + 1) % 5].append(val)
+              i += 1
+          except StopIteration:
+              break
+      results.append(val)
+  max(results)
 #+end_src
 
 * Day 8
@@ -280,20 +269,14 @@ Adding the required functionality to the intcode compiler wasn't too tricky. Opc
 
 Allowing arbitrary final addresses was accomplished by the very dirty hack of changing the program type in this problem from a list to defaultdict(int). If it works, it works.
 #+begin_src jupyter-python
-  relative_base = 0
-  program = defaultdict(int)
-  opcodes = open(datadir / '9.txt').read().split(",")
-  for idx, opcode in enumerate(opcodes):
-      program[idx] = int(opcode)
-
-  part1 = program.copy()
-  ip = 0
-  next(run(part1, inputs=[1]))
+  program = IntCodeProgram(np.loadtxt(datadir / "9.txt", dtype=int, delimiter=","))
+  next(program.run([1]))
 #+end_src
 
 ** Part 2
 #+begin_src jupyter-python
-  next(run(program, inputs=[2]))
+  program.reset()
+  next(program.run([2]))
 #+end_src
 
 * Day 10
@@ -327,37 +310,29 @@ There are more than 200 visible asteroids, so we only need to worry about the on
 [[https://adventofcode.com/2019/day/11][Space Police]]
 ** Part 1
 #+begin_src jupyter-python
-  from intcode import run
-  program = defaultdict(int)
-  opcodes = open(datadir / '11.txt').read().split(",")
-  for idx, opcode in enumerate(opcodes):
-      program[idx] = int(opcode)
-
-  inputs = [0]
-  def solve(program, startval, painted=set()):
-      program = program.copy()
+  from intcode import IntCodeProgram
+  program = IntCodeProgram(np.loadtxt(datadir / "11.txt", dtype=int, delimiter=","))
+  def solve(startval):
       position, direction = 0 + 0j, 1j
+      program.reset()
       field = defaultdict(int)
       count = 0
       inputs = [startval]
-      for value in run(program, inputs):
-          if count % 2 == 0:
-              field[position] = value
-              painted.add(position)
-          else:
-              direction = direction * (1j * (1 - 2 * value))
-              position += direction
-              inputs.append(field[position])
-          count += 1
+      painted = set()
+      for colour, turn in more_itertools.chunked(program.run(inputs), 2):
+          field[position] = colour
+          painted.add(position)
+          direction = direction * (1j * (1 - 2 * turn))
+          position += direction
+          inputs.append(field[position])
       return painted, field
-  painted, _ = solve(program, 0)
-  len(painted)
+  len(solve(0)[0])
 #+end_src
 
 
 ** Part 2
 #+begin_src jupyter-python
-  _, field = solve(program, 1)
+  _, field = solve(1)
   ones = np.array([x for x in field.keys() if field[x]])
   offset = ones.real.min() + 1j*ones.imag.min()
   ones = ones - offset
