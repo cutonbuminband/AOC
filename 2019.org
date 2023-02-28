@@ -11,6 +11,7 @@
   import functools
   import itertools
   import more_itertools
+  import collections
   import re
   datadir = Path("data/2019")
 #+end_src
@@ -391,3 +392,51 @@ I don't know what optimizations are possible here, but an obvious one is to real
   math.lcm(*cycles)
 
 #+end_src
+
+* Day 13
+[[https://adventofcode.com/2019/day/13][Care Package]]
+
+** Part 1
+#+begin_src jupyter-python
+  from intcode import IntCodeProgram
+  program = IntCodeProgram(np.loadtxt(datadir / "13.txt", dtype=int, delimiter=","))
+  tiles = set()
+  for x, y, kind in more_itertools.chunked(program.run(0), 3):
+      if kind == 2:
+          tiles.add((x, y))
+  len(tiles)
+#+end_src
+
+** Part 2
+#+begin_src jupyter-python
+  program.reset()
+  program.set(0, 2)
+  states = [(program.copy(), (-1,)), (program.copy(), (0,)), (program.copy(), (1,))]
+  results = []
+  visited_states = set()
+  for i in range(150000):
+      if not states:
+          break
+      program, parameters = states.pop()
+      values = more_itertools.chunked(program.run([parameters[-1]]), 3)
+      while True:
+          try:
+              x, y, kind = next(values)
+              if x == -1 and y == 0:
+                  results.append(kind)
+          except StopIteration:
+              break
+          except IndexError:
+              current_state = hash(program)
+              if current_state not in visited_states:
+                  new_states = [(program.copy(), parameters + (-1,)),
+                                (program.copy(), parameters + (0,)),
+                                (program.copy(), parameters + (1,)),
+                                ]
+                  states += new_states
+                  visited_states.add(current_state)
+              break
+
+  print(max(results))
+#+end_src
+
