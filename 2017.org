@@ -277,7 +277,7 @@ count
 #+begin_src jupyter-python
   data = "165,1,255,31,87,52,24,113,0,91,148,254,158,2,73,153"
   lengths = [int(length) for length in data.split(",")]
-  def hash(lengths):
+  def knot_hash1(lengths):
       knots = collections.deque(range(256))
       total = 0
       for idx, length in enumerate(lengths):
@@ -288,17 +288,20 @@ count
           total += length + idx
       knots.rotate(total)
       return knots
-  knots = hash(lengths)
+  knots = knot_hash1(lengths)
   knots.popleft() * knots.popleft()
 #+end_src
 
 ** Part 2
 #+begin_src jupyter-python
-  lengths = [ord(x) for x in data] + [17, 31, 73, 47, 23]
-  lengths = itertools.chain.from_iterable(itertools.repeat(lengths, 64))
-  knots = list(hash(lengths))
-  digits = [functools.reduce(lambda x, y: x ^ y, knots[16*i: 16*(i+1)]) for i in range(16)]
-  ''.join(['{:0>2x}'.format(x) for x in digits])
+  def knot_hash64(s):
+      numbers = [ord(x) for x in s] + [17, 31, 73, 47, 23]
+      lengths = itertools.chain.from_iterable(itertools.repeat(numbers, 64))
+      knots = list(knot_hash1(lengths))
+      digits = [functools.reduce(lambda x, y: x ^ y, knots[16*i: 16*(i+1)]) for i in range(16)]
+      return   ''.join(['{:0>2x}'.format(x) for x in digits])
+  knot_hash64(data)
+
 #+end_src
 
 * Day 11
@@ -412,5 +415,43 @@ For most of these, there was only one such modulus. Taking all the ones for whic
               break
       else:
           break
-  2 * x
+  g * x
+#+end_src
+
+* Day 14
+[[https://adventofcode.com/2017/day/14][Disk Defragmentation]]
+** Part 1
+#+begin_src jupyter-python
+  prefix = open(datadir / "14.txt").read().strip() + "-"
+  hashes = [knot_hash64(prefix + str(i)) for i in range(128)]
+  bitstrings = [f"{int(h, 16):0128b}" for h in hashes]
+  sum(x.count("1") for x in bitstrings)
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  field = np.array([[ord(x) - ord("0") for x in b] for b in bitstrings])
+  graph = defaultdict(list)
+  for i, j in itertools.product(range(128), range(128)):
+      neighbors = [(i, j+1), (i + 1, j)]
+      neighbors = [(x, y) for x, y in neighbors if (x < 128 and y < 128)]
+      if not field[i, j]:
+          continue
+      for neighbor in neighbors:
+          if field[neighbor]:
+              graph[(i, j)].append(neighbor)
+              graph[neighbor].append((i, j))
+  count = field.sum() - len(graph)  # singletons
+  while graph:
+      queue = collections.deque([list(graph.keys())[0]])
+      visited = set()
+      while queue:
+          current = queue.pop()
+          visited.add(current)
+          for node in graph[current]:
+              if node not in visited:
+                  queue.append(node)
+      for node in visited:
+          del graph[node]
+      count += 1
+  count
 #+end_src
