@@ -441,3 +441,73 @@ Simulating the 50 billion generations is impossible, so something cleverer is ne
       state = new_state
   (((np.arange(new_state.shape[0]) - generations) + (50_000_000_000 - i))*new_state).sum()
 #+end_src
+
+* Day 13
+
+** Part 1
+[[https://adventofcode.com/2018/day/13][Mine Cart Madness]]
+#+begin_src jupyter-python
+  characters = r" |-/\+><v^"
+  cart_labels = {">": ("-", 1), "<": ("-", -1), "v": ("|", -1j), "^": ("|", 1j)}
+  data = open(datadir / "13.txt").readlines()
+  graph = {}
+  carts = []
+  carts_part2 = []
+  for y, line in enumerate(data):
+      for x, char in enumerate(line.strip("\n")):
+          position = x - 1j * y
+          if char in cart_labels:
+              char, direction = cart_labels[char]
+              carts.append([position, direction, itertools.cycle([1j, 1, -1j])])
+              carts_part2.append([position, direction, itertools.cycle([1j, 1, -1j])])
+          graph[position] = characters.index(char)
+  i = 0
+  while True:
+      for cart in carts:
+          new_position = cart[0] + cart[1]
+          if new_position in [x[0] for x in carts]:
+              result = int(new_position.real), -int(new_position.imag)
+              break
+          cart[0] = new_position
+          tile = graph[new_position]
+          if tile == 3:
+              cart[1] = cart[1].imag + 1j * cart[1].real
+          elif tile == 4:
+              cart[1] = -(cart[1].imag + 1j * cart[1].real)
+          elif tile == 5:
+              cart[1] = cart[1] * next(cart[2])
+      else:
+          i += 1
+          continue
+      break
+  print(result)
+#+end_src
+
+** Part 2
+#+begin_src jupyter-python
+  carts = carts_part2
+  carts.sort(key = lambda x: (-x[0].imag, x[0].real))
+  while len(carts) > 1:
+      is_crashed = [False] * len(carts)
+      for idx, cart in enumerate(carts):
+          if is_crashed[idx]:
+              continue
+          new_position = cart[0] + cart[1]
+          crashes = [i for i, cart2 in enumerate(carts)
+                     if new_position == cart2[0] and not is_crashed[i]]
+          for crash in crashes:
+              is_crashed[idx] = True
+              is_crashed[crash] = True
+              continue
+          cart[0] = new_position
+          tile = graph[new_position]
+          if tile == 3:
+              cart[1] = cart[1].imag + 1j * cart[1].real
+          elif tile == 4:
+              cart[1] = -(cart[1].imag + 1j * cart[1].real)
+          elif tile == 5:
+              cart[1] = cart[1] * next(cart[2])
+      carts = [cart for (crash, cart) in zip(is_crashed, carts) if not crash]
+      carts.sort(key = lambda x: (-x[0].imag, x[0].real))
+  print(int(carts[0][0].real),int(-carts[0][0].imag),sep=",")
+#+end_src
