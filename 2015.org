@@ -388,3 +388,59 @@ Here we see the magic of the defaultdict - since all of the pairs involving "You
       wins += (positions == max(positions))
   max(wins)
 #+end_src
+
+* Day 15
+[[https://adventofcode.com/2015/day/15][Science for Hungry People]]
+
+** Part 1
+#+begin_src jupyter-python
+  data = open(datadir / "15.txt").readlines()
+  data = np.array([[int(x) for x in re.findall("-?\d+", line)] for line in data]).T
+#+end_src
+
+Since each of the values has to be positive, we can derive some constraints on how much of each ingredient we can use. We know there are 100 of each in total, so letting the four variables be $w, x, y, z$, we have $w + x + y + z = 100$. Additionally, since only one ingredient contributes a positive value to any given quantitity we have to use at least one of each. With that out of the way we can use the matrix to set up the following system of inequalities:
+
+
+\begin{align*}
+ 3w - 3x - y &> 0 \\
+ 4y - 3z &> 0 \\
+ -3w + 2z &> 0
+\end{align*}
+
+From that we can derive the following bounds for the amount of each ingredient
+
+\begin{align*}
+1 &\leq w\leq 39\\
+1 &\leq x\leq 39\\
+1 &\leq y\leq 72\\
+1 &\leq z\leq 65
+\end{align*}
+
+For example, the upper bound on $w$ follows from the last inequality, which implies that $z > 1.5 w$. The one on $x$ comes from the first inequality, which implies that $x < w$.
+
+The last thing to consider is that once three of the values are fixed, the fourth is known. Together, these optimizations let us reduce the cases we have to consider from 1 million to less than 50k.
+#+begin_src jupyter-python
+
+  initial_bounds = [[1, 39 + 1], [1, 39 + 1], [1, 72 + 1], [1, 65 + 1]]
+  def calculate(part=1):
+      maxval = 0
+      for w in range(*initial_bounds[0]):
+          for x in range(1, w):
+              left, right = initial_bounds[2]
+              new_y = 3 * (w - x)
+              for y in range(left, min(right, new_y)):
+                  z = 100 - x - y - w
+                  score = (data @ (w, x, y, z))
+                  if (score <= 0).any() or (part == 2 and (score[-1] != 500)):
+                      continue
+                  val = np.product(score[:-1])
+                  if val > maxval:
+                      maxval = val
+      return maxval
+  calculate()
+#+end_src
+
+** Part 2
+#+begin_src jupyter-python
+  calculate(2)
+#+end_src
