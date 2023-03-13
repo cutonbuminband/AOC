@@ -511,3 +511,43 @@ Simulating the 50 billion generations is impossible, so something cleverer is ne
       carts.sort(key = lambda x: (-x[0].imag, x[0].real))
   print(int(carts[0][0].real),int(-carts[0][0].imag),sep=",")
 #+end_src
+
+* Day 14
+[[https://adventofcode.com/2018/day/14][Chocolate Charts]]
+** Part 1
+#+begin_src jupyter-python
+  import functools
+  def solve(n):
+      e1, e2 = 0, 1
+      recipes = [3, 7]
+      while len(recipes) < n + 10:
+          v1, v2 = recipes[e1], recipes[e2]
+          tens, units = divmod(v1 + v2, 10)
+          recipes += [tens, units] if tens else [units]
+          l = len(recipes)
+          e1, e2 = (e1 + v1 + 1) % l, (e2 + v2 + 1) % l
+      # print(recipes)
+      return functools.reduce(lambda x, y: 10*x + y, recipes[n: n + 10])
+  solve(157901)
+
+#+end_src
+
+** Part 2
+#+begin_src jupyter-python
+  def solve(n):
+      seq = [int(x) for x in str(n)]
+      s = len(seq)
+      e1, e2 = 0, 1
+      recipes = [3, 7]
+      while recipes[-s:] != seq and recipes[-s - 1:-1] != seq:
+          v1, v2 = recipes[e1], recipes[e2]
+          tens, units = divmod(v1 + v2, 10)
+          recipes += [tens, units] if tens else [units]
+          l = len(recipes)
+          e1, e2 = (e1 + v1 + 1) % l, (e2 + v2 + 1) % l
+      delta = 0 if recipes[-s:] == seq else 1
+      return l - s - delta
+  solve("157901")
+
+#+end_src
+
