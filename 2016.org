@@ -513,3 +513,20 @@ I was a little uncertain about how to write this cleanly -- all of the logic fro
 #+begin_src jupyter-python
   nth_key_index("yjdafjpo", part=2)
 #+end_src
+* Day 15
+[[https://adventofcode.com/2016/day/15][Timing is Everything]]
+** Part 1
+Another round of the chinese remainder theorem.
+#+begin_src jupyter-python
+  from utils import crt
+  lines = open(datadir / "15.txt").readlines()
+  data = [[int(x) for x in re.findall(r"\d+", line)] for line in lines]
+  remainders = [(x[1], -(x[-1] + x[0])) for x in data]
+  crt(remainders)
+#+end_src
+
+** Part 2
+#+begin_src jupyter-python
+  remainders.append([11, -(len(remainders) + 1)])
+  crt(remainders)
+#+end_src
