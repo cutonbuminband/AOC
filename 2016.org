@@ -473,3 +473,43 @@ This is a fairly straightforward implementation of the problem description, with
   len(visited)
 
 #+end_src
+
+* Day 14
+[[https://adventofcode.com/2016/day/14][One-Time Pad]]
+** Part 1
+#+begin_src jupyter-python
+  import hashlib
+  def infinite_triples(prefix, part=1):
+      r1 = r"(.)\1\1"
+      r2 = r"(.)\1\1\1\1"
+      n = 1
+      while True:
+          s = hashlib.md5((prefix + str(n)).encode()).hexdigest()
+          if part == 2:
+              for i in range(2016):
+                  s = hashlib.md5(s.encode()).hexdigest()
+          if r := re.search(r1, s):
+              yield (r.groups(1)[0], re.findall(r2, s))
+          else:
+              yield False
+          n += 1
+
+  def nth_key_index(prefix, n=64, part=1):
+      triples = filter(lambda x: x[1], enumerate(infinite_triples(prefix, part)))
+      window = [next(triples)]
+      current = 0
+      while current < n:
+         idx, (triple, _) = window.pop(0)
+         while not window or window[-1][0] < idx + 1000:
+             window.append(next(triples))
+         active_quints = [char for triple in window[:-1] for char in triple[1][1]]
+         if triple in active_quints:
+             current += 1
+      return idx + 1
+  nth_key_index("yjdafjpo")
+#+end_src
+** Part 2
+I was a little uncertain about how to write this cleanly -- all of the logic from part one is the same, the only difference is how the hash is generated. In the end, I made a toggle in the `infinite_triples` function, which is why part 2 can be solved by writing just:
+#+begin_src jupyter-python
+  nth_key_index("yjdafjpo", part=2)
+#+end_src
