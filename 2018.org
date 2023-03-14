@@ -11,16 +11,18 @@
   import itertools
   import more_itertools
   import re
-  datadir = Path("data/2018")
+  import utils
+  load = utils.year_load(2018)
 #+end_src
 
 * Day 1
 [[https://adventofcode.com/2018/day/1][Chronal Calibration]]
 ** Part 1
 #+begin_src jupyter-python
-data = np.loadtxt(datadir / "1.txt", dtype=int)
-data.sum()
+  data = load(1, "np")
+  data.sum()
 #+end_src
+
 
 ** Part 2
 #+begin_src jupyter-python
@@ -40,7 +42,7 @@ data.sum()
 [[https://adventofcode.com/2018/day/2][Inventory Managment System]]
 ** Part 1
 #+begin_src jupyter-python
-  lines = [np.array([ord(y) for y in x.strip()]) for x in open(datadir / "2.txt").readlines()]
+  lines = [np.array([ord(y) for y in x.strip()]) for x in load(2)]
   twos = sum([2 in np.unique(list(line), return_counts=True)[1] for line in lines])
   twos * sum([3 in np.unique(list(line), return_counts=True)[1] for line in lines])
 #+end_src
@@ -65,7 +67,7 @@ result
 #+begin_src jupyter-python
   import re
   num = re.compile(r"\d+")
-  data = np.array([[int(x) for x in re.findall(num, line)] for line in open(datadir / "3.txt").readlines()])
+  data = np.array([[int(x) for x in re.findall(num, line)] for line in load(3)])
   field = np.zeros([1000, 1000])
   for pid, x, y, w, h in data:
       field[x:x+w, y:y+h] += 1
@@ -85,7 +87,7 @@ result
 ** Part 1
 #+begin_src jupyter-python
   from time import strptime
-  events = [event[1:].strip().split("] ") for event in open(datadir / "4.txt").readlines()]
+  events = [event[1:].strip().split("] ") for event in load(4)]
   date_format = "%Y-%m-%d %H:%M"
   events = sorted(events, key = lambda event : strptime(event[0], date_format))
   guards = {}
@@ -114,7 +116,7 @@ result
 ** Part 1
 #+begin_src jupyter-python
   import string
-  s = open(datadir / "5.txt").readline().strip()
+  s = load(5)[0].strip()
 
   def reduce(s):
       l = len(s)
@@ -136,8 +138,7 @@ result
 ** Part 1
 The numbers involved are small enough that brute force is a viable approach. It's ugly, but it works. The question is basically asking for the voronoi diagram of the initial points using the L1 metric, but I'm too slow to see an efficient way of calculating that. The approach would have to be something like determining the boundary line between each pair of points, and then intersecting all of those half planes to get the voronoi cell.
 #+begin_src jupyter-python
-  with open(datadir / '6.txt') as f:
-      data = f.readlines()
+  data = load(6)
   coordinates = np.array([list(map(int, re.findall("\d+", line))) for line in data])
   xmax, ymax = coordinates.max(axis=0)
   board = np.zeros([xmax, ymax], dtype=int)
@@ -230,7 +231,7 @@ That gives this pretty cool plot
 ** Part 1
 #+begin_src jupyter-python
   constraints = {}
-  lines = open(datadir / "7.txt").readlines()
+  lines = load(7)
   for tokens in map(str.split, lines):
       parent, child = tokens[1], tokens[-3]
       if parent not in constraints:
@@ -285,7 +286,7 @@ That gives this pretty cool plot
 [[https://adventofcode.com/2018/day/8][Memory Maneuver]]
 ** Part 1
 #+begin_src jupyter-python
-  data = [int(x) for x in open(datadir / "8.txt").read().split()]
+  data = load(8, "integers")[0]
   def parse(tree_list):
       result = {"children": []}
       n_children, n_metadata = tree_list[:2]
@@ -348,9 +349,7 @@ That gives this pretty cool plot
 [[https://adventofcode.com/2018/day/10][The Stars Align]]
 ** Part 1
 #+begin_src jupyter-python
-  data = open(datadir / "10.txt").readlines()
-  regex = r"(-?\d+)"
-  array = np.array([[int(x) for x in re.findall(regex, line)] for line in data])
+  array = np.array(load(10, "integers"))
   positions = array[:, :2].copy()
   velocities = array[:, 2:]
   bounding_box = np.product(positions.max(axis=0) - positions.min(axis=0))
@@ -409,7 +408,7 @@ Brute force over all sizes is slow, but works
 
 ** Part 1
 #+begin_src jupyter-python
-  data = open(datadir / "12.txt").readlines()
+  data = load(12)
   lookup = {".": 0, "#": 1}
   generations = 20
   initial_state = [lookup[char] for char in data[0] if char in lookup]
@@ -449,7 +448,7 @@ Simulating the 50 billion generations is impossible, so something cleverer is ne
 #+begin_src jupyter-python
   characters = r" |-/\+><v^"
   cart_labels = {">": ("-", 1), "<": ("-", -1), "v": ("|", -1j), "^": ("|", 1j)}
-  data = open(datadir / "13.txt").readlines()
+  data = load(13)
   graph = {}
   carts = []
   carts_part2 = []
