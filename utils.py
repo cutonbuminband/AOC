@@ -1,6 +1,8 @@
 import numpy as np
 from pathlib import Path
 
+import re
+
 datadir = Path("data")
 
 
@@ -36,5 +38,16 @@ def crt(congruences):
     return total % N
 
 
-def load(year, day):
-    return open(datadir / str(year) / f"{day}.txt").readlines()
+def year_load(year):
+    def load(day, output="lines"):
+        filename = datadir / str(year) / f"{day}.txt"
+        lines = open(filename).readlines()
+        if output == "lines":
+            return lines
+        if output == "integers":
+            regex = re.compile("-?\d+")
+            return [[int(x) for x in re.findall(regex, line)] for line in lines]
+        if output == "np":
+            return np.loadtxt(filename, dtype=int, delimiter=",")
+
+    return load

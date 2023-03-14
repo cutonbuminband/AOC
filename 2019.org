@@ -13,21 +13,22 @@
   import more_itertools
   import collections
   import re
-  year = 2019
-  from utils import load
+  import utils
+  load = utils.year_load(2019)
 #+end_src
 
 * Day 1
 [[https://adventofcode.com/2019/day/1][The Tyranny of the Rocket Equation]]
 ** Part 1
 #+begin_src jupyter-python
-  data = [int(x) for x in open(datadir / "1.txt").readlines()]
-  sum([x//3 - 2 for x in data])
+  data = load(1, "np")
+  (data // 3 - 2).sum()
 #+end_src
 
 ** Part 2
 #+begin_src jupyter-python
   total = 0
+  data = list(data)
   for val in data:
       fuel = max(val // 3 - 2, 0)
       total += fuel
@@ -41,7 +42,7 @@
 ** Part 1
 #+begin_src jupyter-python
   from intcode import IntCodeProgram
-  program = IntCodeProgram([int(x) for x in open(datadir / "2.txt").readline().split(',')])
+  program = IntCodeProgram([int(x) for x in load(2)[0].split(',')])
   def solve(program, ip=0, noun=12, verb=2):
       program.reset()
       program.program[1] = noun
@@ -67,42 +68,41 @@
 
 ** Part 1
 #+begin_src jupyter-python
-    with open(datadir / '3.txt') as f:
-        lines = [x.strip().split(',') for x in f.readlines()]
+  lines = [x.strip().split(',') for x in load(3)]
 
-    def path_to_segments(path):
-        directions = {"U": 1j, "D": -1j, "R": 1 , "L": -1}
-        deltas = [int(p[1:]) * directions[p[0]] for p in path]
-        ends = np.cumsum(deltas)
-        lengths = np.cumsum(np.abs(deltas))
-        result = np.vstack([np.roll(ends, 1), ends, np.roll(lengths, 1)]).T
-        result[0, 0] = 0
-        result[0, 2] = 0
-        return result
+  def path_to_segments(path):
+      directions = {"U": 1j, "D": -1j, "R": 1 , "L": -1}
+      deltas = [int(p[1:]) * directions[p[0]] for p in path]
+      ends = np.cumsum(deltas)
+      lengths = np.cumsum(np.abs(deltas))
+      result = np.vstack([np.roll(ends, 1), ends, np.roll(lengths, 1)]).T
+      result[0, 0] = 0
+      result[0, 2] = 0
+      return result
 
-    def intersection(s1, s2):
-        if ((s1[1] - s1[0]) * (s2[1] - s2[0])).imag == 0:
-            return False
-        if (s1[0] - s1[1]).imag == 0:
-            s2, s1 = s1, s2
-        if ((s1[0].real - s2[0].real) * (s1[1].real - s2[1].real) < 0
-            and (s1[0].imag - s2[0].imag) * (s1[1].imag - s2[1].imag) < 0):
-            intersection_point = s1[0].real + 1j * s2[0].imag
-            total_length = (s1[2] + s2[2]
-                            + abs((s1[0] - intersection_point).imag)
-                            + abs((s2[0] - intersection_point).real))
-            return intersection_point, total_length
-        return False
+  def intersection(s1, s2):
+      if ((s1[1] - s1[0]) * (s2[1] - s2[0])).imag == 0:
+          return False
+      if (s1[0] - s1[1]).imag == 0:
+          s2, s1 = s1, s2
+      if ((s1[0].real - s2[0].real) * (s1[1].real - s2[1].real) < 0
+          and (s1[0].imag - s2[0].imag) * (s1[1].imag - s2[1].imag) < 0):
+          intersection_point = s1[0].real + 1j * s2[0].imag
+          total_length = (s1[2] + s2[2]
+                          + abs((s1[0] - intersection_point).imag)
+                          + abs((s2[0] - intersection_point).real))
+          return intersection_point, total_length
+      return False
 
-    l1 = path_to_segments(lines[0])
-    l2 = path_to_segments(lines[1])
-    intersections = [i for s1, s2 in itertools.product(l1, l2) if (i := intersection(s1, s2))]
-    int(min( abs(x[0].real) + abs(x[0].imag) for x in intersections))
+  l1 = path_to_segments(lines[0])
+  l2 = path_to_segments(lines[1])
+  intersections = [i for s1, s2 in itertools.product(l1, l2) if (i := intersection(s1, s2))]
+  int(min( abs(x[0].real) + abs(x[0].imag) for x in intersections))
 #+end_src
 
 ** Part 2
 #+begin_src jupyter-python
-min(x[1] for x in intersections)
+  min(x[1] for x in intersections)
 
 #+end_src
 
@@ -168,8 +168,7 @@ That gives this plot for the two different wires
 ** Part 1
 #+begin_src jupyter-python
   from intcode import IntCodeProgram
-  program = IntCodeProgram(np.loadtxt(datadir / "5.txt", dtype=int, delimiter=","),
-                           inputs=[1])
+  program = IntCodeProgram(load(5, "np"), inputs=[1])
   list(program.run())[-1]
 #+end_src
 
@@ -185,7 +184,7 @@ That gives this plot for the two different wires
 ** Part 1
 We construct the DAG as a dictionary, where graph[node] corresponds to node.parent. We use a second dictionary to memoize the counts of how far each node is from the COM
 #+begin_src jupyter-python
-  data = open(datadir / "6.txt").readlines()
+  data = load(6)
   graph = {child: parent for parent, child in map(lambda x: x.strip().split(")"), data)}
 
   @functools.cache
@@ -211,7 +210,7 @@ Moving from orbit A to orbit B can be accomplished by moving to the last common 
 ** Part 1
 #+begin_src jupyter-python
   from intcode import IntCodeProgram
-  opcodes = np.loadtxt(datadir / "7.txt", dtype=int, delimiter=",")
+  opcodes = load(7, "np")
   program = IntCodeProgram(opcodes)
   results = []
   for input_sequence in itertools.permutations(range(5)):
@@ -247,7 +246,7 @@ Moving from orbit A to orbit B can be accomplished by moving to the last common 
 [[https://adventofcode.com/2019/day/8][Space Image Format]]
 ** Part 1
 #+begin_src jupyter-python
-  data = open(datadir / "8.txt").read().strip()
+  data = load(8)[0].strip()
   result = []
   for i in range(len(data) // (25 * 6))[::-1]:
       substring = data[25*6*i: 25*6*(i+1)]
@@ -273,7 +272,7 @@ Adding the required functionality to the intcode compiler wasn't too tricky. Opc
 
 Allowing arbitrary final addresses was accomplished by the very dirty hack of changing the program type in this problem from a list to defaultdict(int). If it works, it works.
 #+begin_src jupyter-python
-  program = IntCodeProgram(np.loadtxt(datadir / "9.txt", dtype=int, delimiter=","))
+  program = IntCodeProgram(load(9, "np"))
   program.inputs = [1]
   next(program.run())
 #+end_src
@@ -297,7 +296,7 @@ Allowing arbitrary final addresses was accomplished by the very dirty hack of ch
       return int(x / factor), int(y / factor)
 
   data = np.array([[0 if char == '.' else 1 for char in line.strip()]
-                   for line in open(datadir / "10.txt").readlines()]).T
+                   for line in load(10)]).T
   ones = np.array(np.where(data)).T
   scores = [len(set(map(lambda x: simplify(*x), ones - ones[i]))) for i in range(len(ones))]
   position = ones[np.argmax(scores)]
@@ -317,7 +316,7 @@ There are more than 200 visible asteroids, so we only need to worry about the on
 ** Part 1
 #+begin_src jupyter-python
   from intcode import IntCodeProgram
-  program = IntCodeProgram(np.loadtxt(datadir / "11.txt", dtype=int, delimiter=","))
+  program = IntCodeProgram(load(11, "np"))
   def solve(startval):
       position, direction = 0 + 0j, 1j
       program.reset()
@@ -353,9 +352,8 @@ There are more than 200 visible asteroids, so we only need to worry about the on
 [[https://adventofcode.com/2019/day/12][The N-Body Problem]]
 ** Part 1
 #+begin_src jupyter-python
-  data = open(datadir / "12.txt").readlines()
-  regex = r"(-?\d+)"
-  positions = np.array([list(map(int, re.findall(regex, line))) for line in data], dtype=int)
+  data = load(12, "integers")
+  positions = np.array(data, dtype=int)
   velocities = np.zeros(positions.shape, dtype=int)
   indices = [0, 1, 2, 3]
   for i in range(1000):
@@ -370,9 +368,8 @@ There are more than 200 visible asteroids, so we only need to worry about the on
 ** Part 2
 I don't know what optimizations are possible here, but an obvious one is to realise that the three different directions (x,y and z) are completely independent, and that instead of searching for one global cycle, we can ask if there are shorter cycles for the coordinates separately. The global cycle length is then the lcm of the individual cycle lengths, as long as each cycle starts at the initial state.
 #+begin_src jupyter-python
-  data = open(datadir / "12.txt").readlines()
-  regex = r"(-?\d+)"
-  positions = np.array([list(map(int, re.findall(regex, line))) for line in data], dtype=int)
+  data = load(12, "integers")
+  positions = np.array(data, dtype=int)
   velocities = np.zeros(positions.shape, dtype=int)
   seen_x = {}
   seen_y = {}
@@ -404,7 +401,7 @@ I don't know what optimizations are possible here, but an obvious one is to real
 ** Part 1
 #+begin_src jupyter-python
   from intcode import IntCodeProgram
-  program = IntCodeProgram(np.loadtxt(datadir / "13.txt", dtype=int, delimiter=","))
+  program = IntCodeProgram(load(13, "np"))
   tiles = set()
   for x, y, kind in more_itertools.chunked(program.run(), 3):
       if kind == 2:
@@ -435,7 +432,7 @@ I don't know what optimizations are possible here, but an obvious one is to real
 
 ** Part 1
 #+begin_src jupyter-python
-  data = load(year, 14)
+  data = load(14)
   graph = {}
   for line in data:
       inputs, output = line.strip().split(" => ")
