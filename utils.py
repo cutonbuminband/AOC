@@ -1,4 +1,7 @@
 import numpy as np
+from pathlib import Path
+
+datadir = Path("data")
 
 
 def bezout(a, b):
@@ -31,3 +34,7 @@ def crt(congruences):
         m, M = bezout(n, N // n)
         total += a * M * (N // n)
     return total % N
+
+
+def load(year, day):
+    return open(datadir / str(year) / f"{day}.txt").readlines()

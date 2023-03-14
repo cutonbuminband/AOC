@@ -13,7 +13,8 @@
   import more_itertools
   import collections
   import re
-  datadir = Path("data/2019")
+  year = 2019
+  from utils import load
 #+end_src
 
 * Day 1
@@ -430,3 +431,59 @@ I don't know what optimizations are possible here, but an obvious one is to real
 #+end_src
 
 
+* Day 14
+
+** Part 1
+#+begin_src jupyter-python
+  data = load(year, 14)
+  graph = {}
+  for line in data:
+      inputs, output = line.strip().split(" => ")
+      output_amount, output_resource = output.split()
+      output_amount = int(output_amount)
+      inputs = [pair.split() for pair in inputs.split(", ")]
+      graph[output_resource] = (output_amount, [x[1] for x in inputs], [int(x[0]) for x in inputs])
+  def topological_sort(graph):
+      if not graph:
+          return []
+      dependencies = functools.reduce(lambda x, y: x | set(y[1]), graph.values(), set())
+      ready = []
+      for key in graph:
+          if key not in dependencies:
+              ready.append(key)
+      assert ready
+      new_graph = {k: v for k, v in graph.items() if k not in ready}
+      return ready + topological_sort(new_graph)
+
+  def part1(n):
+      order = topological_sort(graph)
+      requirements = defaultdict(int)
+      requirements["FUEL"] = n
+      for resource in order:
+          production, kinds, amounts = graph[resource]
+          if resource in requirements:
+              n = int(np.ceil(requirements[resource] / production))
+              for kind, amount in zip(kinds, amounts):
+                  requirements[kind] += n * amount
+          del requirements[resource]
+      return requirements["ORE"]
+  part1(1)
+#+end_src
+
+** Part 2
+We need to somehow reverse the relationship we found above. There are probably smarter ways of doing things, but a binary search works fine:
+#+begin_src jupyter-python
+  target = 1_000_000_000_000
+  lower_limit = target // part1(1)
+  upper_limit = lower_limit * 2
+  while part1(upper_limit) < target:
+      lower_limit *= 2
+      upper_limit *= 2
+  while (upper_limit - lower_limit) != 1:
+      midpoint = int((upper_limit + lower_limit) / 2)
+      if part1(midpoint) > target:
+          upper_limit = midpoint
+      else:
+          lower_limit = midpoint
+  lower_limit
+#+end_src
