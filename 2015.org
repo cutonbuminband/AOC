@@ -21,7 +21,7 @@
 
 ** Part 1
 #+begin_src jupyter-python
-  line = open(datadir / "1.txt", encoding="utf8").readline()
+  line = load(1)[0]
   line.count("(") - line.count(")")
 #+end_src
 
@@ -39,9 +39,9 @@
 [[https://adventofcode.com/2015/day/2][I Was Told There Would Be No Math]]
 ** Part 1
 #+begin_src jupyter-python
-with open(datadir / '2.txt') as f:
-    boxes = [[int(x) for x in y.split('x')] for y in f.readlines()]
-sum([(3*x*y + 2*x*z + 2*y*z) for x,y,z in map(sorted, boxes)])
+  data = load(2)
+  boxes = [[int(x) for x in line.split('x')] for line in data]
+  sum([(3*x*y + 2*x*z + 2*y*z) for x,y,z in map(sorted, boxes)])
 #+end_src
 
 ** Part 2
@@ -53,7 +53,7 @@ sum([ x * y * z + 2 * (x + y) for x,y,z in map(sorted, boxes)])
 [[https://adventofcode.com/2015/day/3][Perfectly Spherical Houses in a Vacuum]]
 ** Part 1
 #+begin_src jupyter-python
-  instructions = open(datadir / "3.txt", encoding="utf8").readline().strip()
+  instructions = load(3)[0].strip()
   commands = {"^": lambda x, y: (x, y + 1), "v": lambda x, y: (x, y - 1),
               ">": lambda x, y: (x + 1, y), "<": lambda x, y: (x - 1, y),}
 
@@ -105,7 +105,7 @@ sum([ x * y * z + 2 * (x + y) for x,y,z in map(sorted, boxes)])
       contains_double = (np.array(list(s))[1:] == np.roll(list(s), 1)[1:]).any()
       contains_forbidden = any(val in s for val in ["ab", "cd", "pq", "xy"])
       return sufficient_vowels and contains_double and not contains_forbidden
-  sum(is_nice(x) for x in open(datadir / "5.txt").readlines())
+  sum(is_nice(x) for x in load(5))
 #+end_src
 
 ** Part 2
@@ -114,14 +114,14 @@ sum([ x * y * z + 2 * (x + y) for x,y,z in map(sorted, boxes)])
       contains_double = (np.array(list(s))[2:] == np.roll(list(s), 2)[2:]).any()
       contains_double_pair = bool(re.findall("(..).*\\1", s))
       return contains_double and contains_double_pair
-  sum(is_nice(x) for x in open(datadir / "5.txt").readlines())
+  sum(is_nice(x) for x in load(5))
 #+end_src
 
 * Day 6
 [[https://adventofcode.com/2015/day/6][Probably a Fire Hazard]]
 ** Part 1
 #+begin_src jupyter-python
-  lines = open(datadir / "6.txt").readlines()
+  lines = load(6)
   numbers = [[int(x) for x in re.findall("\d+", line)] for line in lines]
   instructions = [line.replace("turn ", "").split()[0] for line in lines]
   field = np.zeros([1000, 1000], dtype=int)
@@ -149,7 +149,7 @@ sum([ x * y * z + 2 * (x + y) for x,y,z in map(sorted, boxes)])
 [[https://adventofcode.com/2015/day/7][Some Assembly Required]]
 ** Part 1
 #+begin_src jupyter-python
-  lines = open(datadir / "7.txt").readlines()
+  lines = load(7)
   circuit = {target: source for source, target in map(lambda x: x.strip().split(" -> "), lines)}
   binops = {"AND": lambda x, y: x & y,
             "OR": lambda x, y: x | y,
@@ -188,7 +188,7 @@ That gives
 [[https://adventofcode.com/2015/day/8][Matchsticks]]
 ** Part 1
 #+begin_src jupyter-python
-  lines = [x[:-1] for x in open(datadir / "8.txt").readlines()]
+  lines = [x[:-1] for x load(8)]
   sum(len(line) - len(eval(line)) for line in lines)
 #+end_src
 
@@ -202,7 +202,7 @@ That gives
 ** Part 1
 #+begin_src jupyter-python
   d = {}
-  data = [x.split() for x in open(datadir / "9.txt").readlines()]
+  data = [x.split() for x in load(9)]
   for source, _, destination, __, distance in data:
       d[(source, destination)] = int(distance)
       d[(destination, source)] = int(distance)
@@ -299,16 +299,15 @@ To iterate over candidate passwords, we first construct a helper method to itera
 ** Part 1
 For the first part, we've been promised that integers only appear as integers. So there's no reason to try and read in the json properly - a simple regex does the trick
 #+begin_src jupyter-python
-  s = open(datadir / "12.txt").read()
-  integers = re.findall("-?\d+", f.read())
-  sum(map(int, integers))
+  s = load(12, "int")
+  sum([n for line in s for n in line])
 #+end_src
 
 ** Part 2
 That approach obviously doesn't work for the second part, so we'll need a json library
 #+begin_src jupyter-python
   import json
-  s = json.load(open(datadir / "12.txt"))
+  s = json.loads(load(12, "raw"))
   def find_value(structure):
       if isinstance(structure, str):
           return 0
@@ -322,11 +321,12 @@ That approach obviously doesn't work for the second part, so we'll need a json l
   find_value(s)
 #+end_src
 
+
 * Day 13
 [[https://adventofcode.com/2015/day/13][Knights of the Dinner Table]]
 ** Part 1
 #+begin_src jupyter-python
-  data = open(datadir / "13.txt").readlines()
+  data = load(13)
   def parse(line):
       words = line.strip().split()
       people = tuple(sorted([words[0], words[-1][:-1]]))
@@ -369,8 +369,7 @@ Here we see the magic of the defaultdict - since all of the pairs involving "You
 [[https://adventofcode.com/2015/day/14][Reindeer Olympics]]
 ** Part 1
 #+begin_src jupyter-python
-  data = open(datadir / "14.txt").readlines()
-  reindeer = [list(map(int, re.findall("-?\d+", line))) for line in data]
+  reindeer = load(14, "int")
   def score(time, speed, on, off):
       cycle_length = on + off
       n_cycles = time // (cycle_length)
@@ -395,11 +394,6 @@ Here we see the magic of the defaultdict - since all of the pairs involving "You
 [[https://adventofcode.com/2015/day/15][Science for Hungry People]]
 
 ** Part 1
-#+begin_src jupyter-python
-  data = open(datadir / "15.txt").readlines()
-  data = np.array([[int(x) for x in re.findall("-?\d+", line)] for line in data]).T
-#+end_src
-
 Since each of the values has to be positive, we can derive some constraints on how much of each ingredient we can use. We know there are 100 of each in total, so letting the four variables be $w, x, y, z$, we have $w + x + y + z = 100$. Additionally, since only one ingredient contributes a positive value to any given quantitity we have to use at least one of each. With that out of the way we can use the matrix to set up the following system of inequalities:
 
 
@@ -422,7 +416,7 @@ For example, the upper bound on $w$ follows from the last inequality, which impl
 
 The last thing to consider is that once three of the values are fixed, the fourth is known. Together, these optimizations let us reduce the cases we have to consider from 1 million to less than 50k.
 #+begin_src jupyter-python
-
+  data = np.array(load(15, "int")).T
   initial_bounds = [[1, 39 + 1], [1, 39 + 1], [1, 72 + 1], [1, 65 + 1]]
   def calculate(part=1):
       maxval = 0

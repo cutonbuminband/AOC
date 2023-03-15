@@ -41,10 +41,12 @@ def crt(congruences):
 def year_load(year):
     def load(day, output="lines"):
         filename = datadir / str(year) / f"{day}.txt"
+        if output == "raw":
+            return open(filename).read()
         lines = open(filename).readlines()
         if output == "lines":
             return lines
-        if output == "integers":
+        if output == "int":
             regex = re.compile("-?\d+")
             return [[int(x) for x in re.findall(regex, line)] for line in lines]
         if output == "np":

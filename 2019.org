@@ -352,7 +352,7 @@ There are more than 200 visible asteroids, so we only need to worry about the on
 [[https://adventofcode.com/2019/day/12][The N-Body Problem]]
 ** Part 1
 #+begin_src jupyter-python
-  data = load(12, "integers")
+  data = load(12, "int")
   positions = np.array(data, dtype=int)
   velocities = np.zeros(positions.shape, dtype=int)
   indices = [0, 1, 2, 3]
@@ -368,7 +368,7 @@ There are more than 200 visible asteroids, so we only need to worry about the on
 ** Part 2
 I don't know what optimizations are possible here, but an obvious one is to realise that the three different directions (x,y and z) are completely independent, and that instead of searching for one global cycle, we can ask if there are shorter cycles for the coordinates separately. The global cycle length is then the lcm of the individual cycle lengths, as long as each cycle starts at the initial state.
 #+begin_src jupyter-python
-  data = load(12, "integers")
+  data = load(12, "int")
   positions = np.array(data, dtype=int)
   velocities = np.zeros(positions.shape, dtype=int)
   seen_x = {}

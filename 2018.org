@@ -286,7 +286,7 @@ That gives this pretty cool plot
 [[https://adventofcode.com/2018/day/8][Memory Maneuver]]
 ** Part 1
 #+begin_src jupyter-python
-  data = load(8, "integers")[0]
+  data = load(8, "int")[0]
   def parse(tree_list):
       result = {"children": []}
       n_children, n_metadata = tree_list[:2]
@@ -349,7 +349,7 @@ That gives this pretty cool plot
 [[https://adventofcode.com/2018/day/10][The Stars Align]]
 ** Part 1
 #+begin_src jupyter-python
-  array = np.array(load(10, "integers"))
+  array = np.array(load(10, "int"))
   positions = array[:, :2].copy()
   velocities = array[:, 2:]
   bounding_box = np.product(positions.max(axis=0) - positions.min(axis=0))
@@ -515,7 +515,6 @@ Simulating the 50 billion generations is impossible, so something cleverer is ne
 [[https://adventofcode.com/2018/day/14][Chocolate Charts]]
 ** Part 1
 #+begin_src jupyter-python
-  import functools
   def solve(n):
       e1, e2 = 0, 1
       recipes = [3, 7]
