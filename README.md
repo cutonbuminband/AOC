@@ -12,7 +12,7 @@ Here's a table with my solutions for each year. The links take you to the render
 | [2019](2019.org) | 28/50⭐ |
 | [2018](2018.org) | 28/50⭐ |
 | [2017](2017.org) | 28/50⭐ |
-| [2016](2016.org) | 30/50⭐ |
+| [2016](2016.org) | 32/50⭐ |
 | [2015](2015.org) | 36/50⭐ |
 
 # TODO

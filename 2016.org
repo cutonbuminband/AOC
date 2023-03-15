@@ -513,3 +513,26 @@ Another round of the chinese remainder theorem.
   remainders.append([11, -(len(remainders) + 1)])
   crt(remainders)
 #+end_src
+
+* Day 16
+[[https://adventofcode.com/2016/day/16][Dragon Checksum]]
+
+** Part 1
+#+begin_src jupyter-python
+  start = [1,1,0,1,1,1,1,0,0,1,1,0,1,1,1,0,1]
+  length = 272
+  def solve(prefix, length):
+      while len(prefix) < length:
+          prefix = prefix + [0] + [1 ^ x for x in prefix[::-1]]
+      s = prefix[:length]
+      while len(s) % 2 == 0:
+          s = (abs(np.diff(s))[::2] ^ 1)
+      return s
+  print(*solve(start, length), sep="")
+#+end_src
+
+** Part 2
+#+begin_src jupyter-python
+  print(*solve(start, 35651584), sep="")
+#+end_src
+
