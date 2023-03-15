@@ -12,6 +12,8 @@
   import more_itertools
   import re
   datadir = Path("data/2015")
+  from utils import year_load
+  load = year_load(2015)
 #+end_src
 
 * Day 1
@@ -443,4 +445,56 @@ The last thing to consider is that once three of the values are fixed, the fourt
 ** Part 2
 #+begin_src jupyter-python
   calculate(2)
+#+end_src
+
+* Day 16
+[[https://adventofcode.com/2015/day/16][Aunt Sue]]
+** Part 1
+#+begin_src jupyter-python
+  data = load(16)
+  sues = {}
+  for line in data:
+      sep = line.index(":")
+      sue, info = line[:sep], line[sep + 1:]
+      sues[int(sue.split()[1])] = {k: int(v) for k, v in
+                                   map(lambda x: x.split(": "), info.strip().split(", "))}
+  match = {"children": 3,
+           "cats": 7,
+           "samoyeds": 2,
+           "pomeranians": 3,
+           "akitas": 0,
+           "vizslas": 0,
+           "goldfish": 5,
+           "trees": 3,
+           "cars": 2,
+           "perfumes": 1}
+  for sue in sues:
+      comparison = sues[sue]
+      for key in match:
+          if key not in comparison:
+              continue
+          if match[key] != comparison[key]:
+              break
+      else:
+          print(sue)
+          break
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  for sue in sues:
+      comparison = sues[sue]
+      for key in match:
+          if key not in comparison:
+              continue
+          f = lambda known, measured: known == measured
+          if key in ["cats", "trees"]:
+              f = lambda known, measured: measured > known
+          elif key in ["pomeranians", "goldfish"]:
+              f = lambda known, measured: measured < known
+          if not f(match[key], comparison[key]):
+              break
+      else:
+          print(sue)
+          break
+
 #+end_src
