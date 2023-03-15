@@ -1,9 +1,41 @@
+import queue
 import numpy as np
 from pathlib import Path
 
 import re
 
 datadir = Path("data")
+
+
+def astar(start, end, neighbors, distance_function, multiple_starts=False):
+    """Implementation of the A* path finding algorithm.
+
+    parameters:
+      - start: The initial node, or a list of starting nodes
+      - end: The target node
+      - neighbors: A function Node -> List[Node] which finds the valid neighbors of a node
+      - distance function: A heuristic function [Node, Node] -> Real which provides
+        a lower bound on the distance between two nodes.
+      - multiple_starts: are we starting from multiple nodes, or just one.
+    returns:
+      - The shortest path distance between start and end.
+    """
+    costs = defaultdict(lambda: np.inf)
+    if not multiple_starts:
+        start = [start]
+    q = queue.PriorityQueue()
+    for item in start:
+        q.put((0, item))
+    while q:
+        _, state = q.get()
+        if state == end:
+            return costs[state]
+        for neighbor in neighbors(state):
+            current_cost = costs[state] + 1
+            if current_cost < costs[neighbor]:
+                costs[neighbor] = current_cost
+                q.put((current_cost + distance_function(neighbor, end), neighbor))
+    return costs[end]
 
 
 def bezout(a, b):

@@ -329,30 +329,13 @@ This one looks difficult, but I don't think it is too tricky. Given that we are 
 So I think the way to go is A*.
 
 #+begin_src jupyter-python
-  import queue
   from more_itertools import grouper
+  from utils import astar
   n_floors = 4
 
   def distance_estimate(state, end):
       items = state[1]
       return sum((val / 2) * (n_floors - i - 1) for i, val in enumerate(items))
-
-
-  def astar(start, end, neighbors, distance_function):
-      costs = defaultdict(lambda: np.inf)
-      costs[start] = 0
-      q = queue.PriorityQueue()
-      q.put((0, start))
-      while q:
-          _, state = q.get()
-          if state == end:
-              return costs[state]
-          for neighbor in neighbors(state):
-              current_cost = costs[state] + 1
-              if current_cost < costs[neighbor]:
-                  costs[neighbor] = current_cost
-                  q.put((current_cost + distance_function(neighbor, end), neighbor))
-      return costs[end]
 
   def is_valid(items):
       generators, chips = state[::2], state[1::2]
@@ -436,6 +419,7 @@ This is a fairly straightforward implementation of the problem description, with
 
 ** Part 1
 #+begin_src jupyter-python
+  from utils import astar
   def is_valid(x, y, secret=1362):
       if x < 0 or y < 0:
           return False
