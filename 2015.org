@@ -492,3 +492,33 @@ The last thing to consider is that once three of the values are fixed, the fourt
           break
 
 #+end_src
+* Day 17
+[[https://adventofcode.com/2015/day/17][No Such Thing as Too Much]]
+** Part 1
+#+begin_src jupyter-python
+  def count(value, containers):
+      if value == 0:
+          return 1
+      if value < 0 or len(containers) == 0:
+          return 0
+      return count(value - containers[0], containers[1:]) + count(value, containers[1:])
+  count(150, load(17, "np"))
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  def count(value, containers):
+      result = defaultdict(int)
+      def inner(value, containers, depth):
+          if value == 0:
+              result[depth] += 1
+              return
+          if value < 0 or len(containers) == 0:
+              return
+          inner(value - containers[0], containers[1:], depth + 1)
+          inner(value, containers[1:], depth)
+      inner(value, containers, 0)
+      return result
+  result = count(150, load(17, "np"))
+  result[min(result.keys())]
+
+#+end_src
