@@ -11,6 +11,7 @@
   import itertools
   import more_itertools
   import re
+  import scipy
   datadir = Path("data/2015")
   from utils import year_load
   load = year_load(2015)
@@ -520,5 +521,33 @@ The last thing to consider is that once three of the values are fixed, the fourt
       return result
   result = count(150, load(17, "np"))
   result[min(result.keys())]
-
 #+end_src
+
+* Day 18
+[[https://adventofcode.com/2015/day/18][Like a GIF For Your Yard]]
+** Part 1
+#+begin_src jupyter-python
+  weights = [[1, 1, 1], [1, 1, 1], [1, 1, 1]]
+  initial_board = np.array([[0 if char == "." else 1 for char in line.strip()]
+                            for line in load(18)])
+  board = initial_board.copy()
+  for i in range(100):
+      mask = scipy.ndimage.convolve(board, weights, mode='constant')
+      board = ((mask == 3) | ((mask - board) == 3)).astype(int)
+  board.sum()
+#+end_src
+
+** Part 2
+#+begin_src jupyter-python
+  def fix_corners(board):
+      board = np.roll(board, 1, axis=[0,1])
+      board[:2, :2] = 1
+      return np.roll(board, -1, axis=[0,1])
+
+  board = fix_corners(initial_board)
+  for i in range(100):
+      mask = scipy.ndimage.convolve(board, weights, mode='constant')
+      board = fix_corners(((mask == 3) | ((mask - board) == 3)).astype(int))
+  board.sum()
+#+end_src
+
