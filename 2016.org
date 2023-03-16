@@ -10,6 +10,7 @@
   import functools
   import itertools
   import more_itertools
+  import hashlib
   import re
   from utils import year_load
   load = year_load(2016)
@@ -534,5 +535,46 @@ Another round of the chinese remainder theorem.
 ** Part 2
 #+begin_src jupyter-python
   print(*solve(start, 35651584), sep="")
+#+end_src
+
+* Day 17
+[[https://adventofcode.com/2016/day/17][Two Steps Forward]]
+** Part 1
+BFS to the rescue. I wanted to do astar, but the "distance from 3,3" heuristic didn't seem like it would give much. Then I dropped to Dijkstra, but realised that if all steps cost the same, that's just BFS.
+#+begin_src jupyter-python
+  start = (0, "bwnlcvfs")
+
+  def neighbors(position, path):
+      chars = hashlib.md5(path.encode()).hexdigest()[:4]
+      directions = "UDLR"
+      deltas = -1j, 1j, -1, 1
+      candidates = [(position + delta, path + direction) for
+                    delta, direction, char in zip(deltas, directions, chars)
+                    if char in "bcdef"]
+      return [candidate for candidate in candidates
+              if 0 <= candidate[0].real < 4
+              and 0 <= candidate[0].imag < 4]
+
+  q = deque([start])
+  while q:
+      position, path = q.popleft()
+      if position == 3 + 3j:
+          result = path[len(start[1]):]
+          break
+      q += deque(neighbors(position, path))
+  result
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  q = deque([start])
+  i = 0
+  while q:
+      position, path = q.popleft()
+      if position == 3 + 3j:
+          result = len(path) - len(start[1])
+          continue
+      q += deque(neighbors(position, path))
+      i += 1
+  result
 #+end_src
 
