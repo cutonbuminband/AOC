@@ -12,7 +12,6 @@
   import more_itertools
   import re
   import scipy
-  datadir = Path("data/2015")
   from utils import year_load
   load = year_load(2015)
 #+end_src
@@ -335,10 +334,9 @@ That approach obviously doesn't work for the second part, so we'll need a json l
       sign = 2 * ("gain" in words) - 1
       return people, amount * sign
   scores = defaultdict(int)
-  with open(datadir / "13.txt") as f:
-      for line in f:
-          people, score = parse(line)
-          scores[people] += score
+  for line in load(13):
+      people, score = parse(line)
+      scores[people] += score
 
   people = sorted(set([person for pair in scores.keys() for person in pair]))
   def calculate_score(permutation):
@@ -551,3 +549,36 @@ The last thing to consider is that once three of the values are fixed, the fourt
   board.sum()
 #+end_src
 
+* Day 19
+[[https://adventofcode.com/2015/day/19][Medicine for Rudolph]]
+** Part 1
+#+begin_src jupyter-python
+  data = load(19)
+  transitions, initial_string = data[:-2], data[-1].strip()
+  transitions = [x.strip().split(" => ") for x in transitions]
+  transformations = defaultdict(list)
+  for source, dest in transitions:
+      transformations[source].append(dest)
+  element_regex = "[A-Z][a-z]?"
+  elements = re.findall(element_regex, initial_string)
+  result = set()
+  for idx, element in enumerate(elements):
+      prefix = ''.join(elements[:idx])
+      suffix = ''.join(elements[idx+1:])
+      for transformation in transformations[element]:
+          result.add(prefix + transformation + suffix)
+  len(result)
+#+end_src
+
+** Part 2
+Instead of trying to make the final string starting from "e" and using the given transformations, we can equivalently try to reduce the final string to "e" using the reverse transformations - that should be the same thing.
+
+If we're naive about this, it's going to take a very long time. One thing to notice is that "Ca" only appears on the right hand side of our transformation rules as "X => XCa" or "X => CaX". So generating one unit of "Ca" always takes one step, and we can pretend there's a rule of the form "'∅ => Ca".
+
+That still leaves us with more than 100k candidates for shortening after only 4 reverse substitutions, which is less than ideal. Luckily, there's a pen and paper solution!
+
+Looking further at the list of reactions given, all the ones that don't produce Rn are of the form "A => BC", and thus always take exactly one step to increase the length of the molecule by one.
+
+The only remaining question is how efficiently we can use the Rn we have available. Now, some of the "Rn" reactions give a "C" to start with, but "C" is not the source of any reaction and it's not present in our string, so we can completely ignore these. Looking at the remainder, all the reactions convert one element into four, apart from "H => NRnFYFAr" and "Ca => SiRnFYFAr", which convert one to six. There are only 6 Ys in the initial string, so these reactions have to run exactly six times, and the others run 30 times (There are 36 Rns in my input)
+
+There are 292 elements in the initial string. After getting rid of Rns I have 292 - 5 * 6 - 3 * 30 = 172 elements left, and have spent 36 reactions. Getting to one electron requires a further 171 reactions for a total of 207.
