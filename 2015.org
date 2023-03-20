@@ -582,3 +582,35 @@ Looking further at the list of reactions given, all the ones that don't produce 
 The only remaining question is how efficiently we can use the Rn we have available. Now, some of the "Rn" reactions give a "C" to start with, but "C" is not the source of any reaction and it's not present in our string, so we can completely ignore these. Looking at the remainder, all the reactions convert one element into four, apart from "H => NRnFYFAr" and "Ca => SiRnFYFAr", which convert one to six. There are only 6 Ys in the initial string, so these reactions have to run exactly six times, and the others run 30 times (There are 36 Rns in my input)
 
 There are 292 elements in the initial string. After getting rid of Rns I have 292 - 5 * 6 - 3 * 30 = 172 elements left, and have spent 36 reactions. Getting to one electron requires a further 171 reactions for a total of 207.
+
+* Day 20
+[[https://adventofcode.com/2015/day/20][Infinite Elves and Infinite Houses]]
+** Part 1
+We're looking for numbers that have lots of divisors compared to how big they are. A bit of ass-pulling lets me guess that they have to be divisible by 60.
+#+begin_src jupyter-python
+  target = 33100000
+  def sum_of_factors(n, part=1):
+      result = 0
+      for i in range(1, int(np.sqrt(n)) + 1):
+          if n % i == 0:
+              if part == 1:
+                  result += i + int(n // i)
+              else:
+                  div = n // i
+                  result += (i if div <= 50 else 0) + (div if i <= 50 else 0)
+      return result
+
+  def run(target, part=1):
+      i, total = 0, 0
+      while total < target:
+          i += 60
+          total = sum_of_factors(i, part)
+      return i
+  run(target / 10)
+#+end_src
+
+** Part 2
+The only things that change for part 2 are the target, and the calculation of the sum of factors. That's most easily done by passing a "part" flag to the sum of factors function, and a "target" parameter to run. Of course, that makes the following look fairly boring:
+#+begin_src jupyter-python
+  run(target / 11, 2)
+#+end_src
