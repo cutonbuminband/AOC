@@ -80,7 +80,8 @@ def year_load(year):
             return lines
         if output == "int":
             regex = re.compile("-?\d+")
-            return [[int(x) for x in re.findall(regex, line)] for line in lines]
+            integers = [[int(x) for x in re.findall(regex, line)] for line in lines]
+            return [integer for integer in integers if integer]
         if output == "np":
             return np.loadtxt(filename, dtype=int, delimiter=",")
 

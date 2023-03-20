@@ -614,3 +614,37 @@ The only things that change for part 2 are the target, and the calculation of th
 #+begin_src jupyter-python
   run(target / 11, 2)
 #+end_src
+
+* Day 21
+[[https://adventofcode.com/2015/day/21][RPG Simulator 20XX]]
+** Part 1
+#+begin_src jupyter-python
+  data = {k: int(v) for k,v in map(lambda x: x.split(":"), load(20))}
+  turns = [(armor, np.ceil(100 / (data["Damage"] - armor)) - 1) for armor in range(8)]
+  attack_needed = [np.ceil(data["Hit Points"] / (x[1] + 1)) + data["Armor"] for x in turns]
+
+  equipment= load("20_auxiliary", "int")
+  equipment = equipment[:10] + [x[1:] for x in equipment[10:]]
+  weapons = equipment[:5]
+  armor = equipment[5:10]
+  rings = equipment[10:]
+
+  # Use itertools to select one weapon, at most one armor and at most two rings
+  options = itertools.product(weapons, itertools.chain([[0, 0, 0]], armor), itertools.chain([[0, 0, 0]], rings, itertools.combinations(rings, 2)))
+
+  # The two ring case has to be flattened
+  options = [list(option[:-1]) + list(option[-1]) if isinstance(option[-1], tuple) else option for option in options]
+
+  # Then we have regular data and can just convert to a numpy array and sum
+  sums = [np.array(option, dtype=int).sum(axis=0) for option in options]
+
+  # We need the smallest gold value that has enough (damage, armor)
+  min(s[0] for s in sums if s[1] >= attack_needed[min(s[2], 7)])
+#+end_src
+
+** Part 2
+With all that in place, part 2 is just inverting an inequality and changing a min to a max:
+#+begin_src jupyter-python
+  max(s[0] for s in sums if s[1] < attack_needed[min(s[2], 7)])
+#+end_src
+
