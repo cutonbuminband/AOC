@@ -5,6 +5,7 @@
 #+begin_src jupyter-python
   import pandas as pd
   import numpy as np
+  import scipy
   from collections import defaultdict, deque
   from pathlib import Path
   import functools
@@ -577,4 +578,74 @@ BFS to the rescue. I wanted to do astar, but the "distance from 3,3" heuristic d
       i += 1
   result
 #+end_src
+* Day 18
+[[https://adventofcode.com/2016/day/18][Like a Rogue]]
+** Part 2
+    #+begin_src jupyter-python
+  data = np.array([1 if char == "^" else 0 for char in load(18)[0].strip()], dtype=int)
+  left_right = [1, 0, 1]
+  rows = []
+  for i in range(40):
+      rows.append(data)
+      data = (scipy.ndimage.convolve(data, left_right, mode='constant') == 1).astype(int)
+  (np.array(rows) == 0).sum()
+    #+end_src
+** Part 2
+For part 2 I should probably check to see if I ever hit a row that I've seen before, and then use the repeated cycle to avoid having to calculate that many rows. Or I can just brute force it and not care:
+    #+begin_src jupyter-python
+  for i in range(400000 - 40):
+      rows.append(data)
+      data = (scipy.ndimage.convolve(data, left_right, mode='constant') == 1).astype(int)
+  (np.array(rows) == 0).sum()
 
+    #+end_src
+
+* Day 19
+[[https://adventofcode.com/2016/day/19][An Elephant Named Joseph]]
+** Part 1
+This problem -- with rotations by 1 and deletions only of neighboring elves is definitely calling for a deque:
+#+begin_src jupyter-python
+  queue = deque(range(1, 3005290+1))
+  queue.rotate(-1)
+  while queue:
+      s = queue.popleft()
+      queue.rotate(-1)
+  s
+#+end_src
+
+** Part 2
+Unfortunately, the same approach won't work here, since the rotations to the middle of the queue really ruin everything.
+
+* Day 20
+[[https://adventofcode.com/2016/day/19][Firewall Rules]]
+
+** Part 1
+#+begin_src jupyter-python
+  data = sorted([[int(x) for x in line.split("-")] for line in load(20)], key=lambda x: x[0])
+  low, high = data[0]
+  for new_low, new_high in data[1:]:
+      if high + 1 < new_low:
+          break
+      else:
+          high = max(high, new_high)
+  high + 1
+#+end_src
+
+** Part 2
+We'll start by merging the overlapping banned ranges together. Then, the high point of one range and the low point of the next range define a range of allowed values (endpoints not included). We can sum the length of these to get the total number of allowed values.
+#+begin_src jupyter-python
+  def merge_ranges(data):
+      result = []
+      initial, final = data[0]
+      for low, high in data[1:]:
+          if final + 1 >= low:
+              final = max(high, final)
+          else:
+              result += [initial, final]
+              initial, final = low, high
+      result += [initial, final]
+      return result
+  (0 - ranges[0]
+   + sum([high - low - 1 for low, high in zip(ranges[1::2], ranges[2::2])])
+   + 4294967295 - ranges[-1])
+#+end_src
