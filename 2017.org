@@ -455,3 +455,46 @@ For most of these, there was only one such modulus. Taking all the ones for whic
       count += 1
   count
 #+end_src
+* Day 15
+[[https://adventofcode.com/2017/day/15][Dueling Generators]]
+** Part 1
+#+begin_src jupyter-python
+  A = 16807
+  B = 48271
+
+  a = 116
+  b = 299
+  total = 0
+  for i in range(40_000_000):
+      a = (a * A) % 2147483647
+      b = (b * B) % 2147483647
+      total +=  (a % 2**16) == (b % 2**16)
+  total
+
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  a = 116
+  b = 299
+  total = 0
+  def gen_a(start):
+      current = start
+      while True:
+          current = (current * A) % 2147483647
+          if current % 4 == 0:
+              yield current
+
+  def gen_b(start):
+      current = start
+      while True:
+          current = (current * B) % 2147483647
+          if current % 8 == 0:
+              yield current
+
+  a = gen_a(a)
+  b = gen_b(b)
+  for i in range(5_000_000):
+      total +=  (next(a) % 2**16) == (next(b) % 2**16)
+  total
+
+#+end_src
