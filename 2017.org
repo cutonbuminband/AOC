@@ -13,6 +13,8 @@
   import re
   import more_itertools
   datadir = Path("data/2017")
+  from utils import year_load
+  load = year_load(2017)
 #+end_src
 
 * Day 1
@@ -497,4 +499,42 @@ For most of these, there was only one such modulus. Taking all the ones for whic
       total +=  (next(a) % 2**16) == (next(b) % 2**16)
   total
 
+#+end_src
+* Day 16
+[[https://adventofcode.com/2017/day/16][Permutation Promenade]]
+** Part 1
+#+begin_src jupyter-python
+  moves = load(16)[0].strip().split(",")
+  permutations = list("abcdefghijklmnop")
+
+  def dance(permutations, n):
+      seen = []
+      for i in range(n):
+          s = ''.join(permutations)
+          if s in seen:
+              return seen[n % i]
+          seen.append(s)
+
+          for move in moves:
+              if move[0] == 's':
+                  i = int(move[1:])
+                  permutations = permutations[-i:] + permutations[:-i]
+              else:
+                  if move[0] == 'x':
+                      a,b = map(int, move[1:].split('/'))
+                      permutations[a], permutations[b] = permutations[b], permutations[a]
+                  if move[0] == 'p':
+                      a,b = move[1:].split('/')
+                      A = permutations.index(a)
+                      B = permutations.index(b)
+                      permutations[A], permutations[B] = permutations[B], permutations[A]
+
+      return permutations
+
+  ''.join(dance(permutations[:], 1))
+#+end_src
+** Part 2
+For part 2, it would take too long to go through all the one billion cycles. But what if the dances hit a cycle at some point? That would make things a lot easier!
+#+begin_src jupyter-python
+  dance(permutations[:], 1_000_000_000)
 #+end_src
