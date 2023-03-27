@@ -557,3 +557,108 @@ For part 2, it would take too long to go through all the one billion cycles. But
       q.appendleft(i)
   q[q.index(0) + 1]
 #+end_src
+* Day 18
+[[https://adventofcode.com/2017/day/18][Duet]]
+** Part 1
+#+begin_src jupyter-python
+  program = load(18)
+  program = [x.strip().split() for x in program]
+  ip = 0
+  registers = defaultdict(int)
+  memory = 0
+  binops = {"set": lambda x, y: y,
+            "add": lambda x, y: x + y,
+            "mul": lambda x, y: x * y,
+            "mod": lambda x, y: x % y}
+  memory = 0
+  while 0 <= ip < len(program):
+      instruction = program[ip]
+      instruction, register, argument = instruction[0], instruction[1], instruction[-1]
+      try:
+          argument = int(argument)
+      except ValueError:
+          argument = registers[argument]
+      if instruction in binops:
+          op = binops[instruction]
+          registers[register] = op(registers[register], argument)
+      elif instruction == "jgz":
+          if registers[register] > 0:
+              ip += argument - 1
+      elif instruction == "rcv":
+          if registers[register] != 0:
+              print(memory)
+              break
+      elif instruction == "snd":
+          memory = argument
+      ip += 1
+#+end_src
+
+** Part 2
+There's a bunch of state to keep track of - let's make a class to hold it.
+#+begin_src jupyter-python
+  class Program:
+      def __init__(self, program, program_id, inputs):
+          self.program = program.copy()
+          self.ram = defaultdict(int)
+          self.ram["p"] = program_id
+          self.state = 1  # ready
+          self.count = 0
+          self.ip = 0
+          self.inputs = inputs
+
+      def __next__(self):
+          while 0 <= self.ip < len(self.program):
+              instruction = self.program[self.ip]
+              instruction, register, argument = instruction[0], instruction[1], instruction[-1]
+              try:
+                  argument = int(argument)
+              except ValueError:
+                  argument = self.ram[argument]
+              if instruction in binops:
+                  op = binops[instruction]
+                  self.ram[register] = op(self.ram[register], argument)
+              elif instruction == "jgz":
+                  try:
+                      comparison = int(register)
+                  except ValueError:
+                      comparison = self.ram[register]
+                  if comparison > 0:
+                      self.ip += argument - 1
+              elif instruction == "rcv":
+                  if not self.inputs:
+                      self.state = 0  # Waiting
+                      return None
+                  x = self.inputs.pop(0)
+                  self.ram[register] = x
+              elif instruction == "snd":
+                  self.count += 1
+                  self.ip += 1
+                  return argument
+              self.ip += 1
+          self.state = 2 # terminated
+          return None
+#+end_src
+
+With that out of the way we can implement the collaboration as follows: run program 0 until it's asking for a non-existent value (or finishes), then do the same for program 1. Keep going until both programs are waiting for the other or p1 has finished.
+#+begin_src jupyter-python
+  bus_one = []
+  bus_two = []
+  p0 = Program(program, 0, bus_two)
+  p1 = Program(program, 1, bus_one)
+  while p0.state == 1 and p1.state != 2:
+      while p0.state == 1:
+          n = next(p0)
+          if n is not None:
+              bus_one.append(n)
+      if bus_one and p1.state == 0:
+          p1.state = 1
+      while p1.state == 1:
+          n = next(p1)
+          if n is not None:
+              bus_two.append(n)
+      if bus_two and p0.state == 0:
+          p0.state = 1
+  p1.count
+
+#+end_src
+
