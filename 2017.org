@@ -12,7 +12,6 @@
   import collections
   import re
   import more_itertools
-  datadir = Path("data/2017")
   from utils import year_load
   load = year_load(2017)
 #+end_src
@@ -21,7 +20,7 @@
 [[https://adventofcode.com/2017/day/1][Inverse Captcha]]
 ** Part 1
 #+begin_src jupyter-python
-  data = np.array([int(x) for x in open(datadir / "1.txt").readline().strip()], dtype=int)
+  data = np.array([int(x) for x in load(1)[0].strip()], dtype=int)
   data[np.where(data == np.roll(data, 1))].sum()
 #+end_src
 
@@ -35,7 +34,7 @@
 ** Part 1
 #+begin_src jupyter-python
   data = [sorted(map(lambda x: int(x), x.split()))
-          for x in open(datadir / '2.txt').readlines()]
+          for x in load(2)]
   sum(a[-1] - a[0] for a in data)
 #+end_src
 
@@ -95,7 +94,7 @@ A new system policy has been put in place that requires all accounts to use a pa
 
 To ensure security, a valid passphrase must contain no duplicate words.
 #+begin_src jupyter-python
-  lines = [x.split() for x in open(datadir / "4.txt").readlines()]
+  lines = [x.split() for x in load(4)]
   sum(len(l) == len(set(l)) for l in lines)
 #+end_src
 
@@ -109,7 +108,7 @@ For added security, yet another system policy has been put in place. Now, a vali
 [[https://adventofcode.com/2017/day/5][A Maze of Twisty Trampolines, All Alike]]
 ** Part 1
 #+begin_src jupyter-python
-  instructions = np.loadtxt(datadir / "5.txt", dtype=int)
+  instructions = load(5, "np")
   ip, count = 0, 0
   while ip >= 0 and ip < len(instructions):
       instructions[ip] += 1
@@ -121,7 +120,7 @@ For added security, yet another system policy has been put in place. Now, a vali
 
 ** Part 2
 #+begin_src jupyter-python
-  instructions = np.loadtxt(datadir / "5.txt", dtype=int)
+  instructions = load(5, "np")
   ip, count = 0, 0
   while ip >= 0 and ip < len(instructions):
       instruction = instructions[ip]
@@ -167,7 +166,7 @@ This was made trivial by tracking when a given configuration was seen.
 [[https://adventofcode.com/2017/day/7][Recursive Circus]]
 ** Part 1
 #+begin_src jupyter-python
-  data = map(str.strip, open(datadir / "7.txt").readlines())
+  data = map(str.strip, load(7))
   tree = {}
   for line in data:
       name = line.split(" ")[0]
@@ -207,7 +206,7 @@ This was made trivial by tracking when a given configuration was seen.
 #+begin_src jupyter-python
   import operator as op
   registers = defaultdict(int)
-  instructions = [x.strip().split() for x in open(datadir / "8.txt").readlines()]
+  instructions = [x.strip().split() for x in load(8)]
   ops = {"<": op.lt, "<=": op.le, "==": op.eq, ">=": op.ge, ">": op.gt, "!=": op.ne}
   signs = {"dec": -1, "inc": 1}
   for target, sign, inc_amount, _, comparator, comparison, cmp_value in instructions:
@@ -256,7 +255,7 @@ def canonical_form(sequence):
                 result += replacements[char]
     return result, count
 
-data = open(datadir / '9.txt').readline().strip()
+data = load(9)[0].strip()
 data, count = canonical_form(data)
 total, counter = 0, 0
 for char in data:
@@ -312,7 +311,7 @@ count
 ** Part 1
 To describe the hexgrid we'll use two basis vectors: x1, directed southeast, and x2, directed due north. All the other directions can be found as linear combinations of these, and the final position in this basis is just the sum of all the moves. Now, any move of the form (k, 1), with k in [-1, 0, 1] only takes one step, so the number of steps needed to reach the final position is just the value of whichever of the two basis vectors we have more of
 #+begin_src jupyter-python
-  data = open(datadir / "11.txt").read().strip().split(",")
+  data = open(load(11)[0].strip().split(",")
   coordinates = {"se": np.array((1, 0)),
                  "s": np.array((0, -1)),
                  "sw": np.array((-1, -1)),
@@ -335,8 +334,7 @@ For part 2, instead of finding just the sum of the moves, we look at the running
 ** Part 1
 #+begin_src jupyter-python
   regex = "(-?\d+)"
-  lines = open(datadir / "12.txt").readlines()
-  data = [[int(number) for number in re.findall(regex, line)] for line in lines]
+  data = load(12, "int")
   graph = {line[0]: line[1:] for line in data}
   def find_group(seed):
       queue = set([seed])
@@ -368,11 +366,12 @@ For part 2, instead of finding just the sum of the moves, we look at the running
 ** Part 1
 The only slightly tricky thing here is that we have to convert a depth to a cycle length. In each cycle, a scanner of depth d moves down (d - 1) steps, and then back up (d - 1) steps, so the cycle length is 2 * d - 2.
 #+begin_src jupyter-python
-  data = [list(map(int, line.strip().split(": "))) for line in open(datadir / "13.txt").readlines()]
+  data = load(13, "int")
   sum(map(lambda x: 0 if (x[0] % (x[1] * 2 - 2)) else x[0] * x[1], data))
 #+end_src
+
 ** Part 2
-So, this is another application of the chinese remainder theorem, after a bit of massaging. We have multiple scanners with the same depth at different positions; each such scanner invalidates on congruence class of the integers mod cycle length.
+So, this is another application of the chinese remainder theorem, after a bit of massaging. We have multiple scanners with the same depth at different positions; each such scanner invalidates a congruence class of the integers mod cycle length.
 
 In my input, the depths were almost coprime in the sense that there was one of the scanner depths that divided all the others, and apart from that, the depths were either coprime, or divided one another exactly.
 
@@ -424,7 +423,7 @@ For most of these, there was only one such modulus. Taking all the ones for whic
 [[https://adventofcode.com/2017/day/14][Disk Defragmentation]]
 ** Part 1
 #+begin_src jupyter-python
-  prefix = open(datadir / "14.txt").read().strip() + "-"
+  prefix = load(14)[0].strip() + "-"
   hashes = [knot_hash64(prefix + str(i)) for i in range(128)]
   bitstrings = [f"{int(h, 16):0128b}" for h in hashes]
   sum(x.count("1") for x in bitstrings)
