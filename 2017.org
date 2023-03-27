@@ -537,3 +537,23 @@ For part 2, it would take too long to go through all the one billion cycles. But
 #+begin_src jupyter-python
   dance(permutations[:], 1_000_000_000)
 #+end_src
+* Day 17
+[[https://adventofcode.com/2017/day/17][Spinlock]]
+** Part 1
+#+begin_src jupyter-python
+  steps = 386
+  q = collections.deque([0])
+  for i in range(1, 2018):
+      q.rotate(-steps - 1)
+      q.appendleft(i)
+  q[1]
+#+end_src
+** Part 2
+50 million is at a level where the previous approach is becomingineffective. The code below takes ~40 seconds to run. It could probably be improved, but that would take longer than 40 seconds.
+#+begin_src jupyter-python
+  q = collections.deque([0])
+  for i in range(1, 50_000_000):
+      q.rotate(-steps - 1)
+      q.appendleft(i)
+  q[q.index(0) + 1]
+#+end_src
