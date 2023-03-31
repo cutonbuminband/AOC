@@ -662,3 +662,41 @@ With that out of the way we can implement the collaboration as follows: run prog
 
 #+end_src
 
+* Day 19
+[[https://adventofcode.com/2017/day/19][A Series of Tubes]]
+** Part 1
+The hardest part for this was determining a sensible stopping condition -- that is one that could tell the difference between wires randomly crossing, and actually being finished. Direct inspection of the input showed where there was a dead end, so that's just hard-coded into the below:
+#+begin_src jupyter-python
+  data = load(19)
+  x, y = len(data[0]), len(data)
+  direction = 1j
+  deltas = [(1j, "|"), (-1j, "|"), (1, "-"), (-1, "-")]
+  position = data[0].index("|")
+  result, character = "", ""
+  i = 1
+  while character != "L":
+      position = position + direction
+      character = data[int(position.imag)][int(position.real)]
+      if character == "+":
+          for delta, char in deltas:
+              if delta == -direction:
+                  continue
+              lookahead = position + delta
+              try:
+                  next_char = data[int(lookahead.imag)][int(lookahead.real)]
+              except IndexError:
+                  continue
+              if  next_char == char:
+                  direction = delta
+                  break
+      elif character in string.ascii_letters:
+          result += character
+      i += 1
+  result
+#+end_src
+
+** Part 2
+I don't know if this was intentional, but with the solution to part 1 above, counting the number of steps is trivial. Just add a loop variable to keep track of how many times we move
+#+begin_src jupyter-python
+  i
+#+end_src
