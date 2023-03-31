@@ -700,3 +700,26 @@ I don't know if this was intentional, but with the solution to part 1 above, cou
 #+begin_src jupyter-python
   i
 #+end_src
+
+* Day 20
+[[https://adventofcode.com/2017/day/20][Particle Swarm]]
+** Part 1
+It's always nice to be able to come up with a one-liner to solve these.
+#+begin_src jupyter-python
+  data = np.array(load(20, "int"), dtype=int)
+  abs(data[:, -3:]).sum(axis=1).argmin()
+#+end_src
+
+** Part 2
+For part two we could do some clever work to figure out a stopping condition based on pairs of particles being reachable in each of three dimensions, with reachable defined by being potentially able to catch up. Or we can just pick an arbitrary upper bound and hope it's good enough.
+#+begin_src jupyter-python
+  s, v, dv = data[:, :3], data[:, 3:6], data[:, -3:]
+  for _ in range(1000):
+      v += dv
+      s += v
+      values, index, count = np.unique(s, return_counts=True, return_index=True, axis=0)
+      indices = index[np.where(count == 1)]
+      s, v, dv = s[indices], v[indices], dv[indices]
+
+  len(s)
+#+end_src
