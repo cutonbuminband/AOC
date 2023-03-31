@@ -650,6 +650,71 @@ We'll start by merging the overlapping banned ranges together. Then, the high po
    + 4294967295 - ranges[-1])
 #+end_src
 
+* Day 21
+[[https://adventofcode.com/2016/day/21][Scrambled Letters and Hash]]
+** Part 1
+#+begin_src jupyter-python
+  data = [x.strip().split() for x in load(21)]
+  s = "abcdefgh"
+  def update(s, line, part=1):
+      operands = line[2], line[-1]
+      if line[0] == "reverse":
+          l, r = sorted(map(int, operands))
+          s = s[:l] + s[l:r+1][::-1] + s[r+1:]
+      elif line[0] == "swap":
+          if line[1] == "letter":
+              l, r = map(lambda x: s.index(x), operands)
+          else:
+              l, r = map(int, operands)
+          l, r = sorted([l, r])
+          s = s[:l] + s[r] + s[l+1:r] + s[l] + s[r+1:]
+      elif line[0] == "rotate":
+          if line[1] == "left":
+              rotation = - int(operands[0])
+          elif line[1] == "right":
+              rotation = int(operands[0])
+          else:
+              if part == 1:
+                  index = s.index(operands[1])
+                  rotation = 1 + index + (index >= 4)
+              if part == 2:
+                  rotation = reverse_rotation(s, operands[1])
+          if part == 2:
+              rotation = -rotation
+          rotation = rotation % len(s)
+          s = s[-rotation:] + s[:-rotation]
+      elif line[0] == "move":
+          source, dest = map(int, operands)
+          if part == 2:
+              source, dest = dest, source
+          tmp = s[:source] + s[source + 1:]
+          s = tmp[:dest] + s[source] + tmp[dest:]
+      return s
+  for line in data:
+      s = update(s, line)
+
+  s
+#+end_src
+
+** Part 2
+Ouch. `Move`, `swap` and `reverse` should be easy to do backwards, since they're self-inverses (potentially with the arguments swapped). The issue is `rotate`. When we have to go left/right a fixed number of steps there's no problem, since we just go the other way. For the last one the issue is that the amount we have to rotate by depends on what the state was prior to the rotation. Luckily there aren't that many possible rotations, so the best approach seems to be to just to see which potential preimage string gives the correct answer when rotated.
+#+begin_src jupyter-python
+  def rotate_based_on(s, char):
+      index = s.index(char)
+      rotation = 1 + index + (index >= 4)
+      rotation = rotation % len(s)
+      return s[-rotation:] + s[:-rotation]
+
+  def reverse_rotation(s, char):
+      for i, original_string in [(i, s[-i:] + s[:-i]) for i in range(len(s))]:
+          if rotate_based_on(original_string, char) == s:
+              return -i
+  s = "fbgdceah"
+  for line in data[::-1]:
+      s = update(s, line, part=2)
+  s
+#+end_src
+
 * Day 25
 [[https://adventofcode.com/2016/day/25][Clock Signal]]
 ** Part 1
