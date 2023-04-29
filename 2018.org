@@ -11,6 +11,7 @@
   import itertools
   import more_itertools
   import re
+  import scipy
   import utils
   load = utils.year_load(2018)
 #+end_src
@@ -549,3 +550,44 @@ Simulating the 50 billion generations is impossible, so something cleverer is ne
 
 #+end_src
 
+* Day 18
+[[https://adventofcode.com/2018/day/18][Settlers of The North Pole]]
+** Part 1
+#+begin_src jupyter-python
+  state_map = {".": 0, "|": 1, "#": 2}
+  reverse_map = {v: k for k, v in state_map.items()}
+  state = np.array([[state_map[char] for char in line.strip()] for line in load(18)])
+  weights = np.ones((3, 3))
+  weights[1, 1] = 0
+  seen = {}
+  for i in range(10):
+      seen[tuple(state.flatten())] = i
+      tree_nb = scipy.ndimage.convolve(1 * (state == 1), weights, mode="constant")
+      lumber_nb = scipy.ndimage.convolve(1 * (state == 2), weights, mode="constant")
+      change = (((state == 0) & (tree_nb >= 3))
+                | ((state == 1) & (lumber_nb >= 3))
+                | ((state == 2) & ((tree_nb == 0) | (lumber_nb == 0))))
+      state = (state + change) % 3
+  (state == 1).sum() * (state == 2).sum()
+#+end_src
+
+** Part 2
+There's no way we can run the simulation for that long. Hopefully we'll get a repeat before then
+#+begin_src jupyter-python
+  target = 1000000000
+  for i in range(10, target):
+      if tuple(state.flatten()) in seen:
+          start = seen[tuple(state.flatten())]
+          reversed_dict = {v: k for k, v in seen.items()}
+          state = np.array(reversed_dict[start + (target - start) % (i - start)])
+          break
+      seen[tuple(state.flatten())] = i
+      tree_nb = scipy.ndimage.convolve(1 * (state == 1), weights, mode="constant")
+      lumber_nb = scipy.ndimage.convolve(1 * (state == 2), weights, mode="constant")
+      change = (((state == 0) & (tree_nb >= 3))
+                | ((state == 1) & (lumber_nb >= 3))
+                | ((state == 2) & ((tree_nb == 0) | (lumber_nb == 0))))
+      state = (state + change) % 3
+  (state == 1).sum() * (state == 2).sum()
+
+#+end_src
