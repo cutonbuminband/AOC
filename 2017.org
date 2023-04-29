@@ -723,3 +723,47 @@ For part two we could do some clever work to figure out a stopping condition bas
 
   len(s)
 #+end_src
+
+* Day 22
+[[https://adventofcode.com/2017/day/22][Sporifica Virus]]
+** Part 1
+#+begin_src jupyter-python
+  direction = 1j
+  data = [[0 if char == "." else 1 for char in line.strip()] for line in load(22)]
+  size = len(data)
+  position = size // 2 + (size // 2)*1j
+  board = defaultdict(int)
+  for y, line in enumerate(data):
+      for x, val in enumerate(line):
+          board[x + (size - y - 1) * 1j] = val
+  total = 0
+  for idx in range(10000):
+      state = board[position]
+      total += (state == 0)
+      direction *= (1 - 2 * state) * 1j
+      board[position] = 1 - state
+      position += direction
+  total
+#+end_src
+
+** Part 2
+The large number of iterations for part 2 seems to indicate that I should do something more clever here. But the following runs in about 20s on my machine, so nevermind. 
+#+begin_src jupyter-python
+  direction = 1j
+  data = [[1j if char == "." else -1j for char in line.strip()] for line in load(22)]
+  size = len(data)
+  position = size // 2 + (size // 2)*1j
+  board = defaultdict(lambda: 1j)
+  for y, line in enumerate(data):
+      for x, val in enumerate(line):
+          board[x + (size - y - 1) * 1j] = val
+  total = 0
+  for idx in range(10000000):
+      state = board[position]
+      total += (state == 1)
+      direction *= state
+      board[position] = -state * 1j
+      position += direction
+  total
+#+end_src
+
