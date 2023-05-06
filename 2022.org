@@ -178,12 +178,14 @@ The following code has a bug where it will show incorrect totals if the contents
   calculate_weights("/")
   sum(weight for weight in weights.values() if weight <= 100_000)
 #+end_src
+
 ** Part 2
 The weight of ever directory has been stored in the weight dict, so finding the smallest one that's greater than a given threshold is trivial
 #+begin_src jupyter-python
   to_free = weights["/"] - 40_000_000
   min(weight for weight in weights.values() if weight >= to_free)
 #+end_src
+
 * Day 8
 [[https://adventofcode.com/2022/day/8][Treetop Tree House]]
 ** Part 1
@@ -236,6 +238,7 @@ The grid here invites plotting. One thing we can plot is the shortest tree which
   plt.title('The shortest visible tree at each location')
   plt.savefig('graphs/2022-08.png', bbox_inches='tight')
 #+end_src
+
 That gives the following plot
 
 [[graphs/2022-08.png]]
@@ -411,4 +414,87 @@ We can see how at the edges of the forest shorter trees are visible, but towards
   packets = [ast.literal_eval(packet) for pair in s.split("\n\n") for packet in pair.split("\n")]
   positions = [sum(compare(divider, packet) == 2 for packet in packets) for divider in dividers]
   (positions[0] + 1) * (positions[1] + 2)
+#+end_src
+
+* Day 14
+* Day 15
+[[https://adventofcode.com/2022/day/15][Beacon Exclusion Zone]]
+** Part 1
+#+begin_src jupyter-python
+  digits = re.compile(r"-?\d+")
+  data = open(datadir / "15.txt").read()
+  values = [int(x) for x in re.findall(digits, data)]
+
+  def combine_two_intervals(i1, i2):
+      i1, i2 = sorted([i1, i2])
+      if i2[0] <= i1[1]:
+          return i1[0], max(i1[1], i2[1])
+      return False
+
+  def combine_n_intervals(intervals):
+      active = intervals.copy()
+      result = []
+      while active:
+          current = active.pop()
+          for index, previous in enumerate(result):
+              new_interval = combine_two_intervals(current, previous)
+              if new_interval:
+                  del result[index]
+                  active.append(new_interval)
+                  break
+          else:
+              result.append(current)
+      return result
+
+  y_target = 2000000
+  fixes = set()
+  intervals = []
+  for x, y, u, v in more_itertools.chunked(values, 4):
+      r = abs(x - u) + abs(y - v)
+      if v == y_target:
+          fixes.add(u)
+      available = r - abs(y - y_target)
+      if available >= 0:
+          interval = x - available, x + available + 1
+          intervals += [interval]
+  intervals = combine_n_intervals(intervals)
+  sum(x[1] - x[0] for x in intervals) - len(fixes)
+#+end_src
+
+* Day 16
+** Part 1
+We should start by loading the data, and trying to visualize the graph
+#+begin_src jupyter-python
+  import sknetwork
+  adjacency = {}
+  pressures = {}
+  for line in open(datadir / "16.txt"):
+      pressure = int(re.findall(r"\d+", line)[0])
+      left, right = line.split(";")
+      node = left.split()[1]
+      neighbors = re.sub(".*valves? (.*)", r"\1", right[:-1]).split(",")
+      adjacency[node] = neighbors
+      pressures[node] = pressure
+  graph = sknetwork.data.from_adjacency_list(adjacency, weighted=False)
+  
+  from sknetwork.embedding.force_atlas import ForceAtlas
+  from IPython.display import SVG
+  forceatlas2 = ForceAtlas()
+  embedding = forceatlas2.fit_transform(graph.adjacency)
+  image = sknetwork.visualization.svg_graph(graph.adjacency, embedding, names=graph.names)
+  SVG(image)
+#+end_src
+Looks pretty cool!
+#+begin_src jupyter-python
+  def optimal_choice(open_valves, score, position, visited, time):
+	  if ticks == 0:
+		  return score
+	  neighbors = adjacency[position]
+	  moves = []
+	  if position not in open_valves:
+		  new_score = score + (time - 1) * pressures[position]
+		  moves += [(open_valves + [position], new_score, position, visited, time - 1)]
+	  for neighbor in filter(lambda x: x not in visited, neighbors):
+		  moves += [(open_valves, neighor, score, visited + [neighbor], time - 1)]
+
 #+end_src

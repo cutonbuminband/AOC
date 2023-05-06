@@ -662,30 +662,19 @@ Based on this, we can parse the string from start to finish by tracking a list o
 
 With all that out of the way, the furthest room can be found with a BFS:
 #+begin_src jupyter-python
-  visited = set()
-  queue = deque([(0, 0)])
-  while queue:
-      cost, position = queue.popleft()
-      visited.add(position)
-      for direction in directions.values():
-          if position + direction not in visited and edges[2 * position + direction]:
-              queue.append((cost + 1, position + direction))
-  cost
+  def neighbors(state):
+      return [
+          state + direction for direction in directions.values() if edges[2 * state + direction]
+      ]
+
+  utils.bfs(0, None, neighbors)
 #+end_src
 
 ** Part 2
 
-And finding how many rooms require at least 1000 steps can be found with the same DFS, but ending whenever we get a cost greater than 1000
+And finding how many rooms require at least 1000 steps can be found with the same BFS, but ending whenever we get a cost greater than 1000
 #+begin_src jupyter-python
-  visited = set()
-  queue = deque([(0, 0)])
-  while queue:
-      cost, position = queue.popleft()
-      if cost >= 1000:
-          break
-      visited.add(position)
-      for direction in directions.values():
-          if position + direction not in visited and edges[2 * position + direction]:
-              queue.append((cost + 1, position + direction))
-  nodes - len(visited)
+  end_condition = lambda cost, state: cost >= 1000
+  nodes - len(utils.bfs(0, end_condition, neighbors, return_visited=True))
 #+end_src
+

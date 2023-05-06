@@ -14,6 +14,7 @@
   import hashlib
   import re
   from utils import year_load
+  import utils
   load = year_load(2016)
 #+end_src
 
@@ -332,7 +333,6 @@ So I think the way to go is A*.
 
 #+begin_src jupyter-python
   from more_itertools import grouper
-  from utils import astar
   n_floors = 4
 
   def distance_estimate(state, end):
@@ -367,7 +367,7 @@ So I think the way to go is A*.
 
   state = 0, (0, 0, 0, 0, 1, 1, 1, 1, 1, 2)
   target = 3, (3,)*len(state[1])
-  astar(state, target, constrained_neighbors, distance_estimate)
+  utils.astar(state, target, constrained_neighbors, distance_estimate)
 #+end_src
 
 ** Part 2
@@ -377,7 +377,7 @@ Reducing the search space by only letting the elevator move down with one item a
 #+begin_src jupyter-python
   state = 0, (0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2)
   target = 3, (3,)*len(state[1])
-  astar(state, target, constrained_neighbors, distance_estimate)
+  utils.astar(state, target, constrained_neighbors, distance_estimate)
 #+end_src
 
 * Day 12
@@ -438,26 +438,12 @@ This is a fairly straightforward implementation of the problem description, with
       return abs(point[0] - target[0]) + abs(point[1] - target[1])
   start = (1, 1)
   target = 31, 39
-  astar(start, target, neighbors, distance_function)
+  utils.astar(start, target, neighbors, distance_function)
 #+end_src
 
 ** Part 2
 #+begin_src jupyter-python
-  active = [(1, 1)]
-  visited = set()
-
-  for i in range(51):
-      new_states = []
-      for state in active:
-          if state in visited:
-              continue
-          visited.add(state)
-          new_neighbors = [neighbor for neighbor in neighbors(state)
-                           if neighbor not in visited]
-          new_states += new_neighbors
-      active = new_states
-  len(visited)
-
+  len(utils.bfs((1, 1), lambda cost, state: cost > 50, neighbors, return_visited=True))
 #+end_src
 
 * Day 14
@@ -541,7 +527,7 @@ Another round of the chinese remainder theorem.
 * Day 17
 [[https://adventofcode.com/2016/day/17][Two Steps Forward]]
 ** Part 1
-BFS to the rescue. I wanted to do astar, but the "distance from 3,3" heuristic didn't seem like it would give much. Then I dropped to Dijkstra, but realised that if all steps cost the same, that's just BFS.
+BFS to the rescue. I wanted to do A*, but the "distance from 3,3" heuristic didn't seem like it would give much. Then I dropped to Dijkstra, but realised that if all steps cost the same, that's just BFS.
 #+begin_src jupyter-python
   start = (0, "bwnlcvfs")
 
@@ -565,6 +551,7 @@ BFS to the rescue. I wanted to do astar, but the "distance from 3,3" heuristic d
       q += deque(neighbors(position, path))
   result
 #+end_src
+
 ** Part 2
 #+begin_src jupyter-python
   q = deque([start])
@@ -605,16 +592,32 @@ For part 2 I should probably check to see if I ever hit a row that I've seen bef
 ** Part 1
 This problem -- with rotations by 1 and deletions only of neighboring elves is definitely calling for a deque:
 #+begin_src jupyter-python
-  queue = deque(range(1, 3005290+1))
-  queue.rotate(-1)
+  limit = 100
+  numbers = list(range(1, limit + 1))
+  queue = deque(numbers)
   while queue:
-      s = queue.popleft()
       queue.rotate(-1)
+      s = queue.popleft()
   s
 #+end_src
 
 ** Part 2
-Unfortunately, the same approach won't work here, since the rotations to the middle of the queue really ruin everything.
+Unfortunately, the same approach won't work here, since the rotations to the middle of the queue really ruin everything. We can start by convincing ourselves that part one can be rewritten as
+#+begin_src jupyter-python
+  while (l := len(numbers)) > 1:
+      numbers = numbers[(l % 2)*2::2]
+  numbers[0]
+#+end_src
+
+Can we find a similar update rule for the "reach halfway across the board" case?
+
+#+begin_src jupyter-python
+  numbers = list(range(1, 5 + 1))
+  s = len(numbers) // 2
+  (numbers[s:] + numbers[:s])[2 - len(numbers) % 2::3]
+
+#+end_src  
+
 
 * Day 20
 [[https://adventofcode.com/2016/day/19][Firewall Rules]]
@@ -715,6 +718,32 @@ Ouch. `Move`, `swap` and `reverse` should be easy to do backwards, since they're
   s
 #+end_src
 
+* Day 22
+[[https://adventofcode.com/2016/day/22][Grid Computing]]
+** Part 1
+#+begin_src jupyter-python
+  data = load(22, "int")
+  data.sort(key=lambda x: x[-2])
+  def binary_search(key, haystack):
+      key = key[3]
+      left, right = 0, len(haystack)
+      while (right - left) > 1:
+          midpoint = int((left + right) / 2)
+          if haystack[midpoint][-2] >= key:
+              right = midpoint
+          else:
+              left = midpoint
+      return(right)
+  result = 0
+  for idx1, val in enumerate(data):
+      if val[3] == 0:
+          continue
+      idx2 = binary_search(val, data)
+      result += len(data[idx2:]) + (idx2 <= idx1)
+  result
+#+end_src
+
+** Part 2
 * Day 25
 [[https://adventofcode.com/2016/day/25][Clock Signal]]
 ** Part 1

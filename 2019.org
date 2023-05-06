@@ -409,9 +409,9 @@ I don't know what optimizations are possible here, but an obvious one is to real
 
 ** Part 2
 #+begin_src jupyter-python
-  program.reset()
   program.set(0, 2)
   ball, paddle = 0, 0
+  result = 0
   def ai():
       global ball
       global paddle
@@ -424,6 +424,7 @@ I don't know what optimizations are possible here, but an obvious one is to real
       ball = ball if (kind != 4) else x
   result
 #+end_src
+
 
 
 * Day 14
@@ -536,7 +537,49 @@ I really liked this puzzle! The approach I took is to first map out the entire a
 #+end_src
 
 ** Part 2
-We mapped out the whole area for part 1, so part 2 is just a bfs
+We mapped out the whole area for part 1, so part 2 is just a bfs with no stopping condition
 #+begin_src jupyter-python
   utils.bfs(target, None, neighbors, edges=edges)
 #+end_src
+
+* Day 16
+
+** Part 1
+For the first part all the numbers are small, so we don't need to be particularly clever
+#+begin_src jupyter-python
+  data = [int(x) for x in load(16)[0].strip()]
+  base_pattern = np.array([0, 1, 0, -1])
+  factors = []
+  for i in range(1, len(data) + 1):
+      pattern = base_pattern.repeat(i)
+      repeats = int(np.ceil((len(data) + 1) / len(pattern)))
+      factors.append(np.tile(pattern, repeats)[1:len(data) + 1])
+  factors = np.array(factors)
+  for i in range(100):
+      data = abs(factors @ data) % 10
+  print(*data[:8], sep="", end="\n")
+#+end_src
+
+** Part 2
+
+* Day 24
+[[https://adventofcode.com/2019/day/24][Planet of Discord]]
+** Part 1
+#+begin_src jupyter-python
+  state = np.array([[0 if char == "." else 1 for char in line.strip()] for line in load(24)])
+  weights = [[0, 1, 0], [1, 0, 1], [0, 1, 0]]
+  seen = {}
+  while tuple(state.ravel()) not in seen:
+      seen[tuple(state.ravel())] = True
+      bugs = scipy.ndimage.convolve(state, weights, mode="constant")
+      changes = (bugs != 1)
+      empty = np.where(state == 0)
+      changes[empty] = ((bugs == 1) | (bugs == 2))[empty]
+      state = (state + changes) % 2
+  x = state.ravel()
+  (x * (2 ** np.arange(len(x)))).sum()
+#+end_src
+
+** Part 2
+???
+

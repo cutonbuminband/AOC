@@ -12,6 +12,7 @@
   import collections
   import re
   import more_itertools
+  import utils
   from utils import year_load
   load = year_load(2017)
 #+end_src
@@ -336,17 +337,9 @@ For part 2, instead of finding just the sum of the moves, we look at the running
   regex = "(-?\d+)"
   data = load(12, "int")
   graph = {line[0]: line[1:] for line in data}
-  def find_group(seed):
-      queue = set([seed])
-      visited = set()
-      while queue:
-          current = queue.pop()
-          visited.add(current)
-          for neighbor in graph[current]:
-              if neighbor not in visited:
-                  queue.add(neighbor)
-      return visited
-  len(find_group(0))
+
+  neighbors = lambda state: graph[state]
+  len(utils.bfs(0, None, neighbors, return_visited=True))
 #+end_src
 
 ** Part 2
@@ -354,7 +347,7 @@ For part 2, instead of finding just the sum of the moves, we look at the running
   i = 0
   while graph:
       seed = list(graph.keys())[0]
-      visited = find_group(seed)
+      visited = utils.bfs(seed, None, neighbors, return_visited=True)
       for key in visited:
           del graph[key]
       i += 1
@@ -428,6 +421,7 @@ For most of these, there was only one such modulus. Taking all the ones for whic
   bitstrings = [f"{int(h, 16):0128b}" for h in hashes]
   sum(x.count("1") for x in bitstrings)
 #+end_src
+
 ** Part 2
 #+begin_src jupyter-python
   field = np.array([[ord(x) - ord("0") for x in b] for b in bitstrings])
@@ -442,20 +436,16 @@ For most of these, there was only one such modulus. Taking all the ones for whic
               graph[(i, j)].append(neighbor)
               graph[neighbor].append((i, j))
   count = field.sum() - len(graph)  # singletons
+  neighbors = lambda x: graph[x]
   while graph:
-      queue = collections.deque([list(graph.keys())[0]])
-      visited = set()
-      while queue:
-          current = queue.pop()
-          visited.add(current)
-          for node in graph[current]:
-              if node not in visited:
-                  queue.append(node)
+      seed = list(graph.keys())[0]
+      visited = utils.bfs(seed, None, neighbors, return_visited=True)
       for node in visited:
           del graph[node]
       count += 1
   count
 #+end_src
+
 * Day 15
 [[https://adventofcode.com/2017/day/15][Dueling Generators]]
 ** Part 1
@@ -549,7 +539,7 @@ For part 2, it would take too long to go through all the one billion cycles. But
   q[1]
 #+end_src
 ** Part 2
-50 million is at a level where the previous approach is becomingineffective. The code below takes ~40 seconds to run. It could probably be improved, but that would take longer than 40 seconds.
+50 million is at a level where the previous approach is becoming ineffective. The code below takes ~40 seconds to run. It could probably be improved, but that would take longer than 40 seconds.
 #+begin_src jupyter-python
   q = collections.deque([0])
   for i in range(1, 50_000_000):

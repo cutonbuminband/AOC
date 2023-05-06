@@ -10,6 +10,9 @@
   import functools
   import itertools
   import queue
+  import utils
+  from utils import year_load
+  load = year_load(2021)
   datadir = Path("data/2021")
 #+end_src
 
@@ -18,14 +21,13 @@
 ** Part 1
 To do this, count the number of times a depth measurement increases from the previous measurement. (There is no measurement before the first measurement.)
 #+begin_src jupyter-python
-  data = pd.read_csv(datadir / '1.csv', names=['depth'])
-  (data.diff() > 0).sum()
+  data = load(1, "np")
+  (np.diff(data) > 0).sum()
 #+end_src
 
 ** Part 2
-Instead, consider sums of a three-measurement sliding window.  Your goal now is to count the number of times the sum of measurements in this sliding window increases from the previous sum. So, compare A with B, then compare B with C, then C with D, and so on. Stop when there aren't enough measurements left to create a new three-measurement sum.
 #+begin_src jupyter-python
-(data.rolling(3).sum().diff() > 0).sum()
+  (pd.Series(data).rolling(3).sum().diff() > 0).sum()
 #+end_src
 
 * Day 2
@@ -39,9 +41,11 @@ It seems like the submarine can take a series of commands like forward 1, down 2
 
 Calculate the horizontal position and depth you would have after following the planned course. What do you get if you multiply your final horizontal position by your final depth?
 #+begin_src jupyter-python
-  data = pd.read_csv(datadir / '2.csv', sep=' ', names=['instruction', 'amount'])
-  totals = data.groupby('instruction').sum()
-  totals.loc['forward'] * (totals.loc['down'] - totals.loc['up'])
+  data = [x.strip().split() for x in load(2)]
+  df = pd.DataFrame(data, columns=['instruction', 'amount'])
+  df["amount"] = df["amount"].apply(int)
+  totals = df.groupby("instruction").sum()
+  (totals.loc['forward'] * (totals.loc['down'] - totals.loc['up'])).iat[0]
 #+end_src
 
 ** Part 2
@@ -59,8 +63,8 @@ Using this new interpretation of the commands, calculate the horizontal position
   ops = {'down': lambda x, y: (x[0] + y, x[1], x[2]),
          'up': lambda x, y: (x[0] - y, x[1], x[2]),
          'forward': lambda x, y: (x[0], x[1] + y, x[2] + x[0]*y)}
-  for row in data.itertuples():
-      state = ops[row.instruction](state, row.amount)
+  for row in data:
+      state = ops[row[0]](state, int(row[1]))
   print(state[1] * state[2])
 #+end_src
 
@@ -76,7 +80,7 @@ Each bit in the gamma rate can be determined by finding the most common bit in t
 Use the binary numbers in your diagnostic report to calculate the gamma rate and epsilon rate, then multiply them together.
 
 #+begin_src jupyter-python
-df = pd.read_fwf(datadir / '3.csv', widths=[1]*12, header=None)
+df = pd.read_fwf(datadir / "3.txt", widths=[1]*12, header=None)
 def binarize(array):
     return int(''.join(str(x) for x in array.reshape(-1)), 2)
 bits = df.median().to_numpy(dtype=int)
@@ -117,8 +121,9 @@ The score of the winning board can now be calculated. Start by finding the sum o
 To guarantee victory against the giant squid, figure out which board will win first. What will your final score be if you choose that board?
 
 #+begin_src jupyter-python
-  numbers = np.loadtxt(datadir / '4.txt', delimiter=',', max_rows=1)
-  boards = np.loadtxt(datadir / '4.txt', skiprows=2).reshape(-1, 5, 5)
+  data = load(4, "raw").split("\n\n")
+  numbers = np.array([int(x) for x in data[0].strip().split(",")])
+  boards = np.array([int(x) for x in " ".join(data[1:]).replace("\n", " ").split()]).reshape(-1, 5, 5)
 
   def winning_array(boards):
       return ((boards == -1).all(axis=2) | (boards == -1).all(axis=1)).any(axis=1)
@@ -209,7 +214,7 @@ Each day, a 0 becomes a 6 and adds a new 8 to the end of the list, while each ot
 
 Find a way to simulate lanternfish. How many lanternfish would there be after 80 days?
 #+begin_src jupyter-python
-  data = np.loadtxt(datadir / '6.txt', delimiter=',', dtype=int)
+  data = load(6, "np")
   population, _ = np.histogram(data, range(10))
   transition_matrix = np.roll(np.eye(9, dtype=int), 1, axis=1)
   transition_matrix[6, 0] = 1
@@ -221,7 +226,7 @@ Suppose the lanternfish live forever and have unlimited food and space. Would th
 
 How many lanternfish would there be after 256 days?
 #+begin_src jupyter-python
-    (np.linalg.matrix_power(transition_matrix, 256) @ population).sum()
+  (np.linalg.matrix_power(transition_matrix, 256) @ population).sum()
 #+end_src
 
 * Day 7
@@ -241,7 +246,7 @@ Each change of 1 step in horizontal position of a single crab costs 1 fuel.
 
 Determine the horizontal position that the crabs can align to using the least fuel possible. How much fuel must they spend to align to that position?
 #+begin_src jupyter-python
-  data = np.loadtxt(datadir / '7.csv', delimiter=',', dtype=int)
+  data = load(7, "np")
   np.abs(data - np.median(data)).sum()
 #+end_src
 
@@ -264,8 +269,7 @@ Determine the horizontal position that the crabs can align to using the least fu
 [[https://adventofcode.com/2021/day/8][Seven Segment Search]]
 ** Part 1
 #+begin_src jupyter-python
-  with open(datadir / '8.txt', encoding='utf8') as f:
-      data = f.readlines()
+  data = load(8)
   segments = [line.split("|")[1].strip().split() for line in data]
   mylen = np.vectorize(len)
   np.isin(mylen(segments), [2, 3, 4, 7]).sum()
@@ -340,9 +344,7 @@ We know that every digit occurs before the pipe for every row in our input.
 ** Part 1
 
 #+begin_src jupyter-python
-  with open(datadir / '10.txt', encoding='utf8') as f:
-      lines = f.readlines()
-
+  lines = load(10)
   pairs = ["[]", "()", "<>", "{}"]
 
   def normalize(string):
@@ -458,8 +460,7 @@ We know that every digit occurs before the pipe for every row in our input.
       return [(node,) + x for x in flatten([paths(new_tree, neighbor, end) for neighbor in tree[node]])]
 
 
-  with open(datadir / "12.txt", encoding="utf8") as f:
-      data = f.readlines()
+  data = load(12)
   edges = [line.strip().split("-") for line in data]
   tree = edges_to_tree(edges)
   len(paths(tree, "start", "end"))
@@ -489,7 +490,7 @@ We know that every digit occurs before the pipe for every row in our input.
 ** Part 1
 
 #+begin_src jupyter-python
-  start = np.loadtxt(datadir / '13.txt', delimiter=',', dtype=int)
+  start = load(13, "np")
   arr = np.zeros(start.max(axis=0) + 1, dtype=bool)
   arr[start[:, 0], start[:, 1]] = 1
 
@@ -501,7 +502,7 @@ We know that every digit occurs before the pipe for every row in our input.
 
 ** Part 2
 #+begin_src jupyter-python
-  replacement = np.vectorize(lambda x: "#" if x else " ")
+  replacement = np.vectorize(lambda x: "█" if x else " ")
   instructions = ["x=655", "y=447", "x=327", "y=223", "x=163", "y=111", "x=81", "y=55", "x=40", "y=27", "y=13", "y=6"]
   for instruction in instructions:
       direction, position = instruction.split("=")
@@ -530,8 +531,7 @@ A rule like CH -> B should be interpreted as state "CH" produces states "CB" and
 ** Part 1
 #+begin_src jupyter-python
   state_string = "VCOPVNKPFOOVPVSBKCOF"
-  with open(datadir / '14.txt', encoding='utf8') as f:
-      data = f.readlines()
+  data = load(14)
   transition_elements = ''.join(line.strip().replace(" -> ", "") for line in data)
   elements = sorted(set(state_string + transition_elements))
   n = len(elements)
@@ -570,30 +570,26 @@ A rule like CH -> B should be interpreted as state "CH" produces states "CB" and
 [[https://adventofcode.com/2021/day/15][Chiton]]
 
 ** Part 1
-This is a shortest path search, where we'll use a priority queue to store the items and their cost. Reimplementing Dijkstra's algorithm then gives
+This is a shortest path search, where we'll use a priority queue to store the items and their cost. Reusing my A* implementation then gives
 #+begin_src jupyter-python
   data = pd.read_fwf(datadir / '15.txt', widths=[1]*100, header=None).to_numpy(dtype=int)
-  start = (0, 0)
-  def get_neighbors(data, x, y):
+
+  def neighbors(state, data=None):
+      x, y = state
+      if data is None:
+          return []
       xmax, ymax = data.shape
       candidates = [(x-1, y), (x + 1, y), (x, y - 1), (x, y + 1)]
-      return[[data[c], c] for c in candidates if 0 <= c[0] < xmax and 0 <= c[1] < ymax]
+      return [c for c in candidates if 0 <= c[0] < xmax and 0 <= c[1] < ymax]
 
-  def navigate(data, start, end):
-      q = queue.PriorityQueue()
-      q.put((0, start))
-      seen = set()
-      while q:
-          cost, coords = q.get()
-          if coords in seen:
-              continue
-          seen.add(coords)
-          if coords == end:
-              return cost
-          for neighbor in [(n[0] + cost, n[1]) for n in get_neighbors(data, *coords)]:
-              q.put(neighbor)
-      return np.inf
-  navigate(data, start, (99, 99))
+
+  def cost(state, neighbor, data=None):
+      return 1 if data is None else 0 if state == neighbor else data[neighbor]
+
+  def heuristic(node, end):
+      return abs(node[0] - end[0]) + abs(node[1] - end[1])
+
+  utils.astar((0, 0), (99, 99), neighbors, heuristic, cost, data=data)
 #+end_src
 
 ** Part 2
@@ -604,7 +600,7 @@ This is a shortest path search, where we'll use a priority queue to store the it
       for j in range(5):
           arr[i * x: (i + 1) * x, j * y : (j + 1) * y] = data + i + j
   arr = ((arr - 1) % 9) + 1
-  navigate(arr, start, (499, 499))
+  utils.astar((0, 0), (499, 499), neighbors, heuristic, cost, data=arr)
 #+end_src
 
 * Day 16
@@ -646,9 +642,7 @@ This is a shortest path search, where we'll use a priority queue to store the it
               offset += do
           return version, offset
 
-  with open (datadir / '16.txt') as f:
-      data = f.readline().strip()
-  # data = "A0016C880162017C3686B18A3D4780"
+  data = load(16)[0].strip()
   bits = ''.join(nybbles[x.lower()] for x in data)
   parse(bits)
 #+end_src
@@ -825,10 +819,7 @@ Things to note:
                   return True
           return False
 
-  snumbers = []
-  with open(datadir / '18.txt') as f:
-      for line in f:
-          snumbers.append(eval(line.strip()))
+  snumbers = [eval(line.strip()) for line in load(18)]
   result = Pair(*snumbers[0])
   for snumber in snumbers[1:]:
       result = Pair(result, Pair(*snumber)).reduce()
@@ -863,7 +854,7 @@ We'll start by generating the 24 rotation matrices. There are six possible ways 
 Then we find overlapping scanners in the input and populate a map (x, y) with the matrices to convert from y coordinates to x coordinates
 #+begin_src jupyter-python
   from scipy.spatial.distance import pdist, squareform
-  foo = open(datadir / '19.txt').read()[:-1]
+  foo = load(19, "raw")[:-1]
   scanners = foo.split('\n\n')
   scanners = [np.array([list(map(int, line.split(','))) for line in scanner.split('\n')[1:]], dtype=int) for scanner in scanners]
 
@@ -888,8 +879,6 @@ Then we find overlapping scanners in the input and populate a map (x, y) with th
               mapping[(a, b)] = [rotation, c]
               mapping[(b, a)] = [rotation.T, -c @ rotation.T]
               break
-
-
 #+end_src
 
 We do some linear algebra to extend this map to all the scanners
@@ -933,7 +922,7 @@ What is the largest Manhattan distance between any two scanners?
 [[https://adventofcode.com/2021/day/20][Trench Map]]
 ** Part 1 and 2
 #+begin_src jupyter-python
-  data = open(datadir / '20.txt').read()
+  data = load(20, "raw")
   pixel_map = {".": 0, "#": 1}
   key, array = data.split('\n\n')
   key = np.array([pixel_map[x] for x in key.strip()], dtype=bool)
@@ -1020,7 +1009,7 @@ The first part can be solved trivially by using numpy's indexing
       indices = [x.split("..") for x in line.strip().split(",")]
       return command, [[int(x[0][2:]), int(x[1]) + 1] for x in indices]
 
-  lines = open(datadir / "22.txt").readlines()
+  lines = load(22)
   commands = [parse_line(line) for line in lines]
   values = {"on": 1, "off": 0}
   maxval = 0
@@ -1200,7 +1189,7 @@ Rarely in AOC have I had a worse ratio of thinking employed to code written - th
 
 I think this is the intended approach, since it uses the realisation that if we multiply z by 26 6 times, then to get back below zero, we need to divide 7 times. So each time there's a divide, the value of w is fixed.
 #+begin_src jupyter-python
-  data = open(datadir / "24.txt").read()
+  data = load(24, "raw")
   chunks = [[y.split() for y in x.split("\n") if y] for x in data.split("inp w\n")][1:]
 
   indices = [3, 4, 14]
@@ -1243,7 +1232,7 @@ After all that, luckily part 2 is trivial
 #+begin_src jupyter-python
   lookup = {".": 0, ">": 1, "v": -1}
   reverse = {v: k for k, v in lookup.items()}
-  data = open(datadir / "25.txt").readlines()
+  data = load(25)
   array = np.array([[lookup[char] for char in line.strip()] for line in data], dtype=int)
   def move_one(array, direction=1):
       critter = 2 * direction - 1

@@ -1,22 +1,25 @@
-from collections import deque
+from collections import deque, defaultdict
 import queue
 import numpy as np
 from pathlib import Path
-
 import re
 
 datadir = Path("data")
 
 
-def astar(start, end, neighbors, distance_function, multiple_starts=False):
+def astar(
+    start, end, neighbors, heuristic, weights=None, multiple_starts=False, **kwargs
+):
     """Implementation of the A* path finding algorithm.
 
     parameters:
       - start: The initial node, or a list of starting nodes
       - end: The target node
       - neighbors: A function Node -> List[Node] which finds the valid neighbors of a node
-      - distance function: A heuristic function [Node, Node] -> Real which provides
+      - heuristic: A heuristic function [Node, Node] -> Real which provides
         a lower bound on the distance between two nodes.
+      - weights: A function [Node, Node] -> Real which gives the exact distance between
+        two neighboring nodes
       - multiple_starts: are we starting from multiple nodes, or just one.
     returns:
       - The shortest path distance between start and end.
@@ -26,46 +29,60 @@ def astar(start, end, neighbors, distance_function, multiple_starts=False):
         start = [start]
     q = queue.PriorityQueue()
     for item in start:
+        costs[item] = 0
         q.put((0, item))
     while q:
         _, state = q.get()
         if state == end:
             return costs[state]
-        for neighbor in neighbors(state):
-            current_cost = costs[state] + 1
+        for neighbor in neighbors(state, **kwargs):
+            current_cost = costs[state] + (
+                1 if weights is None else weights(state, neighbor, **kwargs)
+            )
             if current_cost < costs[neighbor]:
                 costs[neighbor] = current_cost
-                q.put((current_cost + distance_function(neighbor, end), neighbor))
+                q.put((current_cost + heuristic(neighbor, end), neighbor))
     return costs[end]
 
 
-def bfs(start, end, neighbors, initial_state=0, update=None, **kwargs):
+def bfs(
+    start, end, neighbors, initial_state=0, update=None, return_visited=False, **kwargs
+):
     """Implementation of a BFS algorithm.
 
     parameters:
       - start: The initial node
-      - end: The target node. If the target is unreachable from start, then all
-        nodes reachable from start will be mapped out instead.
-      - neighbors: A function Node -> List[Node] which finds the valid neighbors
-        of a node, taking optional keyword arguments **kwargs
+      - end: Either a target node or a stopping condition. If the target is unreachable
+        from start, or the stopping condition is always false, then all nodes reachable
+        from start will be mapped out instead.
+      - neighbors: A function Node -> List[Node] which finds the valid neighbors of a node,
+        taking optional keyword arguments **kwargs
       - initial_state: What to return for bfs(start, start)
+      - return_visited: (bool) if True, return visited nodes
     returns:
       - The result of calling update(update(...(initial_state))) when the end is
         reached, or when there are no more reachable nodes.
+      - Or the nodes visited before the stopping condition is true.
     """
     if update is None:
         update = lambda steps, state, neighbor: steps + 1
     q = deque([(initial_state, start)])
     visited = set()
+    if not callable(end):
+        end_condition = lambda steps, state: state == end
+    else:
+        end_condition = end
     while q:
         steps, state = q.popleft()
-        visited.add(state)
-        if state == end:
+        if end_condition(steps, state):
             break
+        visited.add(state)
         for neighbor in neighbors(state, **kwargs):
             if neighbor in visited:
                 continue
             q.append((update(steps, state, neighbor), neighbor))
+    if return_visited:
+        return visited
     return steps
 
 
@@ -102,7 +119,7 @@ def crt(congruences):
 
 
 def year_load(year):
-    def load(day, output="lines"):
+    def load(day, output="lines", **kwargs):
         filename = datadir / str(year) / f"{day}.txt"
         if output == "raw":
             return open(filename).read()
@@ -114,6 +131,8 @@ def year_load(year):
             integers = [[int(x) for x in re.findall(regex, line)] for line in lines]
             return [integer for integer in integers if integer]
         if output == "np":
-            return np.loadtxt(filename, dtype=int, delimiter=",")
+            if "delimiter" not in kwargs:
+                kwargs["delimiter"] = ","
+            return np.loadtxt(filename, dtype=int, **kwargs)
 
     return load
