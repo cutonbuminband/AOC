@@ -3,8 +3,8 @@ from collections import defaultdict
 binops = {
     1: lambda x, y: x + y,
     2: lambda x, y: x * y,
-    7: lambda x, y: x < y,
-    8: lambda x, y: x == y,
+    7: lambda x, y: int(x < y),
+    8: lambda x, y: int(x == y),
 }
 
 instruction_lengths = {1: 4, 2: 4, 3: 2, 4: 2, 5: 3, 6: 3, 7: 4, 8: 4, 9: 2}
@@ -19,22 +19,25 @@ class IntCodeProgram:
         self.program = program.copy()
         self.relative_base = 0
         self.ip = 0
+        self.state = 0  # running/ready
         self.inputs = inputs if inputs is not None else []
         self.input_function = None
 
     def set_input(self, input_method):
         if callable(input_method):
             self.input_function = input_method
+            self.inputs = None
         else:
             self.inputs = input_method
 
     def get_input(self):
-        if self.inputs:
+        if self.inputs is not None:
             return self.inputs.pop(0)
         elif self.input_function:
             return self.input_function()
 
     def step(self):
+        self.state = 0
         op = self.program[self.ip]
         instruction = op % 100
         l = instruction_lengths[instruction]
@@ -49,7 +52,11 @@ class IntCodeProgram:
             self.program[dest] = binops[instruction](*params[:-1])
         elif instruction == 3:
             dest = vals[0] + offsets[0]
-            self.program[dest] = self.get_input()
+            try:
+                self.program[dest] = self.get_input()
+            except IndexError:
+                self.state = 1  # waiting for input
+                return None
 
         elif instruction == 4:
             self.ip += l
@@ -68,13 +75,14 @@ class IntCodeProgram:
         ip = 0
         while (self.program[self.ip] % 100) != 99:
             output = self.step()
-            if output is not None:
+            if (output is not None) or self.state == 1:
                 yield output
 
     def reset(self):
         self.program = self.initial_program.copy()
         self.ip = 0
         self.relative_base = 0
+        self.state = 0
 
     def copy(self):
         copy = IntCodeProgram([])
@@ -85,5 +93,5 @@ class IntCodeProgram:
         return copy
 
     def set(self, position, value):
-        self.program[position] = value
         self.initial_program[position] = value
+        self.reset()

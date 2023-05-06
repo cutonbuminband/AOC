@@ -4,6 +4,7 @@
 * Imports
 #+begin_src jupyter-python
   import math
+  import scipy
   import pandas as pd
   import numpy as np
   from collections import defaultdict
@@ -15,6 +16,7 @@
   import re
   import utils
   from intcode import IntCodeProgram
+  from collections import deque
   load = utils.year_load(2019)
 #+end_src
 
@@ -167,7 +169,6 @@ That gives this plot for the two different wires
 [[https://adventofcode.com/2019/day/5][Sunny with a Chance of Asteroids]]
 ** Part 1
 #+begin_src jupyter-python
-  from intcode import IntCodeProgram
   program = IntCodeProgram(load(5, "np"), inputs=[1])
   list(program.run())[-1]
 #+end_src
@@ -209,7 +210,6 @@ Moving from orbit A to orbit B can be accomplished by moving to the last common 
 [[https://adventofcode.com/2019/day/7][Amplification Circuit]]
 ** Part 1
 #+begin_src jupyter-python
-  from intcode import IntCodeProgram
   opcodes = load(7, "np")
   program = IntCodeProgram(opcodes)
   results = []
@@ -315,7 +315,6 @@ There are more than 200 visible asteroids, so we only need to worry about the on
 [[https://adventofcode.com/2019/day/11][Space Police]]
 ** Part 1
 #+begin_src jupyter-python
-  from intcode import IntCodeProgram
   program = IntCodeProgram(load(11, "np"))
   def solve(startval):
       position, direction = 0 + 0j, 1j
@@ -400,7 +399,6 @@ I don't know what optimizations are possible here, but an obvious one is to real
 
 ** Part 1
 #+begin_src jupyter-python
-  from intcode import IntCodeProgram
   program = IntCodeProgram(load(13, "np"))
   tiles = set()
   for x, y, kind in more_itertools.chunked(program.run(), 3):
@@ -484,3 +482,71 @@ We need to somehow reverse the relationship we found above. There are probably s
           lower_limit = midpoint
   lower_limit
 #+end_src
+
+* Day 15
+[[https://adventofcode.com/2019/day/15][Oxygen System]]
+** Part 1
+I really liked this puzzle! The approach I took is to first map out the entire area by giving the droid the necessary instructions, and then using a path finding algorithm to et from start to finish.
+#+begin_src jupyter-python
+  program = IntCodeProgram(load(15, "np"))
+  f = program.run()
+  directions = [None, 1j, -1j, -1, 1]
+
+
+
+  def navigate(p1, p2, edges):
+      visited = set()
+      instructions, position = [], p1
+      queue = deque([([], p1)])
+      while position != p2:
+          instructions, position = queue.popleft()
+          visited.add(position)
+          for neighbor in edges[position]:
+              new_position = position + directions[neighbor]
+              if new_position in visited:
+                  continue
+              queue.append((instructions + [neighbor], new_position))
+      return instructions
+
+  queue = deque([(0, 0)])
+  old_position = 0
+  visited = set()
+  edges = defaultdict(set)
+  i = 0
+  while queue:
+      i += 1
+      steps, position = queue.popleft()
+      visited.add(position)
+      instructions = navigate(old_position, position, edges)
+      program.set_input(instructions)
+      while program.state != 1:
+          _ = next(f)
+      for direction in [1, 2, 3, 4]:
+          new_position = position + directions[direction]
+          opposite_direction = direction + 2*(direction % 2) - 1
+          program.set_input([direction])
+          val = next(f)
+          if val == 0:
+              continue
+          program.set_input([opposite_direction])
+          _ = next(f)
+          edges[position].add(direction)
+          edges[new_position].add(opposite_direction)
+          if val == 2:
+              target = new_position
+          if new_position not in visited:
+              # append left to make it a dfs, so that the droid doesn't have to
+              # run from one side of the board to the other all the time
+              queue.appendleft((steps + 1, new_position))
+      old_position = position
+  len(navigate(0, target, edges))
+#+end_src
+
+** Part 2
+We mapped out the whole area for part 1, so part 2 is just a flood fill
+#+begin_src jupyter-python
+  def neighbors(x):
+      return [x + directions[direction] for direction in edges[x]]
+  utils.bfs(target, None, neighbors)
+#+end_src
+

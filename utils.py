@@ -1,3 +1,4 @@
+from collections import deque
 import queue
 import numpy as np
 from pathlib import Path
@@ -36,6 +37,23 @@ def astar(start, end, neighbors, distance_function, multiple_starts=False):
                 costs[neighbor] = current_cost
                 q.put((current_cost + distance_function(neighbor, end), neighbor))
     return costs[end]
+
+
+def bfs(start, end, neighbors, initial_state=0, update=None):
+    if update is None:
+        update = lambda steps, state, neighbor: steps + 1
+    q = deque([(initial_state, start)])
+    visited = set()
+    while q:
+        steps, state = q.popleft()
+        visited.add(state)
+        if state == end:
+            break
+        for neighbor in neighbors(state):
+            if neighbor in visited:
+                continue
+            q.append((update(steps, state, neighbor), neighbor))
+    return steps
 
 
 def bezout(a, b):
