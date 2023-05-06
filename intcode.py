@@ -22,8 +22,11 @@ class IntCodeProgram:
         self.inputs = inputs if inputs is not None else []
         self.input_function = None
 
-    def set_input(self, f):
-        self.input_function = f
+    def set_input(self, input_method):
+        if callable(input_method):
+            self.input_function = input_method
+        else:
+            self.inputs = input_method
 
     def get_input(self):
         if self.inputs:

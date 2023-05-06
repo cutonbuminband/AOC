@@ -14,6 +14,7 @@
   import collections
   import re
   import utils
+  from intcode import IntCodeProgram
   load = utils.year_load(2019)
 #+end_src
 
@@ -41,9 +42,8 @@
 [[https://adventofcode.com/2019/day/2][1202 Program Alarm]]
 ** Part 1
 #+begin_src jupyter-python
-  from intcode import IntCodeProgram
   program = IntCodeProgram([int(x) for x in load(2)[0].split(',')])
-  def solve(program, ip=0, noun=12, verb=2):
+  def solve(program, noun=12, verb=2):
       program.reset()
       program.program[1] = noun
       program.program[2] = verb
@@ -56,7 +56,7 @@
 
 #+begin_src jupyter-python
   for noun, verb in itertools.product(range(100), range(100)):
-      result = solve(program, 0, noun, verb)
+      result = solve(program, noun, verb)
       if result == 19690720:
           result = 100 * noun + verb
           break
