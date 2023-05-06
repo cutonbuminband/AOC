@@ -39,7 +39,20 @@ def astar(start, end, neighbors, distance_function, multiple_starts=False):
     return costs[end]
 
 
-def bfs(start, end, neighbors, initial_state=0, update=None):
+def bfs(start, end, neighbors, initial_state=0, update=None, **kwargs):
+    """Implementation of a BFS algorithm.
+
+    parameters:
+      - start: The initial node
+      - end: The target node. If the target is unreachable from start, then all
+        nodes reachable from start will be mapped out instead.
+      - neighbors: A function Node -> List[Node] which finds the valid neighbors
+        of a node, taking optional keyword arguments **kwargs
+      - initial_state: What to return for bfs(start, start)
+    returns:
+      - The result of calling update(update(...(initial_state))) when the end is
+        reached, or when there are no more reachable nodes.
+    """
     if update is None:
         update = lambda steps, state, neighbor: steps + 1
     q = deque([(initial_state, start)])
@@ -49,7 +62,7 @@ def bfs(start, end, neighbors, initial_state=0, update=None):
         visited.add(state)
         if state == end:
             break
-        for neighbor in neighbors(state):
+        for neighbor in neighbors(state, **kwargs):
             if neighbor in visited:
                 continue
             q.append((update(steps, state, neighbor), neighbor))

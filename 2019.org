@@ -486,27 +486,20 @@ We need to somehow reverse the relationship we found above. There are probably s
 * Day 15
 [[https://adventofcode.com/2019/day/15][Oxygen System]]
 ** Part 1
-I really liked this puzzle! The approach I took is to first map out the entire area by giving the droid the necessary instructions, and then using a path finding algorithm to et from start to finish.
+I really liked this puzzle! The approach I took is to first map out the entire area by giving the droid the necessary instructions, and then using a path finding algorithm to get from start to finish.
 #+begin_src jupyter-python
   program = IntCodeProgram(load(15, "np"))
   f = program.run()
-  directions = [None, 1j, -1j, -1, 1]
+  directions = {1: 1j, 2: -1j, 3: -1, 4: 1}
+  reverse_directions = {v: k for k, v in directions.items()}
 
+  def neighbors(state, edges=None):
+      if edges is None:
+          return []
+      return [state + directions[neighbor] for neighbor in edges[state]]
 
-
-  def navigate(p1, p2, edges):
-      visited = set()
-      instructions, position = [], p1
-      queue = deque([([], p1)])
-      while position != p2:
-          instructions, position = queue.popleft()
-          visited.add(position)
-          for neighbor in edges[position]:
-              new_position = position + directions[neighbor]
-              if new_position in visited:
-                  continue
-              queue.append((instructions + [neighbor], new_position))
-      return instructions
+  def update(steps, state, neighbor):
+      return steps + [reverse_directions[neighbor - state]]
 
   queue = deque([(0, 0)])
   old_position = 0
@@ -517,11 +510,11 @@ I really liked this puzzle! The approach I took is to first map out the entire a
       i += 1
       steps, position = queue.popleft()
       visited.add(position)
-      instructions = navigate(old_position, position, edges)
+      instructions = utils.bfs(old_position, position, neighbors, [], update, edges=edges)
       program.set_input(instructions)
       while program.state != 1:
           _ = next(f)
-      for direction in [1, 2, 3, 4]:
+      for direction in directions:
           new_position = position + directions[direction]
           opposite_direction = direction + 2*(direction % 2) - 1
           program.set_input([direction])
@@ -539,14 +532,11 @@ I really liked this puzzle! The approach I took is to first map out the entire a
               # run from one side of the board to the other all the time
               queue.appendleft((steps + 1, new_position))
       old_position = position
-  len(navigate(0, target, edges))
+  utils.bfs(0, target, neighbors, edges=edges)
 #+end_src
 
 ** Part 2
-We mapped out the whole area for part 1, so part 2 is just a flood fill
+We mapped out the whole area for part 1, so part 2 is just a bfs
 #+begin_src jupyter-python
-  def neighbors(x):
-      return [x + directions[direction] for direction in edges[x]]
-  utils.bfs(target, None, neighbors)
+  utils.bfs(target, None, neighbors, edges=edges)
 #+end_src
-
