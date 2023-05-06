@@ -591,3 +591,101 @@ There's no way we can run the simulation for that long. Hopefully we'll get a re
   (state == 1).sum() * (state == 2).sum()
 
 #+end_src
+
+* Day 20
+[[https://adventofcode.com/2018/day/20][A Regular Map]]
+** Part 1
+The hard part of this problem is moving from the regex representation of the map to a more sensible one. A pseudo-ebnf of the grammar is:
+
+path = direction, path | bracketed_path, path | options
+direction = n|e|w|s
+bracketed_path = (, path, )
+options = (path, |)*, path?
+
+Based on this, we can parse the string from start to finish by tracking a list of current positions. If a direction is encountered, each of the positions is updated. Whenever an opening bracket is encountered, the matching close bracket is found, the subexpression is split into options, and each of those paths is parsed. The visited edges are tracked along the way in a global dictionary. It's not super elegant, but it works.
+
+#+begin_src jupyter-python
+  s = load(20)[0].strip()[1:-1]
+  directions = {"N": 1j, "E": 1, "S": -1j, "W": -1}
+  def find_closing_paren(s):
+      count = 0
+      for idx, char in enumerate(s):
+          count += 1 if char == "(" else -1 if char == ")" else 0
+          if count == 0:
+              return idx
+
+  def split_into_options(s):
+      count = 0
+      result = []
+      current = ""
+      for char in s:
+          if char == "|" and count == 0:
+              result.append(current)
+              current = ""
+          else:
+              current += char
+          count += 1 if char == "(" else -1 if char == ")" else 0
+      result.append(current)
+      return result
+
+  edges = defaultdict(bool)
+
+  def endpoints(s, positions=None):
+      i = 0
+      if positions is None:
+          positions = {0}
+      else:
+          positions = positions.copy()
+      while i < len(s):
+          char = s[i]
+          if char == "(":
+              delta = find_closing_paren(s[i:])
+              substring = s[i+1: i+delta]
+              options = split_into_options(substring)
+              positions = {point for x in options for point in endpoints(x, positions)}
+              i += delta
+          else:
+              direction = directions[char]
+              positions = {x + direction for x in positions}
+              for position in positions:
+                  edges[2 * position - direction] = True
+          i += 1
+      return positions
+  points = endpoints(s)
+
+  def edge_to_nodes(x):
+      return ((x.real - x.real % 2 + 1j * (x.imag - x.imag % 2)) / 2,
+              (x.real + x.real % 2 + 1j * (x.imag + x.imag % 2)) / 2)
+
+  nodes = len({node for edge in edges.keys() for node in edge_to_nodes(edge)})
+#+end_src
+
+With all that out of the way, the furthest room can be found with a BFS:
+#+begin_src jupyter-python
+  visited = set()
+  queue = deque([(0, 0)])
+  while queue:
+      cost, position = queue.popleft()
+      visited.add(position)
+      for direction in directions.values():
+          if position + direction not in visited and edges[2 * position + direction]:
+              queue.append((cost + 1, position + direction))
+  cost
+#+end_src
+
+** Part 2
+
+And finding how many rooms require at least 1000 steps can be found with the same DFS, but ending whenever we get a cost greater than 1000
+#+begin_src jupyter-python
+  visited = set()
+  queue = deque([(0, 0)])
+  while queue:
+      cost, position = queue.popleft()
+      if cost >= 1000:
+          break
+      visited.add(position)
+      for direction in directions.values():
+          if position + direction not in visited and edges[2 * position + direction]:
+              queue.append((cost + 1, position + direction))
+  nodes - len(visited)
+#+end_src
