@@ -12,7 +12,11 @@
   import more_itertools
   import re
   import collections
+
   datadir = Path("data/2022")
+  import utils
+
+  load = utils.year_load(2022)
 #+end_src
 
 * Day 1
@@ -23,7 +27,7 @@ The Elves take turns writing down the number of Calories contained by the variou
 Find the Elf carrying the most Calories. How many total Calories is that Elf carrying?
 
 #+begin_src jupyter-python
-  elves = [x.split("\n") for x in open(datadir / "1.txt", "r", encoding="utf8").read().split("\n\n")]
+  elves = [x.split("\n") for x in load(1, "raw").split("\n\n")]
   max([sum([int(y) for y in x if y]) for x in elves])
 #+end_src
 
@@ -41,14 +45,16 @@ To avoid this unacceptable situation, the Elves would instead like to know the t
 
 ** Part 1
 #+begin_src jupyter-python
-lines = [[ord(x) - ord("A"), ord(y) - ord("X")]
-         for x, y in map(str.split, open(datadir / "2.txt").readlines())]
-sum([line[1] + 1 + 3 * ((line[1] - line[0] + 1) % 3) for line in lines])
+  lines = [
+      [ord(x) - ord("A"), ord(y) - ord("X")]
+      for x, y in map(str.split, open(datadir / "2.txt").readlines())
+  ]
+  sum([line[1] + 1 + 3 * ((line[1] - line[0] + 1) % 3) for line in lines])
 #+end_src
 
 ** Part 2
 #+begin_src jupyter-python
-sum([(line[1] + line[0] - 1) % 3 + 1 + 3 * line[1] for line in lines])
+  sum([(line[1] + line[0] - 1) % 3 + 1 + 3 * line[1] for line in lines])
 #+end_src
 
 * Day 3:
@@ -58,7 +64,7 @@ sum([(line[1] + line[0] - 1) % 3 + 1 + 3 * line[1] for line in lines])
   total = 0
   lines = list(map(str.strip, open(datadir / "3.txt", encoding="utf8")))
   for l in lines:
-      letter = set(l[:len(l) // 2]).intersection(set(l[len(l) // 2:])).pop()
+      letter = set(l[: len(l) // 2]).intersection(set(l[len(l) // 2 :])).pop()
       total += ord(letter.upper()) - ord("A") + 1 + 26 * letter.isupper()
   total
 #+end_src
@@ -67,7 +73,7 @@ sum([(line[1] + line[0] - 1) % 3 + 1 + 3 * line[1] for line in lines])
 #+begin_src jupyter-python
   total = 0
   for chunk in more_itertools.chunked(lines, 3):
-      letter = functools.reduce(lambda x, y: set(x).intersection(set(y)), chunk).pop()
+      letter = functools.reduce(lambda x, y: set(x').intersection(set(y)), chunk).pop()
       total += ord(letter.upper()) - ord("A") + 1 + 26 * letter.isupper()
   total
 #+end_src
@@ -96,15 +102,15 @@ sum([(line[1] + line[0] - 1) % 3 + 1 + 3 * line[1] for line in lines])
   lines = [line.strip() for line in open(datadir / "5.txt").readlines()]
   numbers = [re.findall("\d+", line) for line in lines]
   split = np.argmax([len(x) for x in numbers])
-  instructions = [[int(y) for y in x] for x in numbers[split + 1:] if x]
+  instructions = [[int(y) for y in x] for x in numbers[split + 1 :] if x]
   initial_state = list(itertools.zip_longest(*lines[:split]))
 
-  letters = [re.findall("[A-Z]", ''.join(column)) for column in initial_state]
+  letters = [re.findall("[A-Z]", "".join(column)) for column in initial_state]
   p1 = [x[::-1] for x in letters.copy() if x]
   for n, source, dest in instructions:
       for i in range(n):
           p1[dest - 1].append(p1[source - 1].pop())
-  ''.join(x[-1] if x else ' ' for x in p1)
+  "".join(x[-1] if x else " " for x in p1)
 #+end_src
 
 ** Part 2
@@ -113,7 +119,7 @@ sum([(line[1] + line[0] - 1) % 3 + 1 + 3 * line[1] for line in lines])
   for n, source, dest in instructions:
       p2[dest - 1] += p2[source - 1][-n:]
       p2[source - 1] = p2[source - 1][:-n]
-  ''.join(x[-1] if x else ' ' for x in p2)
+  "".join(x[-1] if x else " " for x in p2)
 #+end_src
 
 * Day 6
@@ -121,16 +127,20 @@ sum([(line[1] + line[0] - 1) % 3 + 1 + 3 * line[1] for line in lines])
 ** Part 1
 #+begin_src jupyter-python
   data = open(datadir / "6.txt").readline()
+
+
   def find_marker(n):
       for i in range(len(data) - n + 1):
-          if len(set(list(data[i:i+n]))) == n:
+          if len(set(list(data[i : i + n]))) == n:
               return i + n
+
+
   find_marker(4)
 #+end_src
 
 ** Part 2
 #+begin_src jupyter-python
-find_marker(14)
+  find_marker(14)
 #+end_src
 
 * Day 7
@@ -145,13 +155,16 @@ The following code has a bug where it will show incorrect totals if the contents
   lines = [line.strip() for line in open(datadir / "7.txt").readlines()]
   directory = {"/": {"children": [], "parent": None, "weights": []}}
 
+
   def get_fullname(name, parent):
       return f"{parent if parent != '/' else ''}/{name}"
+
 
   def add_directory(name, parent, directory):
       fullname = get_fullname(name, parent)
       directory[fullname] = {"children": [], "parent": parent, "weights": []}
       directory[parent]["children"].append(fullname)
+
 
   for idx, line in enumerate(lines):
       if "$ cd" in line:
@@ -170,17 +183,22 @@ The following code has a bug where it will show incorrect totals if the contents
           else:
               directory[cwd]["weights"].append(int(metadata))
   weights = {}
+
+
   def calculate_weights(node):
       if node not in weights:
-          weights[node] = (sum(directory[node]["weights"])
-                           + sum(calculate_weights(node) for node in directory[node]["children"]))
+          weights[node] = sum(directory[node]["weights"]) + sum(
+              calculate_weights(node) for node in directory[node]["children"]
+          )
       return weights[node]
+
+
   calculate_weights("/")
   sum(weight for weight in weights.values() if weight <= 100_000)
 #+end_src
 
 ** Part 2
-The weight of ever directory has been stored in the weight dict, so finding the smallest one that's greater than a given threshold is trivial
+The weight of every directory has been stored in the weight dict, so finding the smallest one that's greater than a given threshold is trivial
 #+begin_src jupyter-python
   to_free = weights["/"] - 40_000_000
   min(weight for weight in weights.values() if weight >= to_free)
@@ -193,13 +211,13 @@ It really feels like there should be a slick array-based solution to this: calcu
 
 A bit off digging reveals the very useful ufunc `accumulate`, which does exactly what we need. Then it's just a question of getting it to work in the four directions. Either we change the axis and direction of operation, or (as here) we transform the data from one orientation to another, do the accumulation, and transform back at the end.
 #+begin_src jupyter-python
-  data = np.array([[int(char) for char in line] for line in map(str.strip, open(datadir / "8.txt").readlines())])  
+  data = np.array([[int(char) for char in line.strip()] for line in load(8)])
   masks = []
   for i in range(4):
       transformed = np.rot90(data, i)
       mask = np.roll(np.maximum.accumulate(transformed), 1, axis=0)
       mask[0] = -1
-      masks.append(np.rot90(mask, 4-i))
+      masks.append(np.rot90(mask, 4 - i))
   mask = np.min(masks, axis=0)
   (data > mask).sum()
 #+end_src
@@ -218,25 +236,28 @@ There are a couple of gotchas:
           current = data.copy()
           current[i] = current[i] - 1
           mask = np.maximum.accumulate(np.roll(current, -i, axis=0)) <= current[i]
-          mask[-i -1] = True
-          return mask[1:len(data) -i].sum(axis=0)
+          mask[-i - 1] = True
+          return mask[1 : len(data) - i].sum(axis=0)
+
       return np.array([one_row(i) for i in range(len(data))])
+
 
   scenic_scores = []
   for i in range(4):
-      scenic_scores.append(np.rot90(scenic_score(np.rot90(data, i)), 4-i))
-  np.product(scenic_scores, axis = 0).max()
+      scenic_scores.append(np.rot90(scenic_score(np.rot90(data, i)), 4 - i))
+  np.product(scenic_scores, axis=0).max()
 #+end_src
 
 ** Bonus
 The grid here invites plotting. One thing we can plot is the shortest tree which would be visible at each location
 #+begin_src jupyter-python
   import matplotlib.pyplot as plt
+
   plt.imshow(mask + 1)
   plt.xticks([]), plt.yticks([])
   plt.colorbar()
-  plt.title('The shortest visible tree at each location')
-  plt.savefig('graphs/2022-08.png', bbox_inches='tight')
+  plt.title("The shortest visible tree at each location")
+  plt.savefig("graphs/2022-08.png", bbox_inches="tight")
 #+end_src
 
 That gives the following plot
@@ -251,8 +272,10 @@ We can see how at the edges of the forest shorter trees are visible, but towards
 #+begin_src jupyter-python
   base = {2: 1, 2 + 1j: 1 + 1j, 2 + 2j: 1 + 1j, 1 + 2j: 1 + 1j}
   deltas = {k * 1j**i: v * 1j**i for k, v in base.items() for i in range(4)}
-  directions = {"R" : 1, "L": -1, "U": 1j, "D": -1j}
+  directions = {"R": 1, "L": -1, "U": 1j, "D": -1j}
   instructions = [x.split() for x in open(datadir / "9.txt").readlines()]
+
+
   def tail_moves(rope_length):
       seen = []
       rope = [0] * rope_length
@@ -260,9 +283,15 @@ We can see how at the edges of the forest shorter trees are visible, but towards
           for _ in range(int(count)):
               rope[0] += directions[direction]
               for i in range(1, len(rope)):
-                  rope[i] += deltas[rope[i - 1] - rope[i]] if abs(rope[i - 1] - rope[i]) >= 2 else 0
+                  rope[i] += (
+                      deltas[rope[i - 1] - rope[i]]
+                      if abs(rope[i - 1] - rope[i]) >= 2
+                      else 0
+                  )
               seen.append(rope[-1])
       return seen
+
+
   len(set(tail_moves(2)))
 #+end_src
 
@@ -276,22 +305,30 @@ We can see how at the edges of the forest shorter trees are visible, but towards
 
 ** Part 1
 #+begin_src jupyter-python
-  instructions = open(datadir / '10.txt').readlines()
-  deltas = [int(element) if element[-1].isdigit() else 0
-            for line in instructions for element in line.strip().split()]
+  instructions = load(10)
+  deltas = [
+      int(element) if element[-1].isdigit() else 0
+      for line in instructions
+      for element in line.strip().split()
+  ]
+
+
   def run(f, result):
-        for cycle, x in enumerate(np.cumsum([1] + deltas)):
-            result += f(x, cycle + 1)
-        return result
+      for cycle, x in enumerate(np.cumsum([1] + deltas)):
+          result += f(x, cycle + 1)
+      return result
+
+
   run(lambda x, y: x * y if y % 40 == 20 else 0, 0)
 #+end_src
 
 ** Part 2
 #+begin_src jupyter-python
   def draw_sprite(sprite_position, cycle):
-      return '█' if abs(sprite_position - ((cycle - 1) % 40)) <= 1 else ' '
+      return "█" if abs(sprite_position - ((cycle - 1) % 40)) <= 1 else " "
 
-  print(*[run(draw_sprite, '')[40 * i:40*(i + 1)] for i in range(6)], sep='\n')
+
+  print(*[run(draw_sprite, "")[40 * i : 40 * (i + 1)] for i in range(6)], sep="\n")
 #+end_src
 
 * Day 11
@@ -299,21 +336,25 @@ We can see how at the edges of the forest shorter trees are visible, but towards
 ** Part 1
 #+begin_src jupyter-python
   data = open(datadir / "11.txt").read()
-  monkeys = data.split('\n\n')
+  monkeys = data.split("\n\n")
+
 
   class Monkey:
       def __init__(self, update, test):
           self.update = update
           self.factor = test[0]
           self.target = lambda x: test[1] if x % self.factor == 0 else test[2]
+
+
   monkeys = []
   initial_items = []
-  for monkey in data.split('\n\n'):
-        lines = [line for line in monkey.split('\n') if line]
-        update = eval("lambda old: " + lines[2].split(" = ")[1])
-        digits = [[int(x) for x in re.findall("\d+", line)] for line in lines]
-        monkeys.append(Monkey(update, [x[0] for x in digits[-3:]]))
-        initial_items.append(digits[1])
+  for monkey in data.split("\n\n"):
+      lines = [line for line in monkey.split("\n") if line]
+      update = eval("lambda old: " + lines[2].split(" = ")[1])
+      digits = [[int(x) for x in re.findall("\d+", line)] for line in lines]
+      monkeys.append(Monkey(update, [x[0] for x in digits[-3:]]))
+      initial_items.append(digits[1])
+
 
   def run(rounds, function):
       examined = [0] * len(monkeys)
@@ -326,6 +367,8 @@ We can see how at the edges of the forest shorter trees are visible, but towards
                   item = function((monkey.update(monkey.items.pop())))
                   monkeys[monkey.target(item)].items.append(item)
       return examined
+
+
   np.product(sorted(run(20, lambda x: x // 3))[-2:])
 #+end_src
 
@@ -340,18 +383,23 @@ We can see how at the edges of the forest shorter trees are visible, but towards
 ** Part 1
 #+begin_src jupyter-python
   data = [list(x.strip()) for x in open(datadir / "12.txt").readlines()]
-  elevations = np.array([[ord(char) - ord('a') for char in line] for line in data])
-  source = tuple(x[0] for x in np.where(elevations == ord('S') - ord('a')))
-  target = tuple(x[0] for x in np.where(elevations == ord('E') - ord('a')))
+  elevations = np.array([[ord(char) - ord("a") for char in line] for line in data])
+  source = tuple(x[0] for x in np.where(elevations == ord("S") - ord("a")))
+  target = tuple(x[0] for x in np.where(elevations == ord("E") - ord("a")))
   elevations[source] = 0
   elevations[target] = 25
 
   xmax, ymax = elevations.shape
+
+
   def grid_neighbors(x, y):
       candidates = [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)]
       return [c for c in candidates if 0 <= c[0] < xmax and 0 <= c[1] < ymax]
+
+
   def find_neighbors(x, y):
-      return [n for n in grid_neighbors(x ,y) if elevations[n] - elevations[x, y] <= 1]
+      return [n for n in grid_neighbors(x, y) if elevations[n] - elevations[x, y] <= 1]
+
 
   def navigate(source, neighbor_func, stop_condition):
       active = collections.deque([(0, source)])
@@ -367,6 +415,7 @@ We can see how at the edges of the forest shorter trees are visible, but towards
               active.append((steps + 1, neighbor))
       return np.inf
 
+
   navigate(source, find_neighbors, lambda x: x == target)
 #+end_src
 
@@ -374,6 +423,7 @@ We can see how at the edges of the forest shorter trees are visible, but towards
 #+begin_src jupyter-python
   def reversed_neighbors(x, y):
       return [n for n in grid_neighbors(x, y) if elevations[x, y] - elevations[n] <= 1]
+
 
   navigate(target, reversed_neighbors, lambda x: elevations[x] == 0)
 #+end_src
@@ -383,6 +433,8 @@ We can see how at the edges of the forest shorter trees are visible, but towards
 ** Part 1
 #+begin_src jupyter-python
   import ast
+
+
   def compare(left, right):
       if isinstance(left, int) and isinstance(right, int):
           return (left > right) + (left >= right)
@@ -399,6 +451,7 @@ We can see how at the edges of the forest shorter trees are visible, but towards
       val = compare(left[0], right[0])
       return val if (val == 0 or val == 2) else compare(left[1:], right[1:])
 
+
   total = 0
   s = open(datadir / "13.txt").read()[:-1]
   for idx, (left, right) in enumerate(map(lambda x: x.split("\n"), s.split("\n\n"))):
@@ -411,8 +464,12 @@ We can see how at the edges of the forest shorter trees are visible, but towards
 ** Part 2
 #+begin_src jupyter-python
   dividers = [[2]], [[6]]
-  packets = [ast.literal_eval(packet) for pair in s.split("\n\n") for packet in pair.split("\n")]
-  positions = [sum(compare(divider, packet) == 2 for packet in packets) for divider in dividers]
+  packets = [
+      ast.literal_eval(packet) for pair in s.split("\n\n") for packet in pair.split("\n")
+  ]
+  positions = [
+      sum(compare(divider, packet) == 2 for packet in packets) for divider in dividers
+  ]
   (positions[0] + 1) * (positions[1] + 2)
 #+end_src
 
@@ -425,11 +482,13 @@ We can see how at the edges of the forest shorter trees are visible, but towards
   data = open(datadir / "15.txt").read()
   values = [int(x) for x in re.findall(digits, data)]
 
+
   def combine_two_intervals(i1, i2):
       i1, i2 = sorted([i1, i2])
       if i2[0] <= i1[1]:
           return i1[0], max(i1[1], i2[1])
       return False
+
 
   def combine_n_intervals(intervals):
       active = intervals.copy()
@@ -445,6 +504,7 @@ We can see how at the edges of the forest shorter trees are visible, but towards
           else:
               result.append(current)
       return result
+
 
   y_target = 2000000
   fixes = set()
