@@ -556,5 +556,53 @@ Looks pretty cool!
 		  moves += [(open_valves + [position], new_score, position, visited, time - 1)]
 	  for neighbor in filter(lambda x: x not in visited, neighbors):
 		  moves += [(open_valves, neighor, score, visited + [neighbor], time - 1)]
+#+end_src
 
+* Day 18
+[[https://adventofcode.com/2022/day/18][Boiling Boulders]]
+** Part 1
+Idea: find all neighboring boxes by finding the union of the shifts along each of i,j,k,-i,-j,-k and subtracting the original shape. A given box might neighbor the original shape in up to six places, so to account for that I can take all the neighbors, shift them againalong each of the axes, and for each shift, count how many boxes now overlap the original shape.
+#+begin_src jupyter-python
+  data = load(18, "np")
+
+
+  def to_set(arr):
+      return set(tuple(x) for x in arr)
+
+
+  def inflate(data):
+      if isinstance(data, set):
+          data = np.array(list(data))
+      return to_set(np.vstack([row + data for row in deltas])) - occupied
+
+
+  occupied = to_set(data)
+  deltas = (np.tile(np.eye(3, dtype=int), 2) * np.repeat((1, -1), 3)).T
+  nb = inflate(data)
+  arr = np.array(list(nb))
+  sum([len(to_set(arr + delta) & occupied) for delta in deltas])
+#+end_src
+
+** Part 2
+For part 2, once we have identified which of the neighboring boxes represent external neighbors (i.e. are connected to the outside world), we can do exactly the same thing. The tricky thing is then to make this identification. Under the assumption that the droplet is connected, so that every box in the droplet is reachable from every other via a series of face, edge or corner moves, then every point the outside boundary is face-connected to every other after at most two inflations. I can then use a union find data structure to merge all the connected groups together, and the outside group is then the largest of all of these
+#+begin_src jupyter-python
+  from scipy.cluster.hierarchy import DisjointSet
+
+  points = inflate(data)
+  for i in range(2):
+      points = inflate(points)
+
+  disjoint_set = DisjointSet(points)
+  for x in points:
+      comparisons = x + np.eye(3, dtype=int)
+      for comparison in comparisons:
+          if (y := tuple(comparison)) in disjoint_set:
+              disjoint_set.merge(x, y)
+  max_s = 0
+  for subset in disjoint_set.subsets():
+      if len(subset) > max_s:
+          max_s = len(subset)
+          s = subset
+  arr = np.array(list(s & nb))
+  sum([len(to_set(arr + delta) & occupied) for delta in deltas])
 #+end_src
