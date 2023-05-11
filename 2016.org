@@ -745,6 +745,61 @@ Ouch. `Move`, `swap` and `reverse` should be easy to do backwards, since they're
 
 ** Part 2
 
+* Day 23
+
+** Part 1
+#+begin_src jupyter-python
+  toggle_map = {"inc": "dec", "tgl": "inc", "dec": "inc", "cpy": "jnz", "jnz": "cpy"}
+
+
+  def run(program, registers=None):
+      if registers is None:
+          registers = {"a": 0, "b": 0, "c": 0, "d": 0}
+
+      def extract_operands(ip):
+          instruction = program[ip]
+          return instruction[0], instruction[1:]
+
+      def evaluate_operand(x):
+          return int(x) if x not in "abcd" else registers[x]
+
+      ip = 0
+      i = 0
+      while ip < len(program):
+          i += 1
+          operator, operands = extract_operands(ip)
+          if operator in ["cpy", "jnz"]:
+              source, destination = operands
+              value = evaluate_operand(source)
+              if operator == "cpy":
+                  registers[destination] = value
+              if operator == "jnz" and value != 0:
+                  ip += evaluate_operand(destination) - 1
+          elif operator in ["inc", "dec"]:
+              registers[operands[0]] += 2 * (operator == "inc") - 1
+          elif operator == "tgl":
+              destination = ip + evaluate_operand(operands[0])
+              try:
+                  operator, operands = extract_operands(destination)
+                  operator = toggle_map[operator]
+                  program[destination] = [operator] + operands
+              except IndexError:
+                  pass
+          ip += 1
+      return registers["a"]
+
+
+  data = [line.strip().split(" ") for line in load("23")]
+  registers = {"a": 7, "b": 0, "c": 0, "d": 0}
+  run(data, registers)
+#+end_src
+
+** Part 2
+Just setting the registers to `registers = {"a": 12, "b": 0, "c": 0, "d": 0}` didn't work, since the code was running incredibly slowly. I ended up analysing my input script instead. The first line copied a to b, and lines 2-16 multiplied a by (b - 1), decreased b by one and set c to 2b (ish). Then came the toggle instruction, and the two instructions after that sent us back to line 2.
+
+Some things that stood out here were that c was an even number, decreasing by 2 each iteration so `tgl c` tried to toggle every other instruction, starting at the end of the program and moving back towards the `tgl` instruction itself. That means that the loop before the toggle instruction is unaffected for a long time, and so after the ith iteration we have a = n * (n - 1) * (n - 2) * ... * (n - i). This continues until b = 2, when the `tgl` instruction finally toggles the `jnz` on line 17. At that point we have `a = factorial(n)`. The (now-toggled) last section of the program then just adds the product of the numeric arguments on line 21 and 22.
+
+And that's the final answer.
 * Day 24
 [[https://adventofcode.com/2016/day/24][Air Duct Spelunking]]
 ** Part 1
