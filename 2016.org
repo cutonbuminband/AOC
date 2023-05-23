@@ -857,7 +857,15 @@ And that's the final answer.
 * Day 24
 [[https://adventofcode.com/2016/day/24][Air Duct Spelunking]]
 ** Part 1
-This was a bit of a roller coaster. I originally used my pre-existing bfs code to search the maze, and it was unbelievably slow. Instead of investigating I decided to try and transform the maze, and found a conceptual approach which was horribly engineered, but probably would have worked. Before I finished implementing it, I thought of trying another BFS, less general and hence faster, and it ran more than fast enough. Oh well
+This was a bit of a roller coaster. I originally used my pre-existing bfs code to search the maze, and it was unbelievably slow. Instead of investigating I decided to try and transform the maze, and found a conceptual approach which was horribly over-engineered, but probably would have worked. Before I finished implementing it, I thought of trying another BFS, less general and hence faster, and it ran more than fast enough. Oh well.
+
+I still liked the original approach though. The idea was to simplify the graph of the maze via the following transformations:
+
+1. Delete all empty (non-goal) nodes with only two neighbors by directly connecting their neighbors with a single edge, with a weight $w = w_1 + w_2$
+2. Recursively remove all empty dead ends.
+3. Identify bottlenecks in the graph, i.e. nodes whose removal would disconnect the graph. From there, generate the block-cut tree of the graph, and simplify each component of the block-cut to just the cut vertices and the goal nodes. This basically means that the problem of finding the shortest path X->Y is reduced to finding the shortest path to and from a given bottleneck, and then stitching the paths together.
+
+It was fun to think about even though I didn't use it in the end.
 #+begin_src jupyter-python
   from scipy.cluster.hierarchy import DisjointSet
 
