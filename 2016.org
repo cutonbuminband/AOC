@@ -7,6 +7,7 @@
   import numpy as np
   import scipy
   from collections import defaultdict, deque
+  from queue import PriorityQueue
   from pathlib import Path
   import functools
   import itertools
@@ -744,6 +745,59 @@ Ouch. `Move`, `swap` and `reverse` should be easy to do backwards, since they're
 #+end_src
 
 ** Part 2
+Just another graph search. There's only one empty space, so we can uniquely define the current state by the location of the empty space, and the location of the data we're trying to move.
+#+begin_src jupyter-python
+  size = np.array(data)[:, :2].max(axis=0)
+  grid = np.ones(size + 1, dtype=int)
+  data = np.array(data)
+  grid[tuple(data[np.where(data[:, 2] > 200)][:, :2].T)] = -1
+  source = tuple(data[-1][:2])
+  grid[source] = 0
+  target = size[0], 0
+
+  def heuristic(x, y):
+      to_data = abs(x[0] - y[0]) + abs(x[1] - y[1])
+      return 4 * (abs(y[0]) + abs(y[1]) - 1) + to_data - 1
+
+
+  def neighbors(x, y):
+      new_states = []
+      for dx, dy in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
+          new_x = x[0] + dx, x[1] + dy
+          if (
+              new_x[0] < 0
+              or new_x[1] < 0
+              or new_x[0] > size[0]
+              or new_x[1] > size[1]
+              or grid[new_x] == -1
+          ):
+              continue
+          if new_x == y:
+              new_states.append((new_x, (x[0], x[1])))
+          else:
+              new_states.append((new_x, y))
+      return new_states
+
+
+  queue = PriorityQueue()
+  queue.put((0, source, target))
+  costs = defaultdict(lambda: np.inf)
+  costs[source, target] = 0
+  i = 0
+  while queue.qsize() > 0:
+      i += 1
+      _, x, y = queue.get()
+      if y == (0, 0):
+          result = costs[x, y]
+          break
+
+      for a, b in neighbors(x, y):
+          current_cost = costs[x, y] + 1
+          if current_cost < costs[a, b]:
+              costs[a, b] = current_cost
+              queue.put((current_cost + heuristic(a, b), a, b))
+  result
+#+end_src
 
 * Day 23
 
