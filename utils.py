@@ -31,7 +31,7 @@ def astar(
     for item in start:
         costs[item] = 0
         q.put((0, item))
-    while q:
+    while q.qsize() > 0:
         _, state = q.get()
         if state == end:
             return costs[state]
