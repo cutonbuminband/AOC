@@ -757,3 +757,40 @@ The large number of iterations for part 2 seems to indicate that I should do som
   total
 #+end_src
 
+* Day 24
+[[https://adventofcode.com/2017/day/24][Electromagnetic Moat]]
+
+** Part 1
+#+begin_src jupyter-python
+  ports = load(24, "int")
+  ports = set(map(tuple, ports))
+
+
+  def strongest_bridge(current, components, part=1):
+      strength = current if part == 1 else current[1]
+      bridges = []
+      for candidate in [x for x in components if strength in x]:
+          value = candidate[0] if candidate[1] == strength else candidate[1]
+          new_components = components - set([candidate])
+          new_state = value if part == 1 else (current[0] + 1, value)
+          bridges.append(strongest_bridge(new_state, new_components, part=part))
+      if bridges:
+          best_bridge = max(bridges)
+          return (
+              2 * current + best_bridge
+              if part == 1
+              else (best_bridge[0], 2 * strength + best_bridge[1])
+          )
+      else:
+          return current
+
+
+  strongest_bridge(0, ports)
+#+end_src
+
+** Part 2
+Enumerating all the bridges for part 2 is basically the same as in part 1, so I've incuded the code there with a flag. The only difference is how the bridges are scored - here length takes priority. We can still use the ~max~ function because tuples sort lexicographically. The solution then becomes
+#+begin_src jupyter-python
+  strongest_bridge((0, 0), ports, part=2)[1]
+#+end_src
+
