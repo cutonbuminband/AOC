@@ -555,7 +555,6 @@ For part 2, it would take too long to go through all the one billion cycles. But
   program = [x.strip().split() for x in program]
   ip = 0
   registers = defaultdict(int)
-  memory = 0
   binops = {"set": lambda x, y: y,
             "add": lambda x, y: x + y,
             "mul": lambda x, y: x * y,
@@ -756,6 +755,57 @@ The large number of iterations for part 2 seems to indicate that I should do som
       position += direction
   total
 #+end_src
+
+* Day 23
+[[https://adventofcode.com/2017/day/23][Coprocessor Conflagration]]
+** Part 1
+
+#+begin_src jupyter-python
+  program = load(23)
+  program = [x.strip().split() for x in program]
+  ip = 0
+  registers = {x: 0 for x in "abcdefgh"}
+  binops = {"set": lambda x, y: y,
+            "mul": lambda x, y: x * y,
+            "sub": lambda x, y: x - y}
+  count = 0
+  while 0 <= ip < len(program):
+      instruction = program[ip]
+      instruction, register, argument = instruction[0], instruction[1], instruction[-1]
+      argument = registers[argument] if argument in registers else int(argument)
+      if instruction in binops:
+          if instruction == "mul":
+              count += 1
+          op = binops[instruction]
+          registers[register] = op(registers[register], argument)
+      elif instruction == "jnz":
+          operand = registers[register] if register in registers else int(register)
+          if operand != 0:
+              ip += argument - 1
+      ip += 1
+  count
+#+end_src
+** Part 2
+The instructions warn you that trying to run part 2 as-is is a futile endeavour. And indeed, that is the case. Looking at the script there's a very clear setup section to start with, where variables are set to values; these lines can never be reached again. After that there's a huge loop which covers the rest of the program, and which basically says
+#+begin_src jupyter-python
+  # | eval: false
+  while b != 0:
+      ...
+      b += 17
+#+end_src
+
+Inside this huge loop, we find a section at the start with two nested loops, followed by a tiny bit of cleanup. The two nested loops only involve the d and e variables, and they have the effect of setting f to zero if ever d * e = b, and doing basically nothing else. In the cleanup after the loop, 1 is added to h if f is zero. So that means that whenever b is composite, h increases by 1. So the script is equivalent to:
+
+#+begin_src jupyter-python
+  def is_composite(n):
+      for i in range(2, int(n ** 0.5) + 1):
+          if n % i == 0:
+              return True
+      return False
+  b0 = 5700 + 100_000
+  len(list(filter(is_composite, range(b0, b0 + 17000 + 1, 17))))
+#+end_src
+
 
 * Day 24
 [[https://adventofcode.com/2017/day/24][Electromagnetic Moat]]
