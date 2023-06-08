@@ -603,22 +603,25 @@ This problem -- with rotations by 1 and deletions only of neighboring elves is d
 #+end_src
 
 ** Part 2
-Unfortunately, the same approach won't work here, since the rotations to the middle of the queue really ruin everything. We can start by convincing ourselves that part one can be rewritten as
+Unfortunately, the same approach won't work here, since the rotations to the middle of the queue really ruin everything.
+
+What we can do instead is notice that the pattern of deletions correspond to leaving every third elf alive, starting just after halfway around the circle. To avoid interference from potentially dead elves, we can play the game in rounds, with one round ending whenever an elf at the start of the line would have died. In each round then, a number of elves at the start of the line get to take presents, a number in the middle do nothing, and a number at the end are eliminated from the game. What each of these lists looks like is not too hard to determine:
+
 #+begin_src jupyter-python
-  while (l := len(numbers)) > 1:
-      numbers = numbers[(l % 2)*2::2]
-  numbers[0]
+  def one_round(mylist):
+
+      l = len(mylist)
+      n = int((l + 2) / 3)
+      middle = mylist[int(l / 2) + 2 - l % 2 :: 3]
+      return mylist[n : int(l / 2)] + middle + mylist[:n]
+
+
+  i = 3005290
+  x = list(range(1, i + 1))
+  while len(x) > 1:
+      x = one_round(x)
+  x[0]
 #+end_src
-
-Can we find a similar update rule for the "reach halfway across the board" case?
-
-#+begin_src jupyter-python
-  numbers = list(range(1, 5 + 1))
-  s = len(numbers) // 2
-  (numbers[s:] + numbers[:s])[2 - len(numbers) % 2::3]
-
-#+end_src  
-
 
 * Day 20
 [[https://adventofcode.com/2016/day/19][Firewall Rules]]
