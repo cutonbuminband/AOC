@@ -605,3 +605,77 @@ The change for part 2 is so small that it can be included in part 1 as a flag
 #+begin_src jupyter-python
   sum(evaluate(line, part=2) for line in lines)
 #+end_src
+
+* Day 19
+[[https://adventofcode.com/2020/day/19][Monster Messages]]
+** Part 1
+#+begin_src jupyter-python
+  data = load(19, "raw")
+  relations, strings = map(lambda x: x.split("\n"), data.split("\n\n"))
+  dependencies = {}
+  rules = {}
+  for relation in relations:
+      lhs, rhs = relation.split(":")
+      rules[int(lhs)] = (
+          {rhs.replace('"', "").strip()}
+          if '"' in rhs
+          else {tuple([int(y) for y in x.split()]) for x in rhs.split("|")}
+      )
+
+  dependencies = {
+      x: set().union(*rules[x]) if x not in [54, 20] else set() for x in rules
+  }
+
+
+  def concat(l1, l2):
+      return {s1 + s2 for s1 in l1 for s2 in l2}
+
+
+  def expand(rule, rules, mappings):
+      result = set()
+      for option in rules[rule]:
+          if isinstance(option, str):
+              return rules[rule]
+          new_elements = (
+              mappings[option[0]]
+              if len(option) == 1
+              else concat(*[mappings[i] for i in option])
+          )
+          result |= new_elements
+      return result
+
+
+  def free_elements(mydict):
+      return [x for x in mydict if not mydict[x]]
+
+
+  mappings = {}
+  while dependencies:
+      k1 = free_elements(dependencies)[0]
+      mappings[k1] = expand(k1, rules, mappings)
+      for k2 in dependencies:
+          dependencies[k2].discard(k1)
+      del dependencies[k1]
+  len(list(filter(lambda x: x in mappings[0], strings[:-1])))
+#+end_src
+
+** Part 2
+We have loops now! Analysing the new rules, we see that the system should accept all strings of the form 42^m 13^n, with m > n > 0. Looking at the previous part shows that rule 42 and rule 31 never overlap, and all the strings they match have length 8. That gives the following logic for part 2:x
+#+begin_src jupyter-python
+  from more_itertools import chunked
+  def part2(s):
+      chunks = [''.join(x).strip() for x in chunked(s, 8)]
+      r42, r31 = 0, 0
+      while chunks[r42] in mappings[42]:
+          r42 += 1
+          if r42 == len(chunks):
+              break
+      while r42 + r31 < len(chunks):
+          if chunks[r42 + r31] not in mappings[31]:
+              break
+          r31 += 1
+
+      return r31 >= 1 and r42 > r31 and r42 + r31 == len(chunks)
+  sum(part2(s) for s in strings[:-1])
+#+end_src
+
