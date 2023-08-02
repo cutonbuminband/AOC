@@ -119,11 +119,11 @@ def crt(congruences):
 
 
 def year_load(year):
-    def load(day, output="lines", **kwargs):
+    def load(day, output="lines", header=0, footer=None, **kwargs):
         filename = datadir / str(year) / f"{day}.txt"
         if output == "raw":
             return open(filename).read()
-        lines = open(filename).readlines()
+        lines = open(filename).readlines()[header:footer]
         if output == "lines":
             return lines
         if output == "int":

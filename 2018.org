@@ -550,6 +550,87 @@ Simulating the 50 billion generations is impossible, so something cleverer is ne
 
 #+end_src
 
+* Day 16
+[[https://adventofcode.com/2018/day/16][Chronal Classification]]
+** Part 1
+This is fairly straightforward. We have seven different operations, with two or three different addressing modes for each. We'll start by building a dictionary of each operation, and then one of the valid addressing modes for each operation. From that, we can get a set of all the valid tuples of (operation, addressing mode 1, addressing mode 2).
+
+We can then scan through the header lines of the input, and for each (before, command, after) triple, we can loop over the valid tuples, and check which ones convert before to after.
+#+begin_src jupyter-python
+  from more_itertools import chunked
+  registers = [0, 0, 0, 0]
+  ops = {
+      "add": lambda a, b: a + b,
+      "mul": lambda a, b: a * b,
+      "ban": lambda a, b: a & b,
+      "bor": lambda a, b: a | b,
+      "set": lambda a, b: a,
+      "gt": lambda a, b: int(a > b),
+      "eq": lambda a, b: int(a == b),
+  }
+
+  # 1 is register, 0 is immediate
+  valid_modes = defaultdict(lambda: [(1, 0), (1, 1)])
+  valid_modes["set"] = [(0, 0), (1, 0)]
+  valid_modes["gt"] = [(0, 1), (1, 0), (1, 1)]
+  valid_modes["eq"] = [(0, 1), (1, 0), (1, 1)]
+
+  valid_ops = {(op,) + mode for op in ops for mode in valid_modes[op]}
+
+  def get_operands(modes, operands, registers):
+      result = []
+      for mode, operand in zip(modes, operands):
+          result.append(registers[operand] if mode else operand)
+      return result
+  split = 3298
+  values = load(16, "int", footer=split)
+  total = 0
+  for state, operation, new_state in chunked(values, 3):
+      count = 0
+      operands = operation[1: -1]
+      result = new_state[operation[-1]]
+      for op, *mode in valid_ops:
+          a, b = get_operands(mode, operands, state)
+          if ops[op](a, b) == result:
+              count += 1
+      if count >= 3:
+          total += 1
+  total
+
+#+end_src
+** Part 2
+With that out of the way, we can intersect all the potentially valid assignments for each test case, and use that to figure out which opcode corresponds to what. Running the program after that is fairly straightforward.
+#+begin_src jupyter-python
+  op_ids = defaultdict(lambda: valid_ops.copy())
+  op_assignments = {}
+
+  for state, operation, new_state in chunked(values, 3):
+      op_number = operation[0]
+      if op_number in op_assignments:
+          continue
+      operands = operation[1: -1]
+      result = new_state[operation[-1]]
+      candidate_ops = set()
+      for op, *modes in valid_ops:
+          a, b = get_operands(modes, operands, state)
+          if ops[op](a, b) == result:
+              candidate_ops.add((op,) + tuple(modes))
+      op_ids[op_number] &= candidate_ops
+      if len(op_ids[op_number]) ==  1:
+          assignment = op_ids[op_number].pop()
+          op_assignments[op_number] = assignment
+          for i in range(16):
+              op_ids[i].discard(assignment)
+  state = [0, 0, 0, 0]
+  program = load(16, "int", header=split)
+  i = 0
+  for op_id, a, b, c in program:
+      op, *modes = op_assignments[op_id]
+      a, b = get_operands(modes, (a, b), state)
+      state[c] = ops[op](a, b)
+  state[0]
+#+end_src
+
 * Day 18
 [[https://adventofcode.com/2018/day/18][Settlers of The North Pole]]
 ** Part 1
