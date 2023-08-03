@@ -598,6 +598,7 @@ We can then scan through the header lines of the input, and for each (before, co
   total
 
 #+end_src
+
 ** Part 2
 With that out of the way, we can intersect all the potentially valid assignments for each test case, and use that to figure out which opcode corresponds to what. Running the program after that is fairly straightforward.
 #+begin_src jupyter-python
@@ -671,6 +672,89 @@ There's no way we can run the simulation for that long. Hopefully we'll get a re
       state = (state + change) % 3
   (state == 1).sum() * (state == 2).sum()
 
+#+end_src
+
+* Day 19
+[[https://adventofcode.com/2018/day/19][Go With The Flow]]
+
+** Part 1
+#+begin_src jupyter-python
+  basic_ops = ["add", "mul", "ban", "bor"]
+  name_to_op = {
+      basic_op + mode: (basic_op, 1, int(mode == "r"))
+      for basic_op in basic_ops
+      for mode in "ir"
+  }
+
+  name_to_op.update(**{"set" + mode: ("set", int(mode == "r"), 0) for mode in "ir"})
+  name_to_op.update(
+      ,**{
+          comparison
+          + mode_pair: (comparison, int(mode_pair[0] == "r"), int(mode_pair[1] == "r"))
+          for comparison in ["gt", "eq"]
+          for mode_pair in ["ir", "ri", "rr"]
+      }
+  )
+
+
+  def interpret(op_name):
+      name, *modes = name_to_op[op_name]
+      return [ops[name], modes]
+
+
+  def run(program, registers, ip_register):
+      ip = 0
+      while ip < len(program):
+          registers[ip_register] = ip
+          op, modes, a, b, c = program[ip]
+          a, b = get_operands(modes, (a, b), registers)
+          registers[c] = op(a, b)
+          ip = registers[ip_register] + 1
+      return registers[0]
+
+
+  data = load(19)
+  registers = [0, 0, 0, 0, 0, 0]
+  ip, program = data[0], data[1:]
+  ip_register = int(re.findall(r"-?\d+", ip)[0])
+  program = [x.strip().split() for x in program]
+  program = [interpret(line[0]) + [int(x) for x in line[1:]] for line in program]
+  run(program, registers, ip_register)
+#+end_src
+
+** Part 2
+This is another one of those where changing the value in the first register causes the code to go through a different path in the program, and greatly increases the runtime.
+
+Analysing the execution path shows that the code starts off by jumping to a setup section at the end, which has the main effect of placing a value in register 5. It then jumps back to two nested loops, which go through a lot of busywork, and store their results in register 0. Finally, after a long time, it hits the exit condition of both loops, and the program ends.
+
+Looking at the inner loop, it does the following
+
+#+begin_src python
+  for x4 in range(1, x5 + 1):
+      if x4 * x2 == x5:
+          x0 += x2
+#+end_src
+
+But thats equivalent to  ~x0 += x2 if x5 % x2 == 0 else 0~. The outer loop just runs over all values of x2 from 1 to x5. So what this code is really doing is calculating the sum of divisors function of whatever horrible mess is placed in x5 by the setup. We'll get that by running through the code until the setup is over, and then calculate the sum of divisors:
+
+#+begin_src jupyter-python
+  def sum_of_divisors(n):
+      total = n + 1
+      for i in range(2, n):
+          if n % i == 0:
+              total += i
+      return total
+  
+
+  registers = [1, 0, 0, 0, 0, 0]
+  ip = 0
+  while ip != 1:
+      registers[ip_register] = ip
+      op, modes, a, b, c = program[ip]
+      a, b = get_operands(modes, (a, b), registers)
+      registers[c] = op(a, b)
+      ip = registers[ip_register] + 1
+  sum_of_divisors(registers[5])
 #+end_src
 
 * Day 20
