@@ -843,3 +843,59 @@ And finding how many rooms require at least 1000 steps can be found with the sam
   nodes - len(utils.bfs(0, end_condition, neighbors, return_visited=True))
 #+end_src
 
+* Day 21
+[[https://adventofcode.com/2018/day/21][Chronal Conversion]]
+** Part 1
+Analysing the structure of the program, we can see that the value of register 0 is only relevant in one place, namely as a comparison towards the end, where the program exits if ~x0 == x3~. So for the first part, we just run the code until we hit that comparison the first time, and see what the value of x3 is; that must be the answer to the problem.
+#+begin_src jupyter-python
+  data = load(21)
+  registers = [0, 0, 0, 0, 0, 0]
+  ip, program = data[0], data[1:]
+  ip_register = int(re.findall(r"-?\d+", ip)[0])
+  ip = 0
+  program = [x.strip().split() for x in program]
+  program = [interpret(line[0]) + [int(x) for x in line[1:]] for line in program]
+  count = 0
+  while True:
+      i += 1
+      registers[ip_register] = ip
+      op, modes, a, b, c = program[ip]
+      a, b = get_operands(modes, (a, b), registers)
+      registers[c] = op(a, b)
+      ip = registers[ip_register] + 1
+      if ip == 28:
+          count += 1
+          if count == 2:
+              break
+  registers[3]
+#+end_src
+** Part 2
+For part 2, we need to do two things:
+
+1. Analyse the provided script so that we can run it in pure python rather than the assembly it's given in
+2. Think about why there would even be a largest amount of iterations the code can make and still halt.
+
+For part 1, it turns out that the code is repeatedly applying a fairly simple transformation to register 3, and then checking that against register 0. The only way that there could be a largest set of iterations is if the code eventualy produces the same value in register 3 as it did some number of iterations ago. The value we're looking for is then the last value found in register 3 before the repeated value:
+#+begin_src jupyter-python
+  x1, x3 = 0, 0
+  seen = []
+  while x3 not in seen:
+      seen.append(x3)
+      x1 = x3 | 65536
+      x3 = 4921097
+      while x1 >= 1:
+          x3 = ((x3 + (x1 % 256))  * 65899) % 16777216
+          x1 = x1 // 256
+  seen[-1]
+#+end_src
+
+* Day 23
+[[https://adventofcode.com/2018/day/23][Experimental Emergency Teleportation]]
+** Part 1
+The first part is pretty simple
+#+begin_src jupyter-python
+  data = np.array(load(23, "int"))
+  row = data[np.argmax(data[:, -1])]
+  (np.abs((data - row)[:, :-1]).sum(axis=1) <= row[-1]).sum()
+#+end_src
+
