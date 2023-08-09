@@ -183,7 +183,7 @@ That gives this plot for the two different wires
 * Day 6
 [[https://adventofcode.com/2019/day/6][Universal Orbit Map]]
 ** Part 1
-We construct the DAG as a dictionary, where graph[node] corresponds to node.parent. We use a second dictionary to memoize the counts of how far each node is from the COM
+We construct the DAG as a dictionary, where graph[node] corresponds to node.parent.
 #+begin_src jupyter-python
   data = load(6)
   graph = {child: parent for parent, child in map(lambda x: x.strip().split(")"), data)}
@@ -547,7 +547,8 @@ We mapped out the whole area for part 1, so part 2 is just a bfs with no stoppin
 ** Part 1
 For the first part all the numbers are small, so we don't need to be particularly clever
 #+begin_src jupyter-python
-  data = [int(x) for x in load(16)[0].strip()]
+  initial_data = [int(x) for x in load(16)[0].strip()]
+  data = initial_data.copy()
   base_pattern = np.array([0, 1, 0, -1])
   factors = []
   for i in range(1, len(data) + 1):
@@ -560,7 +561,35 @@ For the first part all the numbers are small, so we don't need to be particularl
   print(*data[:8], sep="", end="\n")
 #+end_src
 
+
 ** Part 2
+
+For part 2, the numbers get so big that this approach is impossible (just the transition matrix  has len(data)**2 * 1e8 elements, so that's not going to work).
+
+The first optimization we can make is to realise that calculating the $k$th from last digit of the output only requires knowledge of the last $k$ digits of the input. So the last digit is always unchanged, the last-but-one digit is always the sum of the previous last two digits etc.
+
+In fact, we can explicitly solve this reccurrence for the second half of the input data, and looking at the data provided, that's where the relevant digits are located! Denoting the $k$th digit from the end after the $n$th iteration as $d_k^n$, we can verify that
+
+\begin{align*}
+d^n_0 &= d^{n-1}_0 = \ldots = d^0_0 \\
+d^n_1 &= d^{n-1}_1 + (d^{n-1}_0) = d^0_1 + nd^0_0 \\
+d^n_2 &= d^{n-1}_2 + (d^{n-1}_1 + d^{n-1}_0) = d^0_2 + nd^0_1 + \frac12n(n+1)d^0_0 \\
+\end{align*}
+
+Explicitly solving the recurrences for all the digits in the second half is certainly possible, but it's going to be very tedious. Instead, we can notice that the middle expression is always $d^{n-1}_k + d^n_{k -1}$ . That means that to calculate $d^{100}_k$ we only need to know $d^0_k$ and $d^1_{k-1},  d^2_{k-1}, \ldots, d^{100}_{k-1}$, which translates to the following short routine:
+
+#+begin_src jupyter-python
+  active = 101 * [0]
+  results = []
+  index = functools.reduce(lambda x, y: 10 * x + y, initial_data[:7])
+  data = np.tile(initial_data, 10_000)
+  counter_index = len(data) - index
+  for i in range(counter_index):
+      active[0] = data[- 1 - i]
+      active = np.cumsum(active) % 10
+      results.append(active[-1])
+  functools.reduce(lambda x, y: 10 * x + y, results[::-1][:8])
+#+end_src
 
 * Day 24
 [[https://adventofcode.com/2019/day/24][Planet of Discord]]
