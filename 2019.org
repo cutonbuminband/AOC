@@ -595,13 +595,16 @@ Explicitly solving the recurrences for all the digits in the second half is cert
 [[https://adventofcode.com/2019/day/24][Planet of Discord]]
 ** Part 1
 #+begin_src jupyter-python
-  state = np.array([[0 if char == "." else 1 for char in line.strip()] for line in load(24)])
+  initial_state = np.array(
+      [[0 if char == "." else 1 for char in line.strip()] for line in load(24)]
+  )
+  state = initial_state.copy()
   weights = [[0, 1, 0], [1, 0, 1], [0, 1, 0]]
   seen = {}
   while tuple(state.ravel()) not in seen:
       seen[tuple(state.ravel())] = True
       bugs = scipy.ndimage.convolve(state, weights, mode="constant")
-      changes = (bugs != 1)
+      changes = bugs != 1
       empty = np.where(state == 0)
       changes[empty] = ((bugs == 1) | (bugs == 2))[empty]
       state = (state + changes) % 2
@@ -610,5 +613,28 @@ Explicitly solving the recurrences for all the digits in the second half is cert
 #+end_src
 
 ** Part 2
-???
+For part 2, we need to figure out how to account for the different levels and how to account for the new neighbors.
+
+We'll add the different recursion levels as a new first axis in our array, and we know that it takes at least two steps before an initially empty layer can affect it's neighbor: one to reach the layer, and one to spread to the edge/centre of the layer. That means that instead of expanding the first axis at every step, we can precompute how many we'll need and fill with zeros.
+
+We can get the in-plane neighbors exactly as before, and after far too much thought, we can get the new neighbors with some clever numpy indexing. This could possibly be shortened even further, but tbh it's concise enough as it is.
+
+#+begin_src jupyter-python
+  length = 200
+  state = np.zeros((length + 3, *initial_state.shape), dtype=int)
+  state[int(length // 2) + 1] = initial_state
+  for i in range(length):
+      neighbors = scipy.ndimage.convolve(state, [weights], mode="constant")
+      neighbors[:, (0, -1) , :] += np.roll(state[:, (1, 3), 2], 1, axis=0)[:, :, None]
+      neighbors[:, :, (0, -1) ] += np.roll(state[:, 2, (1, 3)], 1, axis=0)[:, None, :]
+      neighbors[:, (1, 3), 2] += np.roll(state[:, (0, -1), :], -1, axis=0).sum(axis=2)
+      neighbors[:, 2, (1, 3)] += np.roll(state[:, :, (0, -1)], -1, axis=0).sum(axis=1)
+      changes = neighbors != 1
+      empty = np.where(state == 0)
+      changes[empty] = ((neighbors == 1) | (neighbors == 2))[empty]
+      state = (state + changes) % 2
+      state[:, 2, 2] = 0
+
+  state.sum()
+  #+end_src
 
