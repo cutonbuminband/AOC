@@ -899,3 +899,19 @@ The first part is pretty simple
   (np.abs((data - row)[:, :-1]).sum(axis=1) <= row[-1]).sum()
 #+end_src
 
+* Day 25
+[[https://adventofcode.com/2018/day/25][Four-Dimensional Adventure]]
+
+** Part 1
+I could write this by hand. Or I could realise that the problem description is perfectly suited for a union-find/disjoint set data structure:
+#+begin_src jupyter-python
+  from scipy.cluster.hierarchy import DisjointSet
+  points = [tuple(x) for x in load(25, "int")]
+  disjoint_set = DisjointSet(points)
+  for x in range(len(points)):
+      deltas = np.abs(np.array(points) - np.array(points[x])).sum(axis=1)
+      for y in range(x + 1, len(points)):
+          if deltas[y] <= 3:
+              disjoint_set.merge(points[x], points[y])
+  disjoint_set.n_subsets
+#+end_src
