@@ -3,16 +3,19 @@
 
 * Imports
 #+begin_src jupyter-python
-  import pandas as pd
-  import numpy as np
-  from collections import defaultdict, deque
-  from pathlib import Path
   import functools
   import itertools
-  import more_itertools
   import re
+  from collections import defaultdict, deque
+  from pathlib import Path
+
+  import more_itertools
+  import numpy as np
+  import pandas as pd
   import scipy
+
   import utils
+
   load = utils.year_load(2018)
 #+end_src
 
@@ -887,6 +890,70 @@ For part 1, it turns out that the code is repeatedly applying a fairly simple tr
           x3 = ((x3 + (x1 % 256))  * 65899) % 16777216
           x1 = x1 // 256
   seen[-1]
+#+end_src
+* Day 22
+[[https://adventofcode.com/2018/day/22][Mode Maze]]
+** Part 1
+#+begin_src jupyter-python
+  d = 7863
+  target_x, target_y = 14, 760
+  base = 20183
+  @functools.cache
+  def geologic_index(x, y):
+      if y == 0:
+          return (x * 16807) % base
+      if x == 0:
+          return (y * 48271) % base
+      return ((geologic_index(x-1, y) + d) * (geologic_index(x, y-1) + d)) % base
+
+  @functools.cache
+  def terrain_type(x, y):
+      if x == target_x and y == target_y:
+          return 0
+      return ((geologic_index(x, y) + d) % base) % 3
+  board = np.zeros((target_x + 1, target_y + 1), dtype=int)
+  for i in range(target_x + 1):
+      for j in range(target_y + 1):
+          board[i, j] = terrain_type(i, j)
+  board.sum()
+#+end_src
+
+** Part 2
+This calls for a path finding algorithm. A* to the rescue! We'll need functions that
+
+1. Find the neighboring states of the current state
+2. Find the cost of getting to each neighbor
+3. Estimate the cost of getting to the end from any given location
+
+#+begin_src jupyter-python
+  def neighbors(state):
+      x, y, equipment = state
+      candidates = [
+          (x + 1, y, equipment),
+          (x - 1, y, equipment),
+          (x, y - 1, equipment),
+          (x, y + 1, equipment),
+          (x, y, (equipment + 1) % 3),
+          (x, y, (equipment + 2) % 3),
+      ]
+
+      return [
+          candidate
+          for candidate in candidates
+          if candidate[0] >= 0
+          and candidate[1] >= 0
+          and candidate[2] != terrain_type(candidate[0], candidate[1])
+      ]
+
+  def weights(s1, s2):
+      return 1 if s1[-1] == s2[-1] else 7
+
+  def heuristic(s1, s2):
+      return abs(s1[0] - s2[0]) + abs(s1[1] - s2[1]) + 7 * (s1[-1] != s2[-1])
+
+  initial_state = 0, 0, 1
+  target = target_x, target_y, 1
+  utils.astar(initial_state, target, neighbors, heuristic, weights)
 #+end_src
 
 * Day 23
