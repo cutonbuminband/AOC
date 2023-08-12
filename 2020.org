@@ -838,3 +838,43 @@ The following code will fail if any of the sea monsters overlap, but luckily the
       board = board.T
   board.sum() - monsters * 15
 #+end_src
+
+* Day 21
+[[https://adventofcode.com/2020/day/21][Allergen Assessment]]
+** Part 1
+Nice and easy one today, with just a bunch of set intersection logic
+#+begin_src jupyter-python
+  lines = load(21)
+  counts = defaultdict(int)
+  mappings = {}
+  for line in lines:
+      ingredients, allergens = [
+          x.strip().split() for x in line[:-2].replace(",", "").split("(contains")
+      ]
+      for ingredient in ingredients:
+          counts[ingredient] += 1
+      for allergen in allergens:
+          if allergen in mappings:
+              mappings[allergen] &= set(ingredients)
+          else:
+              mappings[allergen] = set(ingredients)
+  potential_allergens = set().union(*mappings.values())
+  sum(counts[x] for x in counts if x not in potential_allergens)
+#+end_src
+
+** Part 2
+And part 2 isn't much harder. Any allergens which have only one matching ingredient are fixed; and this ingredient can then be removed from all the other allergens. And then it's a question of continuing until we have the full map
+#+begin_src jupyter-python
+  assignments = {}
+  assignable = {x for x in mappings if len(mappings[x]) == 1}
+  while mappings:
+      key = assignable.pop()
+      value = mappings[key].pop()
+      del mappings[key]
+      assignments[key] = value
+      for mapping in mappings:
+          mappings[mapping].discard(value)
+          if len(mappings[mapping]) == 1:
+              assignable.add(mapping)
+  print(",".join(assignments[x] for x in sorted(list(assignments.keys()))))
+#+end_src
