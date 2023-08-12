@@ -679,3 +679,162 @@ We have loops now! Analysing the new rules, we see that the system should accept
   sum(part2(s) for s in strings[:-1])
 #+end_src
 
+* Day 20
+
+#+begin_src jupyter-python
+  data = load(20, "raw").split("\n\n")
+  data[0]
+  tiles = {}
+
+
+  def edge_hashes(t):
+      edges = [
+          t[0],
+          t[0][::-1],
+          t[:, -1],
+          t[:, -1][::-1],
+          t[-1][::-1],
+          t[-1],
+          t[:, 0][::-1],
+          t[:, 0],
+      ]
+      return {
+          idx: functools.reduce(lambda x, y: 2 * x + y, edge[::-1])
+          for idx, edge in enumerate(edges)
+      }
+  def fingerprint(tile):
+      return tile, edge_hashes(tile), {v: k for k, v in edge_hashes(tile).items()}
+
+  for entry in data:
+      header, *tile = entry.split("\n")
+      tile = np.array(
+          [[1 if char == "#" else 0 for char in line] for line in tile if line],
+          dtype="int",
+      )
+      tile_id = int(re.findall(r"\d+", header)[0])
+      tiles[tile_id] = fingerprint(tile)
+  matches = defaultdict(set)
+  keys = sorted(tiles.keys())
+  for x in range(len(keys)):
+      for y in range(x + 1, len(keys)):
+          if set(tiles[keys[x]][1].values()) & set(tiles[keys[y]][1].values()):
+              matches[keys[x]].add(keys[y])
+              matches[keys[y]].add(keys[x])
+  corners = [x for x in matches if len(matches[x]) == 2]
+  np.product(corners)
+#+end_src
+
+** Part 2
+Direct inspection shows that there are no false matches in the edge pairings, so we can proceed to place all the tiles without taking that into account. We'll start by placing the tiles in the correct location without worrying about their orientation, and then rotate and flip them afterwards.
+
+There are eight possible ways to fill the board (four different corners to put in the top left, and then for each of those, two different choices for how to flip around the main diagonal), so we'll arbitrarily pick one of them.
+
+We'll start by placing a corner piece in the top left, and then one of its neighbors below it.
+
+When we place a tile, we mark the candidates for its unplaced neighbors: these are the intersection of whatever candidates were there before, and the unplaced matches of the current tile. We also remove the current tile as a candidate from any other open location, since it's just been placed. Whenever a location has only one candidate, we can place that, and proceed until the whole board is filled.
+#+begin_src jupyter-python
+  corner = corners[0]
+  match = next(iter(matches[corner]))
+  locations = defaultdict(lambda: set(keys))
+  placed = set()
+
+  def place(tile, location):
+      locations[location] = tile
+      placed.add(tile)
+      x, y = location
+      if x < 11 and isinstance(locations[x + 1, y], set):
+          locations[x + 1, y] &= (matches[tile] - placed)
+      if y < 11 and isinstance(locations[x, y + 1], set):
+          locations[x, y + 1] &= (matches[tile] - placed)
+      to_place = []
+      for location in locations:
+          if isinstance(locations[location], set):
+              locations[location].discard(tile)
+              if len(locations[location]) == 1:
+                  to_place.append(location)
+      for placement in to_place:
+          if isinstance(locations[placement], set):
+              place(next(iter(locations[placement])), placement)
+
+
+  place(corner, (0, 0))
+  place(match, (1, 0))
+  coords = np.zeros((12, 12), dtype=int)
+  for location in locations:
+      coords[location] = locations[location]
+#+end_src
+
+With that out of the way, we need to orient the tiles correctly. We start by making sure the top left corner is oriented correctly, and then we match all of the other tiles to that structure.
+
+For each row in the grid, we match the first cell to the first cell in the row above, and then we match all the other cells to the neighbor to their left. 
+#+begin_src jupyter-python
+  # start off by making sure that the right hand side matches
+  overlap = [
+      tiles[coords[0, 0]][2][key]
+      for key in set(tiles[coords[0, 0]][2].keys()) & set(tiles[coords[0, 1]][2].keys())
+  ][0]
+  delta = (((overlap - overlap % 2) - 2) // 2) % 4
+  if delta:
+      tile = np.rot90(tiles[coords[0, 0]][0], -delta)
+      tiles[coords[0, 0]] = fingerprint(tile)
+  # Then check if the bottom of the tile is the one that matches [1, 0]. If not, flip it vertically.
+  overlap = [
+      tiles[coords[0, 0]][2][key]
+      for key in set(tiles[coords[0, 0]][2].keys()) & set(tiles[coords[1, 0]][2].keys())
+  ][0]
+  if overlap // 2 != 2:
+      tile = tile[::-1]
+      tiles[coords[0, 0]] = fingerprint(tile)
+#+end_src
+
+All the edges are labelled (not well, but they are labelled). To be oriented correctly, the 7 edge on a tile should match the 2 edge on the tile to its left, and/or the 0 edge on a tile should match the 5 edge on the tile above it.
+#+begin_src jupyter-python
+  for y in range(12):
+      for x in range(12):
+          if not x and not y:
+              continue
+          tile = tiles[coords[y, x]][0]
+          if not x:
+              old_edge = 5
+              target = 0
+              comparison = (y-1, x)
+          else:
+              old_edge = 2
+              target = 7
+              comparison = (y, x - 1)
+          value = tiles[coords[comparison]][1][old_edge]
+          current = tiles[coords[y, x]][2][value]
+          if (target - current) % 2:
+              tile = tile.T
+              current = 7 - current
+          rotation = (current - target) // 2
+          tile = np.rot90(tile, rotation)
+          tiles[coords[y, x]] = fingerprint(tile)
+#+end_src
+
+We can now reconstruct the board, and go hunting for the sea monsters. The convolve/correlate functions are handy here as well, since we're looking for an area where all of a subset of the neighboring cells are lit up. So we correlate with that mask, and check which correlations have the full set.
+
+The following code will fail if any of the sea monsters overlap, but luckily they don't.
+#+begin_src jupyter-python
+  board = np.zeros((8 * 12, 8 * 12), dtype=int)
+  for y in range(12):
+      for x in range(12):
+          board[y * 8 : (y + 1) * 8, x * 8 : (x + 1) * 8] = tiles[coords[y, x]][0][
+              1:-1, 1:-1
+          ]
+  pattern = [
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+      [1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1],
+      [0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0],
+  ]
+
+  total = np.sum(pattern)
+  monsters = 0
+  for reflection in range(2):
+      for rotation in range(4):
+          convolution = scipy.ndimage.correlate(board, pattern, mode='constant')
+          monsters += (convolution == total).sum()
+          board = np.rot90(board)
+      board = board.T
+  board.sum() - monsters * 15
+#+end_src
