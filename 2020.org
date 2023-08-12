@@ -842,7 +842,7 @@ The following code will fail if any of the sea monsters overlap, but luckily the
 * Day 21
 [[https://adventofcode.com/2020/day/21][Allergen Assessment]]
 ** Part 1
-Nice and easy one today, with just a bunch of set intersection logic
+Nice and easy one today, with just a bit of set intersection logic
 #+begin_src jupyter-python
   lines = load(21)
   counts = defaultdict(int)
@@ -877,4 +877,48 @@ And part 2 isn't much harder. Any allergens which have only one matching ingredi
           if len(mappings[mapping]) == 1:
               assignable.add(mapping)
   print(",".join(assignments[x] for x in sorted(list(assignments.keys()))))
+#+end_src
+
+* Day 24
+[[https://adventofcode.com/2020/day/24][Lobby Layout]]
+** Part 1
+#+begin_src jupyter-python
+  vectors = {
+      "e": (1, 0),
+      "ne": (1, 1),
+      "nw": (0, 1),
+      "w": (-1, 0),
+      "sw": (-1, -1),
+      "se": (0, -1),
+  }
+  current = ""
+  terminals = "ew"
+  tiles = defaultdict(bool)
+  for s in load(24):
+      result = []
+      for char in s.strip():
+          current += char
+          if char in terminals:
+              result.append(vectors[current])
+              current = ""
+      coords = tuple(np.array(result).sum(axis=0))
+      tiles[coords] ^= 1
+  np.sum(list(tiles.values()))
+#+end_src
+
+** Part 2
+This is a fairly simple convolution problem again. We'll be working in the basis defined above, and in that basis, the neighbors are as given in the vectors dictionary. So the array of weights is the one below.
+#+begin_src jupyter-python
+  keys = list(tiles.keys())
+  weights = [[1, 1, 0], [1, 0, 1], [0, 1, 1]]
+  border = 100
+  size = 2 * border + np.max(keys) - np.min(keys)
+  board = np.zeros((size, size), dtype=int)
+  for x, y in tiles:
+      board[x + size // 2, y + size // 2] = tiles[x, y]
+  for i in range(100):
+      neighbors = scipy.ndimage.correlate(board, weights, mode='constant')
+      flips = ((board == 0) & (neighbors == 2)) | ((board == 1) & ((neighbors == 0) | (neighbors > 2)))
+      board = (board + flips) % 2
+  board.sum()
 #+end_src
