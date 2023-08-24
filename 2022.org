@@ -561,7 +561,7 @@ Looks pretty cool!
 * Day 18
 [[https://adventofcode.com/2022/day/18][Boiling Boulders]]
 ** Part 1
-Idea: find all neighboring boxes by finding the union of the shifts along each of i,j,k,-i,-j,-k and subtracting the original shape. A given box might neighbor the original shape in up to six places, so to account for that I can take all the neighbors, shift them againalong each of the axes, and for each shift, count how many boxes now overlap the original shape.
+Idea: find all neighboring boxes by finding the union of the shifts along each of i,j,k,-i,-j,-k and subtracting the original shape. A given box might neighbor the original shape in up to six places, so to account for that I can take all the neighbors, shift them again along each of the axes, and for each shift, count how many boxes now overlap the original shape.
 #+begin_src jupyter-python
   data = load(18, "np")
 
@@ -606,3 +606,64 @@ For part 2, once we have identified which of the neighboring boxes represent ext
   arr = np.array(list(s & nb))
   sum([len(to_set(arr + delta) & occupied) for delta in deltas])
 #+end_src
+
+* Day 21
+[[https://adventofcode.com/2022/day/21][Monkey Math]]
+** Part 1
+We'll use recursion and the call stack to keep track of the operations for us
+#+begin_src jupyter-python
+  from operator import mul, ifloordiv, add, sub
+  instructions = {}
+  lookup = {"*": mul, "/": ifloordiv, "-": sub, "+": add}
+  for line in map(str.strip, load(21)):
+      lhs, rhs = line.split(":")
+      operands = rhs.split()
+      if len(operands) == 1:
+          instructions[lhs] = {"dependencies": [], "value": int(operands[0])}
+      else:
+          instructions[lhs] = {"dependencies": [operands[0], operands[2]], "operation": lookup[operands[1]]}
+
+  @functools.cache
+  def value(mystring):
+      instruction = instructions[mystring]
+      if not instruction["dependencies"]:
+          return instruction["value"]
+      else:
+          return instruction["operation"](*[value(x) for x in instruction["dependencies"]])
+  value("root")
+#+end_src
+
+** Part 2
+#+begin_src jupyter-python
+  value.cache_clear()
+  inverse_operations = {sub: add, add: sub, mul: ifloordiv, ifloordiv: mul}
+  if "humn" in instructions:
+      del instructions["humn"]
+  instructions["root"]["operation"] = sub
+
+
+  def balance(instruction, target):
+      if instruction == "humn":
+          return target
+      for idx, dependency in enumerate(instructions[instruction]["dependencies"]):
+          try:
+              v = value(dependency)
+              pos = idx
+          except KeyError:
+              next_instruction = dependency
+      op = instructions[instruction]["operation"]
+      if pos == 0 and op in [ifloordiv, sub]:
+          updated_target = op(v, target)
+      else:
+          updated_target = inverse_operations[op](target, v)
+      return balance(next_instruction, updated_target)
+
+
+  balance("root", 0)
+#+end_src
+
+
+
+
+| dependencies | : | (hsdb mwrd) | operation | : | <function | _operator.add | (a b /) | > |
+
