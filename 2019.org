@@ -591,6 +591,36 @@ Explicitly solving the recurrences for all the digits in the second half is cert
   functools.reduce(lambda x, y: 10 * x + y, results[::-1][:8])
 #+end_src
 
+* Day 17
+
+** Part 1
+#+begin_src jupyter-python
+  opcodes = load(17, "np")
+  program = IntCodeProgram(opcodes)
+  data = "".join(chr(val) for val in program.run()).split("\n")[:-2]
+  board = np.array([[1 if char == "#" else 0 for char in line] for line in data])
+  neighbors = [[0, 1, 0], [1, 0, 1], [0, 1, 0]]
+  intersections = np.where(
+      (scipy.ndimage.convolve(board, neighbors, mode="constant") > 2) & board
+  )
+  np.product(intersections, axis=0).sum()
+#+end_src
+
+** Part 2
+For this one I solved the path by hand, and then ran the input through the black box program to get the actual output.
+#+begin_src jupyter-python
+  A = "R,6,L,12,R,6"
+  B = "L,12,R,6,L,8,L,12"
+  C = "R,12,L,10,L,10"
+  main = "A,A,B,C,B,C,B,C,B,A"
+  show_output = "n\n"
+  program_input = "\n".join(x for x in [main, A, B, C, show_output])
+  encoded_input = [ord(x) for x in program_input]
+  program.set(0, 2)
+  program.set_input(encoded_input)
+  [x for x in program.run()][-1]
+#+end_src
+
 * Day 24
 [[https://adventofcode.com/2019/day/24][Planet of Discord]]
 ** Part 1
