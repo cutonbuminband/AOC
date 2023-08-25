@@ -621,6 +621,65 @@ For this one I solved the path by hand, and then ran the input through the black
   [x for x in program.run()][-1]
 #+end_src
 
+* Day 19
+[[https://adventofcode.com/2019/day/19][Tractor Beam]]
+** Part 1
+#+begin_src jupyter-python
+  opcodes = load(19, "np")
+  program = IntCodeProgram(opcodes)
+  inputs = []
+  program.set_input(inputs)
+  size = 50
+  board = np.zeros((size, size), dtype=int)
+  for i in range(size):
+      for j in range(size):
+          program.reset()
+          inputs += [j, i]
+          board[i, j] = next(program.run())
+  board.sum()
+#+end_src
+
+** Part 2
+#+begin_src jupyter-python
+  top_edge = []
+  bottom_edge = []
+  current_top = 0
+  current_bottom = 0
+  for j in range(1000):
+      bottom_val = 1
+      top_val = 0
+      current_top -= 1
+      while top_val == 0 and current_top <= 2 * j:
+          current_top += 1
+          program.reset()
+          program.set_input([j, current_top])
+          top_val = next(program.run())
+      if not top_val:
+          current_top = 0
+      if not current_bottom:
+          current_bottom = current_top
+      while bottom_val == 1:
+          current_bottom += 1
+          program.reset()
+          program.set_input([j, current_bottom])
+          bottom_val = next(program.run())
+      top_edge.append(current_top)
+      bottom_edge.append(current_bottom - 1)
+
+  axis = np.arange(len(bottom_edge))
+  top_slope = np.polyfit(axis, top_edge, 1)[0]
+  w = 99
+  dy = (top_slope + 1) * w
+  x = (np.array(bottom_edge) - np.array(top_edge) >= dy).argmax()
+  y = bottom_edge[x] - w
+  while top_edge[x + w] <= (bottom_edge[x] - w):
+      x -= 1
+      y = bottom_edge[x] - w
+  x += 1
+  y = bottom_edge[x] - w
+  10000 * x + y
+#+end_src
+
 * Day 24
 [[https://adventofcode.com/2019/day/24][Planet of Discord]]
 ** Part 1
