@@ -879,6 +879,53 @@ And part 2 isn't much harder. Any allergens which have only one matching ingredi
   print(",".join(assignments[x] for x in sorted(list(assignments.keys()))))
 #+end_src
 
+* Day 22
+[[https://adventofcode.com/2020/day/22][Crab Combat]]
+** Part 1
+#+begin_src jupyter-python
+  p1, p2 = map(deque, np.array(load(22, "int")).reshape(2, -1)[:, 1:])
+  while p1 and p2:
+      c1, c2 = p1[0], p2[0]
+      p1.rotate(-1)
+      p2.rotate(-1)
+      winner, loser = (p1, p2) if (c1 > c2) else (p2, p1)
+      winner.append(loser.pop())
+  result = p1 if p1 else p2
+  (np.array(result) * (np.arange(len(result)) + 1)[::-1]).sum()
+#+end_src
+
+** Part 2
+A fairly straightforward recursive implementation of the requirements
+#+begin_src jupyter-python
+  p1, p2 = map(deque, np.array(load(22, "int")).reshape(2, -1)[:, 1:])
+
+
+  def play(p1, p2):
+      seen = set()
+      while p1 and p2:
+          hashed = (tuple(p1), tuple(p2))
+          if hashed in seen:
+              return 1, 0
+          seen.add(hashed)
+          c1, c2 = p1[0], p2[0]
+          p1.rotate(-1)
+          p2.rotate(-1)
+          if c1 < len(p1) and c2 < len(p2):
+              new_p1 = deque(list(p1)[:c1])
+              new_p2 = deque(list(p2)[:c2])
+              recursive_battle = play(new_p1, new_p2)
+              winner, loser = (p1, p2) if recursive_battle[0] else (p2, p1)
+          else:
+              winner, loser = (p1, p2) if (c1 > c2) else (p2, p1)
+          winner.append(loser.pop())
+      return p1, p2
+
+
+  result = play(p1, p2)
+  result = result[0] if result[0] else result[1]
+  (np.array(result) * np.arange(1, len(result) + 1)[::-1]).sum()
+#+end_src
+
 * Day 24
 [[https://adventofcode.com/2020/day/24][Lobby Layout]]
 ** Part 1
