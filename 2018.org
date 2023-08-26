@@ -966,6 +966,155 @@ The first part is pretty simple
   (np.abs((data - row)[:, :-1]).sum(axis=1) <= row[-1]).sum()
 #+end_src
 
+
+* Day 24
+[[https://adventofcode.com/2018/day/24][Immune System Simulator 20XX]]
+** Part 1
+This was a bit of a slog, with a fair bit of attention needed to make sure that the requirements were implemented correctly.
+#+begin_src jupyter-python
+  class Group:
+      def __init__(
+          self,
+          n_units,
+          hit_points,
+          damage,
+          initiative,
+          damage_type,
+          weaknesses=[],
+          immunities=[],
+      ):
+          self.n_units = n_units
+          self.hit_points = hit_points
+          self.damage = damage
+          self.initiative = initiative
+          self.damage_type = damage_type
+          self.weaknesses = weaknesses
+          self.immunities = immunities
+
+      def __repr__(self):
+          return (
+              f"Group({self.n_units}, {self.hit_points}, {self.damage}, "
+              f"{self.initiative}, {self.damage_type})"
+          )
+
+      @property
+      def effective_power(self):
+          return self.damage * self.n_units
+
+      @property
+      def is_alive(self):
+          return self.n_units > 0
+
+      def attack(self, other):
+          other.defend(self.calculate_damage(other))
+
+      def calculate_damage(self, other):
+          if self.damage_type in other.immunities:
+              return 0
+          elif self.damage_type in other.weaknesses:
+              return 2 * self.effective_power
+          return self.effective_power
+
+      def defend(self, damage):
+          self.n_units = self.n_units - damage // self.hit_points
+          self.n_units = max(self.n_units, 0)
+
+      def selection_order(self):
+          return (-self.effective_power, -self.initiative)
+
+      def select_target(self, others):
+          max_damage = (0, 0, 0)
+          for other in others:
+              damage = self.calculate_damage(other)
+              key = (damage, other.effective_power, other.initiative)
+              if key > max_damage:
+                  max_damage = key
+                  result = other
+          if max_damage[0] > 0:
+              return result
+          else:
+              return None
+
+
+  def select_targets(attackers, defenders):
+      targets = []
+      defenders = defenders.copy()
+      for group in sorted(attackers, key=lambda x: x.selection_order()):
+          target = group.select_target(defenders)
+          if target is not None:
+              targets.append((group, target))
+              defenders.remove(target)
+      return targets
+
+
+  def one_round(infection, immune):
+      matchup = select_targets(infection, immune) + select_targets(immune, infection)
+
+      for match in sorted(matchup, key=lambda x: -x[0].initiative):
+          match[0].attack(match[1])
+
+      return [x for x in infection if x.is_alive], [x for x in immune if x.is_alive]
+
+  data = [x.split("\n")[1:] for x in load(24, "raw")[:-1].split("\n\n")]
+
+  def parse(line):
+      n_units, hit_points, damage, initiative = [int(x) for x in re.findall("-?\d+", line)]
+      damage_type = re.search("(\w*) damage", line).groups()[0]
+      immunity_match = re.search("\((.*)\)", line)
+      if not immunity_match:
+          weaknesses, immunities = [], []
+      else:
+          weaknesses, immunities = parse_immunities(immunity_match.groups()[0])
+      return Group(
+          n_units, hit_points, damage, initiative, damage_type, weaknesses, immunities
+      )
+
+
+  def parse_immunities(exp):
+      weaknesses = []
+      immunities = []
+      for sequence in exp.split("; "):
+          first, middle, *rest = sequence.split()
+          if first == "weak":
+              kind = weaknesses
+          else:
+              kind = immunities
+          kind += "".join(rest).split(",")
+      return weaknesses, immunities
+
+  immune, infection = [[parse(line) for line in block] for block in data]
+  while immune and infection:
+      immune, infection = one_round(immune, infection)
+  result = immune if immune else infection
+  sum(x.n_units for x in result)
+#+end_src
+
+** Part 2
+I did a binary search for this one. The players can get stuck in a draw, so we need to take that into account.
+#+begin_src jupyter-python
+  def winner(boost):
+      immune, infection = [[parse(line) for line in block] for block in data]
+      for group in immune:
+          group.damage += boost
+      while immune and infection:
+          total = sum(x.n_units for x in immune + infection)
+          immune, infection = one_round(immune, infection)
+          if total == sum(x.n_units for x in immune + infection):
+              return 0
+      return sum(x.n_units for x in immune)
+  high = 1
+  while not winner(high):
+      high *= 2
+  low = high // 2
+  while high - low > 1:
+      mid = (high + low) // 2
+      if winner(mid):
+          high = mid
+      else:
+          low = mid
+  winner(high)
+#+end_src
+
 * Day 25
 [[https://adventofcode.com/2018/day/25][Four-Dimensional Adventure]]
 
