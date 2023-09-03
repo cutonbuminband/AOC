@@ -561,15 +561,16 @@ This is fairly straightforward. We have seven different operations, with two or 
 We can then scan through the header lines of the input, and for each (before, command, after) triple, we can loop over the valid tuples, and check which ones convert before to after.
 #+begin_src jupyter-python
   from more_itertools import chunked
+  import operator
   registers = [0, 0, 0, 0]
   ops = {
-      "add": lambda a, b: a + b,
-      "mul": lambda a, b: a * b,
-      "ban": lambda a, b: a & b,
-      "bor": lambda a, b: a | b,
+      "add": operator.add,
+      "mul": operator.mul,
+      "ban": operator.iand,
+      "bor": operator.ior,
       "set": lambda a, b: a,
-      "gt": lambda a, b: int(a > b),
-      "eq": lambda a, b: int(a == b),
+      "gt": operator.gt,
+      "eq": operator.eq,
   }
 
   # 1 is register, 0 is immediate
