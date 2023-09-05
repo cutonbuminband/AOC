@@ -553,6 +553,162 @@ Simulating the 50 billion generations is impossible, so something cleverer is ne
 
 #+end_src
 
+* Day 15
+[[https://adventofcode.com/2018/day/15][Beverage Bandits]]
+** Part 1
+This was a slog. Lots of small pieces to keep track of
+#+begin_src jupyter-python
+  class Unit:
+      def __init__(self, kind, power=3):
+          self.kind = kind
+          self.hit_points = 200
+          self.attack_power = power
+
+      def attack(self, other):
+          other.hit_points -= self.attack_power
+
+      @property
+      def is_dead(self):
+          return self.hit_points <= 0
+
+
+  class Board:
+      def __init__(self, rock, elves, goblins, elf_power=3):
+          self.state = {}
+          self.ymax = max(rock + elves + goblins, key=lambda x: x[0])[0]
+          self.xmax = max(rock + elves + goblins, key=lambda x: x[1])[1]
+          self.board = np.zeros((self.ymax + 1, self.xmax + 1), dtype=np.byte)
+          for coord in rock:
+              self.board[coord] = 1
+          for coord in elves:
+              self.state[coord] = Unit("elf", elf_power)
+              self.board[coord] = 2
+          for coord in goblins:
+              self.state[coord] = Unit("goblin")
+              self.board[coord] = 3
+
+      def __str__(self):
+          char_map = {0: " ", 1: "█", 2: "E", 3: "G"}
+          return "\n".join(
+              "".join(char_map[char] for char in line) for line in self.board
+          )
+
+      def combat(self):
+          n = 0
+          while self.any_alive("goblin") and self.any_alive("elf"):
+              x = self.one_round()
+              n += 1
+          return (n + x), sum(unit.hit_points for unit in self.state.values())
+
+      def any_alive(self, kind):
+          for unit in self.state.values():
+              if unit.kind == kind:
+                  return True
+          return False
+
+      def count(self, kind):
+          return sum(x.kind == kind for x in self.state.values())
+
+      def one_round(self):
+          alive_count = {key: self.count(key) for key in ["elf", "goblin"]}
+          unit_positions = sorted(zip(*np.where(self.board > 1)))
+          for unit_position in unit_positions:
+              if any(x == 0 for x in alive_count.values()):
+                  return -1
+              try:
+                  unit = self.state[unit_position]
+              except KeyError:  # Unit was killed earlier in the round
+                  continue
+              target_position = self.find_target(unit_position)
+              if target_position is None:
+                  new_position = self.find_move(unit_position)
+                  if new_position is None:
+                      continue
+                  self.board[unit_position] = 0
+                  del self.state[unit_position]
+
+                  self.state[new_position] = unit
+                  self.board[new_position] = 2 if unit.kind == "elf" else 3
+                  target_position = self.find_target(new_position)
+                  if target_position is None:
+                      continue
+              target = self.state[target_position]
+              unit.attack(target)
+              if target.is_dead:
+                  alive_count[target.kind] -= 1
+                  del self.state[target_position]
+                  self.board[target_position] = 0
+          return 0
+
+      def find_move(self, position):
+          paths = deque([(0, [], position)])
+          seen = set()
+
+          target_kind = 3 if (self.board[position] == 2) else 2
+          mask = [[0, 1, 0], [1, 0, 1], [0, 1, 0]]
+          target_mask = scipy.ndimage.convolve(
+              self.board == target_kind, mask, mode="constant"
+          ) & (self.board == 0)
+          targets = sorted(zip(*np.where(target_mask)))
+          candidates = []
+          target_distance = np.inf
+          while paths:
+              distance, first_move, position = paths.popleft()
+              if distance > target_distance:
+                  break
+              if position in seen:
+                  continue
+              if position in targets:
+                  candidates.append((position, first_move))
+                  target_distance = distance
+              seen.add(position)
+              y, x = position
+              for neighbor in [(y - 1, x), (y, x - 1), (y, x + 1), (y + 1, x)]:
+                  if self.board[neighbor] == 0 and neighbor not in seen:
+                      move = neighbor if not first_move else first_move
+                      paths.append((distance + 1, move, neighbor))
+          if not candidates:
+              return None
+          return sorted(candidates, key=lambda x: x[0])[0][1]
+
+      def find_target(self, position):
+          y, x = position
+          target_kind = 2 + (self.board[position] == 2)
+          targets = []
+          for neighbor in [(y - 1, x), (y, x - 1), (y, x + 1), (y + 1, x)]:
+              if self.board[neighbor] == target_kind:
+                  targets.append((self.state[neighbor].hit_points, *neighbor))
+          return sorted(targets)[0][1:] if targets else None
+
+
+  data = load(15)
+  lookup = {".": 0, "#": 1, "E": 2, "G": 3}
+  board = np.array([[lookup[char] for char in line.strip()] for line in data])
+  goblins = sorted(zip(*np.where(board == 3)))
+  elves = sorted(zip(*np.where(board == 2)))
+  rock = sorted(zip(*np.where(board == 1)))
+  board = Board(rock, elves, goblins)
+  np.product(board.combat())
+#+end_src
+
+** Part 2
+For the longest time I missed the requirement that when two targets were equally far away, the first one in reading order should be picked, so my units weren't targetting correctly. Annoyingly, this error didn't show up in any of the test cases
+#+begin_src jupyter-python
+  def test(power):
+      board = Board(rock, elves, goblins, elf_power=power)
+      while board.any_alive("goblin"):
+          board.one_round()
+          if board.count("elf") != len(elves):
+              return False
+      return True
+  for power in range(3, 200):
+      if test(power):
+          break
+  board = Board(rock, elves, goblins, power)
+  x = board.combat()
+  print(np.product(x))
+#+end_src
+
 * Day 16
 [[https://adventofcode.com/2018/day/16][Chronal Classification]]
 ** Part 1
