@@ -1068,7 +1068,7 @@ The segments were originally given as closed intervals, but the parsing converte
 
 The approach we'll take is to process the list of instructions sequentially, calculating the various intersections as we go. They'll go in a list where the first element represents the positive terms, and the second represents the negative terms. The final score is then just the sum of the positive values minus the sum of the negative values
 
- Putting it all together gives the follwing. For each instruction, we intersect with all previous cuboids, and swap the signs. If it's an "on" instruction, we also add the whole region to the list of positive volumes.
+ Putting it all together gives the following. For each instruction, we intersect with all previous cuboids, and swap the signs. If it's an "on" instruction, we also add the whole region to the list of positive volumes.
 #+begin_src jupyter-python
   def reboot(instructions):
       state = [[], []]
