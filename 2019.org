@@ -680,6 +680,132 @@ For this one I solved the path by hand, and then ran the input through the black
   10000 * x + y
 #+end_src
 
+* Day 20
+[[https://adventofcode.com/2019/day/20][Donut Maze]]
+** Part 1
+This can be done with a fairly simple BFS. The only added difficulty is that we need some way of specifying that two portals of the same letter neighbor each other.
+
+In terms of the number of lines, that's what most of the following code is doing.
+#+begin_src jupyter-python
+  data = np.array([[ord(char) for char in line[:-1]] for line in load(20)], dtype=int)
+  portals = ((ord("A") <= data) & (data <= ord("Z"))) * 1
+
+
+  def label(item):
+      if isinstance(item, str):
+          item = np.array([ord(x) for x in item])
+      return functools.reduce(lambda x, y: -(26 * x + y), item - ord("A") + 1)
+
+
+  ymax, xmax = data.shape
+  verticals = np.where(scipy.ndimage.correlate(portals, [[1], [1]], mode="constant") == 2)
+  horizontals = np.where(scipy.ndimage.correlate(portals, [[1, 1]], mode="constant") == 2)
+
+
+  def vertical_neighbors(y, x):
+      return [
+          [y - 2, x],
+          [y - 1, x - 1],
+          [y - 1, x + 1],
+          [y, x - 1],
+          [y, x + 1],
+          [y + 1, x],
+      ]
+
+
+  def horizontal_neighbors(y, x):
+      return [
+          [y, x - 2],
+          [y - 1, x - 1],
+          [y + 1, x - 1],
+          [y - 1, x],
+          [y + 1, x],
+          [y, x + 1],
+      ]
+
+
+  def horizontal_window(y, x):
+      return np.array((y, y)), np.array((x - 1, x))
+
+
+  def vertical_window(y, x):
+      return np.array((y - 1, y)), np.array((x, x))
+
+
+  for portals, neighbors, window in zip(
+      [verticals, horizontals],
+      [vertical_neighbors, horizontal_neighbors],
+      [vertical_window, horizontal_window],
+  ):
+      for portal in sorted(zip(*portals)):
+          w = window(*portal)
+          n = [
+              i for i in neighbors(*portal) if data[i[0] % ymax, i[1] % xmax] == ord(".")
+          ][0]
+          data[tuple(n)] = label(data[w])
+          data[w] = ord("#")
+  start = next(zip(*np.where(data == label("AA"))))
+  destination = next(zip(*np.where(data == label("ZZ"))))
+  paths = deque([(start, 0)])
+  seen = set()
+  while paths:
+      (y, x), distance = paths.popleft()
+      if (y, x) in seen:
+          continue
+      if (y, x) == destination:
+          break
+      seen.add((y, x))
+      neighbors = [
+          c
+          for c in [(y - 1, x), (y, x - 1), (y, x + 1), (y + 1, x)]
+          if (data[c] == ord(".")) or data[c] < 0
+      ]
+      if data[y, x] < 0:
+          neighbors += sorted(zip(*np.where(data == data[y, x])))
+      for neighbor in neighbors:
+          if neighbor in seen:
+              continue
+          paths.append((neighbor, distance + 1))
+  distance
+#+end_src
+
+** Part 2
+For part 2, we basically just need to add a level coordinate to our state, and change the way we enumerate neighbors to account for the fact that movign through a portal changes the levels
+#+begin_src jupyter-python
+  level_change = defaultdict(lambda: 1)
+  portals = np.where(data < 0)
+  for y, x in zip(*portals):
+      if x == 2 or y == 2 or x == xmax - 3 or y == ymax - 3:
+          level_change[y, x] = -1
+  start = next(zip(*np.where(data == label("AA")))) + (0,)
+  destination = next(zip(*np.where(data == label("ZZ")))) + (0,)
+  paths = deque([(start, 0)])
+  seen = set()
+  while paths:
+      (y, x, level), distance = paths.popleft()
+      if (y, x, level) in seen:
+          continue
+      if (y, x, level) == destination:
+          break
+      seen.add((y, x, level))
+      neighbors = [
+          c + (level,)
+          for c in [(y - 1, x), (y, x - 1), (y, x + 1), (y + 1, x)]
+          if (data[c] == ord(".")) or data[c] < 0
+      ]
+      if data[y, x] < 0:
+          new_level = level + level_change[y, x]
+          if new_level >= 0:
+              other_neighbors = set(zip(*np.where(data == data[y, x]))) - set([(y, x)])
+              for neighbor in other_neighbors:
+                  neighbors += [neighbor + (new_level,)]
+      for neighbor in neighbors:
+          if neighbor in seen:
+              continue
+          paths.append((neighbor, distance + 1))
+  distance
+#+end_src
+
 * Day 24
 [[https://adventofcode.com/2019/day/24][Planet of Discord]]
 ** Part 1
