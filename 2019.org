@@ -806,6 +806,77 @@ For part 2, we basically just need to add a level coordinate to our state, and c
   distance
 #+end_src
 
+* Day 22
+[[https://adventofcode.com/2019/day/22][Slam Shuffle]]
+** Part 1
+We are asked to follow how a single number moves - the one initally at position 2019. So if we build the operations so that they take an old position and return the new position, we can completely avoid dealing with the rest of the array.
+#+begin_src jupyter-python
+  instructions = [str.split(x) for x in load(22)]
+  lookup = {"cut": 1, "deal": 2}
+  instructions = [
+      (0,)
+      if instruction[-1] == "stack"
+      else (lookup[instruction[0]], int(instruction[-1]))
+      for instruction in instructions
+  ]
+
+  l = 10007
+  p = 2019
+  for instruction in instructions:
+      if instruction[0] == 0:
+          p = (l - p - 1) % l
+      elif instruction[0] == 1:
+          p = (p - instruction[1]) % l
+      else:
+          p = (p * instruction[1]) % l
+  p
+#+end_src
+
+#+RESULTS:
+: 2558
+
+** Part 2
+To nobody's great surprise, part 2 ups the difficulty significantly, with the usual trick of increasing the numbers of cards and rounds significantly.
+
+Additionally, since we're tracking what card ends up at a given spot rather than what spot a given card ends up at, we'll need to reverse the operations defined above, and apply them in reverse order. For the first two that's not a big issue, since the reversal is trivial. For the last one, we'll need a way to find multiplicative inverses in the modular group. We'll use the extended euclidean algorithm for that; it's already implemented in the utils file.
+
+Even with those optimizations, doing as many rounds as required isn't possible. Instead, we can realise that each of the three operations on the position is linear, and therefore so is their composition. That means that we can model the result of each round as
+
+$p \rightarrow ap + b \qquad \mod l$
+
+for some constants a and b. We can find these constants, and thus reduce the work needed for each round to calculating a multiplication, an addition and a remainder; making each round much faster.
+
+The number of rounds is still prohibitive if we're stuck doing them one at a time, but once we know the coefficients for doing one round, we can easily find the coefficients for doing 2 rounds. That lets us use a multiplication by squaring approach to getting the answer.
+
+#+begin_src jupyter-python
+  l = 119315717514047
+  state = (1, 0)
+  for instruction in instructions[::-1]:
+      if instruction[0] == 0:
+          state = -state[0], l - state[1] - 1
+      elif instruction[0] == 1:
+          state = state[0], state[1] + instruction[1]
+      else:
+          state = [x * inverses[instruction[1]] for x in state]
+      state = [x % l for x in state]
+
+
+  def compose(c1, c2):
+      return (c1[0] * c2[0]) % l, (c2[0] * c1[1] + c2[1]) % l
+
+  p = 2020
+  i = 101741582076661
+  while i:
+      if i % 2:
+          p = (p * state[0] + state[1]) % l
+          i -= 1
+      else:
+          state = compose(state, state)
+          i = i >> 1
+  p
+#+end_src
+
+
 * Day 24
 [[https://adventofcode.com/2019/day/24][Planet of Discord]]
 ** Part 1
