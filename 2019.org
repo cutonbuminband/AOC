@@ -621,6 +621,145 @@ For this one I solved the path by hand, and then ran the input through the black
   [x for x in program.run()][-1]
 #+end_src
 
+* Day 18
+[[https://adventofcode.com/2019/day/18][Many-Worlds Interpretation]]
+** Part 1
+The maze we are looking at is fairly large, but it only has a few interesting points. Most of the maze is corridors of width 1; and on these stretches there are no choices about where to go, since backtracking is not an option. Instead of working with the grid we are given, we can extract the points of interest, and store the distance from each point to its neighbors.
+
+The points of interest are:
+
+- Keys
+- Doors
+- Junctions
+
+The numbers here are barely small enough that the straightforward approach works: A BFS with a different visited list for each possible set of collected keys. To slightly improve the runtime, we'll start by eliminating dead ends so the BFS never has to consider them.
+
+#+begin_src jupyter-python
+  data = np.array([[ord(c) for c in line.strip()] for line in load(18)])
+  indices = np.where(data == ord("@"))
+  start = list(zip(*indices))[0]
+  wall = ord("#")
+  free = ord(".")
+  data[indices] = free
+  window = [[0, 1, 0], [1, 0, 1], [0, 1, 0]]
+  walls = (data == wall) * 1
+  walls
+  s = 1
+  while s > 0:
+      walls = (data == wall) * 1
+      dead_ends = (scipy.ndimage.convolve(walls, window, mode="constant") > 2) & (
+          (data == free) | ((data >= ord("A")) & (data <= ord("Z")))
+      )
+      s = dead_ends.sum()
+      data[dead_ends] = wall
+  nw = 1 * (data != wall)
+  junctions = (scipy.ndimage.convolve(nw, window, mode="constant") > 2) & nw
+
+  data[np.where(junctions)] = ord("9")
+  queue = deque()
+  connections = defaultdict(dict)
+  painted = {}
+  width = data.shape[1]
+
+
+  def label(position):
+      if data[position] == ord("9"):
+          return str(position[0] * width + position[1])
+      else:
+          return chr(data[position])
+
+
+  # print(*["".join(chr(x) for x in line) for line in data], sep="\n")
+  for start in list(zip(*np.where(data > max(free, wall)))):
+      queue.append((0, start, start))
+  while queue:
+      steps, position, origin = queue.popleft()
+      if position in painted:
+          other, other_steps = painted[position]
+          if other != origin:
+              s = steps + other_steps
+              connections[label(other)][label(origin)] = s
+              connections[label(origin)][label(other)] = s
+          continue
+      painted[position] = origin, steps
+      y, x = position
+      for neighbor in [(y - 1, x), (y, x - 1), (y, x + 1), (y + 1, x)]:
+          if data[neighbor] == wall:
+              continue
+          queue.append((steps + 1, neighbor, origin))
+  state = frozenset()
+  start = 0, label((40, 40)), state
+  q = PriorityQueue()
+  q.put(start)
+  visited = defaultdict(set)
+  while q.qsize() > 0:
+      steps, l, state = q.get()
+      if len(state) == 26:
+          break
+      if l in visited[state]:
+          continue
+      visited[state].add(l)
+      for neighbor in connections[l]:
+          new_state = state.copy()
+          if neighbor in visited[state]:
+              continue
+          elif "A" <= neighbor <= "Z" and neighbor.lower() not in state:
+              continue
+          elif "a" <= neighbor <= "z":
+              new_state = state | frozenset(neighbor)
+          s = steps + connections[l][neighbor]
+          q.put((s, neighbor, new_state))
+  steps
+#+end_src
+
+** Part 2
+For part 2 we need to keep track of four different robots, which increases the number of neighbors available at each stage. However, direct inspection of the graph of the problem for this specific input reveals that the robots are never waiting for each other, so the shortest amount of steps is just the sum of the individual shortest steps to clear each subgraph. It feels a bit cheesy to completely ignore the doors in the puzzle, but it works here.
+#+begin_src jupyter-python
+  x = 40
+  starts = [(x - 1, x - 1), (x - 1, x + 1), (x + 1, x - 1), (x + 1, x + 1)]
+  dead_positions = [(x - 1, x), (x, x - 1), (x, x), (x, x + 1), (x + 1, x)]
+  dead_labels = [label(_) for _ in dead_positions]
+  part2 = {
+      k: {p: q for p, q in v.items() if p not in dead_labels}
+      for k, v in connections.items()
+      if k not in dead_labels
+  }
+  total = 0
+  for start in map(label, starts):
+      nodes = deque([start])
+      seen = set()
+      while nodes:
+          current = nodes.popleft()
+          if current in seen:
+              continue
+          seen.add(current)
+          for neighbor in part2[current]:
+              if neighbor not in seen:
+                  nodes.append(neighbor)
+      targets = [x for x in seen if "a" <= x <= "z"]
+      state = frozenset()
+      q = PriorityQueue()
+      q.put((0, start, state))
+      visited = defaultdict(set)
+      while q.qsize() > 0:
+          steps, position, state = q.get()
+          if len(state) == len(targets):
+              break
+          if position in visited[state]:
+              continue
+          visited[state].add(position)
+          for neighbor in part2[position]:
+              new_state = state.copy()
+              if neighbor in visited[state]:
+                  continue
+              if neighbor in targets:
+                  new_state = state | frozenset(neighbor)
+              q.put((steps + part2[position][neighbor], neighbor, new_state))
+      total += steps
+  total
+
+#+end_src
+
 * Day 19
 [[https://adventofcode.com/2019/day/19][Tractor Beam]]
 ** Part 1
