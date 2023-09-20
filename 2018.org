@@ -792,6 +792,69 @@ With that out of the way, we can intersect all the potentially valid assignments
   state[0]
 #+end_src
 
+* Day 17
+[[https://adventofcode.com/2018/day/17][Reservoir Research]]
+** Part 1
+#+begin_src jupyter-python
+  data = load(17, "int")
+  variables = [line[0] for line in load(17)]
+  xmin = min(line[0] if v == "x" else line[1] for v, line in zip(variables, data))
+  xmax = max(line[0] if v == "x" else line[2] for v, line in zip(variables, data))
+  ymin = min(line[0] if v == "y" else line[1] for v, line in zip(variables, data))
+  ymax = max(line[0] if v == "y" else line[2] for v, line in zip(variables, data))
+  r, a, f, s = ord("#"), ord("."), ord("|"), ord("~")
+
+  board = np.zeros((ymax - ymin + 1, xmax - xmin + 3), dtype=int) + a
+  for v, line in zip(variables, data):
+      if v == "x":
+          board[line[1] - ymin : line[2] - ymin + 1, line[0] - xmin + 1] = r
+      else:
+          board[line[0] - ymin, line[1] - xmin + 1 : line[2] - xmin + 2] = r
+  source = (-1, 500 - xmin + 1)
+  tips = deque([source])
+  while tips:
+      y, x = tips.popleft()
+      window = board[y + 1 :, x]
+      solid = (window == r) | (window == s)
+      if not solid.any():
+          board[y + 1 :, x] = f
+      else:
+          first_rock = solid.argmax()
+          board[y + 1 : y + 1 + first_rock, x] = f
+          y += first_rock
+          r_platform = ((board[y + 1, x:] != r) & (board[y + 1, x:] != s)).argmax()
+          l_platform = ((board[y + 1, :x] != r) & (board[y + 1, :x] != s))[::-1].argmax()
+          r_wall = mask.argmax() if (mask := (board[y, x:] == r)).any() else np.inf
+          l_wall = mask.argmax() if (mask := (board[y, :x] == r)[::-1]).any() else np.inf
+          fill = s
+          to_add = []
+          if l_wall > l_platform:
+              fill = f
+              to_add += [(y, x - l_platform - 1)]
+              left = x - l_platform - 1
+          else:
+              left = x - l_wall
+          if r_wall > r_platform:
+              fill = f
+              to_add += [(y, x + r_platform)]
+              right = x + r_platform + 1
+          else:
+              right = x + r_wall
+          if fill == s:
+              to_add += [(y - 1, x)]
+          if (board[y, left:right] != fill).any():
+              board[y, left:right] = fill
+              for element in to_add:
+                  tips.append(element)
+  ((board == f) | (board == s)).sum()
+#+end_src
+
+** Part 2
+This was a very weird part 2, since I basically solved it already in part 1
+#+begin_src jupyter-python
+  (board == s).sum()
+#+end_src
+
 * Day 18
 [[https://adventofcode.com/2018/day/18][Settlers of The North Pole]]
 ** Part 1
