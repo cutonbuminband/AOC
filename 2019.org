@@ -971,9 +971,6 @@ We are asked to follow how a single number moves - the one initally at position 
   p
 #+end_src
 
-#+RESULTS:
-: 2558
-
 ** Part 2
 To nobody's great surprise, part 2 ups the difficulty significantly, with the usual trick of increasing the numbers of cards and rounds significantly.
 
