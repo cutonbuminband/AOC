@@ -474,6 +474,65 @@ We can see how at the edges of the forest shorter trees are visible, but towards
 #+end_src
 
 * Day 14
+[[https://adventofcode.com/2022/day/14][Regolith Reservoir]]
+** Part 1
+#+begin_src jupyter-python
+  data = load(14, "int")
+  flat = [val for line in data for val in line]
+  xmin, xmax = min(flat[::2]), max(flat[::2])
+  ymin, ymax = min(flat[1::2]), max(flat[1::2])
+  air, rock, sand = ord("."), ord("#"), ord("o")
+  board = np.zeros((ymax + 1, xmax - xmin + 3), dtype=int) + air
+  for line in data:
+      chunks = list(more_itertools.chunked(line, 2))
+      for (current_x, current_y), (next_x, next_y) in zip(chunks, chunks[1:]):
+          current_y, next_y = sorted([current_y, next_y])
+          current_x, next_x = sorted([current_x, next_x])
+          if current_x == next_x:
+              board[current_y : next_y + 1, current_x - xmin + 1] = rock
+          else:
+              board[current_y, current_x - xmin + 1 : next_x - xmin + 2] = rock
+  initial_board = board.copy()
+  start = 0, 500 - xmin + 1
+  y, x = start
+
+
+  while y + 1 < board.shape[0]:
+      if board[y + 1, x] == air:
+          y += 1
+      elif board[y + 1, x - 1] == air:
+          y, x = y + 1, x - 1
+      elif board[y + 1, x + 1] == air:
+          y, x = y + 1, x + 1
+      else:
+          board[y, x] = sand
+          y, x = start
+  (board == sand).sum()
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  board = np.vstack([initial_board, np.zeros((2, board.shape[1]), dtype=int) + air])
+  pad_width = (board.shape[0] * 2 - board.shape[1]) // 2 + 2
+  padding = np.zeros((board.shape[0], pad_width), dtype=int) + air
+  board = np.hstack([padding, board, padding])
+  board[-1] = rock
+  start = 0, 500 - xmin + 1 + pad_width
+  y, x = start
+  while True:
+      if board[y + 1, x] == air:
+          y += 1
+      elif board[y + 1, x - 1] == air:
+          y, x = y + 1, x - 1
+      elif board[y + 1, x + 1] == air:
+          y, x = y + 1, x + 1
+      else:
+          board[y, x] = sand
+          if (y, x) == start:
+              break
+          y, x = start
+  (board == sand).sum()
+#+end_src
+
 * Day 15
 [[https://adventofcode.com/2022/day/15][Beacon Exclusion Zone]]
 ** Part 1
