@@ -926,6 +926,60 @@ A fairly straightforward recursive implementation of the requirements
   (np.array(result) * np.arange(1, len(result) + 1)[::-1]).sum()
 #+end_src
 
+* Day 23
+[[https://adventofcode.com/2020/day/23][Crab Cups]]
+** Part 1
+
+#+begin_src jupyter-python
+  data = [int(x) for x in "583976241"]
+  s = deque(data)
+  l = len(s)
+  for _ in range(100):
+      target = (s[0] - 2) % l + 1
+      s.rotate(-1)
+      pickup = [s.popleft() for i in range(3)]
+      while target in pickup:
+          target = (target - 2) % l + 1
+
+      count = 0
+      while s[0] != target:
+          s.rotate(-1)
+          count += 1
+      s.rotate(-1)
+      for value in pickup[::-1]:
+          s.appendleft(value)
+      s.rotate(count + 1)
+  while s[0] != 1:
+      s.rotate()
+  s.popleft()
+  "".join(str(x) for x in s)
+#+end_src
+
+** Part 2
+This approach is way too slow for part 2. Instead, we can build a linked list out of a dictionary so that l[node] = next for all nodes. That has the advantage that finding where any given node is can be done through a simple dictionary lookup, instead of having to linearly scan through a linked list which would otherwise be necessary.
+#+begin_src jupyter-python
+  initial_state = data + list(range(10, 1_000_001))
+  minval, maxval = min(initial_state), max(initial_state)
+  l = dict(zip(initial_state, initial_state[1:] + [initial_state[0]]))
+  current = initial_state[0]
+  for _ in range(10_000_000):
+      to_move = [l[current], l[l[current]], l[l[l[current]]]]
+      destination = current - 1
+      while destination < minval or destination in to_move:
+          destination -= 1
+          if destination < minval:
+              destination = maxval
+      # next pointer of current is the one after the moved ones
+      l[current] = l[to_move[-1]]
+      # The next one after the moved three is the one after the destination
+      l[to_move[-1]] = l[destination]
+      # After the destination comes the first of the moved ones
+      l[destination] = to_move[0]
+      # And
+      current = l[current]
+  l[1] * l[l[1]]
+#+end_src
+
 * Day 24
 [[https://adventofcode.com/2020/day/24][Lobby Layout]]
 ** Part 1
@@ -968,4 +1022,26 @@ This is a fairly simple convolution problem again. We'll be working in the basis
       flips = ((board == 0) & (neighbors == 2)) | ((board == 1) & ((neighbors == 0) | (neighbors > 2)))
       board = (board + flips) % 2
   board.sum()
+#+end_src
+
+* Day 25
+#+begin_src jupyter-python
+  d = 14222596
+  c = 4057428
+  s1, s2 = 0, 0
+  f = 7
+  v = 1
+  mod = 20201227
+  i = 0
+  while not s1 or not s2:
+      v = v * f % mod
+      i += 1
+      if v == d and not s1:
+          s1 = i
+      if v == c and not s2:
+          s2 = i
+  r1 = 1
+  for i in range(s1):
+      r1 = r1 * c % mod
+  r1
 #+end_src
