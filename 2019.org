@@ -1230,3 +1230,20 @@ We can get the in-plane neighbors exactly as before, and after far too much thou
   state.sum()
   #+end_src
 
+* Day 25
+[[https://adventofcode.com/2019/day/25][Cryostasis]]
+** Part 1
+#+begin_src jupyter-python
+  program = IntCodeProgram(load(25, "np"), inputs=[])
+
+
+  def run():
+      for char in program.run():
+          if program.state != 1:
+              print(chr(char), end="")
+          else:
+              s = input().strip()
+              program.inputs += [ord(x) for x in s + "\n"]
+#+end_src
+
+#+RESULTS:
