@@ -3,20 +3,23 @@
 
 * Imports
 #+begin_src jupyter-python
-  import math
-  import scipy
-  import pandas as pd
-  import numpy as np
-  from collections import defaultdict
-  from pathlib import Path
+  import collections
   import functools
   import itertools
-  import more_itertools
-  import collections
+  import math
   import re
+  from collections import defaultdict, deque
+  from pathlib import Path
+  from queue import PriorityQueue
+
+  import more_itertools
+  import numpy as np
+  import pandas as pd
+  import scipy
+
   import utils
   from intcode import IntCodeProgram
-  from collections import deque
+
   load = utils.year_load(2019)
 #+end_src
 
