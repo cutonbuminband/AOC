@@ -1102,6 +1102,86 @@ The number of rounds is still prohibitive if we're stuck doing them one at a tim
   p
 #+end_src
 
+* Day 23
+[[https://adventofcode.com/2019/day/23][Category Six]]
+** Part 1
+#+begin_src jupyter-python
+  data = load(23, "np")
+  inputs = [[x] for x in list(range(50))]
+
+  programs = []
+  for i in range(50):
+      program = IntCodeProgram(data, inputs=inputs[i])
+      programs.append(program)
+
+  idx = 0
+  done = False
+  while True:
+      program = programs[idx]
+      values = program.run()
+      outputs = []
+      count = 0
+      for value in values:
+          if value == 255 and (count % 3) == 0:
+              done = True
+              break
+          if program.state == 1:
+              inputs[idx].append(-1)
+              break
+          outputs += [value]
+      if done:
+          x = next(values)
+          y = next(values)
+          break
+      for destination, x, y in more_itertools.chunked(outputs, 3):
+          inputs[destination] += [x, y]
+      idx = (idx + 1) % 50 if not outputs else destination
+
+  y
+#+end_src
+
+** Part 2
+#+begin_src jupyter-python
+  data = load(23, "np")
+  inputs = [[x] for x in list(range(50))]
+
+  programs = []
+  for i in range(50):
+      program = IntCodeProgram(data, inputs=inputs[i])
+      programs.append(program)
+
+  idx = 0
+  done = False
+  def is_idle(inputs):
+      return all(i == [-1] for i in inputs)
+  nat = [x, y]
+  old_y = -1
+  while True:
+      if is_idle(inputs):
+          if nat[1] == old_y:
+              break
+          new_input = nat.copy()
+          inputs[0] = new_input
+          programs[0].set_input(new_input)
+          old_y = nat[1]
+          idx = 0
+      program = programs[idx]
+      values = program.run()
+      outputs = []
+      for value in values:
+          if program.state == 1:
+              inputs[idx].append(-1)
+              break
+          outputs += [value]
+      for destination, x, y in more_itertools.chunked(outputs, 3):
+          if destination == 255:
+              nat = [x, y]
+          else:
+              inputs[destination] += [x, y]
+      idx = (idx + 1) % 50
+  old_y
+#+end_src
+
 
 * Day 24
 [[https://adventofcode.com/2019/day/24][Planet of Discord]]
