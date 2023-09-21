@@ -660,7 +660,7 @@ The change for part 2 is so small that it can be included in part 1 as a flag
 #+end_src
 
 ** Part 2
-We have loops now! Analysing the new rules, we see that the system should accept all strings of the form 42^m 13^n, with m > n > 0. Looking at the previous part shows that rule 42 and rule 31 never overlap, and all the strings they match have length 8. That gives the following logic for part 2:x
+We have loops now! Analysing the new rules, we see that the system should accept all strings of the form 42^m 13^n, with m > n > 0. Looking at the previous part shows that rule 42 and rule 31 never overlap, and all the strings they match have length 8. That gives the following logic for part 2:
 #+begin_src jupyter-python
   from more_itertools import chunked
   def part2(s):
