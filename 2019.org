@@ -948,6 +948,93 @@ For part 2, we basically just need to add a level coordinate to our state, and c
   distance
 #+end_src
 
+* Day 21
+[[https://adventofcode.com/2019/day/21][Springdroid Adventure]]
+** Part 1
+Part 1 is possible to brute force, even if a bit of thought is needed to do it. With 3 different commands available, with six options for their first argument and 2 for their second, there are are 36 possible SPRINGSCRIPT instructions; each program is a max of 15 instructions, so there are more than $2\times10^{23}$ possible programs. That's not the right way to go.
+
+On the other hand, there are only four inputs at any given stage, so there are only 16 distinct inputs to our assignments. The program we have to supply is just a way of mapping each input to either 0 or 1, and there are only 2**16 of those.
+
+Additionally, we are told that jumping when there is a hole 4 tiles away will result in automatic loss, since that's how far we jump. Similarly, not jumping when there is a hole right in front of us will result in a loss. So any valid rule has to have the following structure (0 as input is hole, 1 is ground; 0 as output is don't jump, 1 is jump)
+
+0BCD -> 1
+ABC0 -> 0
+
+(this reveals that the input 0BC0 is an automatic loss)
+
+That also means that for anything else we can assume A = 1 and D = 1, since otherwise the output is fixed. So rally we just have to map the four BC states. That means there are only 16 possible programs, so we can enumerate them all. Especially since 8 of them are mirrors of the other 8.
+
+#+begin_src jupyter-python
+  springscript_programs = [
+      [],
+      ["NOT B T", "NOT C J", "OR T J", "NOT J J"],
+      ["NOT C J", "AND B J"],
+      ["NOT B J", "NOT J J"],
+      ["NOT B J", "AND C J"],
+      ["NOT C J", "NOT J J"],
+      ["NOT B J", "AND C J", "NOT C T", "AND B T", "OR T J"],
+      ["NOT B T", "NOT C J", "AND T J", "NOT J J"],
+  ]
+
+
+  def invert(program):
+      try:
+          if program[-1] == "NOT J J":
+              return program[:-1]
+      except:
+          pass
+      return program + ["NOT J J"]
+
+
+  footer = ["NOT A T", "OR T J", "AND D J", "WALK"]
+  springscript_programs += [invert(p) for p in springscript_programs]
+  springscript_programs = [p + footer for p in springscript_programs]
+  encoded = [
+      [ord(char) for char in "\n".join(program) + "\n"]
+      for program in springscript_programs
+  ]
+  program = IntCodeProgram(load(21, "np"))
+  for p in springscript_programs:
+      encoded_program = [ord(char) for char in "\n".join(p) + "\n"]
+      program.reset()
+      program.set_input(encoded_program)
+      for value in program.run():
+          if value > 255:
+              break
+      else:
+          continue
+      break
+  value
+#+end_src
+
+** Part 2
+Well.
+
+For part 2 we get five more registers, for a total of 7 that are allowed to vary state. That makes 128 possible inputs, and $\approx10^{38}$ possible mappings. The total number of 15-line springscript programs is only $\left(3\times11\times2\right)^{15} \approx 2\times10^{27}$, so a different approach is going to be needed
+
+Some thoughts:
+
+- If all of ABCD are ground there is no reason to jump, since we can just move forward. If A is a hole we have to jump, and if D is a hole we cannot jump. In general, if the landing is safe, we should try and jump early, since that'll give us more time to think on the other side. So if either B or C is a hole and D is safe we should jump. The exception is when H is a hole since then we cannot jump from D, and would be better off waiting to see what happens
+
+#+begin_src jupyter-python
+  springscript_program = ["NOT B J",
+                          "NOT C T",
+                          "OR T J",
+                          "AND D J", # if d is ground and there's a hole at B or C, we can jump to D
+                          "AND H J", # but only if H is also ground
+                          "NOT A T", # if next tile is a hole we have to jump
+                          "OR T J",
+                          "RUN"]
+  encoded_program = [ord(char) for char in "\n".join(springscript_program) + "\n"]
+  program.reset()
+  program.set_input(encoded_program)
+  for value in program.run():
+      if value > 255:
+              break
+      print(chr(value), end="")
+  value
+#+end_src
+
 * Day 22
 [[https://adventofcode.com/2019/day/22][Slam Shuffle]]
 ** Part 1
