@@ -1186,7 +1186,85 @@ The first part is pretty simple
   (np.abs((data - row)[:, :-1]).sum(axis=1) <= row[-1]).sum()
 #+end_src
 
+** Part 2
+The next part is signifcantly more tricky. Blindly iterating through every point and asking "how many are you in range of" is a non-starter, due to the sizes of the numbers involved. SImilarly, going the other way and generating all the covered points for each nanobot and adding those up runs into the same problem.
 
+A first thing to realise is that the sets of points covered by any given nanobot is an axis-aligned octahedron, centered at the nanobot's position. The eight faces that define the octahedron have normal vectors [±1, ±1, ±1]. We can group these faces into four pairs of parallel faces, and each octahedron can be thought of as the intersection of the infinte regions between those pairs of planes. To intersect two octahedra, we can simply intersect the corresponding infinite regions, which in practice is done by intersecting the two intervals that represent the region.
+
+With the above considertaions in hand, we could create a list of (region, number of intersections) pairs, with initial state [(all space, 0)]. We could then loop over all the nanobots, and for each one, calculate all the intersections with the existing list, and if they are non-zero, append them to the list, with updated intersection count.
+
+That would build up a map of all the intersections, and the desired answer would be represented by the pair with greatest intersection count. That would look something like this:
+
+#+begin_src jupyter-python
+  normal_vectors = np.array([[1, 1, 1], [1, 1, -1], [1, -1, 1], [1, -1, -1]])
+  centers = data[:, :-1] @ normal_vectors.T
+  radii = data[:, -1].reshape(-1, 1)
+  c = np.transpose(np.stack([centers - radii, centers + radii]), axes=[1, 2, 0])
+  intersections = {}
+  for idx, row in enumerate(c):
+      current = frozenset([idx])
+      to_add = {current: row}
+      for i in intersections:
+          new_i = np.hstack(
+              [
+                  np.maximum(intersections[i], row)[:, :1],
+                  np.minimum(intersections[i], row)[:, 1:],
+              ]
+          )
+          if (np.diff(new_i) >= 0).all():
+              to_add[current.union(i)] = new_i
+      intersections = intersections | to_add
+
+      break
+  #+end_src
+
+Unfortunately, the above approach has a slight flaw: It ends up explicitly creating all ~ 2^n possible intersections. With 1000 nanobots, that's just not feasible.
+
+If we focus on just one set of planes we can quite easily find where the biggest intersection is in that direction by scanning through from $-\infty$ to $\infty$, adding one for every left plane we encounter, and subtracting one for every right plane. 
+
+#+begin_src jupyter-python
+  openings = sorted(c[:, 0, 0])[::-1]
+  closings = sorted(c[:, 0, -1])[::-1]
+  current_closing, current_opening = closings.pop(), openings.pop()
+  total = 0
+  edges = {}
+  while openings:
+      if current_opening < current_closing:
+          total += 1
+          edges[current_opening] = total
+          current_opening = openings.pop()
+      else:
+          total -= 1
+          edges[current_closing + 1] = total
+          current_closing = closings.pop()
+  max(edges.values())
+#+end_src
+
+But extending this to all four planes is nob-obvious. Analysing the inputs shows that all the points overlap, apart from very few emitters. That means we can identify these, and the relevant points are just the intersection of all the other emitters, which can easily be found in the basis we've chosen.
+
+#+begin_src jupyter-python
+  adjacency_matrix = np.zeros((len(c), len(c)))
+  for i, pi in enumerate(c):
+      for j, pj in enumerate(c):
+          new = np.hstack([np.maximum(pi, pj)[:, :1], np.minimum(pi, pj)[:, 1:]])
+          if (np.diff(new) >= 0).all():
+              adjacency_matrix[i, j] = 1
+  mask = (adjacency_matrix.sum(axis = 0) >= np.median(adjacency_matrix.sum(axis = 0)) / 2)
+  assert (adjacency_matrix[mask, mask == 1).all()
+  indices = np.where(mask)[0]
+  c[indices, :, :].max(axis=0)[0, 0]
+#+end_src
+
+#+RESULTS:
+: 123356173
+
+This feels slightly like cheating, since it easily fails for other inputs. Looking up other solutions I saw that one option was to recursively partition space into boxes, and calculate how many emitters are in range of each box, and then just expand the most plausible candidate, until a 1x1x1 box is found. The expansion order should be
+
+- Most bots in range of box 
+- Size of box  (expand smaller boxes first)
+- Distance to origin (expand closer boxes first)
+
+I don't think I'll implement that.  
 * Day 24
 [[https://adventofcode.com/2018/day/24][Immune System Simulator 20XX]]
 ** Part 1
@@ -1351,3 +1429,4 @@ I could write this by hand. Or I could realise that the problem description is p
               disjoint_set.merge(points[x], points[y])
   disjoint_set.n_subsets
 #+end_src
+
