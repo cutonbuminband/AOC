@@ -956,28 +956,30 @@ A fairly straightforward recursive implementation of the requirements
 #+end_src
 
 ** Part 2
-This approach is way too slow for part 2. Instead, we can build a linked list out of a dictionary so that l[node] = next for all nodes. That has the advantage that finding where any given node is can be done through a simple dictionary lookup, instead of having to linearly scan through a linked list which would otherwise be necessary.
+This approach is way too slow for part 2. Instead, we can build an implicit linked list in a numpy array, so that a[node] = next node for all nodes. To make that work with zero based indexing we relabel all the nodes. A single step can now be accomplished by just updating three array elements: the next pointer of the current node, the next pointer of the destination node, and the next pointer of the last of the moved elements.
 #+begin_src jupyter-python
   initial_state = data + list(range(10, 1_000_001))
-  minval, maxval = min(initial_state), max(initial_state)
-  l = dict(zip(initial_state, initial_state[1:] + [initial_state[0]]))
-  current = initial_state[0]
+  a = np.zeros(len(initial_state), dtype=int)
+  minval = min(initial_state)
+  for c, n in zip(initial_state, initial_state[1:] + [initial_state[0]]):
+      a[c - 1] = n - 1
+  current = a[-1]
   for _ in range(10_000_000):
-      to_move = [l[current], l[l[current]], l[l[l[current]]]]
+      to_move = [a[current], a[a[current]], a[a[a[current]]]]
       destination = current - 1
-      while destination < minval or destination in to_move:
+      while destination < 0 or destination in to_move:
           destination -= 1
-          if destination < minval:
-              destination = maxval
+          if destination < 0:
+              destination = 999_999
       # next pointer of current is the one after the moved ones
-      l[current] = l[to_move[-1]]
+      a[current] = a[to_move[-1]]
       # The next one after the moved three is the one after the destination
-      l[to_move[-1]] = l[destination]
+      a[to_move[-1]] = a[destination]
       # After the destination comes the first of the moved ones
-      l[destination] = to_move[0]
-      # And
-      current = l[current]
-  l[1] * l[l[1]]
+      a[destination] = to_move[0]
+      # And we move to the next node
+      current = a[current]
+  (a[0] + 1) * (a[a[0]] + 1)
 #+end_src
 
 * Day 24
