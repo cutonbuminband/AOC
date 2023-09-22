@@ -3,15 +3,17 @@
 
 * Imports
 #+begin_src jupyter-python
-  import pandas as pd
-  import numpy as np
-  from collections import defaultdict
-  from pathlib import Path
+  import collections
   import functools
   import itertools
-  import more_itertools
   import re
-  import collections
+  from collections import defaultdict
+  from pathlib import Path
+  from queue import PriorityQueue
+
+  import more_itertools
+  import numpy as np
+  import pandas as pd
 
   datadir = Path("data/2022")
   import utils
@@ -585,37 +587,83 @@ We can see how at the edges of the forest shorter trees are visible, but towards
 We should start by loading the data, and trying to visualize the graph
 #+begin_src jupyter-python
   import sknetwork
-  adjacency = {}
+
+  graph = {}
   pressures = {}
-  for line in open(datadir / "16.txt"):
+  for line in load(16):
       pressure = int(re.findall(r"\d+", line)[0])
       left, right = line.split(";")
       node = left.split()[1]
-      neighbors = re.sub(".*valves? (.*)", r"\1", right[:-1]).split(",")
-      adjacency[node] = neighbors
-      pressures[node] = pressure
-  graph = sknetwork.data.from_adjacency_list(adjacency, weighted=False)
-  
-  from sknetwork.embedding.force_atlas import ForceAtlas
+      neighbors = [
+          x.strip() for x in re.sub(".*valves? (.*)", r"\1", right[:-1]).split(",")
+      ]
+      graph[node] = neighbors
+      if pressure > 0:
+          pressures[node] = pressure
+  g = sknetwork.data.from_adjacency_list(graph, weighted=False)
+
   from IPython.display import SVG
+  from sknetwork.embedding.force_atlas import ForceAtlas
+
   forceatlas2 = ForceAtlas()
-  embedding = forceatlas2.fit_transform(graph.adjacency)
-  image = sknetwork.visualization.svg_graph(graph.adjacency, embedding, names=graph.names)
+  embedding = forceatlas2.fit_transform(g.adjacency)
+  image = sknetwork.visualization.svg_graph(g.adjacency, embedding, names=g.names)
   SVG(image)
 #+end_src
+
 Looks pretty cool!
+
+
 #+begin_src jupyter-python
-  def optimal_choice(open_valves, score, position, visited, time):
-	  if ticks == 0:
-		  return score
-	  neighbors = adjacency[position]
-	  moves = []
-	  if position not in open_valves:
-		  new_score = score + (time - 1) * pressures[position]
-		  moves += [(open_valves + [position], new_score, position, visited, time - 1)]
-	  for neighbor in filter(lambda x: x not in visited, neighbors):
-		  moves += [(open_valves, neighor, score, visited + [neighbor], time - 1)]
+  distances = {
+      (j, i): 0 if i == j else 100 if i not in graph[j] else 1
+      for i in graph
+      for j in graph
+  }
+  # Very slick Floyd-Warshall: The distance between two nodes i and j is the minimum over
+  # all paths from i to j, which in turn is the minimum of the sum d(i, k) + d(j,
+  # k) over all nodes k. Shamelessly stolen. Could have been done with some
+  # pathfinding instead, but that would have been slower.
+  for k, i, j in itertools.permutations(graph, 3):
+      distances[i, j] = min(distances[i, j], distances[i, k] + distances[k, j])
+
+
+  def expand(node, time_remaining):
+      result = {}
+
+      # For each possible set of open valves, we store the result of opening them
+      # in the optimal order. We take care not to exceed the time alloted to us,
+      # and not to open a valve twice.
+      def inner(node, time_remaining, used_valves, flow):
+          result[used_valves] = max(result.get(used_valves, 0), flow)
+          for other_node, pressure in pressures.items():
+              new_time_remaining = time_remaining - distances[node, other_node] - 1
+              if new_time_remaining <= 0 or other_node in used_valves:
+                  continue
+              inner(
+                  other_node,
+                  new_time_remaining,
+                  used_valves | frozenset([other_node]),
+                  flow + new_time_remaining * pressure,
+              )
+
+      inner(node, time_remaining, frozenset(), 0)
+      return result
+
+
+  # The result for part 1 is then
+  max(expand("AA", 30).values())
 #+end_src
+
+** Part 2
+For part 2, we don't need to consider the two agents together. We can just find the best pair of valve sets with no overlaps.
+#+begin_src jupyter-python
+  part2_paths = expand('AA', 26)
+  max(v1 + v2 for s1, v1 in part2_paths.items() for s2, v2 in part2_paths.items() if not (s1 & s2))
+#+end_src
+
+* Day 17
+** Part 1
 
 * Day 18
 [[https://adventofcode.com/2022/day/18][Boiling Boulders]]
