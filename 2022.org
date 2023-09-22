@@ -722,7 +722,57 @@ We'll use recursion and the call stack to keep track of the operations for us
 #+end_src
 
 
+* Day 22
+[[https://adventofcode.com/2022/day/22][Monkey Map]]
+** Part 1
+#+begin_src jupyter-python
+  data = load(22, "raw")
+  chart, instructions = data.split("\n\n")
+  chart = chart.split("\n")
+  target = max(len(x) for x in chart)
+  chart = [[x for x in line.ljust(target, " ")] for line in chart]
+  board = np.array(chart)
+  start_x = (board[0] == ".").argmax()
+  y, x = 0, start_x
+  dy, dx = 0, 1
+  ymax, xmax = board.shape
+  R = np.array([[0, 1], [-1, 0]])
+  L = -R
+  instructions = instructions.replace("R", ",R,").replace("L", ",L,").split(",")
+  for instruction in instructions:
+      if instruction == "L":
+          dy, dx = L @ [dy, dx]
+      elif instruction == "R":
+          dy, dx = R @ [dy, dx]
+      else:
+          for _ in range(int(instruction)):
+              next_y, next_x = (y + dy) % ymax, (x + dx) % xmax
+              while board[next_y, next_x] == " ":
+                  next_y, next_x = (next_y + dy) % ymax, (next_x + dx) % xmax
+              if board[next_y, next_x] == "#":
+                  break
+              y, x = next_y, next_x
+  facings = {(0, 1): 0, (1, 0): 1, (0, -1): 2, (-1, 0): 3}
+  (y + 1) * 1000 + 4 * (x + 1) + facings[dy, dx]
+#+end_src
+* Day 25
+[[https://adventofcode.com/2022/day/25][Full of Hot Air]]
+#+begin_src jupyter-python
+  lookup = {"2": 2, "1": 1, "0": 0, "-": -1, "=": -2}
+  reverse_lookup = {3: "=", 4: "-"}
+
+  total = 0
+  for line in load(25):
+      total += functools.reduce(lambda x, y: 5 * x + lookup[y], line.strip(), 0)
 
 
-| dependencies | : | (hsdb mwrd) | operation | : | <function | _operator.add | (a b /) | > |
+  def dec2snafu(n):
+      if n == 0:
+          return ""
+      if n % 5 in [0, 1, 2]:
+          return dec2snafu(n // 5) + str(n % 5)
+      return dec2snafu(n // 5 + 1) + reverse_lookup[n % 5]
 
+
+  dec2snafu(total)
+#+end_src
