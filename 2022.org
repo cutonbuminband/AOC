@@ -6,13 +6,14 @@
   import functools
   import itertools
   import re
-  from collections import defaultdict, deque
+  from collections import defaultdict, deque, namedtuple
   from pathlib import Path
   from queue import PriorityQueue
 
   import more_itertools
   import numpy as np
   import pandas as pd
+  import scipy
 
   datadir = Path("data/2022")
   import utils
@@ -802,6 +803,65 @@ We'll use recursion and the call stack to keep track of the operations for us
   facings = {(0, 1): 0, (1, 0): 1, (0, -1): 2, (-1, 0): 3}
   (y + 1) * 1000 + 4 * (x + 1) + facings[dy, dx]
 #+end_src
+* Day 23
+[[https://adventofcode.com/2022/day/23][Unstable Diffusion]]
+** Part 1
+#+begin_src jupyter-python
+  board = np.array(
+      [[1 if char == "#" else 0 for char in line.strip()] for line in load("23")],
+      dtype=bool,
+  )
+  def simulate(board, n_rounds):
+      mask = np.ones((3, 3), dtype=bool)
+      mask[1, 1] = 0
+      n = np.array([[1, 1, 1], [0, 0, 0], [0, 0, 0]])
+      e, s, w = n[::-1].T, n[::-1], n.T
+      Direction = namedtuple("Direction", ["weights", "padding", "reverse_move", "bitmask"])
+      north = Direction(n, [[0, 2], [1, 1]], [1, 0], 1)
+      south = Direction(s, [[2, 0], [1, 1]], [-1, 0], 2)
+      east = Direction(e, [[1, 1], [2, 0]], [0, -1], 4)
+      west = Direction(w, [[1, 1], [0, 2]], [0, 1], 8)
+      directions = [north, south, west, east]
+
+      i = 0
+      while i < n_rounds:
+          i += 1
+          has_neighbors = scipy.ndimage.convolve(board, mask, mode="constant")
+          stopped, rest = (board & (~has_neighbors)), (board & has_neighbors)
+          proposed_moves = np.pad(stopped.astype(int), 1, mode="constant")
+          for d in directions:
+              neighbors = scipy.ndimage.correlate(board, d.weights, mode="constant")
+              proposed_moves += np.pad(
+                  (rest & ~neighbors) * d.bitmask, d.padding, mode="constant"
+              )
+              rest &= neighbors
+          proposed_moves += np.pad(rest, 1, mode="constant")
+
+          # Now unwind overlapping moves
+          for d1 in directions[1:]:
+              multiples = ((proposed_moves & d1.bitmask) > 0) & (proposed_moves != d1.bitmask)
+              for point in np.argwhere(multiples):
+                  for d2 in directions:
+                      if proposed_moves[tuple(point)] & d2.bitmask:
+                          proposed_moves[tuple(point + d2.reverse_move)] = d2.bitmask
+                  proposed_moves[tuple(point)] = 0
+          coords = np.argwhere(proposed_moves)
+          x_min, y_min = coords.min(axis=0)
+          x_max, y_max = coords.max(axis=0)
+          new_board = proposed_moves[x_min : x_max + 1, y_min : y_max + 1] > 0
+          if board.shape == new_board.shape and (board == new_board).all():
+              break
+          board = new_board
+          directions = directions[1:] + [directions[0]]
+      return i, (board == 0).sum()
+
+  simulate(board, 10)[1]
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+  simulate(board, np.inf)[0]
+#+end_src
+
 * Day 24
 [[https://adventofcode.com/2022/day/24][Blizzard Basin]]
 ** Part 1
