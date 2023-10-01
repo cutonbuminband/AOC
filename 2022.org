@@ -3,11 +3,10 @@
 
 * Imports
 #+begin_src jupyter-python
-  import collections
   import functools
   import itertools
   import re
-  from collections import defaultdict
+  from collections import defaultdict, deque
   from pathlib import Path
   from queue import PriorityQueue
 
@@ -404,7 +403,7 @@ We can see how at the edges of the forest shorter trees are visible, but towards
 
 
   def navigate(source, neighbor_func, stop_condition):
-      active = collections.deque([(0, source)])
+      active = deque([(0, source)])
       seen = set()
       while active:
           steps, current = active.popleft()
@@ -803,6 +802,91 @@ We'll use recursion and the call stack to keep track of the operations for us
   facings = {(0, 1): 0, (1, 0): 1, (0, -1): 2, (-1, 0): 3}
   (y + 1) * 1000 + 4 * (x + 1) + facings[dy, dx]
 #+end_src
+* Day 24
+[[https://adventofcode.com/2022/day/24][Blizzard Basin]]
+** Part 1
+This is a problem that seems to call for some pathfinding algorithms. We can account for the movement of the blizzards by making a function to answer the question "Is there a blizzard at position y, x at time t?". With that in hand, we can just explore the full search space. To guide the search, we'll use the (current tiime + manhattan distance to the goal node) as a score and always expand the lowest scoring state first, and stop when we've reached the target.
+#+begin_src jupyter-python
+  chart = np.array([list(x.strip()) for x in load("24")])[1:-1, 1:-1]
+  chart_dict = {}
+  directions = [">", "<", "^", "v"]
+  updates = {">": (1, 1), "<": (1, -1), "^": (0, -1), "v": (0, 1)}
+  for direction in directions:
+      positions = defaultdict(list)
+      for y, x in zip(*np.where(chart == direction)):
+          (fixed, moving) = (y, x) if direction in "<>" else (x, y)
+          positions[fixed].append(moving)
+      chart_dict[direction] = positions
+
+
+  def has_blizzard(y, x, time):
+      position = y, x
+      for direction in directions:
+          moving, sign = updates[direction]
+          fixed = 1 - moving
+          blizzards = chart_dict[direction][position[fixed]]
+          blizzard_positions = [
+              (b + sign * time) % chart.shape[moving] for b in blizzards
+          ]
+          if position[moving] in blizzard_positions:
+              return True
+      return False
+
+
+
+  def travel(chart, start, end, time):
+      score = abs(end[0] - start[0]) + abs(start[1] - end[1]) + time
+      target_y, target_x = end
+      state = score, time, start
+      q = PriorityQueue()
+      q.put(state)
+      seen = set()
+      while q.qsize() > 0:
+          score, time, (y, x) = q.get()
+          if (y, x) == end:
+              break
+          if (time, y, x) in seen:
+              continue
+          seen.add((time, y, x))
+          for (dy, dx) in [(-1, 0), (0, -1), (0, 0), (0, 1), (1, 0)]:
+              new_y, new_x = y + dy, x + dx
+              if (
+                  new_y < -1
+                  or (new_y == -1 and new_x != 0)
+                  or (new_y > chart.shape[0])
+                  or (new_y == chart.shape[0] and new_x != chart.shape[1] - 1)
+                  or new_x < 0
+                  or new_x >= chart.shape[1]
+                  or has_blizzard(new_y, new_x, time + 1)
+
+              ):
+                  continue
+              score = abs(target_y - new_y) + abs(target_x - new_x) + time + 1
+              q.put((score, time + 1, (new_y, new_x)))
+      return score
+
+  bottom_y, right_x = chart.shape
+  start = (-1, 0)
+  end = (bottom_y, right_x - 1)
+  first_leg = travel(chart, start, end, 0)
+  first_leg
+#+end_src
+** Part 2
+The above takes ~7 seconds on my machine (and it took 13 before I added the A* scoring logic), so using it to do three searches through the search space might not be. On the other hand, the three searches can be made completely independent of one another, since arriving later at a checkpoint will always be worse than arriving earlier, since an early arrival could always wait in place until the later time.
+
+
+#+begin_src jupyter-python
+  time = first_leg
+  waypoints = [(-1, 0), (bottom_y, right_x - 1)]
+  for waypoint in waypoints:
+      start = end
+      end = waypoint
+      time = travel(chart, start, end, time)
+  time
+#+end_src
+
+This actually works, but it still seems like there should be some slick-ish way of using the chinese remainder theorem or something similar to greatly reduce the search space, since we basically have four masks of residues that are invalid for (y, x, t) triples.
+
 * Day 25
 [[https://adventofcode.com/2022/day/25][Full of Hot Air]]
 #+begin_src jupyter-python
