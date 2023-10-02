@@ -714,6 +714,100 @@ For part 2, once we have identified which of the neighboring boxes represent ext
   sum([len(to_set(arr + delta) & occupied) for delta in deltas])
 #+end_src
 
+* Day 19
+[[https://adventofcode.com/2022/day/19][Not Enough Minerals]]
+** Part 1
+The core of this problem is to develop an approach that can take a list of prices and generate an optimal build. Blindly taking every action probably won't work, but is maybe worth examining as a first attempt.
+
+Instead of simulating each of the 24 different time steps, we should focus on the build order, so the decision at any given point in time is which robot to build next. We should bail from any given branch if:
+
+- The time has exceeded the maximum time available
+- We have built more robots of a given kind than are needed by any of the recipes
+- We've already seen a better situation: Suppose we've previously found a state with a given config of robots at t1, and now have built the same robots at a later time t2. If we could have the same or more resources at t2 by using the t1 config and just waiting, then the first build order is strictly better.
+
+
+#+begin_src jupyter-python
+  def score(geodes, time, t_max=24):
+      time_remaining = t_max - time - 1
+      return -(geodes + time_remaining * (time_remaining + 1) // 2)
+
+
+  def is_better(t1, r1, g1, i, t2, r2, g2):
+      return False  # (t2 >= t1) and (g1 >= g2) and ((r1 + (t2 - t1) * i) >= r2).all()
+
+
+  def evaluate(costs, t_max=24):
+      seen = defaultdict(dict)
+      max_prices = costs.max(axis=0)
+      income = np.array([1, 0, 0])
+      resources = np.array([0, 0, 0])
+      time = 0
+      geodes = 0
+      initial_state = (score(geodes, time, t_max), time, geodes, tuple(income), tuple(resources))
+      q = PriorityQueue()
+      q.put(initial_state)
+      max_geodes = 0
+      while q.qsize() > 0:
+          _, time, geodes, income, resources = q.get()
+          income, resources = np.array(income), np.array(resources)
+          if time == t_max:
+              break
+          for t1, (r1, g1) in seen[tuple(income)].items():
+              if is_better(t1, r1, g1, income, time, resources, geodes):
+                  break
+          else:
+              seen[tuple(income)][time] = (resources, geodes)
+              with np.errstate(divide="ignore", invalid="ignore"):
+                  waits = (costs - resources) / income
+              waits[np.isnan(waits)] = 0
+              for idx, wait in enumerate(np.ceil(waits.max(axis=1))):
+                  wait = max(wait, 0)
+                  if time + wait + 1 > t_max:
+                      continue
+                  # Turns to wait for resources, plus one to build
+                  dt = int(wait) + 1
+                  new_time = time + dt
+                  new_income = income.copy()
+                  new_geodes = geodes
+                  if idx != 3:
+                      if income[idx] >= max_prices[idx]:
+                          continue
+                      new_income[idx] += 1
+                  else:
+                      new_geodes += t_max - new_time
+                      if new_geodes > max_geodes:
+                          max_geodes = new_geodes
+
+                  new_resources = resources.copy() + income * dt - costs[idx]
+
+                  q.put(
+                      (
+                          score(new_geodes, new_time, t_max),
+                          new_time,
+                          new_geodes,
+                          tuple(new_income),
+                          tuple(new_resources),
+                      )
+                  )
+      return max_geodes
+
+
+  total = 0
+  for blueprint_id, *l in load(19, "int"):
+      costs = np.array([[l[0], 0, 0], [l[1], 0, 0], [l[2], l[3], 0], [l[4], 0, l[5]]])
+      total += blueprint_id * evaluate(costs)
+  total
+#+end_src
+
+** Part 2
+#+begin_src jupyter-python
+  total = 1
+  for _, *l in load(19, "int")[:3]:
+      costs = np.array([[l[0], 0, 0], [l[1], 0, 0], [l[2], l[3], 0], [l[4], 0, l[5]]])
+      total *= evaluate(costs, 32)
+  total
+#+end_src
+
 * Day 21
 [[https://adventofcode.com/2022/day/21][Monkey Math]]
 ** Part 1
