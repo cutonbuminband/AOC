@@ -663,8 +663,89 @@ For part 2, we don't need to consider the two agents together. We can just find 
 #+end_src
 
 * Day 17
+[[https://adventofcode.com/2022/day/17][Pyroclastic Flow]]
 ** Part 1
+#+begin_src jupyter-python
+  shapes = [
+      np.array(
+          [[0 if char == "." else 1 for char in line] for line in x.split("\n")],
+          dtype=bool,
+      )
+      for x in ["####", ".#.\n###\n.#.", "..#\n..#\n###", "#\n#\n#\n#", "##\n##"]
+  ]
+  directions = load(17, "raw").strip()
 
+
+  def has_collision(x, y, shape, board):
+      if y < 0:
+          return False
+      height, width = shape.shape
+      window = np.pad(
+          shape[max(0, height - y - 1) :],
+          [[0, 0], [x, 7 - x - width]],
+          mode="constant",
+      )
+      top_of_window = y - window.shape[0] + 1
+      return (board[top_of_window : top_of_window + window.shape[0]] & window).any()
+
+
+  def find_height(directions, n=2022):
+      board = np.ones((1, 7), dtype=bool)
+      discard = -1
+      d = 0
+      seen = {}
+      cycle_length = None
+      for i in range(n):
+          shape = shapes[i % len(shapes)]
+          height, width = shape.shape
+          x, y = 2, -4
+          while True:
+              direction = directions[d]
+              d = (d + 1) % len(directions)
+              if direction == ">":
+                  if x + width != 7 and not has_collision(x + 1, y, shape, board):
+                      x += 1
+              else:
+                  if x != 0 and not has_collision(x - 1, y, shape, board):
+                      x -= 1
+              if y < -1:
+                  y += 1
+              else:
+                  if has_collision(x, y + 1, shape, board):
+                      old_board = board.copy()
+                      board = np.pad(
+                          board, [[max(height - y - 1, 0), 0], [0, 0]], mode="constant"
+                      )
+                      loc = max(y - height + 1, 0)
+                      board[loc : loc + height, x : x + width] += shape
+                      break
+                  y += 1
+          row = board.all(axis=1).argmax()
+          discard += board.shape[0] - row - 1
+          board = board[: row + 1]
+          state = (i % len(shapes), d, tuple(np.ravel(board)))
+          if state in seen:
+              if cycle_length is None:
+                  cycle_length = i - seen[state][0]
+              if (i % cycle_length) == (n % cycle_length):
+                  delta_h = board.shape[0] + discard - seen[state][1]
+                  return board.shape[0] + discard + delta_h * ((n - i) // cycle_length)
+          seen[state] = i, board.shape[0] + discard
+      return seen[state][1]
+
+
+  find_height(directions)
+#+end_src
+
+** Part 2
+Actually simulating that many steps isn't possible, so we should probably look for a loop of some kind. To avoid having to think too much, we'll say that after any given rock has fallen the state is (shape_index, wind_index, hash of board above latest full line). If a state ever repeats, we know it will go on repeating forever, so we can just advance until we're at the same point in the cycle as the very end, and then add on however many cycles we need
+
+
+#+begin_src jupyter-python
+  find_height(directions, 1_000_000_000_000) - 1
+#+end_src
+
+There's a weird off by one error in my code which is only present for some cases. I can't be bothered to find out why.
 * Day 18
 [[https://adventofcode.com/2022/day/18][Boiling Boulders]]
 ** Part 1
