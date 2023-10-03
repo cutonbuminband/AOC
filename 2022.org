@@ -808,6 +808,64 @@ Instead of simulating each of the 24 different time steps, we should focus on th
   total
 #+end_src
 
+* Day 20
+[[https://adventofcode.com/2022/day/21][Grove Positioning System]]
+** Part 1
+I was almost caught out by the fact that there can be duplicate entries in the data; my original linked list in a dictionary didn't account for this, so nodes were silently dropped. Oops.
+
+Otherwise the simple approach ended up working: make a list of node -> (predecessor, successor), and to move a given element simply follow the pointers the relevant number of times.
+
+To save time, I map each rotation to the range [-l/2, l/2] where l is the length of the linked list. The idea is that for a circular list of length l, moving l-1 steps to the right is the same as not moving, and since the list is doubly linked, moving one step to the left is better than moving l-2 steps to the right.
+#+begin_src jupyter-python
+  def mix(data, n=1):
+      unique_data = list(enumerate(data))
+      ll = {
+          k: [p, n]
+          for (k, p, n) in zip(
+              unique_data,
+              [unique_data[-1]] + unique_data[:-1],
+              unique_data[1:] + [unique_data[0]],
+          )
+      }
+      for i in range(n):
+          for value in enumerate(data):
+              mod = len(data) - 1
+              offset = mod // 2
+              shift = (value[1] + offset) % mod - offset
+              if shift == 0:
+                  continue
+              current = ll[value]
+              ll[current[0]][1] = current[1]
+              ll[current[1]][0] = current[0]
+              del ll[value]
+              coord = 1 if shift > 0 else 0
+              for _ in range(abs(shift)):
+                  current = ll[current[coord]]
+
+              succ = current[coord]
+              pred = ll[succ][1 - coord]
+              if shift < 0:
+                  pred, succ = succ, pred
+              ll[value] = [pred, succ]
+              ll[pred][1] = value
+              ll[succ][0] = value
+      v = (data.index(0), 0)
+      result = []
+      for _ in range(len(ll)):
+          result.append(v[1])
+          v = ll[v][1]
+      return sum(result[((i + 1) * 1000) % len(result)] for i in range(3))
+
+
+  data = list(load("20", "np"))
+  mix(data)
+#+end_src
+
+** Part 2
+#+begin_src jupyter-python
+  mix([x * 811589153 for x in data], 10)
+#+end_src
+
 * Day 21
 [[https://adventofcode.com/2022/day/21][Monkey Math]]
 ** Part 1
