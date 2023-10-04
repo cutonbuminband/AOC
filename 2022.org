@@ -1019,12 +1019,11 @@ We'll use recursion and the call stack to keep track of the operations for us
   ymax, xmax = board.shape
   R = np.array([[0, 1], [-1, 0]])
   L = -R
+  matrices = {"L": L, "R": R}
   instructions = instructions.replace("R", " R ").replace("L", " L ").split()
   for instruction in instructions:
-      if instruction == "L":
-          dy, dx = L @ [dy, dx]
-      elif instruction == "R":
-          dy, dx = R @ [dy, dx]
+      if instruction in "LR":
+          dy, dx = matrices[instruction] @ [dy, dx]
       else:
           for _ in range(int(instruction)):
               next_y, next_x = (y + dy) % ymax, (x + dx) % xmax
@@ -1036,12 +1035,97 @@ We'll use recursion and the call stack to keep track of the operations for us
   facings = {(0, 1): 0, (1, 0): 1, (0, -1): 2, (-1, 0): 3}
   (y + 1) * 1000 + 4 * (x + 1) + facings[dy, dx]
 #+end_src
+
+** Part 2
+Well.
+
+The logic for this one is basically the same as for part one, with the only change being what happens when we hit an empty cell. Previously we just kept moving in the same direction until we landed back on the board; now we have to find which edge we should move to.
+
+I considered trying to solve the edge pairing for all possible cube nets, but quickly concluded that hardcoding the specific net in my input was going to be much faster. I start off by building a mapping of edge pairings which tracks:
+
+- Which pairs of edges are connected
+- What the rotation between the two edges is
+- Whether values along the two edges increase in the same direction. This is technically not necessary, since it's basically included in the rotation, but it's handy to have around.
+
+There are 14 outside edges, but they pair up two and two, so we only need to specify 7 of them and then add the reverse pairing to the mapping.
+
+The edges are labelled with an arbitrary number, so we also need a way of identifying which edge we're on. So for each edge, we'll specify which two meta-squares of the net it joins, starting with the square on the cube and ending with the square off the cube.
+
+When we hit an empty cell, we identify which edge we just crossed, and then move to the corresponding matching edge. There's a bit of faffing to make sure that (say) top and bottom edges along the same square get different y coordinates, and then we finally add on how far along the edge we are.
+
+That gives us the new position on the grid. If this position is empty, we rotate to face the new direction and move there. Otherwise we stay in place and don't rotate.
+#+begin_src jupyter-python
+  edge_pairings = {
+      0: [9, "R", 1],
+      1: [8, "", 1],
+      2: [5, "RR", -1],
+      3: [4, "R", 1],
+      6: [7, "R", 1],
+      10: [13, "RR", -1],
+      11: [12, "R", 1],
+  }
+
+  for key in list(edge_pairings.keys()):
+      edge, direction, sign = edge_pairings[key]
+      edge_pairings[edge] = [key, direction.replace("R", "L"), sign]
+
+  edge_positions = [
+      ((0, 1), (3, 1)),
+      ((0, 2), (3, 2)),
+      ((0, 2), (0, 0)),
+      ((0, 2), (1, 2)),
+      ((1, 1), (1, 2)),
+      ((2, 1), (2, 2)),
+      ((2, 1), (3, 1)),
+      ((3, 0), (3, 1)),
+      ((3, 0), (0, 0)),
+      ((3, 0), (3, 2)),
+      ((2, 0), (2, 2)),
+      ((2, 0), (1, 0)),
+      ((1, 1), (1, 0)),
+      ((0, 1), (0, 0)),
+  ]
+  edge_lookup = {edges: idx for idx, edges in enumerate(edge_positions)}
+  board_shape = np.array([4, 3])
+  y, x = 0, start_x
+  dy, dx = 0, 1
+  for instruction in instructions:
+      if instruction in "LR":
+          dy, dx = matrices[instruction] @ [dy, dx]
+      else:
+          for _ in range(int(instruction)):
+              next_y, next_x = (y + dy) % ymax, (x + dx) % xmax
+              if board[next_y, next_x] == " ":
+                  old_square = y // 50, x // 50
+                  new_square = next_y // 50, next_x // 50
+                  edge = edge_lookup[(old_square, new_square)]
+                  new_edge, rotations, sign = edge_pairings[edge]
+                  new_edge_position = edge_positions[new_edge]
+                  new_edge_delta = np.diff(new_edge_position, axis=0).ravel()
+                  next_y, next_x = [x * 50 for x in new_edge_position[0]]
+                  next_y, next_x = [next_y, next_x] + 49 * (
+                      (new_edge_delta % board_shape) == 1
+                  )
+                  offset = x % 50 if dx == 0 else y % 50
+                  offset = offset if sign > 0 else 49 - offset
+                  next_y, next_x = [next_y, next_x] + offset * (new_edge_delta == 0)
+                  if board[next_y, next_x] != "#":
+                      for rotation in rotations:
+                          dy, dx = matrices[rotation] @ [dy, dx]
+              if board[next_y, next_x] == "#":
+                  break
+              y, x = next_y, next_x
+  facings = {(0, 1): 0, (1, 0): 1, (0, -1): 2, (-1, 0): 3}
+  (y + 1) * 1000 + 4 * (x + 1) + facings[dy, dx]
+#+end_src
+
+
 * Day 23
 [[https://adventofcode.com/2022/day/23][Unstable Diffusion]]
 ** Part 1
 #+begin_src jupyter-python
   board = np.array(
-      [[1 if char == "#" else 0 for char in line.strip()] for line in load("23")],
+      [[1 if char == "#" else 0 for char in line.strip()] for line in load(23)],
       dtype=bool,
   )
   def simulate(board, n_rounds):
