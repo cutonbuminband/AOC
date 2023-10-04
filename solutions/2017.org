@@ -1,24 +1,31 @@
 #+PROPERTY: header-args:jupyter-python  :session aoc-2017 :kernel aoc
 #+PROPERTY: header-args    :pandoc t
+#+TITLE: 2017 Solutions
 
 * Imports
 #+begin_src jupyter-python
-  import pandas as pd
-  import numpy as np
-  from collections import defaultdict
-  from pathlib import Path
+  import collections
   import functools
   import itertools
-  import collections
+  import os
   import re
+  import sys
+  from collections import defaultdict
+  from pathlib import Path
+
   import more_itertools
+  import numpy as np
+  import pandas as pd
+
+  sys.path.insert(1, os.path.join(sys.path[0], ".."))
   import utils
-  from utils import year_load
-  load = year_load(2017)
+
+  load = utils.year_load(2017)
 #+end_src
 
-* Day 1
-[[https://adventofcode.com/2017/day/1][Inverse Captcha]]
+#+RESULTS:
+
+* [[https://adventofcode.com/2017/day/1][Day 1: Inverse Captcha]]
 ** Part 1
 #+begin_src jupyter-python
   data = np.array([int(x) for x in load(1)[0].strip()], dtype=int)
@@ -30,8 +37,7 @@
   data[np.where(data == np.roll(data, len(data) // 2))].sum()
 #+end_src
 
-* Day 2
-[[https://adventofcode.com/2017/day/2][Corruption Checksum]]
+* [[https://adventofcode.com/2017/day/2][Day 2: Corruption Checksum]]
 ** Part 1
 #+begin_src jupyter-python
   data = [sorted(map(lambda x: int(x), x.split()))
@@ -49,8 +55,7 @@
   total
 #+end_src
 
-* Day 3
-[[https://adventofcode.com/2017/day/3][Spiral Memory]]
+* [[https://adventofcode.com/2017/day/3][Day 3: Spiral Memory]]
 ** Part 1
 #+begin_src jupyter-python
   puzzle_input = 368078
@@ -88,8 +93,7 @@
   tmp
 #+end_src
 
-* Day 4
-[[https://adventofcode.com/2017/day/4][High-Entropy Passphrases]]
+* [[https://adventofcode.com/2017/day/4][Day 4: High-Entropy Passphrases]]
 ** Part 1
 #+begin_src jupyter-python
   lines = [x.split() for x in load(4)]
@@ -101,8 +105,7 @@
   sum(len(l) == len(set([''.join(sorted(w)) for w in l])) for l in lines)
 #+end_src
 
-* Day 5
-[[https://adventofcode.com/2017/day/5][A Maze of Twisty Trampolines, All Alike]]
+* [[https://adventofcode.com/2017/day/5][Day 5: A Maze of Twisty Trampolines, All Alike]]
 ** Part 1
 #+begin_src jupyter-python
   instructions = load(5, "np")
@@ -127,8 +130,7 @@
   count
 #+end_src
 
-* Day 6
-[[https://adventofcode.com/2017/day/6][Memory Reallocation]]
+* [[https://adventofcode.com/2017/day/6][Day 6: Memory Reallocation]]
 ** Part 1
 #+begin_src jupyter-python
   data = np.array([0, 5, 10, 0, 11, 14, 13, 4, 11, 8, 8, 7, 1, 4, 12, 11])
@@ -159,8 +161,7 @@ This was made trivial by tracking when a given configuration was seen.
   i - seen[(tuple(data))]
 #+end_src
 
-* Day 7
-[[https://adventofcode.com/2017/day/7][Recursive Circus]]
+* [[https://adventofcode.com/2017/day/7][Day 7: Recursive Circus]]
 ** Part 1
 #+begin_src jupyter-python
   data = map(str.strip, load(7))
@@ -197,8 +198,7 @@ This was made trivial by tracking when a given configuration was seen.
   tree[node]["weight"] + delta
 #+end_src
 
-* Day 8
-[[https://adventofcode.com/2017/day/8][I Heard You Like Registers]]
+* [[https://adventofcode.com/2017/day/8][Day 8: I Heard You Like Registers]]
 ** Part 1
 #+begin_src jupyter-python
   import operator as op
@@ -225,8 +225,7 @@ This was made trivial by tracking when a given configuration was seen.
   maxval
 #+end_src
 
-* Day 9
-[[https://adventofcode.com/2017/day/9][Stream Processing]]
+* [[https://adventofcode.com/2017/day/9][Day 9: Stream Processing]]
 ** Part 1
 #+begin_src jupyter-python
 def canonical_form(sequence):
@@ -270,8 +269,7 @@ total
 count
 #+end_src
 
-* Day 10
-[[https://adventofcode.com/2017/day/10][Knot Hash]]
+* [[https://adventofcode.com/2017/day/10][Day 10: Knot Hash]]
 ** Part 1
 #+begin_src jupyter-python
   data = "165,1,255,31,87,52,24,113,0,91,148,254,158,2,73,153"
@@ -303,9 +301,7 @@ count
 
 #+end_src
 
-* Day 11
-[[https://adventofcode.com/2017/day/11][Hex Ed]]
-
+* [[https://adventofcode.com/2017/day/11][Day 11: Hex Ed]]
 ** Part 1
 To describe the hexgrid we'll use two basis vectors: x1, directed southeast, and x2, directed due north. All the other directions can be found as linear combinations of these, and the final position in this basis is just the sum of all the moves. Now, any move of the form (k, 1), with k in [-1, 0, 1] only takes one step, so the number of steps needed to reach the final position is just the value of whichever of the two basis vectors we have more of
 #+begin_src jupyter-python
@@ -326,9 +322,7 @@ For part 2, instead of finding just the sum of the moves, we look at the running
   abs(moves.cumsum(axis=0)).max()
 #+end_src
 
-* Day 12
-[[https://adventofcode.com/2017/day/12][Digital Plumber]]
-
+* [[https://adventofcode.com/2017/day/12][Day 12: Digital Plumber]]
 ** Part 1
 #+begin_src jupyter-python
   regex = "(-?\d+)"
@@ -351,8 +345,7 @@ For part 2, instead of finding just the sum of the moves, we look at the running
   i
 #+end_src
 
-* Day 13
-[[https://adventofcode.com/2017/day/13][Packet Scanners]]
+* [[https://adventofcode.com/2017/day/13][Day 13: Packet Scanners]]
 ** Part 1
 The only slightly tricky thing here is that we have to convert a depth to a cycle length. In each cycle, a scanner of depth d moves down (d - 1) steps, and then back up (d - 1) steps, so the cycle length is 2 * d - 2.
 #+begin_src jupyter-python
@@ -409,8 +402,7 @@ For most of these, there was only one such modulus. Taking all the ones for whic
   g * x
 #+end_src
 
-* Day 14
-[[https://adventofcode.com/2017/day/14][Disk Defragmentation]]
+* [[https://adventofcode.com/2017/day/14][Day 14: Disk Defragmentation]]
 ** Part 1
 #+begin_src jupyter-python
   prefix = load(14)[0].strip() + "-"
@@ -443,8 +435,7 @@ For most of these, there was only one such modulus. Taking all the ones for whic
   count
 #+end_src
 
-* Day 15
-[[https://adventofcode.com/2017/day/15][Dueling Generators]]
+* [[https://adventofcode.com/2017/day/15][Day 15: Dueling Generators]]
 ** Part 1
 #+begin_src jupyter-python
   A = 16807
@@ -486,8 +477,7 @@ For most of these, there was only one such modulus. Taking all the ones for whic
   total
 
 #+end_src
-* Day 16
-[[https://adventofcode.com/2017/day/16][Permutation Promenade]]
+* [[https://adventofcode.com/2017/day/16][Day 16: Permutation Promenade]]
 ** Part 1
 #+begin_src jupyter-python
   moves = load(16)[0].strip().split(",")
@@ -524,8 +514,7 @@ For part 2, it would take too long to go through all the one billion cycles. But
 #+begin_src jupyter-python
   dance(permutations[:], 1_000_000_000)
 #+end_src
-* Day 17
-[[https://adventofcode.com/2017/day/17][Spinlock]]
+* [[https://adventofcode.com/2017/day/17][Day 17: Spinlock]]
 ** Part 1
 #+begin_src jupyter-python
   steps = 386
@@ -544,8 +533,7 @@ For part 2, it would take too long to go through all the one billion cycles. But
       q.appendleft(i)
   q[q.index(0) + 1]
 #+end_src
-* Day 18
-[[https://adventofcode.com/2017/day/18][Duet]]
+* [[https://adventofcode.com/2017/day/18][Day 18: Duet]]
 ** Part 1
 #+begin_src jupyter-python
   program = load(18)
@@ -648,8 +636,7 @@ With that out of the way we can implement the collaboration as follows: run prog
 
 #+end_src
 
-* Day 19
-[[https://adventofcode.com/2017/day/19][A Series of Tubes]]
+* [[https://adventofcode.com/2017/day/19][Day 19: A Series of Tubes]]
 ** Part 1
 The hardest part for this was determining a sensible stopping condition -- that is one that could tell the difference between wires randomly crossing, and actually being finished. Direct inspection of the input showed where there was a dead end, so that's just hard-coded into the below:
 #+begin_src jupyter-python
@@ -687,8 +674,7 @@ I don't know if this was intentional, but with the solution to part 1 above, cou
   i
 #+end_src
 
-* Day 20
-[[https://adventofcode.com/2017/day/20][Particle Swarm]]
+* [[https://adventofcode.com/2017/day/20][Day 20: Particle Swarm]]
 ** Part 1
 It's always nice to be able to come up with a one-liner to solve these.
 #+begin_src jupyter-python
@@ -710,8 +696,7 @@ For part two we could do some clever work to figure out a stopping condition bas
   len(s)
 #+end_src
 
-* Day 21
-[[https://adventofcode.com/2017/day/21][Fractal Art]]
+* [[https://adventofcode.com/2017/day/21][Day 21: Fractal Art]]
 ** Part 1
 This feels like the triumph of brute force over elegance. The process involves exponential growth, where the array triples in size every three iterations, so brute forcing seems like an unlikely choice, but the numbers are small enough that it just about works.
 
@@ -763,8 +748,7 @@ This feels like the triumph of brute force over elegance. The process involves e
 #+begin_src jupyter-python
   solve(array, 18)
 #+end_src
-* Day 22
-[[https://adventofcode.com/2017/day/22][Sporifica Virus]]
+* [[https://adventofcode.com/2017/day/22][Day 22: Sporifica Virus]]
 ** Part 1
 #+begin_src jupyter-python
   direction = 1j
@@ -806,8 +790,7 @@ The large number of iterations for part 2 seems to indicate that I should do som
   total
 #+end_src
 
-* Day 23
-[[https://adventofcode.com/2017/day/23][Coprocessor Conflagration]]
+* [[https://adventofcode.com/2017/day/23][Day 23: Coprocessor Conflagration]]
 ** Part 1
 
 #+begin_src jupyter-python
@@ -856,10 +839,7 @@ Inside this huge loop, we find a section at the start with two nested loops, fol
   len(list(filter(is_composite, range(b0, b0 + 17000 + 1, 17))))
 #+end_src
 
-
-* Day 24
-[[https://adventofcode.com/2017/day/24][Electromagnetic Moat]]
-
+* [[https://adventofcode.com/2017/day/24][Day 24: Electromagnetic Moat]]
 ** Part 1
 #+begin_src jupyter-python
   ports = load(24, "int")
@@ -894,8 +874,7 @@ Enumerating all the bridges for part 2 is basically the same as in part 1, so I'
   strongest_bridge((0, 0), ports, part=2)[1]
 #+end_src
 
-* Day 25
-[[https://adventofcode.com/2017/day/25][The Halting Problem]]
+* [[https://adventofcode.com/2017/day/25][Day 25: The Halting Problem]]
 A pretty mindless translation of the requirements into code. Parsing the data was almost the fiddliest part
 #+begin_src jupyter-python
   data = load(25, "raw")

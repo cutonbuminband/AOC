@@ -2,4 +2,7 @@ data
 .venv
 .quarto/
 _site/
+_freeze/
 __pycache__
+/qmd
+/.quarto/

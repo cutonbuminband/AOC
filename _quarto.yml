@@ -1,0 +1,38 @@
+project:
+  type: website
+
+website:
+  title: "Advent of Code"
+  sidebar:
+    style: "floating"
+    search: false
+    contents:
+    - qmd/2022.qmd
+    - qmd/2021.qmd
+    - qmd/2020.qmd
+    - qmd/2019.qmd
+    - qmd/2018.qmd
+    - qmd/2017.qmd
+    - qmd/2016.qmd
+    - qmd/2015.qmd
+  page-footer:
+    center:
+      - text: "Github"
+        href: https://github.com/cutonbuminband/AOC
+format:
+  html:
+    anchor-sections: true
+    code-tools: true
+    code-fold: show
+    execute:
+        eval: false
+    theme:
+        light: flatly
+        dark: darkly
+    css: qmd/styles.css
+    toc: true
+    reference-location: margin
+    citation-location: margin
+    highlight-style: pygments
+execute:
+  freeze: auto

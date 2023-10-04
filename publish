@@ -1,0 +1,5 @@
+#!/bin/bash
+new_filename="${1%.*}.qmd"
+pandoc -s --wrap=none $1 -t markdown-smart-citations -o $new_filename --lua-filter=filter.lua
+sed -i 's/ {.python .code}/{python}/g' $new_filename
+mv $new_filename qmd

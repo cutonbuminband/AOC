@@ -1,25 +1,29 @@
 #+PROPERTY: header-args:jupyter-python  :session aoc-2021 :kernel aoc
 #+PROPERTY: header-args    :pandoc t
+#+TITLE: 2021 Solutions
 
 * Imports
 #+begin_src jupyter-python
-  import pandas as pd
-  import numpy as np
-  from collections import defaultdict
-  from pathlib import Path
   import functools
   import itertools
+  import os
   import queue
+  import sys
+  from collections import defaultdict
+  from pathlib import Path
+
+  import numpy as np
+  import pandas as pd
+
+  sys.path.insert(1, os.path.join(sys.path[0], ".."))
   import utils
-  from utils import year_load
-  load = year_load(2021)
-  datadir = Path("data/2021")
+
+  load = utils.year_load(2021)
+  datadir = Path("../data/2021")
 #+end_src
 
-* Day 1
-[[https://adventofcode.com/2021/day/1][Sonar Sweep]]
+* [[https://adventofcode.com/2021/day/1][Day 1: Sonar Sweep]]
 ** Part 1
-To do this, count the number of times a depth measurement increases from the previous measurement. (There is no measurement before the first measurement.)
 #+begin_src jupyter-python
   data = load(1, "np")
   (np.diff(data) > 0).sum()
@@ -30,16 +34,8 @@ To do this, count the number of times a depth measurement increases from the pre
   (pd.Series(data).rolling(3).sum().diff() > 0).sum()
 #+end_src
 
-* Day 2
-[[https://adventofcode.com/2021/day/2][Dive!]]
+* [[https://adventofcode.com/2021/day/2][Day 2: Dive!]]
 ** Part 1
-It seems like the submarine can take a series of commands like forward 1, down 2, or up 3:
-
-    - forward X increases the horizontal position by X units.
-    - down X increases the depth by X units.
-    - up X decreases the depth by X units.
-
-Calculate the horizontal position and depth you would have after following the planned course. What do you get if you multiply your final horizontal position by your final depth?
 #+begin_src jupyter-python
   data = [x.strip().split() for x in load(2)]
   df = pd.DataFrame(data, columns=['instruction', 'amount'])
@@ -49,15 +45,6 @@ Calculate the horizontal position and depth you would have after following the p
 #+end_src
 
 ** Part 2
-In addition to horizontal position and depth, you'll also need to track a third value, aim, which also starts at 0. The commands also mean something entirely different than you first thought:
-
-    - down X increases your aim by X units.
-    - up X decreases your aim by X units.
-    - forward X does two things:
-        - It increases your horizontal position by X units.
-        - It increases your depth by your aim multiplied by X.
-
-Using this new interpretation of the commands, calculate the horizontal position and depth you would have after following the planned course. What do you get if you multiply your final horizontal position by your final depth?
 #+begin_src jupyter-python
   state = (0, 0, 0)
   ops = {'down': lambda x, y: (x[0] + y, x[1], x[2]),
@@ -68,17 +55,8 @@ Using this new interpretation of the commands, calculate the horizontal position
   print(state[1] * state[2])
 #+end_src
 
-* Day 3
-[[https://adventofcode.com/2021/day/3][Binary Diagnostic]]
+* [[https://adventofcode.com/2021/day/3][Day 3: Binary Diagnostic]]
 ** Part 1
-The diagnostic report (your puzzle input) consists of a list of binary numbers which, when decoded properly, can tell you many useful things about the conditions of the submarine. The first parameter to check is the power consumption.
-
-You need to use the binary numbers in the diagnostic report to generate two new binary numbers (called the gamma rate and the epsilon rate). The power consumption can then be found by multiplying the gamma rate by the epsilon rate.
-
-Each bit in the gamma rate can be determined by finding the most common bit in the corresponding position of all numbers in the diagnostic report. The epsilon rate is calculated in a similar way; rather than use the most common bit, the least common bit from each position is used.
-
-Use the binary numbers in your diagnostic report to calculate the gamma rate and epsilon rate, then multiply them together.
-
 #+begin_src jupyter-python
 df = pd.read_fwf(datadir / "3.txt", widths=[1]*12, header=None)
 def binarize(array):
@@ -88,19 +66,6 @@ binarize(bits) * binarize(1 - bits)
 #+end_src
 
 ** Part 2
-Both the oxygen generator rating and the CO2 scrubber rating are values that can be found in your diagnostic report - finding them is the tricky part. Both values are located using a similar process that involves filtering out values until only one remains. Before searching for either rating value, start with the full list of binary numbers from your diagnostic report and consider just the first bit of those numbers. Then:
-
-    - Keep only numbers selected by the bit criteria for the type of rating value for which you are searching. Discard numbers which do not match the bit criteria.
-    - If you only have one number left, stop; this is the rating value for which you are searching.
-    - Otherwise, repeat the process, considering the next bit to the right.
-
-The bit criteria depends on which type of rating value you want to find:
-
-    - To find oxygen generator rating, determine the most common value (0 or 1) in the current bit position, and keep only numbers with that bit in that position. If 0 and 1 are equally common, keep values with a 1 in the position being considered.
-    - To find CO2 scrubber rating, determine the least common value (0 or 1) in the current bit position, and keep only numbers with that bit in that position. If 0 and 1 are equally common, keep values with a 0 in the position being considered.
-
-Use the binary numbers in your diagnostic report to calculate the oxygen generator rating and CO2 scrubber rating, then multiply them together.
-
 #+begin_src jupyter-python
 oxygen = df
 co2 = df
@@ -111,15 +76,8 @@ for column in df.columns:
 binarize(oxygen.to_numpy()) * binarize(co2.to_numpy())
 #+end_src
 
-* Day 4
-[[https://adventofcode.com/2021/day/4][Giant Squid]]
+* [[https://adventofcode.com/2021/day/4][Day 4: Giant Squid]]
 ** Part 1
-Bingo is played on a set of boards each consisting of a 5x5 grid of numbers. Numbers are chosen at random, and the chosen number is marked on all boards on which it appears. (Numbers may not appear on all boards.) If all numbers in any row or any column of a board are marked, that board wins. (Diagonals don't count.)
-
-The score of the winning board can now be calculated. Start by finding the sum of all unmarked numbers on that board. Then, multiply that sum by the number that was just called when the board won, to get the final score
-
-To guarantee victory against the giant squid, figure out which board will win first. What will your final score be if you choose that board?
-
 #+begin_src jupyter-python
   data = load(4, "raw").split("\n\n")
   numbers = np.array([int(x) for x in data[0].strip().split(",")])
@@ -150,23 +108,8 @@ Figure out which board will win last. Once it wins, what would its final score b
   np.sum(np.ma.array(boards, mask=(boards == -1))[index]) * number
 #+end_src
 
-* Day 5
-[[https://adventofcode.com/2021/day/5][Hydrothermal Venture]]
+* [[https://adventofcode.com/2021/day/5][Day 5: Hydrothermal Venture]]
 ** Part 1
-You come across a field of hydrothermal vents on the ocean floor! These vents constantly produce large, opaque clouds, so it would be best to avoid them if possible.
-
-They tend to form in lines; the submarine helpfully produces a list of nearby lines of vents (your puzzle input) for you to review.
-
-Each line of vents is given as a line segment in the format x1,y1 -> x2,y2 where x1,y1 are the coordinates of one end the line segment and x2,y2 are the coordinates of the other end. These line segments include the points at both ends. In other words:
-
-    An entry like 1,1 -> 1,3 covers points 1,1, 1,2, and 1,3.
-    An entry like 9,7 -> 7,7 covers points 9,7, 8,7, and 7,7.
-
-For now, only consider horizontal and vertical lines: lines where either x1 = x2 or y1 = y2.
-
-To avoid the most dangerous areas, you need to determine the number of points where at least two lines overlap.
-
-Consider only horizontal and vertical lines. At how many points do at least two lines overlap?
 #+begin_src jupyter-python
   data = pd.read_csv(datadir / '5.txt', names=['x1', 'middle', 'y2'])
   data[['y1', 'x2']] = data['middle'].apply(lambda x: pd.Series(x.split('->')).astype('int'))
@@ -186,9 +129,6 @@ Consider only horizontal and vertical lines. At how many points do at least two 
 #+end_src
 
 ** Part 2
-Unfortunately, considering only horizontal and vertical lines doesn't give you the full picture; you need to also consider diagonal lines.
-
-Consider all of the lines. At how many points do at least two lines overlap?
 #+begin_src jupyter-python
   skewed = data[(data['x1'] != data['x2']) & (data['y1'] != data['y2'])]
   for row in skewed.itertuples():
@@ -197,22 +137,8 @@ Consider all of the lines. At how many points do at least two lines overlap?
   (grid > 1).sum()
 #+end_src
 
-* Day 6
-[[https://adventofcode.com/2021/day/6][Lanternfish]]
+* [[https://adventofcode.com/2021/day/6][Day 6: Lanternfish]]
 ** Part 1
-Although you know nothing about this specific species of lanternfish, you make some guesses about their attributes. Surely, each lanternfish creates a new lanternfish once every 7 days.
-
-However, this process isn't necessarily synchronized between every lanternfish - one lanternfish might have 2 days left until it creates another lanternfish, while another might have 4. So, you can model each fish as a single number that represents the number of days until it creates a new lanternfish.
-
-Furthermore, you reason, a new lanternfish would surely need slightly longer before it's capable of producing more lanternfish: two more days for its first cycle.
-
-A lanternfish that creates a new fish resets its timer to 6, not 7 (because 0 is included as a valid timer value). The new lanternfish starts with an internal timer of 8 and does not start counting down until the next day.
-
-Realizing what you're trying to do, the submarine automatically produces a list of the ages of several hundred nearby lanternfish (your puzzle input).
-
-Each day, a 0 becomes a 6 and adds a new 8 to the end of the list, while each other number decreases by 1 if it was present at the start of the day.
-
-Find a way to simulate lanternfish. How many lanternfish would there be after 80 days?
 #+begin_src jupyter-python
   data = load(6, "np")
   population, _ = np.histogram(data, range(10))
@@ -222,40 +148,18 @@ Find a way to simulate lanternfish. How many lanternfish would there be after 80
 #+end_src
 
 ** Part 2
-Suppose the lanternfish live forever and have unlimited food and space. Would they take over the entire ocean?
-
-How many lanternfish would there be after 256 days?
 #+begin_src jupyter-python
   (np.linalg.matrix_power(transition_matrix, 256) @ population).sum()
 #+end_src
 
-* Day 7
-[[https://adventofcode.com/2021/day/7][The Treachery of Whales]]
+* [[https://adventofcode.com/2021/day/7][Day 7: The Treachery of Whales]]
 ** Part 1
-A giant whale has decided your submarine is its next meal, and it's much faster than you are. There's nowhere to run!
-
-Suddenly, a swarm of crabs (each in its own tiny submarine - it's too deep for them otherwise) zooms in to rescue you! They seem to be preparing to blast a hole in the ocean floor; sensors indicate a massive underground cave system just beyond where they're aiming!
-
-The crab submarines all need to be aligned before they'll have enough power to blast a large enough hole for your submarine to get through. However, it doesn't look like they'll be aligned before the whale catches you! Maybe you can help?
-
-There's one major catch - crab submarines can only move horizontally.
-
-You quickly make a list of the horizontal position of each crab (your puzzle input). Crab submarines have limited fuel, so you need to find a way to make all of their horizontal positions match while requiring them to spend as little fuel as possible.
-
-Each change of 1 step in horizontal position of a single crab costs 1 fuel.
-
-Determine the horizontal position that the crabs can align to using the least fuel possible. How much fuel must they spend to align to that position?
 #+begin_src jupyter-python
   data = load(7, "np")
   np.abs(data - np.median(data)).sum()
 #+end_src
 
 ** Part 2
-The crabs don't seem interested in your proposed solution. Perhaps you misunderstand crab engineering?
-
-As it turns out, crab submarine engines don't burn fuel at a constant rate. Instead, each change of 1 step in horizontal position costs 1 more unit of fuel than the last: the first step costs 1, the second step costs 2, the third step costs 3, and so on.
-
-Determine the horizontal position that the crabs can align to using the least fuel possible so they can make you an escape route! How much fuel must they spend to align to that position?
 #+begin_src jupyter-python
   def cost(position):
       delta = np.abs(data - position)
@@ -265,8 +169,7 @@ Determine the horizontal position that the crabs can align to using the least fu
   min(options)
 #+end_src
 
-* Day 8
-[[https://adventofcode.com/2021/day/8][Seven Segment Search]]
+* [[https://adventofcode.com/2021/day/8][Day 8: Seven Segment Search]]
 ** Part 1
 #+begin_src jupyter-python
   data = load(8)
@@ -298,8 +201,7 @@ We know that every digit occurs before the pipe for every row in our input.
 
  It's not super elegant, and I kind of prefer just using the generalised constraints programming.
 
-* Day 9
-[[https://adventofcode.com/2021/day/9][Smoke Basin]]
+* [[https://adventofcode.com/2021/day/9][Day 9: Smoke Basin]]
 ** Part 1
 #+begin_src jupyter-python
   data = pd.read_fwf(datadir / '9.txt', widths=[1]*100, header=None).to_numpy()
@@ -339,10 +241,8 @@ We know that every digit occurs before the pipe for every row in our input.
   print(np.product(sorted(sizes)[-3:]))
 #+end_src
 
-* Day 10
-[[https://adventofcode.com/2021/day/10][Syntax Scoring]]
+* [[https://adventofcode.com/2021/day/10][Day 10: Syntax Scoring]]
 ** Part 1
-
 #+begin_src jupyter-python
   lines = load(10)
   pairs = ["[]", "()", "<>", "{}"]
@@ -370,7 +270,6 @@ We know that every digit occurs before the pipe for every row in our input.
 #+end_src
 
 ** Part 2
-
 #+begin_src jupyter-python
   delimiters = " ([{<"
   scores = []
@@ -383,8 +282,7 @@ We know that every digit occurs before the pipe for every row in our input.
   int(np.median(scores))
 #+end_src
 
-* Day 11:
-[[https://adventofcode.com/2021/day/11][Dumbo Octopus]]
+* [[https://adventofcode.com/2021/day/11][Day 11: Dumbo Octopus]]
 ** Part 1
 #+begin_src jupyter-python
     def find_neighbors(x, y):
@@ -429,8 +327,7 @@ We know that every digit occurs before the pipe for every row in our input.
 
 #+end_src
 
-* Day 12
-[[https://adventofcode.com/2021/day/12][Passage Pathing]]
+* [[https://adventofcode.com/2021/day/12][Day 12: Passage Pathing]]
 ** Part 1
 #+begin_src jupyter-python
   def flatten(mylist):
@@ -485,8 +382,7 @@ We know that every digit occurs before the pipe for every row in our input.
   len(set(paths(tree)))
 #+end_src
 
-* Day 13
-[[https://adventofcode.com/2021/day/13][Transparent Origami]]
+* [[https://adventofcode.com/2021/day/13][Day 13: Transparent Origami]]
 ** Part 1
 
 #+begin_src jupyter-python
@@ -521,8 +417,7 @@ We know that every digit occurs before the pipe for every row in our input.
 
 #+end_src
 
-* Day 14
-[[https://adventofcode.com/2021/day/14][Extended Polymerization]]
+* [[https://adventofcode.com/2021/day/14][Day 14: Extended Polymerization]]
 
 Here's another puzzle that seems tailor made for a transition matrix based approach. We are given an initial state, and a set of rules for producing the next state from the current state. The rules are all phrased in terms of pairs, so we should work in the basis of pairs of elements.
 
@@ -566,8 +461,7 @@ A rule like CH -> B should be interpreted as state "CH" produces states "CB" and
   pd.Series(totals).max() - pd.Series(totals).min()
 #+end_src
 
-* Day 15
-[[https://adventofcode.com/2021/day/15][Chiton]]
+* [[https://adventofcode.com/2021/day/15][Day 15: Chiton]]
 
 ** Part 1
 This is a shortest path search, where we'll use a priority queue to store the items and their cost. Reusing my A* implementation then gives
@@ -603,8 +497,7 @@ This is a shortest path search, where we'll use a priority queue to store the it
   utils.astar((0, 0), (499, 499), neighbors, heuristic, cost, data=arr)
 #+end_src
 
-* Day 16
-[[https://adventofcode.com/2021/day/16][Packet Decoder]]
+* [[https://adventofcode.com/2021/day/16][Day 16: Packet Decoder]]
 ** Part 1
 #+begin_src jupyter-python
   nybbles = {hex(i)[2:]: bin(i)[2:].rjust(4, '0') for i in range(16)}
@@ -689,8 +582,7 @@ For part 2, we have to completely ignore the version number and actually do some
   print(evaluate_one_packet(bits)[0])
 #+end_src
 
-* Day 17
-[[https://adventofcode.com/2021/day/17][Trick Shot]]
+* [[https://adventofcode.com/2021/day/17][Day 17: Trick Shot]]
 ** Part 1
 First pen and paper solution for this year.
 
@@ -708,7 +600,6 @@ Things to note:
 10. ∎
 
 ** Part 2
-
 #+begin_src jupyter-python
   xmin, xmax =  217, 240
   ymin, ymax = -126, -69
@@ -734,8 +625,7 @@ Things to note:
   print(len(set(result)))
 #+end_src
 
-* Day 18
-[[https://adventofcode.com/2021/day/18][Snailfish]]
+* [[https://adventofcode.com/2021/day/18][Day 18: Snailfish]]
 ** Part 1
 #+begin_src jupyter-python
 
@@ -836,8 +726,7 @@ Things to note:
   maxval
 #+end_src
 
-* Day 19
-[[https://adventofcode.com/2021/day/19][Beacon Scanner]]
+* [[https://adventofcode.com/2021/day/19][Day 19: Beacon Scanner]]
 ** Part 1
 We'll start by generating the 24 rotation matrices. There are six possible ways of permuting the axes, and eight possible sign conventions. Half of the sign conventions will be left-handed, so we discard them
 #+begin_src jupyter-python
@@ -918,8 +807,7 @@ What is the largest Manhattan distance between any two scanners?
   maxval
 #+end_src
 
-* Day 20
-[[https://adventofcode.com/2021/day/20][Trench Map]]
+* [[https://adventofcode.com/2021/day/20][Day 20: Trench Map]]
 ** Part 1 and 2
 #+begin_src jupyter-python
   data = load(20, "raw")
@@ -939,8 +827,7 @@ What is the largest Manhattan distance between any two scanners?
           print(new.sum())
 #+end_src
 
-* Day 21
-[[https://adventofcode.com/2021/day/21][Dirac Dice]]
+* [[https://adventofcode.com/2021/day/21][Day 21: Dirac Dice]]
 ** Part 1
 #+begin_src jupyter-python
   positions, scores, count = [4, 6], [0, 0], 0
@@ -984,10 +871,8 @@ What is the largest Manhattan distance between any two scanners?
   max(wins)
 #+end_src
 
-* Day 22
-[[https://adventofcode.com/2021/day/22][Reactor Reboot]]
+* [[https://adventofcode.com/2021/day/22][Day 22: Reactor Reboot]]
 ** Part 1
-
 The first part can be solved trivially by using numpy's indexing
 #+begin_src jupyter-python
   offset = 50
@@ -1070,7 +955,7 @@ The approach we'll take is to process the list of instructions sequentially, cal
 
 #+end_src
 
-* Day 23
+* [[https://adventofcode.com/2021/day/23][Day 23: Amphipod]]
 ** Part 1
 This is definitely not pretty, and takes a bunch of time to run as well, but it works. This is a pathfinding problem: Given some initial state, our goal is to move to the final state with as small a cost as possible.
 
@@ -1171,8 +1056,7 @@ And then for part 2
   navigate(s, d)
 #+end_src
 
-* Day 24
-[[https://adventofcode.com/2021/day/24][Arithmetic Logic Unit]]
+* [[https://adventofcode.com/2021/day/24][Day 24: Arithmetic Logic Unit]]
 ** Part 1
 Rarely in AOC have I had a worse ratio of thinking employed to code written - this code looks way simpler than for day 23, but getting there was a real challenge.
 
@@ -1215,9 +1099,8 @@ After all that, luckily part 2 is trivial
 
 #+end_src
 
-* Day 25
+* [[https://adventofcode.com/2021/day/25][Day 25: Sea Cucumber]]
 🎄
-[[https://adventofcode.com/2021/day/25][Sea Cucumber]]
 #+begin_src jupyter-python
   lookup = {".": 0, ">": 1, "v": -1}
   reverse = {v: k for k, v in lookup.items()}

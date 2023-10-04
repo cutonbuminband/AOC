@@ -1,11 +1,16 @@
 #+PROPERTY: header-args:jupyter-python  :session aoc-2018 :kernel aoc
 #+PROPERTY: header-args    :pandoc t
+#+TITLE: 2018 Solutions
 
 * Imports
 #+begin_src jupyter-python
+  # | eval: true
+  # | output: false
   import functools
   import itertools
+  import os
   import re
+  import sys
   from collections import defaultdict, deque
   from pathlib import Path
 
@@ -13,20 +18,20 @@
   import numpy as np
   import pandas as pd
   import scipy
+  from IPython.display import HTML
 
+  sys.path.insert(1, os.path.join(sys.path[0], ".."))
   import utils
 
   load = utils.year_load(2018)
 #+end_src
 
-* Day 1
-[[https://adventofcode.com/2018/day/1][Chronal Calibration]]
+* [[https://adventofcode.com/2018/day/1][Day 1: Chronal Calibration]]
 ** Part 1
 #+begin_src jupyter-python
   data = load(1, "np")
   data.sum()
 #+end_src
-
 
 ** Part 2
 #+begin_src jupyter-python
@@ -42,8 +47,7 @@
   value
 #+end_src
 
-* Day 2
-[[https://adventofcode.com/2018/day/2][Inventory Managment System]]
+* [[https://adventofcode.com/2018/day/2][Day 2: Inventory Managment System]]
 ** Part 1
 #+begin_src jupyter-python
   lines = [np.array([ord(y) for y in x.strip()]) for x in load(2)]
@@ -65,8 +69,7 @@
 result
 #+end_src
 
-* Day 3
-[[https://adventofcode.com/2018/day/3][No Matter How You Slice It]]
+* [[https://adventofcode.com/2018/day/3][Day 3: No Matter How You Slice It]]
 ** Part 1
 #+begin_src jupyter-python
   import re
@@ -86,8 +89,7 @@ result
   pid
 #+end_src
 
-* Day 4
-[[https://adventofcode.com/2018/day/4][Repose Record]]
+* [[https://adventofcode.com/2018/day/4][Day 4: Repose Record]]
 ** Part 1
 #+begin_src jupyter-python
   from time import strptime
@@ -115,8 +117,7 @@ result
   int(sleepiest_guard) * guards[sleepiest_guard].argmax()
 #+end_src
 
-* Day 5
-[[https://adventofcode.com/2018/day/5][Alchemical Reduction]]
+* [[https://adventofcode.com/2018/day/5][Day 5: Alchemical Reduction]]
 ** Part 1
 #+begin_src jupyter-python
   import string
@@ -136,12 +137,12 @@ result
   min(reduce(s.replace(c, "").replace(c.upper(), "")) for c in string.ascii_lowercase)
 #+end_src
 
-* Day 6
-[[https://adventofcode.com/2018/day/6][Chronal Coordinates]]
-
+* [[https://adventofcode.com/2018/day/6][Day 6: Chronal Coordinates]]
 ** Part 1
 The numbers involved are small enough that brute force is a viable approach. It's ugly, but it works. The question is basically asking for the voronoi diagram of the initial points using the L1 metric, but I'm too slow to see an efficient way of calculating that. The approach would have to be something like determining the boundary line between each pair of points, and then intersecting all of those half planes to get the voronoi cell.
 #+begin_src jupyter-python
+  # | eval: true
+  # | output: false
   data = load(6)
   coordinates = np.array([list(map(int, re.findall("\d+", line))) for line in data])
   xmax, ymax = coordinates.max(axis=0)
@@ -150,14 +151,23 @@ The numbers involved are small enough that brute force is a viable approach. It'
       distances = (np.abs(coordinates - np.array([x, y]))).sum(axis=1)
       values, counts = np.unique(distances, return_counts=True)
       board[x, y] = distances.argmin() if counts[0] == 1 else -1
-  infinite = functools.reduce(lambda x, y: set(x) | set(y), [board[0], board[:, 0], board[-1], board[:, -1]])
-  max([(board == seed).sum() if seed not in infinite else 0 for seed in range(len(coordinates))])
+  infinite = functools.reduce(
+      lambda x, y: set(x) | set(y), [board[0], board[:, 0], board[-1], board[:, -1]]
+  )
+  max(
+      [
+          (board == seed).sum() if seed not in infinite else 0
+          for seed in range(len(coordinates))
+      ]
+  )
 #+end_src
 
 ** Part 2
 #+begin_src jupyter-python
+  # | eval: true
+  # | output: false
   board = np.zeros([xmax, ymax], dtype=int)
-  for x,y in itertools.product(range(xmax), range(ymax)):
+  for x, y in itertools.product(range(xmax), range(ymax)):
       board[x, y] = (np.abs(coordinates - np.array([x, y]))).sum()
 
   (board < 10000).sum()
@@ -166,6 +176,8 @@ The numbers involved are small enough that brute force is a viable approach. It'
 ** Bonus
 I haven't figured out the cleanest way of solving part 1, but here's an approach that's slightly better than brute force. We can basically flood fill the grid, starting with the seed locations given in the input, and then expanding one step at a time. That way we end up considering the effect of at most four (and usually only one or two) seeds on each location, and we avoid having to calculate the distance from the point to every single seed.
 #+begin_src jupyter-python
+  # | eval: true
+  # | output: false
   import matplotlib.pyplot as plt
   board = np.zeros([xmax + 1, ymax + 1], dtype=int)
   def expand_one(cells, idx, to_paint):
@@ -192,6 +204,8 @@ I haven't figured out the cleanest way of solving part 1, but here's an approach
 We can animate the process of expanding each seed
 
 #+begin_src jupyter-python
+  # | eval: true
+  # | fig-cap: How each seed expands to fill its own area
   to_paint = {tuple(x): idx + 1 for idx, x in enumerate(coordinates)}
   system = [[x] for x in to_paint.keys()]
   boards = []
@@ -222,16 +236,12 @@ We can animate the process of expanding each seed
           i=0
       im.set_array(boards[i])
       return im,
-  a = animation.FuncAnimation(fig, updatefig,  blit=True, frames=len(boards))
-  a.save('graphs/2018-06.gif', fps=30)
+  a = animation.FuncAnimation(fig, updatefig,  blit=True, frames=len(boards), interval=10)
+  plt.close(fig)
+  HTML(a.to_jshtml())
 #+end_src
 
-That gives this pretty cool plot
-
-[[https://github.com/cutonbuminband/AOC/blob/main/graphs/2018-06.gif]]
-
-* Day 7
-[[https://adventofcode.com/2018/day/7][The Sum of Its Parts]]
+* [[https://adventofcode.com/2018/day/7][Day 7: The Sum of Its Parts]]
 ** Part 1
 #+begin_src jupyter-python
   constraints = {}
@@ -286,8 +296,7 @@ That gives this pretty cool plot
   time
 #+end_src
 
-* Day 8
-[[https://adventofcode.com/2018/day/8][Memory Maneuver]]
+* [[https://adventofcode.com/2018/day/8][Day 8: Memory Maneuver]]
 ** Part 1
 #+begin_src jupyter-python
   data = load(8, "int")[0]
@@ -322,8 +331,7 @@ That gives this pretty cool plot
 
 #+end_src
 
-* Day 9
-[[https://adventofcode.com/2018/day/9][Marble Mania]]
+* [[https://adventofcode.com/2018/day/9][Day 9: Marble Mania]]
 ** Part 1
 #+begin_src jupyter-python
   n_players = 419
@@ -349,8 +357,7 @@ That gives this pretty cool plot
   run(n_players, n_marbles * 100)
 #+end_src
 
-* Day 10
-[[https://adventofcode.com/2018/day/10][The Stars Align]]
+* [[https://adventofcode.com/2018/day/10][Day 10: The Stars Align]]
 ** Part 1
 #+begin_src jupyter-python
   array = np.array(load(10, "int"))
@@ -373,8 +380,7 @@ That gives this pretty cool plot
   int(((positions[0] - array[0, :2]) / velocities[0])[0])
 #+end_src
 
-* Day 11
-[[https://adventofcode.com/2018/day/11][Chronal Charge]]
+* [[https://adventofcode.com/2018/day/11][Day 11: Chronal Charge]]
 ** Part 1
 
 #+begin_src jupyter-python
@@ -407,9 +413,7 @@ Brute force over all sizes is slow, but works
   print(",".join(str(x) for x in result))
 #+end_src
 
-* Day 12
-[[https://adventofcode.com/2018/day/12][Subterranean Sustainability]]
-
+* [[https://adventofcode.com/2018/day/12][Day 12: Subterranean Sustainability]]
 ** Part 1
 #+begin_src jupyter-python
   data = load(12)
@@ -445,8 +449,7 @@ Simulating the 50 billion generations is impossible, so something cleverer is ne
   (((np.arange(new_state.shape[0]) - generations) + (50_000_000_000 - i))*new_state).sum()
 #+end_src
 
-* Day 13
-
+* [[https://adventofcode.com/2018/day/13][Day 13: Mine Cart Madness]]
 ** Part 1
 [[https://adventofcode.com/2018/day/13][Mine Cart Madness]]
 #+begin_src jupyter-python
@@ -515,8 +518,7 @@ Simulating the 50 billion generations is impossible, so something cleverer is ne
   print(int(carts[0][0].real),int(-carts[0][0].imag),sep=",")
 #+end_src
 
-* Day 14
-[[https://adventofcode.com/2018/day/14][Chocolate Charts]]
+* [[https://adventofcode.com/2018/day/14][Day 14: Chocolate Charts]]
 ** Part 1
 #+begin_src jupyter-python
   def solve(n):
@@ -553,8 +555,7 @@ Simulating the 50 billion generations is impossible, so something cleverer is ne
 
 #+end_src
 
-* Day 15
-[[https://adventofcode.com/2018/day/15][Beverage Bandits]]
+* [[https://adventofcode.com/2018/day/15][Day 15: Beverage Bandits]]
 ** Part 1
 This was a slog. Lots of small pieces to keep track of
 #+begin_src jupyter-python
@@ -709,8 +710,7 @@ For the longest time I missed the requirement that when two targets were equally
   print(np.product(x))
 #+end_src
 
-* Day 16
-[[https://adventofcode.com/2018/day/16][Chronal Classification]]
+* [[https://adventofcode.com/2018/day/16][Day 16: Chronal Classification]]
 ** Part 1
 This is fairly straightforward. We have seven different operations, with two or three different addressing modes for each. We'll start by building a dictionary of each operation, and then one of the valid addressing modes for each operation. From that, we can get a set of all the valid tuples of (operation, addressing mode 1, addressing mode 2).
 
@@ -792,8 +792,7 @@ With that out of the way, we can intersect all the potentially valid assignments
   state[0]
 #+end_src
 
-* Day 17
-[[https://adventofcode.com/2018/day/17][Reservoir Research]]
+* [[https://adventofcode.com/2018/day/17][Day 17: Reservoir Research]]
 ** Part 1
 #+begin_src jupyter-python
   data = load(17, "int")
@@ -855,8 +854,7 @@ This was a very weird part 2, since I basically solved it already in part 1
   (board == s).sum()
 #+end_src
 
-* Day 18
-[[https://adventofcode.com/2018/day/18][Settlers of The North Pole]]
+* [[https://adventofcode.com/2018/day/18][Day 18: Settlers of The North Pole]]
 ** Part 1
 #+begin_src jupyter-python
   state_map = {".": 0, "|": 1, "#": 2}
@@ -897,9 +895,7 @@ There's no way we can run the simulation for that long. Hopefully we'll get a re
 
 #+end_src
 
-* Day 19
-[[https://adventofcode.com/2018/day/19][Go With The Flow]]
-
+* [[https://adventofcode.com/2018/day/19][Day 19: Go With The Flow]]
 ** Part 1
 #+begin_src jupyter-python
   basic_ops = ["add", "mul", "ban", "bor"]
@@ -980,8 +976,7 @@ But thats equivalent to  ~x0 += x2 if x5 % x2 == 0 else 0~. The outer loop just 
   sum_of_divisors(registers[5])
 #+end_src
 
-* Day 20
-[[https://adventofcode.com/2018/day/20][A Regular Map]]
+* [[https://adventofcode.com/2018/day/20][Day 20: A Regular Map]]
 ** Part 1
 The hard part of this problem is moving from the regex representation of the map to a more sensible one. A pseudo-ebnf of the grammar is:
 
@@ -1066,8 +1061,7 @@ And finding how many rooms require at least 1000 steps can be found with the sam
   nodes - len(utils.bfs(0, end_condition, neighbors, return_visited=True))
 #+end_src
 
-* Day 21
-[[https://adventofcode.com/2018/day/21][Chronal Conversion]]
+* [[https://adventofcode.com/2018/day/21][Day 21: Chronal Conversion]]
 ** Part 1
 Analysing the structure of the program, we can see that the value of register 0 is only relevant in one place, namely as a comparison towards the end, where the program exits if ~x0 == x3~. So for the first part, we just run the code until we hit that comparison the first time, and see what the value of x3 is; that must be the answer to the problem.
 #+begin_src jupyter-python
@@ -1111,8 +1105,7 @@ For part 1, it turns out that the code is repeatedly applying a fairly simple tr
           x1 = x1 // 256
   seen[-1]
 #+end_src
-* Day 22
-[[https://adventofcode.com/2018/day/22][Mode Maze]]
+* [[https://adventofcode.com/2018/day/22][Day 22: Mode Maze]]
 ** Part 1
 #+begin_src jupyter-python
   d = 7863
@@ -1176,8 +1169,7 @@ This calls for a path finding algorithm. A* to the rescue! We'll need functions 
   utils.astar(initial_state, target, neighbors, heuristic, weights)
 #+end_src
 
-* Day 23
-[[https://adventofcode.com/2018/day/23][Experimental Emergency Teleportation]]
+* [[https://adventofcode.com/2018/day/23][Day 23: Experimental Emergency Teleportation]]
 ** Part 1
 The first part is pretty simple
 #+begin_src jupyter-python
@@ -1265,8 +1257,7 @@ This feels slightly like cheating, since it easily fails for other inputs. Looki
 - Distance to origin (expand closer boxes first)
 
 I don't think I'll implement that.  
-* Day 24
-[[https://adventofcode.com/2018/day/24][Immune System Simulator 20XX]]
+* [[https://adventofcode.com/2018/day/24][Day 24: Immune System Simulator 20XX]]
 ** Part 1
 This was a bit of a slog, with a fair bit of attention needed to make sure that the requirements were implemented correctly.
 #+begin_src jupyter-python
@@ -1413,9 +1404,7 @@ I did a binary search for this one. The players can get stuck in a draw, so we n
   winner(high)
 #+end_src
 
-* Day 25
-[[https://adventofcode.com/2018/day/25][Four-Dimensional Adventure]]
-
+* [[https://adventofcode.com/2018/day/25][Day 25: Four-Dimensional Adventure]]
 ** Part 1
 I could write this by hand. Or I could realise that the problem description is perfectly suited for a union-find/disjoint set data structure:
 #+begin_src jupyter-python

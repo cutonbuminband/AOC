@@ -4,7 +4,7 @@ import numpy as np
 from pathlib import Path
 import re
 
-datadir = Path("data")
+datadir = Path(__file__).parent / "data"
 
 
 def astar(

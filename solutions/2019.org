@@ -1,13 +1,18 @@
 #+PROPERTY: header-args:jupyter-python  :session aoc-2019 :kernel aoc
 #+PROPERTY: header-args    :pandoc t
+#+TITLE: 2019 Solutions
 
 * Imports
 #+begin_src jupyter-python
+  # | eval: true
+  # | output: false
   import collections
   import functools
   import itertools
   import math
+  import os
   import re
+  import sys
   from collections import defaultdict, deque
   from pathlib import Path
   from queue import PriorityQueue
@@ -17,14 +22,15 @@
   import pandas as pd
   import scipy
 
+  sys.path.insert(1, os.path.join(sys.path[0], ".."))
+
   import utils
   from intcode import IntCodeProgram
 
   load = utils.year_load(2019)
 #+end_src
 
-* Day 1
-[[https://adventofcode.com/2019/day/1][The Tyranny of the Rocket Equation]]
+* [[https://adventofcode.com/2019/day/1][Day 1: The Tyranny of the Rocket Equation]]
 ** Part 1
 #+begin_src jupyter-python
   data = load(1, "np")
@@ -43,8 +49,7 @@
   total
 #+end_src
 
-* Day 2
-[[https://adventofcode.com/2019/day/2][1202 Program Alarm]]
+* [[https://adventofcode.com/2019/day/2][Day 2: 1202 Program Alarm]]
 ** Part 1
 #+begin_src jupyter-python
   program = IntCodeProgram([int(x) for x in load(2)[0].split(',')])
@@ -68,11 +73,11 @@
   result
 #+end_src
 
-* Day 3
-[[https://adventofcode.com/2019/day/3][Crossed Wires]]
-
+* [[https://adventofcode.com/2019/day/3][Day 3: Crossed Wires]]
 ** Part 1
 #+begin_src jupyter-python
+  # | eval: true
+  # | output: false
   lines = [x.strip().split(',') for x in load(3)]
 
   def path_to_segments(path):
@@ -108,13 +113,13 @@
 ** Part 2
 #+begin_src jupyter-python
   min(x[1] for x in intersections)
-
 #+end_src
 
 ** Bonus
 As a bonus, we can visualize the walk through space
 #+begin_src jupyter-python
-
+  # | eval: true
+  # | fig-cap: How the two wires are arranged in space
   import matplotlib.pyplot as plt
   import seaborn as sns
   sns.set_theme()
@@ -126,16 +131,9 @@ As a bonus, we can visualize the walk through space
   plot_path(l1)
   plot_path(l2)
   ax = plt.gca()
-  plt.savefig("graphs/2019-3.png", bbox_inches="tight")
-
+  # plt.savefig("../graphs/2019-3.png", bbox_inches="tight")
 #+end_src
-
-That gives this plot for the two different wires
-
-[[graphs/2019-3.png]]
-
-* Day 4
-[[https://adventofcode.com/2019/day/4][Secure Container]]
+* [[https://adventofcode.com/2019/day/4][Day 4: Secure Container]]
 ** Part 1
 #+begin_src jupyter-python
   low = 231832
@@ -168,8 +166,7 @@ That gives this plot for the two different wires
 
 #+end_src
 
-* Day 5
-[[https://adventofcode.com/2019/day/5][Sunny with a Chance of Asteroids]]
+* [[https://adventofcode.com/2019/day/5][Day 5: Sunny with a Chance of Asteroids]]
 ** Part 1
 #+begin_src jupyter-python
   program = IntCodeProgram(load(5, "np"), inputs=[1])
@@ -183,8 +180,7 @@ That gives this plot for the two different wires
   next(program.run())
 #+end_src
 
-* Day 6
-[[https://adventofcode.com/2019/day/6][Universal Orbit Map]]
+* [[https://adventofcode.com/2019/day/6][Day 6: Universal Orbit Map]]
 ** Part 1
 We construct the DAG as a dictionary, where graph[node] corresponds to node.parent.
 #+begin_src jupyter-python
@@ -209,8 +205,7 @@ Moving from orbit A to orbit B can be accomplished by moving to the last common 
   len(set(p1) ^ set(p2))
 #+end_src
 
-* Day 7
-[[https://adventofcode.com/2019/day/7][Amplification Circuit]]
+* [[https://adventofcode.com/2019/day/7][Day 7: Amplification Circuit]]
 ** Part 1
 #+begin_src jupyter-python
   opcodes = load(7, "np")
@@ -245,8 +240,7 @@ Moving from orbit A to orbit B can be accomplished by moving to the last common 
   max(results)
 #+end_src
 
-* Day 8
-[[https://adventofcode.com/2019/day/8][Space Image Format]]
+* [[https://adventofcode.com/2019/day/8][Day 8: Space Image Format]]
 ** Part 1
 #+begin_src jupyter-python
   data = load(8)[0].strip()
@@ -268,8 +262,7 @@ Moving from orbit A to orbit B can be accomplished by moving to the last common 
                    for line in  np.array(result).reshape(6, 25)]))
 #+end_src
 
-* Day 9
-[[https://adventofcode.com/2019/day/9][Sensor Boost]]
+* [[https://adventofcode.com/2019/day/9][Day 9: Sensor Boost]]
 ** Part 1
 Adding the required functionality to the intcode compiler wasn't too tricky. Opcodes which set values had to be modified a bit to account for the offset, but that was more or less it.
 
@@ -287,8 +280,7 @@ Allowing arbitrary final addresses was accomplished by the very dirty hack of ch
   next(program.run())
 #+end_src
 
-* Day 10
-[[https://adventofcode.com/2019/day/10][Monitoring Station]]
+* [[https://adventofcode.com/2019/day/10][Day 10: Monitoring Station]]
 ** Part 1
 #+begin_src jupyter-python
   from math import gcd
@@ -314,8 +306,7 @@ There are more than 200 visible asteroids, so we only need to worry about the on
   np.array(sorted(set([simplify(*x) for x in ones - position]), key = lambda x: (np.arctan2(x[0], -x[1])) % (2 * np.pi))[200]) + position
 #+end_src
 
-* Day 11
-[[https://adventofcode.com/2019/day/11][Space Police]]
+* [[https://adventofcode.com/2019/day/11][Day 11: Space Police]]
 ** Part 1
 #+begin_src jupyter-python
   program = IntCodeProgram(load(11, "np"))
@@ -336,7 +327,6 @@ There are more than 200 visible asteroids, so we only need to worry about the on
   len(solve(0)[0])
 #+end_src
 
-
 ** Part 2
 #+begin_src jupyter-python
   _, field = solve(1)
@@ -350,8 +340,7 @@ There are more than 200 visible asteroids, so we only need to worry about the on
 
 #+end_src
 
-* Day 12
-[[https://adventofcode.com/2019/day/12][The N-Body Problem]]
+* [[https://adventofcode.com/2019/day/12][Day 12: The N-Body Problem]]
 ** Part 1
 #+begin_src jupyter-python
   data = load(12, "int")
@@ -397,9 +386,7 @@ I don't know what optimizations are possible here, but an obvious one is to real
 
 #+end_src
 
-* Day 13
-[[https://adventofcode.com/2019/day/13][Care Package]]
-
+* [[https://adventofcode.com/2019/day/13][Day 13: Care Package]]
 ** Part 1
 #+begin_src jupyter-python
   program = IntCodeProgram(load(13, "np"))
@@ -429,9 +416,7 @@ I don't know what optimizations are possible here, but an obvious one is to real
 #+end_src
 
 
-
-* Day 14
-[[https://adventofcode.com/2019/day/14][Space Stoichiometry]]
+* [[https://adventofcode.com/2019/day/14][Day 14: Space Stoichiometry]]
 ** Part 1
 #+begin_src jupyter-python
   data = load(14)
@@ -487,8 +472,7 @@ We need to somehow reverse the relationship we found above. There are probably s
   lower_limit
 #+end_src
 
-* Day 15
-[[https://adventofcode.com/2019/day/15][Oxygen System]]
+* [[https://adventofcode.com/2019/day/15][Day 15: Oxygen System]]
 ** Part 1
 I really liked this puzzle! The approach I took is to first map out the entire area by giving the droid the necessary instructions, and then using a path finding algorithm to get from start to finish.
 #+begin_src jupyter-python
@@ -545,8 +529,7 @@ We mapped out the whole area for part 1, so part 2 is just a bfs with no stoppin
   utils.bfs(target, None, neighbors, edges=edges)
 #+end_src
 
-* Day 16
-[[https://adventofcode.com/2019/day/16][Flawed Frequency Transmission]]
+* [[https://adventofcode.com/2019/day/16][Day 16: Flawed Frequency Transmission]]
 ** Part 1
 For the first part all the numbers are small, so we don't need to be particularly clever
 #+begin_src jupyter-python
@@ -563,7 +546,6 @@ For the first part all the numbers are small, so we don't need to be particularl
       data = abs(factors @ data) % 10
   print(*data[:8], sep="", end="\n")
 #+end_src
-
 
 ** Part 2
 
@@ -594,8 +576,7 @@ Explicitly solving the recurrences for all the digits in the second half is cert
   functools.reduce(lambda x, y: 10 * x + y, results[::-1][:8])
 #+end_src
 
-* Day 17
-[[https://adventofcode.com/2019/day/17][Set and Forget]]
+* [[https://adventofcode.com/2019/day/17][Day 17: Set and Forget]]
 ** Part 1
 #+begin_src jupyter-python
   opcodes = load(17, "np")
@@ -624,8 +605,7 @@ For this one I solved the path by hand, and then ran the input through the black
   [x for x in program.run()][-1]
 #+end_src
 
-* Day 18
-[[https://adventofcode.com/2019/day/18][Many-Worlds Interpretation]]
+* [[https://adventofcode.com/2019/day/18][Day 18: Many-Worlds Interpretation]]
 ** Part 1
 The maze we are looking at is fairly large, but it only has a few interesting points. Most of the maze is corridors of width 1; and on these stretches there are no choices about where to go, since backtracking is not an option. Instead of working with the grid we are given, we can extract the points of interest, and store the distance from each point to its neighbors.
 
@@ -763,8 +743,7 @@ For part 2 we need to keep track of four different robots, which increases the n
 
 #+end_src
 
-* Day 19
-[[https://adventofcode.com/2019/day/19][Tractor Beam]]
+* [[https://adventofcode.com/2019/day/19][Day 19: Tractor Beam]]
 ** Part 1
 #+begin_src jupyter-python
   opcodes = load(19, "np")
@@ -822,8 +801,7 @@ For part 2 we need to keep track of four different robots, which increases the n
   10000 * x + y
 #+end_src
 
-* Day 20
-[[https://adventofcode.com/2019/day/20][Donut Maze]]
+* [[https://adventofcode.com/2019/day/20][Day 20: Donut Maze]]
 ** Part 1
 This can be done with a fairly simple BFS. The only added difficulty is that we need some way of specifying that two portals of the same letter neighbor each other.
 
@@ -948,8 +926,7 @@ For part 2, we basically just need to add a level coordinate to our state, and c
   distance
 #+end_src
 
-* Day 21
-[[https://adventofcode.com/2019/day/21][Springdroid Adventure]]
+* [[https://adventofcode.com/2019/day/21][Day 21: Springdroid Adventure]]
 ** Part 1
 Part 1 is possible to brute force, even if a bit of thought is needed to do it. With 3 different commands available, with six options for their first argument and 2 for their second, there are are 36 possible SPRINGSCRIPT instructions; each program is a max of 15 instructions, so there are more than $2\times10^{23}$ possible programs. That's not the right way to go.
 
@@ -1035,8 +1012,7 @@ Some thoughts:
   value
 #+end_src
 
-* Day 22
-[[https://adventofcode.com/2019/day/22][Slam Shuffle]]
+* [[https://adventofcode.com/2019/day/22][Day 22: Slam Shuffle]]
 ** Part 1
 We are asked to follow how a single number moves - the one initally at position 2019. So if we build the operations so that they take an old position and return the new position, we can completely avoid dealing with the rest of the array.
 #+begin_src jupyter-python
@@ -1102,8 +1078,7 @@ The number of rounds is still prohibitive if we're stuck doing them one at a tim
   p
 #+end_src
 
-* Day 23
-[[https://adventofcode.com/2019/day/23][Category Six]]
+* [[https://adventofcode.com/2019/day/23][Day 23: Category Six]]
 ** Part 1
 #+begin_src jupyter-python
   data = load(23, "np")
@@ -1182,9 +1157,7 @@ The number of rounds is still prohibitive if we're stuck doing them one at a tim
   old_y
 #+end_src
 
-
-* Day 24
-[[https://adventofcode.com/2019/day/24][Planet of Discord]]
+* [[https://adventofcode.com/2019/day/24][Day 24: Planet of Discord]]
 ** Part 1
 #+begin_src jupyter-python
   initial_state = np.array(
@@ -1230,8 +1203,7 @@ We can get the in-plane neighbors exactly as before, and after far too much thou
   state.sum()
   #+end_src
 
-* Day 25
-[[https://adventofcode.com/2019/day/25][Cryostasis]]
+* [[https://adventofcode.com/2019/day/25][Day 25: Cryostasis]]
 ** Part 1
 #+begin_src jupyter-python
   program = IntCodeProgram(load(25, "np"), inputs=[])
@@ -1245,5 +1217,3 @@ We can get the in-plane neighbors exactly as before, and after far too much thou
               s = input().strip()
               program.inputs += [ord(x) for x in s + "\n"]
 #+end_src
-
-#+RESULTS:

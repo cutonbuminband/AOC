@@ -1,11 +1,16 @@
 #+PROPERTY: header-args:jupyter-python  :session aoc-2022 :kernel aoc
 #+PROPERTY: header-args    :pandoc t
+#+TITLE: 2022 Solutions
 
 * Imports
 #+begin_src jupyter-python
+  # | eval: true
+  # | output: false
   import functools
   import itertools
+  import os
   import re
+  import sys
   from collections import defaultdict, deque, namedtuple
   from pathlib import Path
   from queue import PriorityQueue
@@ -15,41 +20,31 @@
   import pandas as pd
   import scipy
 
-  datadir = Path("data/2022")
+  sys.path.insert(1, os.path.join(sys.path[0], ".."))
+
   import utils
 
   load = utils.year_load(2022)
 #+end_src
 
-* Day 1
-[[https://adventofcode.com/2022/day/1][Calorie Counting]]
+* [[https://adventofcode.com/2022/day/1][Day 1: Calorie Counting]]
 ** Part 1
-The Elves take turns writing down the number of Calories contained by the various meals, snacks, rations, etc. that they've brought with them, one item per line. Each Elf separates their own inventory from the previous Elf's inventory (if any) by a blank line.
-
-Find the Elf carrying the most Calories. How many total Calories is that Elf carrying?
-
 #+begin_src jupyter-python
   elves = [x.split("\n") for x in load(1, "raw").split("\n\n")]
   max([sum([int(y) for y in x if y]) for x in elves])
 #+end_src
 
 ** Part 2
-By the time you calculate the answer to the Elves' question, they've already realized that the Elf carrying the most Calories of food might eventually run out of snacks.
-
-To avoid this unacceptable situation, the Elves would instead like to know the total Calories carried by the top three Elves carrying the most Calories. That way, even if one of those Elves runs out of snacks, they still have two backups.
-
 #+begin_src jupyter-python
   sum(sorted([sum([int(y) for y in x if y]) for x in elves])[-3:])
 #+end_src
 
-* Day 2:
-[[https://adventofcode.com/2022/day/2][Rock Paper Scissors]]
-
+* [[https://adventofcode.com/2022/day/2][Day 2: Rock Paper Scissors]]
 ** Part 1
 #+begin_src jupyter-python
   lines = [
       [ord(x) - ord("A"), ord(y) - ord("X")]
-      for x, y in map(str.split, open(datadir / "2.txt").readlines())
+      for x, y in [x.strip().split() for x in load(2)]
   ]
   sum([line[1] + 1 + 3 * ((line[1] - line[0] + 1) % 3) for line in lines])
 #+end_src
@@ -59,12 +54,11 @@ To avoid this unacceptable situation, the Elves would instead like to know the t
   sum([(line[1] + line[0] - 1) % 3 + 1 + 3 * line[1] for line in lines])
 #+end_src
 
-* Day 3:
-[[https://adventofcode.com/2022/day/3][Rucksack Reorganization]]
+* [[https://adventofcode.com/2022/day/3][Day 3: Rucksack Reorganization]]
 ** Part 1
 #+begin_src jupyter-python
   total = 0
-  lines = list(map(str.strip, open(datadir / "3.txt", encoding="utf8")))
+  lines = [x.strip() for x in load(3)]
   for l in lines:
       letter = set(l[: len(l) // 2]).intersection(set(l[len(l) // 2 :])).pop()
       total += ord(letter.upper()) - ord("A") + 1 + 26 * letter.isupper()
@@ -75,16 +69,15 @@ To avoid this unacceptable situation, the Elves would instead like to know the t
 #+begin_src jupyter-python
   total = 0
   for chunk in more_itertools.chunked(lines, 3):
-      letter = functools.reduce(lambda x, y: set(x').intersection(set(y)), chunk).pop()
+      letter = functools.reduce(lambda x, y: set(x).intersection(set(y)), chunk).pop()
       total += ord(letter.upper()) - ord("A") + 1 + 26 * letter.isupper()
   total
 #+end_src
 
-* Day 4
-[[https://adventofcode.com/2022/day/4][Camp Cleanup]]
+* [[https://adventofcode.com/2022/day/4][Day 4: Camp Cleanup]]
 ** Part 1
 #+begin_src jupyter-python
-  assignments = [x.strip() for x in open(datadir / "4.txt", encoding="utf8").readlines()]
+  assignments = [x.strip() for x in load(4)]
   regex = re.compile("\d+")
   assignments = map(lambda x: [int(y) for y in re.findall(regex, x)], assignments)
   assignments = [sorted([a[:2], a[2:]]) for a in assignments]
@@ -96,12 +89,10 @@ To avoid this unacceptable situation, the Elves would instead like to know the t
   sum((a[1] >= b[0] or a[0] == b[0]) for a, b in assignments)
 #+end_src
 
-* Day 5
-[[https://adventofcode.com/2022/day/5][Supply Stacks]]
-
+* [[https://adventofcode.com/2022/day/5][Day 5: Supply Stacks]]
 ** Part 1
 #+begin_src jupyter-python
-  lines = [line.strip() for line in open(datadir / "5.txt").readlines()]
+  lines = [line.strip() for line in load(5)]
   numbers = [re.findall("\d+", line) for line in lines]
   split = np.argmax([len(x) for x in numbers])
   instructions = [[int(y) for y in x] for x in numbers[split + 1 :] if x]
@@ -124,11 +115,10 @@ To avoid this unacceptable situation, the Elves would instead like to know the t
   "".join(x[-1] if x else " " for x in p2)
 #+end_src
 
-* Day 6
-[[https://adventofcode.com/2022/day/6][Tuning Trouble]]
+* [[https://adventofcode.com/2022/day/6][Day 6: Tuning Trouble]]
 ** Part 1
 #+begin_src jupyter-python
-  data = open(datadir / "6.txt").readline()
+  data = load(6)[0]
 
 
   def find_marker(n):
@@ -145,8 +135,7 @@ To avoid this unacceptable situation, the Elves would instead like to know the t
   find_marker(14)
 #+end_src
 
-* Day 7
-[[https://adventofcode.com/2022/day/7][No Space Left On Device]]
+* [[https://adventofcode.com/2022/day/7][Day 7: No Space Left On Device]]
 ** Part 1
 This requires a bit of tedious bookkeeping, but is otherwise straightforward.
 
@@ -154,7 +143,7 @@ Keeping track of full names is necessary, since "/foo/baz" and "/bar/baz" refer 
 
 The following code has a bug where it will show incorrect totals if the contents of the same directory are described more than once. Luckily, that doesn't seem to ever happen.
 #+begin_src jupyter-python
-  lines = [line.strip() for line in open(datadir / "7.txt").readlines()]
+  lines = [line.strip() for line in load(7)]
   directory = {"/": {"children": [], "parent": None, "weights": []}}
 
 
@@ -206,13 +195,14 @@ The weight of every directory has been stored in the weight dict, so finding the
   min(weight for weight in weights.values() if weight >= to_free)
 #+end_src
 
-* Day 8
-[[https://adventofcode.com/2022/day/8][Treetop Tree House]]
+* [[https://adventofcode.com/2022/day/8][Day 8: Treetop Tree House]]
 ** Part 1
 It really feels like there should be a slick array-based solution to this: calculate the cumulative max from each of the four directions, take the minimum of those four and compare with our array. But it doesn't seem like numpy has easy functionality for calculating the cumulative max.
 
 A bit off digging reveals the very useful ufunc `accumulate`, which does exactly what we need. Then it's just a question of getting it to work in the four directions. Either we change the axis and direction of operation, or (as here) we transform the data from one orientation to another, do the accumulation, and transform back at the end.
 #+begin_src jupyter-python
+  # | eval: true
+  # | output: false
   data = np.array([[int(char) for char in line.strip()] for line in load(8)])
   masks = []
   for i in range(4):
@@ -232,6 +222,8 @@ There are a couple of gotchas:
 - The elves' sightlines are blocked by trees of the same height, not just by trees of greater height. If we want to leverage `maximum` as an indicator, we need to decrease the value of the tree under consideration by one, since otherwise there's no way of distinguishing between a, a - 1 (not blocked) and a, a (blocked).
 - The elves can see the tree that they're being blocked by. If we try to account for this by just adding one to all the sightlines, we'll get a bug when they can see all the way to the edge. Instead, we pretend that they can always see the last tree in the forest
 #+begin_src jupyter-python
+  # | eval: true
+  # | output: false
   def scenic_score(data):
       def one_row(i):
           """How many trees can be seen looking down from row i"""
@@ -253,29 +245,25 @@ There are a couple of gotchas:
 ** Bonus
 The grid here invites plotting. One thing we can plot is the shortest tree which would be visible at each location
 #+begin_src jupyter-python
+  # | eval: true
+  # | fig-cap: "The shortest visible tree at each location"
   import matplotlib.pyplot as plt
 
   plt.imshow(mask + 1)
   plt.xticks([]), plt.yticks([])
   plt.colorbar()
-  plt.title("The shortest visible tree at each location")
-  plt.savefig("graphs/2022-08.png", bbox_inches="tight")
+  plt.savefig("../graphs/2022-08.png", bbox_inches="tight")
 #+end_src
-
-That gives the following plot
-
-[[graphs/2022-08.png]]
 
 We can see how at the edges of the forest shorter trees are visible, but towards the center they've all been shadowed by taller trees.
 
-* Day 9
-[[https://adventofcode.com/2022/day/9][Rope Bridge]]
+* [[https://adventofcode.com/2022/day/9][Day 9: Rope Bridge]]
 ** Part 1
 #+begin_src jupyter-python
   base = {2: 1, 2 + 1j: 1 + 1j, 2 + 2j: 1 + 1j, 1 + 2j: 1 + 1j}
   deltas = {k * 1j**i: v * 1j**i for k, v in base.items() for i in range(4)}
   directions = {"R": 1, "L": -1, "U": 1j, "D": -1j}
-  instructions = [x.split() for x in open(datadir / "9.txt").readlines()]
+  instructions = [x.split() for x in load(9)]
 
 
   def tail_moves(rope_length):
@@ -302,9 +290,7 @@ We can see how at the edges of the forest shorter trees are visible, but towards
   len(set(tail_moves(10)))
 #+end_src
 
-* Day 10
-[[https://adventofcode.com/2022/day/10][Cathode-Ray Tube]]
-
+* [[https://adventofcode.com/2022/day/10][Day 10: Cathode-Ray Tube]]
 ** Part 1
 #+begin_src jupyter-python
   instructions = load(10)
@@ -333,11 +319,10 @@ We can see how at the edges of the forest shorter trees are visible, but towards
   print(*[run(draw_sprite, "")[40 * i : 40 * (i + 1)] for i in range(6)], sep="\n")
 #+end_src
 
-* Day 11
-[[https://adventofcode.com/2022/day/11][Monkey in the Middle]]
+* [[https://adventofcode.com/2022/day/11][Day 11: Monkey in the Middle]]
 ** Part 1
 #+begin_src jupyter-python
-  data = open(datadir / "11.txt").read()
+  data = load(11, "raw")
   monkeys = data.split("\n\n")
 
 
@@ -380,11 +365,10 @@ We can see how at the edges of the forest shorter trees are visible, but towards
   np.product(sorted(run(10000, lambda x: x % common_multiple))[-2:])
 #+end_src
 
-* Day 12
-[[https://adventofcode.com/2022/day/12][Hill Climbing Algorithm]]
+* [[https://adventofcode.com/2022/day/12][Day 12: Hill Climbing Algorithm]]
 ** Part 1
 #+begin_src jupyter-python
-  data = [list(x.strip()) for x in open(datadir / "12.txt").readlines()]
+  data = [list(x.strip()) for x in load(12)]
   elevations = np.array([[ord(char) - ord("a") for char in line] for line in data])
   source = tuple(x[0] for x in np.where(elevations == ord("S") - ord("a")))
   target = tuple(x[0] for x in np.where(elevations == ord("E") - ord("a")))
@@ -430,8 +414,7 @@ We can see how at the edges of the forest shorter trees are visible, but towards
   navigate(target, reversed_neighbors, lambda x: elevations[x] == 0)
 #+end_src
 
-* Day 13
-[[https://adventofcode.com/2022/day/13][Distress Signal]]
+* [[https://adventofcode.com/2022/day/13][Day 13: Distress Signal]]
 ** Part 1
 #+begin_src jupyter-python
   import ast
@@ -455,7 +438,7 @@ We can see how at the edges of the forest shorter trees are visible, but towards
 
 
   total = 0
-  s = open(datadir / "13.txt").read()[:-1]
+  s = load(13, "raw")[:-1]
   for idx, (left, right) in enumerate(map(lambda x: x.split("\n"), s.split("\n\n"))):
       val = compare(ast.literal_eval(left), ast.literal_eval(right))
       if val == 0:
@@ -475,8 +458,7 @@ We can see how at the edges of the forest shorter trees are visible, but towards
   (positions[0] + 1) * (positions[1] + 2)
 #+end_src
 
-* Day 14
-[[https://adventofcode.com/2022/day/14][Regolith Reservoir]]
+* [[https://adventofcode.com/2022/day/14][Day 14: Regolith Reservoir]]
 ** Part 1
 #+begin_src jupyter-python
   data = load(14, "int")
@@ -535,15 +517,9 @@ We can see how at the edges of the forest shorter trees are visible, but towards
   (board == sand).sum()
 #+end_src
 
-* Day 15
-[[https://adventofcode.com/2022/day/15][Beacon Exclusion Zone]]
+* [[https://adventofcode.com/2022/day/15][Day 15: Beacon Exclusion Zone]]
 ** Part 1
 #+begin_src jupyter-python
-  digits = re.compile(r"-?\d+")
-  data = open(datadir / "15.txt").read()
-  values = [int(x) for x in re.findall(digits, data)]
-
-
   def combine_two_intervals(i1, i2):
       i1, i2 = sorted([i1, i2])
       if i2[0] <= i1[1]:
@@ -570,7 +546,7 @@ We can see how at the edges of the forest shorter trees are visible, but towards
   y_target = 2000000
   fixes = set()
   intervals = []
-  for x, y, u, v in more_itertools.chunked(values, 4):
+  for x, y, u, v in load(15, "int"):
       r = abs(x - u) + abs(y - v)
       if v == y_target:
           fixes.add(u)
@@ -581,11 +557,13 @@ We can see how at the edges of the forest shorter trees are visible, but towards
   intervals = combine_n_intervals(intervals)
   sum(x[1] - x[0] for x in intervals) - len(fixes)
 #+end_src
-
-* Day 16
+** Part 2
+* [[https://adventofcode.com/2021/day/16][Day 16: Proboscidea Volcanium]]
 ** Part 1
 We should start by loading the data, and trying to visualize the graph
 #+begin_src jupyter-python
+  # | eval : true
+  # | fig-cap: The network of rooms and valves, and how they link together
   import sknetwork
 
   graph = {}
@@ -662,8 +640,7 @@ For part 2, we don't need to consider the two agents together. We can just find 
   max(v1 + v2 for s1, v1 in part2_paths.items() for s2, v2 in part2_paths.items() if not (s1 & s2))
 #+end_src
 
-* Day 17
-[[https://adventofcode.com/2022/day/17][Pyroclastic Flow]]
+* [[https://adventofcode.com/2022/day/17][Day 17: Pyroclastic Flow]]
 ** Part 1
 #+begin_src jupyter-python
   shapes = [
@@ -746,8 +723,7 @@ Actually simulating that many steps isn't possible, so we should probably look f
 #+end_src
 
 There's a weird off by one error in my code which is only present for some cases. I can't be bothered to find out why.
-* Day 18
-[[https://adventofcode.com/2022/day/18][Boiling Boulders]]
+* [[https://adventofcode.com/2022/day/18][Day 18: Boiling Boulders]]
 ** Part 1
 Idea: find all neighboring boxes by finding the union of the shifts along each of i,j,k,-i,-j,-k and subtracting the original shape. A given box might neighbor the original shape in up to six places, so to account for that I can take all the neighbors, shift them again along each of the axes, and for each shift, count how many boxes now overlap the original shape.
 #+begin_src jupyter-python
@@ -795,8 +771,7 @@ For part 2, once we have identified which of the neighboring boxes represent ext
   sum([len(to_set(arr + delta) & occupied) for delta in deltas])
 #+end_src
 
-* Day 19
-[[https://adventofcode.com/2022/day/19][Not Enough Minerals]]
+* [[https://adventofcode.com/2022/day/19][Day 19: Not Enough Minerals]]
 ** Part 1
 The core of this problem is to develop an approach that can take a list of prices and generate an optimal build. Blindly taking every action probably won't work, but is maybe worth examining as a first attempt.
 
@@ -889,8 +864,7 @@ Instead of simulating each of the 24 different time steps, we should focus on th
   total
 #+end_src
 
-* Day 20
-[[https://adventofcode.com/2022/day/21][Grove Positioning System]]
+* [[https://adventofcode.com/2022/day/21][Day 20: Grove Positioning System]]
 ** Part 1
 I was almost caught out by the fact that there can be duplicate entries in the data; my original linked list in a dictionary didn't account for this, so nodes were silently dropped. Oops.
 
@@ -947,8 +921,7 @@ To save time, I map each rotation to the range [-l/2, l/2] where l is the length
   mix([x * 811589153 for x in data], 10)
 #+end_src
 
-* Day 21
-[[https://adventofcode.com/2022/day/21][Monkey Math]]
+* [[https://adventofcode.com/2022/day/21][Day 21: Monkey Math]]
 ** Part 1
 We'll use recursion and the call stack to keep track of the operations for us
 #+begin_src jupyter-python
@@ -1002,9 +975,7 @@ We'll use recursion and the call stack to keep track of the operations for us
   balance("root", 0)
 #+end_src
 
-
-* Day 22
-[[https://adventofcode.com/2022/day/22][Monkey Map]]
+* [[https://adventofcode.com/2022/day/22][Day 22: Monkey Map]]
 ** Part 1
 #+begin_src jupyter-python
   data = load(22, "raw")
@@ -1119,9 +1090,7 @@ That gives us the new position on the grid. If this position is empty, we rotate
   (y + 1) * 1000 + 4 * (x + 1) + facings[dy, dx]
 #+end_src
 
-
-* Day 23
-[[https://adventofcode.com/2022/day/23][Unstable Diffusion]]
+* [[https://adventofcode.com/2022/day/23][Day 23: Unstable Diffusion]]
 ** Part 1
 #+begin_src jupyter-python
   board = np.array(
@@ -1180,8 +1149,7 @@ That gives us the new position on the grid. If this position is empty, we rotate
   simulate(board, np.inf)[0]
 #+end_src
 
-* Day 24
-[[https://adventofcode.com/2022/day/24][Blizzard Basin]]
+* [[https://adventofcode.com/2022/day/24][Day 24: Blizzard Basin]]
 ** Part 1
 This is a problem that seems to call for some pathfinding algorithms. We can account for the movement of the blizzards by making a function to answer the question "Is there a blizzard at position y, x at time t?". With that in hand, we can just explore the full search space. To guide the search, we'll use the (current tiime + manhattan distance to the goal node) as a score and always expand the lowest scoring state first, and stop when we've reached the target.
 #+begin_src jupyter-python
@@ -1264,8 +1232,7 @@ The above takes ~7 seconds on my machine (and it took 13 before I added the A* s
 
 This actually works, but it still seems like there should be some slick-ish way of using the chinese remainder theorem or something similar to greatly reduce the search space, since we basically have four masks of residues that are invalid for (y, x, t) triples.
 
-* Day 25
-[[https://adventofcode.com/2022/day/25][Full of Hot Air]]
+* [[https://adventofcode.com/2022/day/25][Day 25: Full of Hot Air]]
 #+begin_src jupyter-python
   lookup = {"2": 2, "1": 1, "0": 0, "-": -1, "=": -2}
   reverse_lookup = {3: "=", 4: "-"}

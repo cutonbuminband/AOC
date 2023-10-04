@@ -1,24 +1,28 @@
 #+PROPERTY: header-args:jupyter-python  :session aoc-2015 :kernel aoc
 #+PROPERTY: header-args    :pandoc t
+#+TITLE: 2015 Solutions
 
 * Imports
 #+begin_src jupyter-python
-  import pandas as pd
-  import numpy as np
-  from collections import defaultdict
-  from pathlib import Path
   import functools
   import itertools
-  import more_itertools
+  import os
   import re
+  import sys
+  from collections import defaultdict
+
+  import more_itertools
+  import numpy as np
+  import pandas as pd
   import scipy
-  from utils import year_load
-  load = year_load(2015)
+
+  sys.path.insert(1, os.path.join(sys.path[0], ".."))
+  import utils
+
+  load = utils.year_load(2015)
 #+end_src
 
-* Day 1
-[[https://adventofcode.com/2015/day/1][Not Quite Lisp]]
-
+* [[https://adventofcode.com/2015/day/1][Day 1: Not Quite Lisp]]
 ** Part 1
 #+begin_src jupyter-python
   line = load(1)[0]
@@ -35,8 +39,7 @@
   idx + 1
 #+end_src
 
-* Day 2
-[[https://adventofcode.com/2015/day/2][I Was Told There Would Be No Math]]
+* [[https://adventofcode.com/2015/day/2][Day 2: I Was Told There Would Be No Math]]
 ** Part 1
 #+begin_src jupyter-python
   data = load(2)
@@ -49,8 +52,7 @@
 sum([ x * y * z + 2 * (x + y) for x,y,z in map(sorted, boxes)])
 #+end_src
 
-* Day 3
-[[https://adventofcode.com/2015/day/3][Perfectly Spherical Houses in a Vacuum]]
+* [[https://adventofcode.com/2015/day/3][Day 3: Perfectly Spherical Houses in a Vacuum]]
 ** Part 1
 #+begin_src jupyter-python
   instructions = load(3)[0].strip()
@@ -75,8 +77,7 @@ sum([ x * y * z + 2 * (x + y) for x,y,z in map(sorted, boxes)])
   len(execute_instructions(instructions[1::2], houses))
 #+end_src
 
-* Day 4
-[[https://adventofcode.com/2015/day/4][The Ideal Stocking Stuffer]]
+* [[https://adventofcode.com/2015/day/4][Day 4: The Ideal Stocking Stuffer]]
 ** Part 1
 #+begin_src jupyter-python
   import hashlib
@@ -96,8 +97,7 @@ sum([ x * y * z + 2 * (x + y) for x,y,z in map(sorted, boxes)])
   brute_force(6)
 #+end_src
 
-* Day 5
-[[https://adventofcode.com/2015/day/5][Doesn't He Have Intern-Elves For This?]]
+* [[https://adventofcode.com/2015/day/5][Day 5: Doesn't He Have Intern-Elves For This?]]
 ** Part 1
 #+begin_src jupyter-python
   def is_nice(s):
@@ -117,8 +117,7 @@ sum([ x * y * z + 2 * (x + y) for x,y,z in map(sorted, boxes)])
   sum(is_nice(x) for x in load(5))
 #+end_src
 
-* Day 6
-[[https://adventofcode.com/2015/day/6][Probably a Fire Hazard]]
+* [[https://adventofcode.com/2015/day/6][Day 6: Probably a Fire Hazard]]
 ** Part 1
 #+begin_src jupyter-python
   lines = load(6)
@@ -145,8 +144,7 @@ sum([ x * y * z + 2 * (x + y) for x,y,z in map(sorted, boxes)])
   field.sum()
 #+end_src
 
-* Day 7
-[[https://adventofcode.com/2015/day/7][Some Assembly Required]]
+* [[https://adventofcode.com/2015/day/7][Day 7: Some Assembly Required]]
 ** Part 1
 #+begin_src jupyter-python
   lines = load(7)
@@ -184,8 +182,7 @@ That gives
   evaluate("a")
 #+end_src
 
-* Day 8
-[[https://adventofcode.com/2015/day/8][Matchsticks]]
+* [[https://adventofcode.com/2015/day/8][Day 8: Matchsticks]]
 ** Part 1
 #+begin_src jupyter-python
   lines = [x[:-1] for x load(8)]
@@ -197,8 +194,7 @@ That gives
   sum(2 + len([x for x in line if x in ["\"", "\\"]]) for line in lines)
 #+end_src
 
-* Day 9
-[[https://adventofcode.com/2015/day/9][All in a Single Night]]
+* [[https://adventofcode.com/2015/day/9][Day 9: All in a Single Night]]
 ** Part 1
 #+begin_src jupyter-python
   d = {}
@@ -217,8 +213,7 @@ That gives
   max(tours)
 #+end_src
 
-* Day 10
-[[https://adventofcode.com/2015/day/10][Elves Look, Elves Say]]
+* [[https://adventofcode.com/2015/day/10][Day 10: Elves Look, Elves Say]]
 ** Part 1
 #+begin_src jupyter-python
   message = "3113322113"
@@ -238,10 +233,7 @@ That gives
 
 #+end_src
 
-* Day 11
-
-[[https://adventofcode.com/2015/day/11][Corporate Policy]]
-
+* [[https://adventofcode.com/2015/day/11][Day 11: Corporate Policy]]
 ** Part 1
 So there are two jobs here:
 
@@ -294,8 +286,7 @@ To iterate over candidate passwords, we first construct a helper method to itera
 
 #+end_src
 
-* Day 12
-[[https://adventofcode.com/2015/day/12][JSAbacusFramework.io]]
+* [[https://adventofcode.com/2015/day/12][Day 12: JSAbacusFramework.io]]
 ** Part 1
 For the first part, we've been promised that integers only appear as integers. So there's no reason to try and read in the json properly - a simple regex does the trick
 #+begin_src jupyter-python
@@ -321,9 +312,7 @@ That approach obviously doesn't work for the second part, so we'll need a json l
   find_value(s)
 #+end_src
 
-
-* Day 13
-[[https://adventofcode.com/2015/day/13][Knights of the Dinner Table]]
+* [[https://adventofcode.com/2015/day/13][Day 13: Knights of the Dinner Table]]
 ** Part 1
 #+begin_src jupyter-python
   data = load(13)
@@ -364,8 +353,7 @@ Here we see the magic of the defaultdict - since all of the pairs involving "You
   maxval
 #+end_src
 
-* Day 14
-[[https://adventofcode.com/2015/day/14][Reindeer Olympics]]
+* [[https://adventofcode.com/2015/day/14][Day 14: Reindeer Olympics]]
 ** Part 1
 #+begin_src jupyter-python
   reindeer = load(14, "int")
@@ -389,9 +377,7 @@ Here we see the magic of the defaultdict - since all of the pairs involving "You
   max(wins)
 #+end_src
 
-* Day 15
-[[https://adventofcode.com/2015/day/15][Science for Hungry People]]
-
+* [[https://adventofcode.com/2015/day/15][Day 15: Science for Hungry People]]
 ** Part 1
 Since each of the values has to be positive, we can derive some constraints on how much of each ingredient we can use. We know there are 100 of each in total, so letting the four variables be $w, x, y, z$, we have $w + x + y + z = 100$. Additionally, since only one ingredient contributes a positive value to any given quantitity we have to use at least one of each. With that out of the way we can use the matrix to set up the following system of inequalities:
 
@@ -440,8 +426,7 @@ The last thing to consider is that once three of the values are fixed, the fourt
   calculate(2)
 #+end_src
 
-* Day 16
-[[https://adventofcode.com/2015/day/16][Aunt Sue]]
+* [[https://adventofcode.com/2015/day/16][Day 16: Aunt Sue]]
 ** Part 1
 #+begin_src jupyter-python
   data = load(16)
@@ -491,8 +476,7 @@ The last thing to consider is that once three of the values are fixed, the fourt
           break
 
 #+end_src
-* Day 17
-[[https://adventofcode.com/2015/day/17][No Such Thing as Too Much]]
+* [[https://adventofcode.com/2015/day/17][Day 17: No Such Thing as Too Much]]
 ** Part 1
 #+begin_src jupyter-python
   def count(value, containers):
@@ -521,8 +505,7 @@ The last thing to consider is that once three of the values are fixed, the fourt
   result[min(result.keys())]
 #+end_src
 
-* Day 18
-[[https://adventofcode.com/2015/day/18][Like a GIF For Your Yard]]
+* [[https://adventofcode.com/2015/day/18][Day 18: Like a GIF For Your Yard]]
 ** Part 1
 #+begin_src jupyter-python
   weights = [[1, 1, 1], [1, 1, 1], [1, 1, 1]]
@@ -549,8 +532,7 @@ The last thing to consider is that once three of the values are fixed, the fourt
   board.sum()
 #+end_src
 
-* Day 19
-[[https://adventofcode.com/2015/day/19][Medicine for Rudolph]]
+* [[https://adventofcode.com/2015/day/19][Day 19: Medicine for Rudolph]]
 ** Part 1
 #+begin_src jupyter-python
   data = load(19)
@@ -583,8 +565,7 @@ The only remaining question is how efficiently we can use the Rn we have availab
 
 There are 292 elements in the initial string. After getting rid of Rns I have 292 - 5 * 6 - 3 * 30 = 172 elements left, and have spent 36 reactions. Getting to one electron requires a further 171 reactions for a total of 207.
 
-* Day 20
-[[https://adventofcode.com/2015/day/20][Infinite Elves and Infinite Houses]]
+* [[https://adventofcode.com/2015/day/20][Day 20: Infinite Elves and Infinite Houses]]
 ** Part 1
 We're looking for numbers that have lots of divisors compared to how big they are. A bit of ass-pulling lets me guess that they have to be divisible by 60.
 #+begin_src jupyter-python
@@ -615,8 +596,7 @@ The only things that change for part 2 are the target, and the calculation of th
   run(target / 11, 2)
 #+end_src
 
-* Day 21
-[[https://adventofcode.com/2015/day/21][RPG Simulator 20XX]]
+* [[https://adventofcode.com/2015/day/21][Day 21: RPG Simulator 20XX]]
 ** Part 1
 #+begin_src jupyter-python
   data = {k: int(v) for k,v in map(lambda x: x.split(":"), load(20))}
@@ -648,8 +628,7 @@ With all that in place, part 2 is just inverting an inequality and changing a mi
   max(s[0] for s in sums if s[1] < attack_needed[min(s[2], 7)])
 #+end_src
 
-* Day 22
-[[https://adventofcode.com/2015/day/22][Wizard Simulator 20XX]]
+* [[https://adventofcode.com/2015/day/22][Day 22: Wizard Simulator 20XX]]
 ** Part 1
 #+begin_src jupyter-python
   import queue
@@ -710,9 +689,7 @@ With all that in place, part 2 is just inverting an inequality and changing a mi
   cost
 #+end_src
 
-
-* Day 23
-[[https://adventofcode.com/2015/day/23][Opening the Turing Lock]]
+* [[https://adventofcode.com/2015/day/23][Day 23: Opening the Turing Lock]]
 ** Part 1
 #+begin_src jupyter-python
   arithmetics = {"inc": lambda x: x + 1, "tpl": lambda x: x * 3, "hlf": lambda x: int(x // 2)}
@@ -742,8 +719,7 @@ A flag in the "run" function lets us change the relevant register for part 2
   run(data, 2)["b"]
 #+end_src
 
-* Day 24
-[[https://adventofcode.com/2015/day/24][It Hangs in the Balance]]
+* [[https://adventofcode.com/2015/day/24][Day 24: It Hangs in the Balance]]
 ** Part 1
 Here's a buggy implementation of part 1. It only looks at the smallest sets that can make the first compartment and completely ignores the others. For the first part that's semi justifiable, since the amount of small numbers in the input make it very likely that the leftover set can be partitioned into two.
 #+begin_src jupyter-python
@@ -771,8 +747,7 @@ For the second part, the same cheat works, but is less justifiable, since I don'
   run(4)
 #+end_src
 
-* Day 25
-[[https://adventofcode.com/2015/day/25][Let It Snow]]
+* [[https://adventofcode.com/2015/day/25][Day 25: Let It Snow]]
 ** Part 1
 #+begin_src jupyter-python
   def coordinates_to_n(row, column):
