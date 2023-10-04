@@ -36,6 +36,6 @@ format:
     toc: true
     reference-location: margin
     citation-location: margin
-    highlight-style: pygments
+    highlight-style: github
 execute:
   freeze: auto
