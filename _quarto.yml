@@ -2,7 +2,7 @@ project:
   type: website
 
 website:
-  title: "Advent of Code"
+  title: "AOC"
   sidebar:
     style: "floating"
     search: false
@@ -21,6 +21,9 @@ website:
         href: https://github.com/cutonbuminband/AOC
 format:
   html:
+    grid:
+      body-width: 850px
+      sidebar-width: 150px
     anchor-sections: true
     code-tools: true
     code-fold: show
