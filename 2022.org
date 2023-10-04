@@ -1174,6 +1174,7 @@ That gives us the new position on the grid. If this position is empty, we rotate
 
   simulate(board, 10)[1]
 #+end_src
+
 ** Part 2
 #+begin_src jupyter-python
   simulate(board, np.inf)[0]
@@ -1249,8 +1250,7 @@ This is a problem that seems to call for some pathfinding algorithms. We can acc
   first_leg
 #+end_src
 ** Part 2
-The above takes ~7 seconds on my machine (and it took 13 before I added the A* scoring logic), so using it to do three searches through the search space might not be. On the other hand, the three searches can be made completely independent of one another, since arriving later at a checkpoint will always be worse than arriving earlier, since an early arrival could always wait in place until the later time.
-
+The above takes ~7 seconds on my machine (and it took 13 before I added the A* scoring logic), so using it to do three searches through the search space might not be feasible. On the other hand, the three searches can be made completely independent of one another, since arriving later at a checkpoint will always be worse than arriving earlier, since an early arrival could always wait in place until the later time.
 
 #+begin_src jupyter-python
   time = first_leg
