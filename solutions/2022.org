@@ -199,7 +199,7 @@ The weight of every directory has been stored in the weight dict, so finding the
 ** Part 1
 It really feels like there should be a slick array-based solution to this: calculate the cumulative max from each of the four directions, take the minimum of those four and compare with our array. But it doesn't seem like numpy has easy functionality for calculating the cumulative max.
 
-A bit off digging reveals the very useful ufunc `accumulate`, which does exactly what we need. Then it's just a question of getting it to work in the four directions. Either we change the axis and direction of operation, or (as here) we transform the data from one orientation to another, do the accumulation, and transform back at the end.
+A bit off digging reveals the very useful ufunc ~accumulate~, which does exactly what we need. Then it's just a question of getting it to work in the four directions. Either we change the axis and direction of operation, or (as here) we transform the data from one orientation to another, do the accumulation, and transform back at the end.
 #+begin_src jupyter-python
   # | eval: true
   # | output: false
