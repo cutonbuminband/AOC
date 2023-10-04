@@ -649,7 +649,7 @@ With all that in place, part 2 is just inverting an inequality and changing a mi
 #+end_src
 
 * Day 22
-
+[[https://adventofcode.com/2015/day/22][Wizard Simulator 20XX]]
 ** Part 1
 #+begin_src jupyter-python
   import queue
@@ -772,7 +772,7 @@ For the second part, the same cheat works, but is less justifiable, since I don'
 #+end_src
 
 * Day 25
-
+[[https://adventofcode.com/2015/day/25][Let It Snow]]
 ** Part 1
 #+begin_src jupyter-python
   def coordinates_to_n(row, column):

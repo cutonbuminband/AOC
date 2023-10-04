@@ -288,13 +288,13 @@ We know that every digit occurs before the pipe for every row in our input.
 
  The three six segment numbers let us disambiguate {1267}, {345}.
 
- 1 is the segment present in 3 but not in 2.
- 2 is the segment present in 4, not present in 2, and present in every 6
- 3 is the segment present in 2 which is not present in every 6
- 4 is the segment present in 4, not present in 2, and not present in every 6
- 5 is the segment not present in 4 which only occurs once in 5
- 6 is the segment which is present in 2 and is present in every 6
- 7 is the segment present in every 5, not present in every 6, not present in 4
+- 1 is the segment present in 3 but not in 2.
+- 2 is the segment present in 4, not present in 2, and present in every 6
+- 3 is the segment present in 2 which is not present in every 6
+- 4 is the segment present in 4, not present in 2, and not present in every 6
+- 5 is the segment not present in 4 which only occurs once in 5
+- 6 is the segment which is present in 2 and is present in every 6
+- 7 is the segment present in every 5, not present in every 6, not present in 4
 
  It's not super elegant, and I kind of prefer just using the generalised constraints programming.
 
@@ -942,11 +942,6 @@ What is the largest Manhattan distance between any two scanners?
 * Day 21
 [[https://adventofcode.com/2021/day/21][Dirac Dice]]
 ** Part 1
-Players take turns moving. On each player's turn, the player rolls the die three times and adds up the results. Then, the player moves that many times forward around the track.
-
-After each player moves, they increase their score by the value of the space their pawn stopped on. Players' scores start at 0. The game immediately ends as a win for any player whose score reaches at least 1000.
-
-Play a practice game using the deterministic 100-sided die. The moment either player wins, what do you get if you multiply the score of the losing player by the number of times the die was rolled during the game?
 #+begin_src jupyter-python
   positions, scores, count = [4, 6], [0, 0], 0
 
@@ -962,12 +957,6 @@ Play a practice game using the deterministic 100-sided die. The moment either pl
 #+end_src
 
 ** Part 2
-A second compartment opens, this time labeled Dirac dice. Out of it falls a single three-sided die.
-
-Rolling this die splits the universe into three copies: one where the outcome of the roll was 1, one where it was 2, and one where it was 3.
-
-The game is played the same as before, although to prevent things from getting too far out of hand, the game now ends when either player's score reaches at least 21.
-
 #+begin_src jupyter-python
   states = {((4, 0), (6, 0)): 1}
   wins = [0, 0]

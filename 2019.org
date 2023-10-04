@@ -431,7 +431,7 @@ I don't know what optimizations are possible here, but an obvious one is to real
 
 
 * Day 14
-
+[[https://adventofcode.com/2019/day/14][Space Stoichiometry]]
 ** Part 1
 #+begin_src jupyter-python
   data = load(14)
@@ -546,7 +546,7 @@ We mapped out the whole area for part 1, so part 2 is just a bfs with no stoppin
 #+end_src
 
 * Day 16
-
+[[https://adventofcode.com/2019/day/16][Flawed Frequency Transmission]]
 ** Part 1
 For the first part all the numbers are small, so we don't need to be particularly clever
 #+begin_src jupyter-python
@@ -595,7 +595,7 @@ Explicitly solving the recurrences for all the digits in the second half is cert
 #+end_src
 
 * Day 17
-
+[[https://adventofcode.com/2019/day/17][Set and Forget]]
 ** Part 1
 #+begin_src jupyter-python
   opcodes = load(17, "np")
@@ -912,7 +912,7 @@ In terms of the number of lines, that's what most of the following code is doing
 #+end_src
 
 ** Part 2
-For part 2, we basically just need to add a level coordinate to our state, and change the way we enumerate neighbors to account for the fact that movign through a portal changes the levels
+For part 2, we basically just need to add a level coordinate to our state, and change the way we enumerate neighbors to account for the fact that moving through a portal changes the levels
 #+begin_src jupyter-python
   level_change = defaultdict(lambda: 1)
   portals = np.where(data < 0)

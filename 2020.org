@@ -287,7 +287,8 @@ with initial conditions f(0) = 1, f(-1) = 0, f(-2) = 0.
 
 That recurrence can be written in matrix form as
 
-$$\begin{pmatrix}
+$$
+\begin{pmatrix}
 1 & 1 & 1 \\
 1 & 0 & 0 \\
 0 & 1 & 0 \\
@@ -680,7 +681,7 @@ We have loops now! Analysing the new rules, we see that the system should accept
 #+end_src
 
 * Day 20
-
+[[https://adventofcode.com/2020/day/20][Jurassic Jigsaw]]
 #+begin_src jupyter-python
   data = load(20, "raw").split("\n\n")
   data[0]
@@ -1027,6 +1028,7 @@ This is a fairly simple convolution problem again. We'll be working in the basis
 #+end_src
 
 * Day 25
+[[https://adventofcode.com/2020/day/25][Combo Breaker]]
 #+begin_src jupyter-python
   d = 14222596
   c = 4057428

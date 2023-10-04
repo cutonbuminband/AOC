@@ -91,16 +91,12 @@
 * Day 4
 [[https://adventofcode.com/2017/day/4][High-Entropy Passphrases]]
 ** Part 1
-A new system policy has been put in place that requires all accounts to use a passphrase instead of simply a password. A passphrase consists of a series of words (lowercase letters) separated by spaces.
-
-To ensure security, a valid passphrase must contain no duplicate words.
 #+begin_src jupyter-python
   lines = [x.split() for x in load(4)]
   sum(len(l) == len(set(l)) for l in lines)
 #+end_src
 
 ** Part 2
-For added security, yet another system policy has been put in place. Now, a valid passphrase must contain no two words that are anagrams of each other.
 #+begin_src jupyter-python
   sum(len(l) == len(set([''.join(sorted(w)) for w in l])) for l in lines)
 #+end_src
@@ -230,6 +226,7 @@ This was made trivial by tracking when a given configuration was seen.
 #+end_src
 
 * Day 9
+[[https://adventofcode.com/2017/day/9][Stream Processing]]
 ** Part 1
 #+begin_src jupyter-python
 def canonical_form(sequence):
@@ -898,6 +895,7 @@ Enumerating all the bridges for part 2 is basically the same as in part 1, so I'
 #+end_src
 
 * Day 25
+[[https://adventofcode.com/2017/day/25][The Halting Problem]]
 A pretty mindless translation of the requirements into code. Parsing the data was almost the fiddliest part
 #+begin_src jupyter-python
   data = load(25, "raw")

@@ -326,7 +326,7 @@ With Part 1 out of the way, part 2 is just
 #+end_src
 
 * Day 11
-
+[[https://adventofcode.com/2016/day/11][Radioisotope Thermoelectric Generators]]
 ** Part 1
 This one looks difficult, but I don't think it is too tricky. Given that we are in floor $n$, the valid next positions are us at floor $n+1$ or $n - 1$, with up to two items moved; with the items moved being subject to the puzzle constraints.
 
@@ -624,7 +624,7 @@ What we can do instead is notice that the pattern of deletions correspond to lea
 #+end_src
 
 * Day 20
-[[https://adventofcode.com/2016/day/19][Firewall Rules]]
+[[https://adventofcode.com/2016/day/20][Firewall Rules]]
 
 ** Part 1
 #+begin_src jupyter-python
@@ -803,7 +803,7 @@ Just another graph search. There's only one empty space, so we can uniquely defi
 #+end_src
 
 * Day 23
-
+[[https://adventofcode.com/2016/day/23][Safe Cracking]]
 ** Part 1
 #+begin_src jupyter-python
   toggle_map = {"inc": "dec", "tgl": "inc", "dec": "inc", "cpy": "jnz", "jnz": "cpy"}
