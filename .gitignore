@@ -1,4 +1,5 @@
-201*/
-2020
 data
 .venv
+.quarto/
+_site/
+__pycache__
