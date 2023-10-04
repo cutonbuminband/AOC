@@ -10,67 +10,63 @@
   import re
   import sys
   from collections import defaultdict, deque
-  from pathlib import Path
 
   import numpy as np
-  import pandas as pd
   import scipy
 
-  datadir = Path("../data/2020/")
   sys.path.insert(1, os.path.join(sys.path[0], ".."))
   import utils
 
   load = utils.year_load(2020)
 #+end_src
 
-#+RESULTS:
-
 * [[https://adventofcode.com/2020/day/1][Day 1: Report Repair]]
 ** Part 1
-Specifically, they need you to find the two entries that sum to 2020 and then multiply those two numbers together.
 #+begin_src jupyter-python
-data = np.loadtxt(datadir / "1.txt", dtype=int)
-[pair[0] * pair[1] for pair in itertools.product(data, data) if sum(pair) == 2020][0]
+  data = load(1, "np")
+  [pair[0] * pair[1] for pair in itertools.product(data, data) if sum(pair) == 2020][0]
 #+end_src
 
 ** Part 2
-In your expense report, what is the product of the three entries that sum to 2020?
 #+begin_src jupyter-python
-[triple[0] * triple[1] * triple[2] for triple in itertools.product(data, data, data) if sum(triple) == 2020][0]
+  [
+      triple[0] * triple[1] * triple[2]
+      for triple in itertools.product(data, data, data)
+      if sum(triple) == 2020
+  ][0]
 #+end_src
 
 * [[https://adventofcode.com/2020/day/2][Day 2: Password Philosophy]]
 ** Part 1
 #+begin_src jupyter-python
   def is_valid(interval, letters, password):
-      interval = [int(x) for x in interval.split('-')]
+      interval = [int(x) for x in interval.split("-")]
       occurrences = password.count(letters[0])
       return interval[0] <= occurrences <= interval[1]
 
-  lines = list(map(str.split, open(datadir / "2.txt", encoding="utf8").readlines()))
-  sum([is_valid(*line) for line in lines])
+
+  lines = load(2)
+  sum([is_valid(*line.split()) for line in lines])
 #+end_src
 
 ** Part 2
 #+begin_src jupyter-python
   from operator import xor
 
+
   def is_valid(interval, letters, password):
-      lower, upper = [int(x) - 1 for x in interval.split('-')]
+      lower, upper = [int(x) - 1 for x in interval.split("-")]
       return xor(password[lower] == letters[0], password[upper] == letters[0])
-  sum([is_valid(*line) for line in lines])
+
+
+  sum([is_valid(*line.split()) for line in lines])
 #+end_src
 
 * [[https://adventofcode.com/2020/day/3][Day 3: Toboggan Trajectory]]
 ** Part 1
 #+begin_src jupyter-python
-  def read(myfile):
-      lines = open(myfile).readlines()
-      lookup = {'.': 0, "#": 1}
-      lines = np.array([[lookup[x] for x in line.strip()] for line in lines])
-      return lines
+  data = np.array([[0 if char == "." else 1 for char in line] for line in load(3)])
 
-  data = read(datadir / '3.txt')
 
   def count_trees(data, width_change, height_change):
       height, width = data.shape
@@ -78,6 +74,7 @@ In your expense report, what is the product of the three entries that sum to 202
       for i in range((height - 1) // height_change + 1):
           result += data[i * height_change, (i * width_change) % width]
       return result
+
 
   count_trees(data, 3, 1)
 #+end_src
@@ -91,41 +88,49 @@ In your expense report, what is the product of the three entries that sum to 202
 * [[https://adventofcode.com/2020/day/4][Day 4: Passport Processing]]
 ** Part 1
 #+begin_src jupyter-python
-  data = open(datadir / "4.txt").read()
+  data = load(4, "raw")
   passports = data.split("\n\n")
-  passport_dicts = [dict(list(map(lambda x: x.split(":"), p.replace("\n", " ").split()))) for p in passports]
+  passport_dicts = [
+      dict(list(map(lambda x: x.split(":"), p.replace("\n", " ").split())))
+      for p in passports
+  ]
   sum([len(set(p.keys()) - set(["cid"])) == 7 for p in passport_dicts])
 #+end_src
 
 ** Part 2
 #+begin_src jupyter-python
   def validate_key(key, value):
-      year_limits = {'byr': [1920, 2002],
-                     'eyr': [2020, 2030],
-                     'iyr': [2010, 2020]}
+      year_limits = {"byr": [1920, 2002], "eyr": [2020, 2030], "iyr": [2010, 2020]}
       try:
-          if key in ['byr', 'eyr', 'iyr']:
+          if key in ["byr", "eyr", "iyr"]:
               minval, maxval = year_limits[key]
               return minval <= int(value) <= maxval
-          if key == 'hgt':
+          if key == "hgt":
               value, unit = int(value[:-2]), value[-2:]
-              return ((unit == 'cm' and (150 <= value <= 193))
-                      or (unit == 'in' and (59 <= value <= 76)))
-          if key == 'hcl':
-              return (value[0] == "#"
-                      and len(value) == 7
-                      and not (set(value[1:]) - set("0123456789abcdef")))
-          if key == 'ecl':
+              return (unit == "cm" and (150 <= value <= 193)) or (
+                  unit == "in" and (59 <= value <= 76)
+              )
+          if key == "hcl":
+              return (
+                  value[0] == "#"
+                  and len(value) == 7
+                  and not (set(value[1:]) - set("0123456789abcdef"))
+              )
+          if key == "ecl":
               return value in ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"]
-          if key == 'pid':
+          if key == "pid":
               test = int(value)
               return len(value) == 9
           return True
       except ValueError:
           return False
 
+
   def is_valid_passport(p):
-      return len(set(p.keys()) - set(["cid"])) == 7 and all([validate_key(key, p[key]) for key in p])
+      return len(set(p.keys()) - set(["cid"])) == 7 and all(
+          [validate_key(key, p[key]) for key in p]
+      )
+
 
   sum([is_valid_passport(p) for p in passport_dicts])
 #+end_src
@@ -137,9 +142,9 @@ In your expense report, what is the product of the three entries that sum to 202
   def seat_id(instruction):
       return int(instruction.translate(str.maketrans("BFRL", "1010")), 2)
 
-  seat_ids = [seat_id(x.strip()) for x in open(datadir / "5.txt").readlines()]
-  max(seat_ids)
 
+  seat_ids = [seat_id(x) for x in load(5)]
+  max(seat_ids)
 #+end_src
 
 ** Part 2
@@ -150,35 +155,41 @@ In your expense report, what is the product of the three entries that sum to 202
 * [[https://adventofcode.com/2020/day/6][Day 6: Custom Customs]]
 ** Part 1
 #+begin_src jupyter-python
-  data = open(datadir / "6.txt").read()
+  data = load(6, "raw")
   groups = data.split("\n\n")
   sum(len(set(list(group.replace("\n", "")))) for group in groups)
 #+end_src
 
 ** Part 2
 #+begin_src jupyter-python
-  sum(len(functools.reduce(lambda x, y: set(x) & set(y), (group.splitlines())))
-      for group in groups)
+  sum(
+      len(functools.reduce(lambda x, y: set(x) & set(y), (group.splitlines())))
+      for group in groups
+  )
 #+end_src
 
 * [[https://adventofcode.com/2020/day/7][Day 7: Handy Haversacks]]
 ** Part 1
 Nothing super groundbreaking for part one. I thought of using a regex to parse the input, but splitting on commas and then into words works just fine.
 #+begin_src jupyter-python
-  data = open(datadir / "7.txt").readlines()
+  data = load(7)
   tree = {}
   for line in data:
-      bag, contents = line.strip().split(" bags contain ")
+      bag, contents = line.split(" bags contain ")
       if "no other" in contents:
           contents = {}
       else:
           elements = contents.split(", ")
-          contents = {' '.join(words[1:-1]): int(words[0]) for words in map(str.split, elements)}
+          contents = {
+              " ".join(words[1:-1]): int(words[0]) for words in map(str.split, elements)
+          }
       tree[bag] = contents
+
 
   @functools.cache
   def contains_gold(key):
-      return ("shiny gold" in tree[key] or any(contains_gold(child) for child in tree[key]))
+      return "shiny gold" in tree[key] or any(contains_gold(child) for child in tree[key])
+
 
   sum(contains_gold(key) for key in tree)
 #+end_src
@@ -189,14 +200,18 @@ The key thing to remember is to include the bag itself, as well as the bags it c
   @functools.cache
   def count_bags(bag):
       return sum(tree[bag][key] * (count_bags(key) + 1) for key in tree[bag])
+
+
   count_bags("shiny gold")
 #+end_src
 
 * [[https://adventofcode.com/2020/day/8][Day 8: Handheld Halting]]
 ** Part 1
 #+begin_src jupyter-python
-  data = [x.strip().split() for x in open(datadir / "8.txt").readlines()]
+  data = [x.split() for x in load(8)]
   data = [(x[0], int(x[1])) for x in data]
+
+
   def terminal_run(program):
       ip, accumulator = 0, 0
       seen = {}
@@ -212,8 +227,8 @@ The key thing to remember is to include the bag itself, as well as the bags it c
               accumulator += operand
       return True, accumulator
 
-  terminal_run(data)[1]
 
+  terminal_run(data)[1]
 #+end_src
 
 ** Part 2
@@ -221,7 +236,7 @@ The key thing to remember is to include the bag itself, as well as the bags it c
   instruction_map = {"acc": "acc", "jmp": "nop", "nop": "jmp"}
   for idx, instruction in enumerate(data):
       new_instruction = (instruction_map[instruction[0]], instruction[1])
-      status, value = terminal_run(data[:idx] + [new_instruction] + data[idx + 1:])
+      status, value = terminal_run(data[:idx] + [new_instruction] + data[idx + 1 :])
       if status:
           break
   value
@@ -230,11 +245,19 @@ The key thing to remember is to include the bag itself, as well as the bags it c
 * [[https://adventofcode.com/2020/day/9][Day 9: Encoding Error]]
 ** Part 1
 #+begin_src jupyter-python
-  data = [int(x) for x in open(datadir / "9.txt").readlines()]
+  data = list(load(9, "np"))
   end = len(data) - 25
   for window_start in range(end):
       target = data[window_start + 25]
-      if min(map(lambda x: abs(target - sum(x)), itertools.combinations(data[window_start: window_start + 25], 2))) != 0:
+      if (
+          min(
+              map(
+                  lambda x: abs(target - sum(x)),
+                  itertools.combinations(data[window_start : window_start + 25], 2),
+              )
+          )
+          != 0
+      ):
           break
   invalid_number = target
   invalid_number
@@ -244,7 +267,7 @@ The key thing to remember is to include the bag itself, as well as the bags it c
 #+begin_src jupyter-python
   start_idx, end_idx = 0, 1
   while start_idx < len(data):
-      total = sum(data[start_idx: end_idx])
+      total = sum(data[start_idx:end_idx])
       if total == invalid_number:
           break
       if total < invalid_number:
@@ -258,28 +281,28 @@ The key thing to remember is to include the bag itself, as well as the bags it c
 * [[https://adventofcode.com/2020/day/10][Day 10: Adapter Array]]
 ** Part 1
 #+begin_src jupyter-python
-  data = [0] + sorted([int(x) for x in open(datadir / "10.txt").readlines()])
+  data = [0] + sorted((load(10, "np")))
   (np.diff(data) == 1).sum() * ((np.diff(data) == 3).sum() + 1)
 #+end_src
 
 ** Part 2
 Sorting the values, we see a series of jumps of 1 and jumps of 3. If the value is allowed to jump by at most 3 every time, then we have to include both sides of every jump of 3.
 
-The only interesting thing is then what to do with runs of 1 jumps. In general, we can count the number of ways, f, as follows
+The only interesting thing is then what to do with runs of 1 jumps. In general, we can count the number of ways, $f$, as follows
 
-f(n) = f(n - 1) + g(n-1)
+$f(n) = f(n - 1) + g(n-1)$
 
-The first term comes from saying that we pick the first element, leaving us with a run of length (n - 1), exactly as before. The second comes from saying that we skip the first element, and now have to find the number of ways of choosing for a series of gaps starting with 2, followed by n - 2 ones. Similarly
+The first term comes from saying that we pick the first element, leaving us with a run of length $(n - 1)$, exactly as before. The second comes from saying that we skip the first element, and now have to find the number of ways of choosing for a series of gaps starting with $2$, followed by $n - 2$ ones. Similarly
 
-g(n - 1) = f(n - 2) + f(n - 3)
+$g(n - 1) = f(n - 2) + f(n - 3)$
 
-If we pick the element that resulted in a gap of two, then we just have to choose from a run of n - 2 ones, which is the f we are looking at. If we don't pick it, we've created a gap of size 3 - but then we are forced to pick the next element, leaving us with a run of length n - 3 to distribute.
+If we pick the element that resulted in a gap of two, then we just have to choose from a run of n - 2 ones, which is the $f$ we are looking at. If we don't pick it, we've created a gap of size $3$ - but then we are forced to pick the next element, leaving us with a run of length $n - 3$ to distribute.
 
 Putting everything together gives the recurrence
 
-f(n) = f(n - 1) + f(n - 2) + f(n - 3),
+$f(n) = f(n - 1) + f(n - 2) + f(n - 3)$,
 
-with initial conditions f(0) = 1, f(-1) = 0, f(-2) = 0.
+with initial conditions $f(0) = 1$, $f(-1) = 0$, $f(-2) = 0$.
 
 That recurrence can be written in matrix form as
 
@@ -295,7 +318,11 @@ And iterating the function is then just a question of matrix powers
   def total_ways(n_ones):
       matrix = np.array([[1, 1, 1], [1, 0, 0], [0, 1, 0]])
       return (np.linalg.matrix_power(matrix, n_ones) @ [1, 0, 0])[0]
-  np.product([total_ways(len(x)) for x in ''.join(str(x) for x in np.diff(data)).split("3")])
+
+
+  np.product(
+      [total_ways(len(x)) for x in "".join(str(x) for x in np.diff(data)).split("3")]
+  )
 #+end_src
 
 * [[https://adventofcode.com/2020/day/11][Day 11: Seating System]]
@@ -311,15 +338,15 @@ $$
 Scipy has nice routines that handle all that indexing for us, so we'll cheat and use them. The only slight issue is what to do at the edge of the grid, but using a constant value of 0 for any cells that would fall outside the grid works out of the box.
 
 #+begin_src jupyter-python
-  data = np.array([[1 if char == "." else 0 for char in line.strip()] for line in open(datadir / "11.txt").readlines()])
+  data = np.array([[1 if char == "." else 0 for char in line] for line in load(11)])
   mask = np.where(data)
   board = np.zeros(data.shape, dtype=int)
   new_board = np.ones(board.shape, dtype=int)
   new_board[mask] = 0
-  weights = [[1,1,1], [1,0,1], [1,1,1]]
+  weights = [[1, 1, 1], [1, 0, 1], [1, 1, 1]]
   while (board != new_board).any():
       board = new_board.copy()
-      convolution = scipy.ndimage.convolve(new_board, weights, mode='constant')
+      convolution = scipy.ndimage.convolve(new_board, weights, mode="constant")
       new_board[np.where(convolution == 0)] = 1
       new_board[np.where(convolution >= 4)] = 0
       new_board[mask] = 0
@@ -332,6 +359,8 @@ For part 2 I was unable to find a nice way of expressing the condition of "Look 
   board = np.zeros(data.shape, dtype=int)
   new_board = np.ones(board.shape, dtype=int)
   new_board[mask] = 0
+
+
   def update(board):
       new_board = board.copy()
       directions = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]]
@@ -342,7 +371,12 @@ For part 2 I was unable to find a nice way of expressing the condition of "Look 
               new_row, new_col = row, col
               while not done:
                   new_row, new_col = new_row + direction[0], new_col + direction[1]
-                  if new_row < 0 or new_row >= board.shape[0] or new_col < 0 or new_col >= board.shape[1]:
+                  if (
+                      new_row < 0
+                      or new_row >= board.shape[0]
+                      or new_col < 0
+                      or new_col >= board.shape[1]
+                  ):
                       break
                   if not data[new_row, new_col]:
                       done = True
@@ -354,6 +388,7 @@ For part 2 I was unable to find a nice way of expressing the condition of "Look 
               new_board[row, col] = 0
       new_board[mask] = 0
       return new_board
+
 
   while (new_board != board).any():
       board = new_board
@@ -369,15 +404,21 @@ I'll use the usual trick of modelling the 2d grid as the complex plane.
   turns = {"L": 1j, "R": -1j}
   position, direction = 0, 1
 
+
   def update_state(position, direction, instruction, value, part=1):
       if instruction in directions:
           offset = directions[instruction] * value
-          return (position + offset, direction) if part == 1 else (position, direction + offset)
+          return (
+              (position + offset, direction)
+              if part == 1
+              else (position, direction + offset)
+          )
       if instruction in turns:
-          return position, direction * turns[instruction]**(int(value // 90))
+          return position, direction * turns[instruction] ** (int(value // 90))
       return position + value * direction, direction
 
-  instructions = open(datadir / "12.txt").readlines()
+
+  instructions = load(12)
   for instruction, value in map(lambda x: (x[0], int(x[1:])), instructions):
       position, direction = update_state(position, direction, instruction, value)
   int(abs(position.real) + abs(position.imag))
@@ -398,10 +439,14 @@ Part 2 can be done basically the same way as part 1, with only a small change to
 This one looks like a bunch of modular arithmetic. The first one is just whichever bus number n has the smallest -x (mod n)
 #+begin_src jupyter-python
   x = 1006726
-  buses =("23,x,x,x,x,x,x,x,x,x,x,x,x,41,x,x,x,x,x,x,x,x,x,647,"
-          "x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,13,19,x,x,x,x,x,x,x"
-          ",x,x,29,x,557,x,x,x,x,x,37,x,x,x,x,x,x,x,x,x,x,17")
-  bus_moduli = [(int(_), (- idx) % int(_)) for idx, _ in enumerate(buses.split(",")) if _ != "x"]
+  buses = (
+      "23,x,x,x,x,x,x,x,x,x,x,x,x,41,x,x,x,x,x,x,x,x,x,647,"
+      "x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,13,19,x,x,x,x,x,x,x"
+      ",x,x,29,x,557,x,x,x,x,x,37,x,x,x,x,x,x,x,x,x,x,17"
+  )
+  bus_moduli = [
+      (int(_), (-idx) % int(_)) for idx, _ in enumerate(buses.split(",")) if _ != "x"
+  ]
   bus_numbers = [n for n, a in bus_moduli]
   waits = [-x % bus for bus in bus_numbers]
   min(waits) * bus_numbers[np.argmin(waits)]
@@ -411,20 +456,23 @@ This one looks like a bunch of modular arithmetic. The first one is just whichev
 For the second, it's the Chinese remainder theorem to the rescue. Code shamelessly copied from wikipedia.
 #+begin_src jupyter-python
   from utils import crt
+
   crt(bus_moduli)
     #+end_src
 
 * [[https://adventofcode.com/2020/day/14][Day 14: Docking Data]]
 ** Part 1
 #+begin_src jupyter-python
-  data = [line.strip().split(" = ") for line in open(datadir / "14.txt").readlines()]
+  data = [line.split(" = ") for line in load(14)]
   result = defaultdict(int)
   mask = ""
   for operation, operand in data:
       if operation == "mask":
           mask = operand
       else:
-          new_operand = ''.join([b1 if (b1 != 'X') else b2 for b1, b2 in zip(mask, f"{int(operand):036b}")])
+          new_operand = "".join(
+              [b1 if (b1 != "X") else b2 for b1, b2 in zip(mask, f"{int(operand):036b}")]
+          )
           result[operation[4:-1]] = int(new_operand, 2)
   sum(result.values())
 #+end_src
@@ -453,9 +501,11 @@ For the second, it's the Chinese remainder theorem to the rescue. Code shameless
 * [[https://adventofcode.com/2020/day/15][Day 15: Rambunctious Recitation]]
 ** Part 1
 #+begin_src jupyter-python
-  prefix = [int(x) for x in open(datadir / "15.txt").read().split(",")]
+  prefix = load(15, "int")[0]
   state = {i: idx + 1 for idx, i in enumerate(prefix[:-1])}
   current = prefix[-1]
+
+
   def update(current, i):
       if current not in state:
           next_n = 0
@@ -463,11 +513,14 @@ For the second, it's the Chinese remainder theorem to the rescue. Code shameless
           next_n = i - state[current]
       state[current] = i
       return next_n
+
+
   n_turns = 2020
   for i in range(len(prefix), n_turns):
       current = update(current, i)
   current
 #+end_src
+
 ** Part 2
 30 million is just within range where brute force would be plausible. Let's try it:
 #+begin_src jupyter-python
@@ -479,14 +532,19 @@ For the second, it's the Chinese remainder theorem to the rescue. Code shameless
 ** Part 1
 I could do this by trying to merge ranges of valid values. Or I could just instantiate a set with every valid value...
 #+begin_src jupyter-python
-  data = open(datadir / "16.txt").read()
+  data = load(16, "raw")
   rules, own, nearby = data[:-1].split("\n\n")
   valid = set()
   for rule in rules.split("\n"):
       limits = [int(x) for x in re.findall(r"\d+", rule)]
       for lower, upper in zip(limits[::2], limits[1::2]):
           valid |= set(range(lower, upper + 1))
-  sum(map(lambda x: 0 if int(x) in valid else int(x), nearby[nearby.index("\n") + 1:].replace("\n", ",").split(",")))
+  sum(
+      map(
+          lambda x: 0 if int(x) in valid else int(x),
+          nearby[nearby.index("\n") + 1 :].replace("\n", ",").split(","),
+      )
+  )
 #+end_src
 
 ** Part 2
@@ -506,30 +564,43 @@ I'm not entirely surprised that that's where he went for part 2
       for column in range(len(assignments)):
           if assignments[column]:
               continue
-          candidates = [key for key in ranges.keys()
-                        if all(x in ranges[key] for x in nearby_tickets[:, column])]
+          candidates = [
+              key
+              for key in ranges.keys()
+              if all(x in ranges[key] for x in nearby_tickets[:, column])
+          ]
           if len(candidates) == 1:
               assignments[column] = candidates[0]
               del ranges[candidates[0]]
-  np.product([own_ticket[idx] for idx, assignment in enumerate(assignments) if "departure" in assignment])
+  np.product(
+      [
+          own_ticket[idx]
+          for idx, assignment in enumerate(assignments)
+          if "departure" in assignment
+      ]
+  )
 #+end_src
 
 * [[https://adventofcode.com/2020/day/17][Day 17: Conway Cubes]]
 ** Part 1
 This looks like another good time to use scipy's handy correlate/convolve functions. At some point I should probably learn what the difference between those two is.
 #+begin_src jupyter-python
-  data = np.array([[1 if char == "#" else 0 for char in line.strip()]
-                   for line in open(datadir / "17.txt").readlines()],
-                  dtype=int)
+  data = np.array(
+      [[1 if char == "#" else 0 for char in line] for line in load(17)], dtype=int
+  )
+
+
   def simulate(data, dimensions=3, ncycles=6):
       weights = np.ones((3,) * dimensions)
       missing_dimensions = dimensions - len(data.shape)
       data = data.reshape(data.shape + (1,) * missing_dimensions)
       data = np.pad(data, ncycles)
       for i in range(ncycles):
-          convolution = scipy.ndimage.correlate(data, weights, mode='constant')
-          data = ((convolution == 3) | ((convolution == 4) & data))
+          convolution = scipy.ndimage.correlate(data, weights, mode="constant")
+          data = (convolution == 3) | ((convolution == 4) & data)
       return data.sum()
+
+
   simulate(data)
 #+end_src
 
@@ -583,7 +654,7 @@ This looks like another good time to use scipy's handy correlate/convolve functi
       return operands.pop()
 
 
-  lines = [x.strip().replace(" ", "") for x in load(18)]
+  lines = [x.replace(" ", "") for x in load(18)]
   sum(evaluate(line) for line in lines)
 #+end_src
 
@@ -649,8 +720,10 @@ The change for part 2 is so small that it can be included in part 1 as a flag
 We have loops now! Analysing the new rules, we see that the system should accept all strings of the form 42^m 13^n, with m > n > 0. Looking at the previous part shows that rule 42 and rule 31 never overlap, and all the strings they match have length 8. That gives the following logic for part 2:
 #+begin_src jupyter-python
   from more_itertools import chunked
+
+
   def part2(s):
-      chunks = [''.join(x).strip() for x in chunked(s, 8)]
+      chunks = ["".join(x).strip() for x in chunked(s, 8)]
       r42, r31 = 0, 0
       while chunks[r42] in mappings[42]:
           r42 += 1
@@ -662,6 +735,8 @@ We have loops now! Analysing the new rules, we see that the system should accept
           r31 += 1
 
       return r31 >= 1 and r42 > r31 and r42 + r31 == len(chunks)
+
+
   sum(part2(s) for s in strings[:-1])
 #+end_src
 
@@ -688,8 +763,11 @@ We have loops now! Analysing the new rules, we see that the system should accept
           idx: functools.reduce(lambda x, y: 2 * x + y, edge[::-1])
           for idx, edge in enumerate(edges)
       }
+
+
   def fingerprint(tile):
       return tile, edge_hashes(tile), {v: k for k, v in edge_hashes(tile).items()}
+
 
   for entry in data:
       header, *tile = entry.split("\n")
@@ -724,14 +802,15 @@ When we place a tile, we mark the candidates for its unplaced neighbors: these a
   locations = defaultdict(lambda: set(keys))
   placed = set()
 
+
   def place(tile, location):
       locations[location] = tile
       placed.add(tile)
       x, y = location
       if x < 11 and isinstance(locations[x + 1, y], set):
-          locations[x + 1, y] &= (matches[tile] - placed)
+          locations[x + 1, y] &= matches[tile] - placed
       if y < 11 and isinstance(locations[x, y + 1], set):
-          locations[x, y + 1] &= (matches[tile] - placed)
+          locations[x, y + 1] &= matches[tile] - placed
       to_place = []
       for location in locations:
           if isinstance(locations[location], set):
@@ -783,7 +862,7 @@ All the edges are labelled (not well, but they are labelled). To be oriented cor
           if not x:
               old_edge = 5
               target = 0
-              comparison = (y-1, x)
+              comparison = (y - 1, x)
           else:
               old_edge = 2
               target = 7
@@ -818,7 +897,7 @@ The following code will fail if any of the sea monsters overlap, but luckily the
   monsters = 0
   for reflection in range(2):
       for rotation in range(4):
-          convolution = scipy.ndimage.correlate(board, pattern, mode='constant')
+          convolution = scipy.ndimage.correlate(board, pattern, mode="constant")
           monsters += (convolution == total).sum()
           board = np.rot90(board)
       board = board.T
@@ -829,12 +908,11 @@ The following code will fail if any of the sea monsters overlap, but luckily the
 ** Part 1
 Nice and easy one today, with just a bit of set intersection logic
 #+begin_src jupyter-python
-  lines = load(21)
   counts = defaultdict(int)
   mappings = {}
-  for line in lines:
+  for line in load(21):
       ingredients, allergens = [
-          x.strip().split() for x in line[:-2].replace(",", "").split("(contains")
+          x.split() for x in line[:-2].replace(",", "").split("(contains")
       ]
       for ingredient in ingredients:
           counts[ingredient] += 1
@@ -981,7 +1059,7 @@ This approach is way too slow for part 2. Instead, we can build an implicit link
   tiles = defaultdict(bool)
   for s in load(24):
       result = []
-      for char in s.strip():
+      for char in s:
           current += char
           if char in terminals:
               result.append(vectors[current])
@@ -1002,8 +1080,10 @@ This is a fairly simple convolution problem again. We'll be working in the basis
   for x, y in tiles:
       board[x + size // 2, y + size // 2] = tiles[x, y]
   for i in range(100):
-      neighbors = scipy.ndimage.correlate(board, weights, mode='constant')
-      flips = ((board == 0) & (neighbors == 2)) | ((board == 1) & ((neighbors == 0) | (neighbors > 2)))
+      neighbors = scipy.ndimage.correlate(board, weights, mode="constant")
+      flips = ((board == 0) & (neighbors == 2)) | (
+          (board == 1) & ((neighbors == 0) | (neighbors > 2))
+      )
       board = (board + flips) % 2
   board.sum()
 #+end_src

@@ -30,16 +30,17 @@
 ** Part 1
 How many blocks away is Easter Bunny HQ?
 #+begin_src jupyter-python
-  instructions = load(1)[0].strip().split(", ")
+  instructions = load(1)[0].split(", ")
   position = np.array([0, 0])
   direction = np.array([0, 1])
-  rotations = {"R": np.array([[0, 1], [-1, 0]], dtype=int),
-               "L": np.array([[0, -1], [1, 0]], dtype=int)}
+  rotations = {
+      "R": np.array([[0, 1], [-1, 0]], dtype=int),
+      "L": np.array([[0, -1], [1, 0]], dtype=int),
+  }
   for instruction in instructions:
       direction = rotations[instruction[0]] @ direction
       position += direction * int(instruction[1:])
   sum(abs(position))
-
 #+end_src
 
 ** Part 2
@@ -52,9 +53,11 @@ Then, you notice the instructions continue on the back of the Recruiting Documen
       direction = rotations[instruction[0]] @ direction
       for i in range(int(instruction[1:])):
           position += direction
-          if tuple(position) in seen: break
+          if tuple(position) in seen:
+              break
           seen[tuple(position)] = True
-      else: continue
+      else:
+          continue
       break
   sum(abs(position))
 #+end_src
@@ -63,32 +66,43 @@ Then, you notice the instructions continue on the back of the Recruiting Documen
 ** Part 1
 #+begin_src jupyter-python
   commands = {"U": -1j, "D": 1j, "L": -1, "R": 1}
-  grid = { 0: 1,    1: 2,    2: 3,
-          1j: 4, 1+1j: 5, 2+1j: 6,
-          2j: 7, 1+2j: 8, 2+2j: 9}
+  grid = {0: 1, 1: 2, 2: 3, 1j: 4, 1 + 1j: 5, 2 + 1j: 6, 2j: 7, 1 + 2j: 8, 2 + 2j: 9}
+
+
   def update(point, grid, instructions):
       for instruction in instructions:
           new_point = point + commands[instruction]
           if new_point in grid:
               point = new_point
       return point
+
+
   point = 1 + 1j
-  password = ''
-  instructions = [line.strip() for line in load(2)]
+  password = ""
+  instructions = load(2)
   for line in instructions:
       point = update(point, grid, line)
       password += str(grid[point])
   password
-
 #+end_src
 
 ** Part 2
 #+begin_src jupyter-python
-  grid = {0j + 2: 1,
-          1j + 1: 2, 1j + 2: 3, 1j + 3: 4,
-          2j: 5, 2j + 1: 6, 2j + 2: 7, 2j+3: 8, 2j + 4: 9,
-          3j + 1: "A", 3j + 2: "B", 3j + 3: "C",
-          4j + 2: "D"}
+  grid = {
+      0j + 2: 1,
+      1j + 1: 2,
+      1j + 2: 3,
+      1j + 3: 4,
+      2j: 5,
+      2j + 1: 6,
+      2j + 2: 7,
+      2j + 3: 8,
+      2j + 4: 9,
+      3j + 1: "A",
+      3j + 2: "B",
+      3j + 3: "C",
+      4j + 2: "D",
+  }
   point = 2j
   password = ""
   for line in instructions:
@@ -101,15 +115,19 @@ Then, you notice the instructions continue on the back of the Recruiting Documen
 ** Part 1
 #+begin_src jupyter-python
   data = np.array(load(3, "int"), dtype=int)
+
+
   def is_valid(triangle):
       x, y, z = triangle
       return x + y > z and x + z > y and y + z > x
+
+
   sum(map(is_valid, data))
 #+end_src
 
 ** Part 2
 #+begin_src jupyter-python
-sum(map(is_valid, data.T.ravel().reshape(-1, 3)))
+  sum(map(is_valid, data.T.ravel().reshape(-1, 3)))
 #+end_src
 
 * [[https://adventofcode.com/2016/day/4][Day 4: Security Through Obscurity]]
@@ -119,33 +137,42 @@ sum(map(is_valid, data.T.ravel().reshape(-1, 3)))
   def parse_line(room):
       checksum = room[-6:-1]
       sector_id = int(room[:-7].split("-")[-1])
-      name = '-'.join(room.split("-")[:-1])
+      name = "-".join(room.split("-")[:-1])
       return name, sector_id, checksum
+
 
   def calculate_checksum(name):
       occurrences = list(zip(*np.unique(list(name.replace("-", "")), return_counts=True)))
-      return ''.join(x[0] for x in sorted(occurrences, key = lambda x: [-x[1], x[0]])[:5])
+      return "".join(x[0] for x in sorted(occurrences, key=lambda x: [-x[1], x[0]])[:5])
 
-  data = [parse_line(l.strip()) for l in load(4)]
-  sum(sector_id for name, sector_id, checksum in data if calculate_checksum(name) == checksum)
+
+  data = [parse_line(l) for l in load(4)]
+  sum(
+      sector_id
+      for name, sector_id, checksum in data
+      if calculate_checksum(name) == checksum
+  )
 #+end_src
 
 ** Part 2
 #+begin_src jupyter-python
   real_rooms = [room[:2] for room in data if calculate_checksum(room[0]) == room[2]]
+
+
   def decrypt(name, offset):
       alphabet = "abcdefghijklmnopqrstuvwxyz"
-      shifted_alphabet = ''.join(x for x in np.roll(list(alphabet), -offset % 26))
+      shifted_alphabet = "".join(x for x in np.roll(list(alphabet), -offset % 26))
       return name.translate(str.maketrans(alphabet, shifted_alphabet)), offset
 
-  [answer for room in real_rooms if "north" in (answer := decrypt(*room))[0]]
 
+  [answer for room in real_rooms if "north" in (answer := decrypt(*room))[0]]
 #+end_src
 
 * [[https://adventofcode.com/2016/day/5][Day 5: How About a Nice Game of Chess?]]
 ** Part 1
 #+begin_src jupyter-python
   import hashlib
+
   h = hashlib.md5()
   prefix = "wtnhxymk"
   password = ""
@@ -166,21 +193,20 @@ sum(map(is_valid, data.T.ravel().reshape(-1, 3)))
       if s[:5] == "0" * 5 and s[5] in "01234567" and password[int(s[5])] is None:
           password[int(s[5])] = s[6]
       i += 1
-  ''.join(password)
+  "".join(password)
 #+end_src
 
 * [[https://adventofcode.com/2016/day/6][Day 6: Signals and Noise]]
 ** Part 1
 #+begin_src jupyter-python
   messages = load(6)
-  ''.join(pd.DataFrame([list(x.strip()) for x in messages]).mode().values[0])
-
+  "".join(pd.DataFrame([list(x) for x in messages]).mode().values[0])
 #+end_src
 
 ** Part 2
 #+begin_src jupyter-python
-  foo = np.array([list(x.strip()) for x in messages])
-  s = ''
+  foo = np.array([list(x) for x in messages])
+  s = ""
   for i in range(foo.shape[1]):
       letters, counts = np.unique(foo[:, i], return_counts=True)
       s += letters[counts.argmin()]
@@ -193,39 +219,49 @@ sum(map(is_valid, data.T.ravel().reshape(-1, 3)))
   data = load(7)
   abba = re.compile(r"(.)(?!\1)(.)\2\1")
   bracketed_abba = re.compile(r"\[[^]]*(.)(?!\1)(.)\2\1.*?\]")
+
+
   def supports_tls(haystack):
-      return bool(re.search(abba, haystack)) and not bool(re.search(bracketed_abba, haystack))
+      return bool(re.search(abba, haystack)) and not bool(
+          re.search(bracketed_abba, haystack)
+      )
+
 
   sum(supports_tls(line) for line in data)
-
 #+end_src
 
 ** Part 2
 Part two is more regex wrangling, except the patterns can overlap now. We could spend time figuring out exactly how to account for that, or we can import the third party regex module which does it for us automagically.
 #+begin_src jupyter-python
   import regex
+
+
   def supports_ssl(haystack):
       aba = regex.compile(r"(.)(?!\1)(.)\1")
       bracket_split = [x.split("[") for x in haystack.split("]")]
-      outside, inside = itertools.zip_longest(*bracket_split, fillvalue='')
-      abas = [match for fragment in outside for match in regex.findall(aba, fragment, overlapped=True)]
+      outside, inside = itertools.zip_longest(*bracket_split, fillvalue="")
+      abas = [
+          match
+          for fragment in outside
+          for match in regex.findall(aba, fragment, overlapped=True)
+      ]
       for a, b in abas:
           bab = f"{b}{a}{b}"
           if any(bab in fragment for fragment in inside):
               return True
       return False
 
-  sum(supports_ssl(line) for line in data)
 
+  sum(supports_ssl(line) for line in data)
 #+end_src
 
 * [[https://adventofcode.com/2016/day/8][Day 8: Two-Factor Authentication]]
 ** Part 1
 #+begin_src jupyter-python
   array = np.zeros((6, 50), dtype=int)
-  lines = [x.strip().split() for x in load(8)]
+  lines = [x.split() for x in load(8)]
   for instructions in lines:
-      if instructions[0] == 'rect':
+      if instructions[0] == "rect":
           row, col = [int(a) for a in instructions[1].split("x")]
           array[:col, :row] = 1
           continue
@@ -241,16 +277,17 @@ Part two is more regex wrangling, except the patterns can overlap now. We could 
 
 ** Part 2
 #+begin_src jupyter-python
-  [[''.join('█' if char else ' ' for char in line)] for line in array]
+  [["".join("█" if char else " " for char in line)] for line in array]
 #+end_src
 
 * [[https://adventofcode.com/2016/day/9][Day 9: Explosives in Cyberspace]]
 ** Part 1
 #+begin_src jupyter-python
-  data = load(9)[0].strip()
+  data = load(9)[0]
   part1 = data
 
-  def count(s, part2 = False):
+
+  def count(s, part2=False):
       total = 0
       while s:
           if s[0] != "(":
@@ -259,13 +296,15 @@ Part two is more regex wrangling, except the patterns can overlap now. We could 
               continue
           end = s.index(")")
           chars, repeat = map(int, s[1:end].split("x"))
-          s = s[end + 1:]
+          s = s[end + 1 :]
           if part2:
               total += repeat * count(s[:chars], True)
           else:
               total += repeat * chars
           s = s[chars:]
       return total
+
+
   count(data)
 #+end_src
 
@@ -277,7 +316,6 @@ Part two is more regex wrangling, except the patterns can overlap now. We could 
 * [[https://adventofcode.com/2016/day/10][Day 10: Balance Bots]]
 ** Part 1
 #+begin_src jupyter-python
-  import pprint
   data = load(10)
   wiring = {}
   state = defaultdict(list)
@@ -293,6 +331,7 @@ Part two is more regex wrangling, except the patterns can overlap now. We could 
   queue = deque([x for x in start if len(state[x]) == 2])
   output = [0] * 21
 
+
   def step():
       current = queue.popleft()
       values = sorted(state[current])
@@ -306,6 +345,8 @@ Part two is more regex wrangling, except the patterns can overlap now. We could 
           else:
               output[value] = values[idx]
       return current, values
+
+
   while True:
       current, values = step()
       if values == [17, 61]:
@@ -329,19 +370,26 @@ So I think the way to go is A*.
 
 #+begin_src jupyter-python
   from more_itertools import grouper
+
   n_floors = 4
+
 
   def distance_estimate(state, end):
       items = state[1]
       return sum((val / 2) * (n_floors - i - 1) for i, val in enumerate(items))
 
+
   def is_valid(items):
       generators, chips = state[::2], state[1::2]
-      return all((chip == generator) or (chip not in generators)
-                 for chip, generator in zip(chips, generators))
+      return all(
+          (chip == generator) or (chip not in generators)
+          for chip, generator in zip(chips, generators)
+      )
+
 
   def normalize(items):
       return tuple(x for pair in sorted(list(grouper(items, 2))) for x in pair)
+
 
   def constrained_neighbors(state):
       floor, items = state
@@ -361,8 +409,9 @@ So I think the way to go is A*.
                   neighbors.add((new_floor, normalize(new_items)))
       return neighbors
 
+
   state = 0, (0, 0, 0, 0, 1, 1, 1, 1, 1, 2)
-  target = 3, (3,)*len(state[1])
+  target = 3, (3,) * len(state[1])
   utils.astar(state, target, constrained_neighbors, distance_estimate)
 #+end_src
 
@@ -372,7 +421,7 @@ Extending this to part 2 without changing anything is possible, but the whole th
 Reducing the search space by only letting the elevator move down with one item at a time reduced the runtime to about half. I'm not 100% convinced the restriction is always valid, but it did work in this case.
 #+begin_src jupyter-python
   state = 0, (0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2)
-  target = 3, (3,)*len(state[1])
+  target = 3, (3,) * len(state[1])
   utils.astar(state, target, constrained_neighbors, distance_estimate)
 #+end_src
 
@@ -389,7 +438,7 @@ This is a fairly straightforward implementation of the problem description, with
           operator, operands = instruction[0], instruction[1:]
           if operator in ["cpy", "jnz"]:
               source, destination = operands
-              value = int(source) if source not in 'abcd' else registers[source]
+              value = int(source) if source not in "abcd" else registers[source]
               if operator == "cpy":
                   registers[destination] = value
               if operator == "jnz" and value != 0:
@@ -397,16 +446,17 @@ This is a fairly straightforward implementation of the problem description, with
           elif operator in ["inc", "dec"]:
               registers[operands[0]] += 2 * (operator == "inc") - 1
           ip += 1
-      return registers['a']
+      return registers["a"]
 
-  data = [line.strip().split(" ") for line in load(12)]
+
+  data = [line.split(" ") for line in load(12)]
   run(data)
 #+end_src
 
 ** Part 2
 #+begin_src jupyter-python
   registers = defaultdict(int)
-  registers['c'] = 1
+  registers["c"] = 1
   run(data, registers)
 #+end_src
 
@@ -414,20 +464,26 @@ This is a fairly straightforward implementation of the problem description, with
 ** Part 1
 #+begin_src jupyter-python
   from utils import astar
+
+
   def is_valid(x, y, secret=1362):
       if x < 0 or y < 0:
           return False
-      val = x*x + 3*x + 2*x*y + y + y*y + secret
+      val = x * x + 3 * x + 2 * x * y + y + y * y + secret
       ones = f"{val:b}".count("1")
       return (ones % 2) == 0
+
 
   def neighbors(state):
       x, y = state
       candidates = [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)]
       return [candidate for candidate in candidates if is_valid(*candidate)]
 
+
   def distance_function(point, target):
       return abs(point[0] - target[0]) + abs(point[1] - target[1])
+
+
   start = (1, 1)
   target = 31, 39
   utils.astar(start, target, neighbors, distance_function)
@@ -442,6 +498,8 @@ This is a fairly straightforward implementation of the problem description, with
 ** Part 1
 #+begin_src jupyter-python
   import hashlib
+
+
   def infinite_triples(prefix, part=1):
       r1 = r"(.)\1\1"
       r2 = r"(.)\1\1\1\1"
@@ -457,18 +515,21 @@ This is a fairly straightforward implementation of the problem description, with
               yield False
           n += 1
 
+
   def nth_key_index(prefix, n=64, part=1):
       triples = filter(lambda x: x[1], enumerate(infinite_triples(prefix, part)))
       window = [next(triples)]
       current = 0
       while current < n:
-         idx, (triple, _) = window.pop(0)
-         while not window or window[-1][0] < idx + 1000:
-             window.append(next(triples))
-         active_quints = [char for triple in window[:-1] for char in triple[1][1]]
-         if triple in active_quints:
-             current += 1
+          idx, (triple, _) = window.pop(0)
+          while not window or window[-1][0] < idx + 1000:
+              window.append(next(triples))
+          active_quints = [char for triple in window[:-1] for char in triple[1][1]]
+          if triple in active_quints:
+              current += 1
       return idx + 1
+
+
   nth_key_index("yjdafjpo")
 #+end_src
 ** Part 2
@@ -481,6 +542,7 @@ I was a little uncertain about how to write this cleanly -- all of the logic fro
 Another round of the chinese remainder theorem.
 #+begin_src jupyter-python
   from utils import crt
+
   data = [[int(x) for x in re.findall(r"\d+", line)] for line in load(15)]
   remainders = [(x[1], -(x[-1] + x[0])) for x in data]
   crt(remainders)
@@ -495,15 +557,19 @@ Another round of the chinese remainder theorem.
 * [[https://adventofcode.com/2016/day/16][Day 16: Dragon Checksum]]
 ** Part 1
 #+begin_src jupyter-python
-  start = [1,1,0,1,1,1,1,0,0,1,1,0,1,1,1,0,1]
+  start = [1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1, 0, 1]
   length = 272
+
+
   def solve(prefix, length):
       while len(prefix) < length:
           prefix = prefix + [0] + [1 ^ x for x in prefix[::-1]]
       s = prefix[:length]
       while len(s) % 2 == 0:
-          s = (abs(np.diff(s))[::2] ^ 1)
+          s = abs(np.diff(s))[::2] ^ 1
       return s
+
+
   print(*solve(start, length), sep="")
 #+end_src
 
@@ -518,22 +584,28 @@ BFS to the rescue. I wanted to do A*, but the "distance from 3,3" heuristic didn
 #+begin_src jupyter-python
   start = (0, "bwnlcvfs")
 
+
   def neighbors(position, path):
       chars = hashlib.md5(path.encode()).hexdigest()[:4]
       directions = "UDLR"
       deltas = -1j, 1j, -1, 1
-      candidates = [(position + delta, path + direction) for
-                    delta, direction, char in zip(deltas, directions, chars)
-                    if char in "bcdef"]
-      return [candidate for candidate in candidates
-              if 0 <= candidate[0].real < 4
-              and 0 <= candidate[0].imag < 4]
+      candidates = [
+          (position + delta, path + direction)
+          for delta, direction, char in zip(deltas, directions, chars)
+          if char in "bcdef"
+      ]
+      return [
+          candidate
+          for candidate in candidates
+          if 0 <= candidate[0].real < 4 and 0 <= candidate[0].imag < 4
+      ]
+
 
   q = deque([start])
   while q:
       position, path = q.popleft()
       if position == 3 + 3j:
-          result = path[len(start[1]):]
+          result = path[len(start[1]) :]
           break
       q += deque(neighbors(position, path))
   result
@@ -555,22 +627,21 @@ BFS to the rescue. I wanted to do A*, but the "distance from 3,3" heuristic didn
 * [[https://adventofcode.com/2016/day/18][Day 18: Like a Rogue]]
 ** Part 2
     #+begin_src jupyter-python
-  data = np.array([1 if char == "^" else 0 for char in load(18)[0].strip()], dtype=int)
-  left_right = [1, 0, 1]
-  rows = []
-  for i in range(40):
-      rows.append(data)
-      data = (scipy.ndimage.convolve(data, left_right, mode='constant') == 1).astype(int)
-  (np.array(rows) == 0).sum()
+      data = np.array([1 if char == "^" else 0 for char in load(18)[0]], dtype=int)
+      left_right = [1, 0, 1]
+      rows = []
+      for i in range(40):
+          rows.append(data)
+          data = (scipy.ndimage.convolve(data, left_right, mode="constant") == 1).astype(int)
+      (np.array(rows) == 0).sum()
     #+end_src
 ** Part 2
 For part 2 I should probably check to see if I ever hit a row that I've seen before, and then use the repeated cycle to avoid having to calculate that many rows. Or I can just brute force it and not care:
     #+begin_src jupyter-python
-  for i in range(400000 - 40):
-      rows.append(data)
-      data = (scipy.ndimage.convolve(data, left_right, mode='constant') == 1).astype(int)
-  (np.array(rows) == 0).sum()
-
+      for i in range(400000 - 40):
+          rows.append(data)
+          data = (scipy.ndimage.convolve(data, left_right, mode="constant") == 1).astype(int)
+      (np.array(rows) == 0).sum()
     #+end_src
 
 * [[https://adventofcode.com/2016/day/19][Day 19: An Elephant Named Joseph]]
@@ -610,7 +681,9 @@ What we can do instead is notice that the pattern of deletions correspond to lea
 * [[https://adventofcode.com/2016/day/20][Day 20: Firewall Rules]]
 ** Part 1
 #+begin_src jupyter-python
-  data = sorted([[int(x) for x in line.split("-")] for line in load(20)], key=lambda x: x[0])
+  data = sorted(
+      [[int(x) for x in line.split("-")] for line in load(20)], key=lambda x: x[0]
+  )
   low, high = data[0]
   for new_low, new_high in data[1:]:
       if high + 1 < new_low:
@@ -634,31 +707,39 @@ We'll start by merging the overlapping banned ranges together. Then, the high po
               initial, final = low, high
       result += [initial, final]
       return result
-  (0 - ranges[0]
-   + sum([high - low - 1 for low, high in zip(ranges[1::2], ranges[2::2])])
-   + 4294967295 - ranges[-1])
+
+
+  (
+      0
+      - ranges[0]
+      + sum([high - low - 1 for low, high in zip(ranges[1::2], ranges[2::2])])
+      + 4294967295
+      - ranges[-1]
+  )
 #+end_src
 
 * [[https://adventofcode.com/2016/day/21][Day 21: Scrambled Letters and Hash]]
 ** Part 1
 #+begin_src jupyter-python
-  data = [x.strip().split() for x in load(21)]
+  data = [x.split() for x in load(21)]
   s = "abcdefgh"
+
+
   def update(s, line, part=1):
       operands = line[2], line[-1]
       if line[0] == "reverse":
           l, r = sorted(map(int, operands))
-          s = s[:l] + s[l:r+1][::-1] + s[r+1:]
+          s = s[:l] + s[l : r + 1][::-1] + s[r + 1 :]
       elif line[0] == "swap":
           if line[1] == "letter":
               l, r = map(lambda x: s.index(x), operands)
           else:
               l, r = map(int, operands)
           l, r = sorted([l, r])
-          s = s[:l] + s[r] + s[l+1:r] + s[l] + s[r+1:]
+          s = s[:l] + s[r] + s[l + 1 : r] + s[l] + s[r + 1 :]
       elif line[0] == "rotate":
           if line[1] == "left":
-              rotation = - int(operands[0])
+              rotation = -int(operands[0])
           elif line[1] == "right":
               rotation = int(operands[0])
           else:
@@ -675,9 +756,11 @@ We'll start by merging the overlapping banned ranges together. Then, the high po
           source, dest = map(int, operands)
           if part == 2:
               source, dest = dest, source
-          tmp = s[:source] + s[source + 1:]
+          tmp = s[:source] + s[source + 1 :]
           s = tmp[:dest] + s[source] + tmp[dest:]
       return s
+
+
   for line in data:
       s = update(s, line)
 
@@ -693,10 +776,13 @@ Ouch. `Move`, `swap` and `reverse` should be easy to do backwards, since they're
       rotation = rotation % len(s)
       return s[-rotation:] + s[:-rotation]
 
+
   def reverse_rotation(s, char):
       for i, original_string in [(i, s[-i:] + s[:-i]) for i in range(len(s))]:
           if rotate_based_on(original_string, char) == s:
               return -i
+
+
   s = "fbgdceah"
   for line in data[::-1]:
       s = update(s, line, part=2)
@@ -708,6 +794,8 @@ Ouch. `Move`, `swap` and `reverse` should be easy to do backwards, since they're
 #+begin_src jupyter-python
   data = load(22, "int")
   data.sort(key=lambda x: x[-2])
+
+
   def binary_search(key, haystack):
       key = key[3]
       left, right = 0, len(haystack)
@@ -717,7 +805,9 @@ Ouch. `Move`, `swap` and `reverse` should be easy to do backwards, since they're
               right = midpoint
           else:
               left = midpoint
-      return(right)
+      return right
+
+
   result = 0
   for idx1, val in enumerate(data):
       if val[3] == 0:
@@ -737,6 +827,7 @@ Just another graph search. There's only one empty space, so we can uniquely defi
   source = tuple(data[-1][:2])
   grid[source] = 0
   target = size[0], 0
+
 
   def heuristic(x, y):
       to_data = abs(x[0] - y[0]) + abs(x[1] - y[1])
@@ -825,7 +916,7 @@ Just another graph search. There's only one empty space, so we can uniquely defi
       return registers["a"]
 
 
-  data = [line.strip().split(" ") for line in load("23")]
+  data = [line.split(" ") for line in load("23")]
   registers = {"a": 7, "b": 0, "c": 0, "d": 0}
   run(data, registers)
 #+end_src
@@ -851,7 +942,7 @@ It was fun to think about even though I didn't use it in the end.
   from scipy.cluster.hierarchy import DisjointSet
 
   parse = lambda x: -2 if x == "#" else -1 if x == "." else int(x)
-  data = np.array([[parse(char) for char in line.strip()] for line in load(24)])
+  data = np.array([[parse(char) for char in line] for line in load(24)])
 
 
   def encode(mask):
@@ -891,7 +982,7 @@ It was fun to think about even though I didn't use it in the end.
 
   minval = np.inf
   for permutation in itertools.permutations(range(1, len(nodes))):
-      indices = (0, ) + permutation[:-1], permutation
+      indices = (0,) + permutation[:-1], permutation
       if (total := sum(distances[indices])) < minval:
           minval = total
   int(minval)
@@ -901,11 +992,10 @@ It was fun to think about even though I didn't use it in the end.
 #+begin_src jupyter-python
   minval = np.inf
   for permutation in itertools.permutations(range(1, len(nodes))):
-      indices = (0, ) + permutation, permutation + (0,)
+      indices = (0,) + permutation, permutation + (0,)
       if (total := sum(distances[indices])) < minval:
           minval = total
   int(minval)
-
 #+end_src
 
 * [[https://adventofcode.com/2016/day/25][Day 25: Clock Signal]]

@@ -10,6 +10,7 @@
   import itertools
   import os
   import re
+  import string
   import sys
   from collections import defaultdict, deque
   from pathlib import Path
@@ -50,41 +51,40 @@
 * [[https://adventofcode.com/2018/day/2][Day 2: Inventory Managment System]]
 ** Part 1
 #+begin_src jupyter-python
-  lines = [np.array([ord(y) for y in x.strip()]) for x in load(2)]
+  lines = [np.array([ord(y) for y in x]) for x in load(2)]
   twos = sum([2 in np.unique(list(line), return_counts=True)[1] for line in lines])
   twos * sum([3 in np.unique(list(line), return_counts=True)[1] for line in lines])
 #+end_src
 
 ** Part 2
 #+begin_src jupyter-python
-  for s1 in lines:
-      for s2 in lines:
-          if len(s2) != len(s1): continue
-          if (s2 - s1 != 0).sum() == 1:
-              result = ''.join(chr(x) for x in s1[np.where(s1 == s2)])
-              break
-      else:
-          continue
-      break
-result
+    for s1 in lines:
+        for s2 in lines:
+            if len(s2) != len(s1): continue
+            if (s2 - s1 != 0).sum() == 1:
+                result = ''.join(chr(x) for x in s1[np.where(s1 == s2)])
+                break
+        else:
+            continue
+        break
+  result
 #+end_src
 
 * [[https://adventofcode.com/2018/day/3][Day 3: No Matter How You Slice It]]
 ** Part 1
 #+begin_src jupyter-python
-  import re
   num = re.compile(r"\d+")
   data = np.array([[int(x) for x in re.findall(num, line)] for line in load(3)])
   field = np.zeros([1000, 1000])
   for pid, x, y, w, h in data:
-      field[x:x+w, y:y+h] += 1
+      field[x : x + w, y : y + h] += 1
   (field > 1).sum()
 #+end_src
 
 ** Part 2
 #+begin_src jupyter-python
   for pid, x, y, w, h in data:
-      if (field[x:x+w, y:y+h] == 1).all():
+      if (field[x : x + w, y : y + h] == 1).all():
           break
   pid
 #+end_src
@@ -93,9 +93,10 @@ result
 ** Part 1
 #+begin_src jupyter-python
   from time import strptime
-  events = [event[1:].strip().split("] ") for event in load(4)]
+
+  events = [event[1:].split("] ") for event in load(4)]
   date_format = "%Y-%m-%d %H:%M"
-  events = sorted(events, key = lambda event : strptime(event[0], date_format))
+  events = sorted(events, key=lambda event: strptime(event[0], date_format))
   guards = {}
   while events:
       event = events.pop(0)
@@ -105,23 +106,23 @@ result
               guards[active_guard] = np.zeros(60)
           continue
       end = events.pop(0)
-      guards[active_guard][int(event[0][-2:]):int(end[0][-2:])] += 1
+      guards[active_guard][int(event[0][-2:]) : int(end[0][-2:])] += 1
 
-  sleepiest_guard = sorted(guards.keys(), key = lambda x: - guards[x].sum())[0]
+  sleepiest_guard = sorted(guards.keys(), key=lambda x: -guards[x].sum())[0]
   int(sleepiest_guard) * guards[sleepiest_guard].argmax()
 #+end_src
 
 ** Part 2
 #+begin_src jupyter-python
-  sleepiest_guard = sorted(guards.keys(), key = lambda x: - max(guards[x]))[0]
+  sleepiest_guard = sorted(guards.keys(), key=lambda x: -max(guards[x]))[0]
   int(sleepiest_guard) * guards[sleepiest_guard].argmax()
 #+end_src
 
 * [[https://adventofcode.com/2018/day/5][Day 5: Alchemical Reduction]]
 ** Part 1
 #+begin_src jupyter-python
-  import string
-  s = load(5)[0].strip()
+  s = load(5)[0]
+
 
   def reduce(s):
       l = len(s)
@@ -129,6 +130,8 @@ result
           s = s.replace(f"{char + char.swapcase()}", "")
           s = s.replace(f"{char.swapcase() + char}", "")
       return l if l == len(s) else reduce(s)
+
+
   reduce(s)
 #+end_src
 
@@ -179,7 +182,10 @@ I haven't figured out the cleanest way of solving part 1, but here's an approach
   # | eval: true
   # | output: false
   import matplotlib.pyplot as plt
+
   board = np.zeros([xmax + 1, ymax + 1], dtype=int)
+
+
   def expand_one(cells, idx, to_paint):
       new_cells = []
       for neighbor in get_neighbors(cells):
@@ -193,11 +199,14 @@ I haven't figured out the cleanest way of solving part 1, but here's an approach
 
       return new_cells
 
+
   def get_neighbors(cells):
       neighbors = []
       for x, y in cells:
           candidates = [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)]
-          neighbors += [(x,y) for x,y in candidates if (0 <= x <= xmax) and (0 <= y <= ymax)]
+          neighbors += [
+              (x, y) for x, y in candidates if (0 <= x <= xmax) and (0 <= y <= ymax)
+          ]
       return set(neighbors)
 #+end_src
 
@@ -222,21 +231,25 @@ We can animate the process of expanding each seed
   import matplotlib.animation as animation
 
   s = 3.0
-  fig = plt.figure(figsize=(s, s*ymax/xmax))
+  fig = plt.figure(figsize=(s, s * ymax / xmax))
   l = len(boards)
-  i=0
+  i = 0
   im = plt.imshow(boards[0], animated=True, cmap="inferno")
   plt.xticks([])
   plt.yticks([])
+
+
   def updatefig(*args):
       global i
       if i < len(boards) - 1:
           i += 1
       else:
-          i=0
+          i = 0
       im.set_array(boards[i])
-      return im,
-  a = animation.FuncAnimation(fig, updatefig,  blit=True, frames=len(boards), interval=10)
+      return (im,)
+
+
+  a = animation.FuncAnimation(fig, updatefig, blit=True, frames=len(boards), interval=10)
   plt.close(fig)
   HTML(a.to_jshtml())
 #+end_src
@@ -249,19 +262,24 @@ We can animate the process of expanding each seed
   for tokens in map(str.split, lines):
       parent, child = tokens[1], tokens[-3]
       if parent not in constraints:
-          constraints[parent] = ['', '']
+          constraints[parent] = ["", ""]
       if child not in constraints:
-          constraints[child] = ['', '']
+          constraints[child] = ["", ""]
       constraints[parent][0] += child
       constraints[child][1] += parent
-  executed = ''
+  executed = ""
   available = []
+
 
   def pop_node(node, ordering):
       for child in ordering[node][0]:
           idx = ordering[child][1].index(node)
-          ordering[child] = [ordering[child][0], ordering[child][1][:idx] + ordering[child][1][idx + 1:]]
-      del ordering[node]      
+          ordering[child] = [
+              ordering[child][0],
+              ordering[child][1][:idx] + ordering[child][1][idx + 1 :],
+          ]
+      del ordering[node]
+
 
   part1 = constraints.copy()
   while part1:
@@ -271,7 +289,6 @@ We can animate the process of expanding each seed
       pop_node(current, part1)
 
   executed
-
 #+end_src
 
 ** Part 2
@@ -288,10 +305,12 @@ We can animate the process of expanding each seed
           else:
               pop_node(key, part2)
       active = new_active
-      available = sorted(set(key for key in part2 if not part2[key][1]) - set(x[0] for x in active))
+      available = sorted(
+          set(key for key in part2 if not part2[key][1]) - set(x[0] for x in active)
+      )
       while available and len(active) < n_workers:
           key = available.pop(0)
-          active += [[key, ord(key) - ord('A') + 60]]
+          active += [[key, ord(key) - ord("A") + 60]]
       time += 1
   time
 #+end_src
@@ -300,6 +319,8 @@ We can animate the process of expanding each seed
 ** Part 1
 #+begin_src jupyter-python
   data = load(8, "int")[0]
+
+
   def parse(tree_list):
       result = {"children": []}
       n_children, n_metadata = tree_list[:2]
@@ -310,10 +331,12 @@ We can animate the process of expanding each seed
       result["metadata"] = tree_list[:n_metadata]
       return tree_list[n_metadata:], result
 
+
   def weigh(tree):
-      if not tree['children']:
+      if not tree["children"]:
           return sum(tree["metadata"])
-      return sum(tree["metadata"]) + sum(map(weigh, tree['children']))
+      return sum(tree["metadata"]) + sum(map(weigh, tree["children"]))
+
 
   tree = parse(data)[1]
   weigh(tree)
@@ -322,13 +345,15 @@ We can animate the process of expanding each seed
 ** Part 2
 #+begin_src jupyter-python
   def value(node):
-      children = node['children']
+      children = node["children"]
       if not children:
           return sum(node["metadata"])
-      return sum(value(children[idx - 1]) for idx in node["metadata"]
-                 if idx <= len(children))
-  value(tree)
+      return sum(
+          value(children[idx - 1]) for idx in node["metadata"] if idx <= len(children)
+      )
 
+
+  value(tree)
 #+end_src
 
 * [[https://adventofcode.com/2018/day/9][Day 9: Marble Mania]]
@@ -336,6 +361,7 @@ We can animate the process of expanding each seed
 #+begin_src jupyter-python
   n_players = 419
   n_marbles = 72164
+
 
   def run(n_players, n_marbles):
       scores = defaultdict(int)
@@ -349,6 +375,8 @@ We can animate the process of expanding each seed
               circle.rotate(-1)
               circle.append(marble)
       return max(scores.values())
+
+
   run(n_players, n_marbles)
 #+end_src
 
@@ -371,8 +399,10 @@ We can animate the process of expanding each seed
       bounding_box = np.product(positions.max(axis=0) - positions.min(axis=0))
   positions -= velocities
   board = np.zeros(positions.max(axis=0) - positions.min(axis=0) + 1)
-  board[(positions[:, 0] - positions[:, 0].min(), positions[:, 1] - positions[:, 1].min())] = 1
-  print('\n'.join([''.join('█' if char else ' ' for char in line) for line in board.T]))
+  board[
+      (positions[:, 0] - positions[:, 0].min(), positions[:, 1] - positions[:, 1].min())
+  ] = 1
+  print("\n".join(["".join("█" if char else " " for char in line) for line in board.T]))
 #+end_src
 
 ** Part 2
@@ -384,16 +414,15 @@ We can animate the process of expanding each seed
 ** Part 1
 
 #+begin_src jupyter-python
-  import scipy
   s = 8772
   board = np.zeros((300, 300), dtype=int)
   for row, col in itertools.product(range(300), range(300)):
-      score = ((row + 1 + 10)  * (col + 1) + s) * (row + 1 + 10)
+      score = ((row + 1 + 10) * (col + 1) + s) * (row + 1 + 10)
       board[row, col] = (score // 100) % 10
   board -= 5
   best = 0
   for row, col in itertools.product(range(300 - 2), range(300 - 2)):
-      total = board[row: row+3, col:col+3].sum()
+      total = board[row : row + 3, col : col + 3].sum()
       if total > best:
           best = total
           result = row + 1, col + 1
@@ -406,7 +435,7 @@ Brute force over all sizes is slow, but works
   best = 0
   for i in range(3, 301):
       for row, col in itertools.product(range(301 - i), range(301 - i)):
-          total = board[row:row+i, col:col+i].sum()
+          total = board[row : row + i, col : col + i].sum()
           if total > best:
               best = total
               result = row + 1, col + 1, i
@@ -421,14 +450,21 @@ Brute force over all sizes is slow, but works
   generations = 20
   initial_state = [lookup[char] for char in data[0] if char in lookup]
   state = np.pad(initial_state, generations)
-  rules = [line.strip().split(' => ') for line in data[2:]]
-  alive = np.array([[lookup[x] for x in rule[0]] for rule in rules if lookup[rule[1]] == 1])
+  rules = [line.split(" => ") for line in data[2:]]
+  alive = np.array(
+      [[lookup[x] for x in rule[0]] for rule in rules if lookup[rule[1]] == 1]
+  )
+
+
   def update(cell_neighbors):
       return 1 * (not abs(np.array(alive) - cell_neighbors).sum(axis=1).min())
 
+
   states = [state.copy()]
   for i in range(generations):
-      state = scipy.ndimage.generic_filter(state, update, footprint=np.ones(5), mode='constant')
+      state = scipy.ndimage.generic_filter(
+          state, update, footprint=np.ones(5), mode="constant"
+      )
       states.append(state.copy())
   indices = np.arange(state.shape[0]) - generations
   (indices * state).sum()
@@ -441,12 +477,16 @@ Simulating the 50 billion generations is impossible, so something cleverer is ne
   state = np.pad(initial_state, generations)
   states = [state.copy()]
   for i in range(1, generations):
-      new_state = scipy.ndimage.generic_filter(state, update, footprint=np.ones(5), mode='constant')
+      new_state = scipy.ndimage.generic_filter(
+          state, update, footprint=np.ones(5), mode="constant"
+      )
       states.append(new_state.copy())
       if (new_state == np.roll(state, 1)).all():
           break
       state = new_state
-  (((np.arange(new_state.shape[0]) - generations) + (50_000_000_000 - i))*new_state).sum()
+  (
+      ((np.arange(new_state.shape[0]) - generations) + (50_000_000_000 - i)) * new_state
+  ).sum()
 #+end_src
 
 * [[https://adventofcode.com/2018/day/13][Day 13: Mine Cart Madness]]
@@ -455,12 +495,11 @@ Simulating the 50 billion generations is impossible, so something cleverer is ne
 #+begin_src jupyter-python
   characters = r" |-/\+><v^"
   cart_labels = {">": ("-", 1), "<": ("-", -1), "v": ("|", -1j), "^": ("|", 1j)}
-  data = load(13)
   graph = {}
   carts = []
   carts_part2 = []
-  for y, line in enumerate(data):
-      for x, char in enumerate(line.strip("\n")):
+  for y, line in enumerate(load(13)):
+      for x, char in enumerate(line):
           position = x - 1j * y
           if char in cart_labels:
               char, direction = cart_labels[char]
@@ -492,15 +531,18 @@ Simulating the 50 billion generations is impossible, so something cleverer is ne
 ** Part 2
 #+begin_src jupyter-python
   carts = carts_part2
-  carts.sort(key = lambda x: (-x[0].imag, x[0].real))
+  carts.sort(key=lambda x: (-x[0].imag, x[0].real))
   while len(carts) > 1:
       is_crashed = [False] * len(carts)
       for idx, cart in enumerate(carts):
           if is_crashed[idx]:
               continue
           new_position = cart[0] + cart[1]
-          crashes = [i for i, cart2 in enumerate(carts)
-                     if new_position == cart2[0] and not is_crashed[i]]
+          crashes = [
+              i
+              for i, cart2 in enumerate(carts)
+              if new_position == cart2[0] and not is_crashed[i]
+          ]
           for crash in crashes:
               is_crashed[idx] = True
               is_crashed[crash] = True
@@ -514,8 +556,8 @@ Simulating the 50 billion generations is impossible, so something cleverer is ne
           elif tile == 5:
               cart[1] = cart[1] * next(cart[2])
       carts = [cart for (crash, cart) in zip(is_crashed, carts) if not crash]
-      carts.sort(key = lambda x: (-x[0].imag, x[0].real))
-  print(int(carts[0][0].real),int(-carts[0][0].imag),sep=",")
+      carts.sort(key=lambda x: (-x[0].imag, x[0].real))
+  print(int(carts[0][0].real), int(-carts[0][0].imag), sep=",")
 #+end_src
 
 * [[https://adventofcode.com/2018/day/14][Day 14: Chocolate Charts]]
@@ -531,9 +573,10 @@ Simulating the 50 billion generations is impossible, so something cleverer is ne
           l = len(recipes)
           e1, e2 = (e1 + v1 + 1) % l, (e2 + v2 + 1) % l
       # print(recipes)
-      return functools.reduce(lambda x, y: 10*x + y, recipes[n: n + 10])
-  solve(157901)
+      return functools.reduce(lambda x, y: 10 * x + y, recipes[n : n + 10])
 
+
+  solve(157901)
 #+end_src
 
 ** Part 2
@@ -543,7 +586,7 @@ Simulating the 50 billion generations is impossible, so something cleverer is ne
       s = len(seq)
       e1, e2 = 0, 1
       recipes = [3, 7]
-      while recipes[-s:] != seq and recipes[-s - 1:-1] != seq:
+      while recipes[-s:] != seq and recipes[-s - 1 : -1] != seq:
           v1, v2 = recipes[e1], recipes[e2]
           tens, units = divmod(v1 + v2, 10)
           recipes += [tens, units] if tens else [units]
@@ -551,8 +594,9 @@ Simulating the 50 billion generations is impossible, so something cleverer is ne
           e1, e2 = (e1 + v1 + 1) % l, (e2 + v2 + 1) % l
       delta = 0 if recipes[-s:] == seq else 1
       return l - s - delta
-  solve("157901")
 
+
+  solve("157901")
 #+end_src
 
 * [[https://adventofcode.com/2018/day/15][Day 15: Beverage Bandits]]
@@ -682,9 +726,8 @@ This was a slog. Lots of small pieces to keep track of
           return sorted(targets)[0][1:] if targets else None
 
 
-  data = load(15)
   lookup = {".": 0, "#": 1, "E": 2, "G": 3}
-  board = np.array([[lookup[char] for char in line.strip()] for line in data])
+  board = np.array([[lookup[char] for char in line] for line in load(15)])
   goblins = sorted(zip(*np.where(board == 3)))
   elves = sorted(zip(*np.where(board == 2)))
   rock = sorted(zip(*np.where(board == 1)))
@@ -702,6 +745,8 @@ For the longest time I missed the requirement that when two targets were equally
           if board.count("elf") != len(elves):
               return False
       return True
+
+
   for power in range(3, 200):
       if test(power):
           break
@@ -716,8 +761,10 @@ This is fairly straightforward. We have seven different operations, with two or 
 
 We can then scan through the header lines of the input, and for each (before, command, after) triple, we can loop over the valid tuples, and check which ones convert before to after.
 #+begin_src jupyter-python
-  from more_itertools import chunked
   import operator
+
+  from more_itertools import chunked
+
   registers = [0, 0, 0, 0]
   ops = {
       "add": operator.add,
@@ -737,17 +784,20 @@ We can then scan through the header lines of the input, and for each (before, co
 
   valid_ops = {(op,) + mode for op in ops for mode in valid_modes[op]}
 
+
   def get_operands(modes, operands, registers):
       result = []
       for mode, operand in zip(modes, operands):
           result.append(registers[operand] if mode else operand)
       return result
+
+
   split = 3298
   values = load(16, "int", footer=split)
   total = 0
   for state, operation, new_state in chunked(values, 3):
       count = 0
-      operands = operation[1: -1]
+      operands = operation[1:-1]
       result = new_state[operation[-1]]
       for op, *mode in valid_ops:
           a, b = get_operands(mode, operands, state)
@@ -756,7 +806,6 @@ We can then scan through the header lines of the input, and for each (before, co
       if count >= 3:
           total += 1
   total
-
 #+end_src
 
 ** Part 2
@@ -769,7 +818,7 @@ With that out of the way, we can intersect all the potentially valid assignments
       op_number = operation[0]
       if op_number in op_assignments:
           continue
-      operands = operation[1: -1]
+      operands = operation[1:-1]
       result = new_state[operation[-1]]
       candidate_ops = set()
       for op, *modes in valid_ops:
@@ -777,7 +826,7 @@ With that out of the way, we can intersect all the potentially valid assignments
           if ops[op](a, b) == result:
               candidate_ops.add((op,) + tuple(modes))
       op_ids[op_number] &= candidate_ops
-      if len(op_ids[op_number]) ==  1:
+      if len(op_ids[op_number]) == 1:
           assignment = op_ids[op_number].pop()
           op_assignments[op_number] = assignment
           for i in range(16):
@@ -859,7 +908,7 @@ This was a very weird part 2, since I basically solved it already in part 1
 #+begin_src jupyter-python
   state_map = {".": 0, "|": 1, "#": 2}
   reverse_map = {v: k for k, v in state_map.items()}
-  state = np.array([[state_map[char] for char in line.strip()] for line in load(18)])
+  state = np.array([[state_map[char] for char in line] for line in load(18)])
   weights = np.ones((3, 3))
   weights[1, 1] = 0
   seen = {}
@@ -867,9 +916,11 @@ This was a very weird part 2, since I basically solved it already in part 1
       seen[tuple(state.flatten())] = i
       tree_nb = scipy.ndimage.convolve(1 * (state == 1), weights, mode="constant")
       lumber_nb = scipy.ndimage.convolve(1 * (state == 2), weights, mode="constant")
-      change = (((state == 0) & (tree_nb >= 3))
-                | ((state == 1) & (lumber_nb >= 3))
-                | ((state == 2) & ((tree_nb == 0) | (lumber_nb == 0))))
+      change = (
+          ((state == 0) & (tree_nb >= 3))
+          | ((state == 1) & (lumber_nb >= 3))
+          | ((state == 2) & ((tree_nb == 0) | (lumber_nb == 0)))
+      )
       state = (state + change) % 3
   (state == 1).sum() * (state == 2).sum()
 #+end_src
@@ -887,12 +938,13 @@ There's no way we can run the simulation for that long. Hopefully we'll get a re
       seen[tuple(state.flatten())] = i
       tree_nb = scipy.ndimage.convolve(1 * (state == 1), weights, mode="constant")
       lumber_nb = scipy.ndimage.convolve(1 * (state == 2), weights, mode="constant")
-      change = (((state == 0) & (tree_nb >= 3))
-                | ((state == 1) & (lumber_nb >= 3))
-                | ((state == 2) & ((tree_nb == 0) | (lumber_nb == 0))))
+      change = (
+          ((state == 0) & (tree_nb >= 3))
+          | ((state == 1) & (lumber_nb >= 3))
+          | ((state == 2) & ((tree_nb == 0) | (lumber_nb == 0)))
+      )
       state = (state + change) % 3
   (state == 1).sum() * (state == 2).sum()
-
 #+end_src
 
 * [[https://adventofcode.com/2018/day/19][Day 19: Go With The Flow]]
@@ -936,7 +988,7 @@ There's no way we can run the simulation for that long. Hopefully we'll get a re
   registers = [0, 0, 0, 0, 0, 0]
   ip, program = data[0], data[1:]
   ip_register = int(re.findall(r"-?\d+", ip)[0])
-  program = [x.strip().split() for x in program]
+  program = [x.split() for x in program]
   program = [interpret(line[0]) + [int(x) for x in line[1:]] for line in program]
   run(program, registers, ip_register)
 #+end_src
@@ -963,7 +1015,7 @@ But thats equivalent to  ~x0 += x2 if x5 % x2 == 0 else 0~. The outer loop just 
           if n % i == 0:
               total += i
       return total
-  
+
 
   registers = [1, 0, 0, 0, 0, 0]
   ip = 0
@@ -980,22 +1032,25 @@ But thats equivalent to  ~x0 += x2 if x5 % x2 == 0 else 0~. The outer loop just 
 ** Part 1
 The hard part of this problem is moving from the regex representation of the map to a more sensible one. A pseudo-ebnf of the grammar is:
 
-path = direction, path | bracketed_path, path | options
-direction = n|e|w|s
-bracketed_path = (, path, )
-options = (path, |)*, path?
+- ~path = direction, path | bracketed_path, path | options~
+- ~direction = n|e|w|s~
+- ~bracketed_path = (, path, )~
+- ~options = (path, |)*, path?~
 
 Based on this, we can parse the string from start to finish by tracking a list of current positions. If a direction is encountered, each of the positions is updated. Whenever an opening bracket is encountered, the matching close bracket is found, the subexpression is split into options, and each of those paths is parsed. The visited edges are tracked along the way in a global dictionary. It's not super elegant, but it works.
 
 #+begin_src jupyter-python
-  s = load(20)[0].strip()[1:-1]
+  s = load(20)[0][1:-1]
   directions = {"N": 1j, "E": 1, "S": -1j, "W": -1}
+
+
   def find_closing_paren(s):
       count = 0
       for idx, char in enumerate(s):
           count += 1 if char == "(" else -1 if char == ")" else 0
           if count == 0:
               return idx
+
 
   def split_into_options(s):
       count = 0
@@ -1011,7 +1066,9 @@ Based on this, we can parse the string from start to finish by tracking a list o
       result.append(current)
       return result
 
+
   edges = defaultdict(bool)
+
 
   def endpoints(s, positions=None):
       i = 0
@@ -1023,7 +1080,7 @@ Based on this, we can parse the string from start to finish by tracking a list o
           char = s[i]
           if char == "(":
               delta = find_closing_paren(s[i:])
-              substring = s[i+1: i+delta]
+              substring = s[i + 1 : i + delta]
               options = split_into_options(substring)
               positions = {point for x in options for point in endpoints(x, positions)}
               i += delta
@@ -1034,11 +1091,17 @@ Based on this, we can parse the string from start to finish by tracking a list o
                   edges[2 * position - direction] = True
           i += 1
       return positions
+
+
   points = endpoints(s)
 
+
   def edge_to_nodes(x):
-      return ((x.real - x.real % 2 + 1j * (x.imag - x.imag % 2)) / 2,
-              (x.real + x.real % 2 + 1j * (x.imag + x.imag % 2)) / 2)
+      return (
+          (x.real - x.real % 2 + 1j * (x.imag - x.imag % 2)) / 2,
+          (x.real + x.real % 2 + 1j * (x.imag + x.imag % 2)) / 2,
+      )
+
 
   nodes = len({node for edge in edges.keys() for node in edge_to_nodes(edge)})
 #+end_src
@@ -1047,8 +1110,11 @@ With all that out of the way, the furthest room can be found with a BFS:
 #+begin_src jupyter-python
   def neighbors(state):
       return [
-          state + direction for direction in directions.values() if edges[2 * state + direction]
+          state + direction
+          for direction in directions.values()
+          if edges[2 * state + direction]
       ]
+
 
   utils.bfs(0, None, neighbors)
 #+end_src
@@ -1070,11 +1136,10 @@ Analysing the structure of the program, we can see that the value of register 0 
   ip, program = data[0], data[1:]
   ip_register = int(re.findall(r"-?\d+", ip)[0])
   ip = 0
-  program = [x.strip().split() for x in program]
+  program = [x.split() for x in program]
   program = [interpret(line[0]) + [int(x) for x in line[1:]] for line in program]
   count = 0
   while True:
-      i += 1
       registers[ip_register] = ip
       op, modes, a, b, c = program[ip]
       a, b = get_operands(modes, (a, b), registers)
@@ -1086,6 +1151,7 @@ Analysing the structure of the program, we can see that the value of register 0 
               break
   registers[3]
 #+end_src
+
 ** Part 2
 For part 2, we need to do two things:
 
@@ -1101,7 +1167,7 @@ For part 1, it turns out that the code is repeatedly applying a fairly simple tr
       x1 = x3 | 65536
       x3 = 4921097
       while x1 >= 1:
-          x3 = ((x3 + (x1 % 256))  * 65899) % 16777216
+          x3 = ((x3 + (x1 % 256)) * 65899) % 16777216
           x1 = x1 // 256
   seen[-1]
 #+end_src
@@ -1111,19 +1177,24 @@ For part 1, it turns out that the code is repeatedly applying a fairly simple tr
   d = 7863
   target_x, target_y = 14, 760
   base = 20183
+
+
   @functools.cache
   def geologic_index(x, y):
       if y == 0:
           return (x * 16807) % base
       if x == 0:
           return (y * 48271) % base
-      return ((geologic_index(x-1, y) + d) * (geologic_index(x, y-1) + d)) % base
+      return ((geologic_index(x - 1, y) + d) * (geologic_index(x, y - 1) + d)) % base
+
 
   @functools.cache
   def terrain_type(x, y):
       if x == target_x and y == target_y:
           return 0
       return ((geologic_index(x, y) + d) % base) % 3
+
+
   board = np.zeros((target_x + 1, target_y + 1), dtype=int)
   for i in range(target_x + 1):
       for j in range(target_y + 1):
@@ -1158,11 +1229,14 @@ This calls for a path finding algorithm. A* to the rescue! We'll need functions 
           and candidate[2] != terrain_type(candidate[0], candidate[1])
       ]
 
+
   def weights(s1, s2):
       return 1 if s1[-1] == s2[-1] else 7
 
+
   def heuristic(s1, s2):
       return abs(s1[0] - s2[0]) + abs(s1[1] - s2[1]) + 7 * (s1[-1] != s2[-1])
+
 
   initial_state = 0, 0, 1
   target = target_x, target_y, 1
@@ -1246,9 +1320,6 @@ But extending this to all four planes is nob-obvious. Analysing the inputs shows
   indices = np.where(mask)[0]
   c[indices, :, :].max(axis=0)[0, 0]
 #+end_src
-
-#+RESULTS:
-: 123356173
 
 This feels slightly like cheating, since it easily fails for other inputs. Looking up other solutions I saw that one option was to recursively partition space into boxes, and calculate how many emitters are in range of each box, and then just expand the most plausible candidate, until a 1x1x1 box is found. The expansion order should be
 
@@ -1344,10 +1415,14 @@ This was a bit of a slog, with a fair bit of attention needed to make sure that 
 
       return [x for x in infection if x.is_alive], [x for x in immune if x.is_alive]
 
+
   data = [x.split("\n")[1:] for x in load(24, "raw")[:-1].split("\n\n")]
 
+
   def parse(line):
-      n_units, hit_points, damage, initiative = [int(x) for x in re.findall("-?\d+", line)]
+      n_units, hit_points, damage, initiative = [
+          int(x) for x in re.findall("-?\d+", line)
+      ]
       damage_type = re.search("(\w*) damage", line).groups()[0]
       immunity_match = re.search("\((.*)\)", line)
       if not immunity_match:
@@ -1371,6 +1446,7 @@ This was a bit of a slog, with a fair bit of attention needed to make sure that 
           kind += "".join(rest).split(",")
       return weaknesses, immunities
 
+
   immune, infection = [[parse(line) for line in block] for block in data]
   while immune and infection:
       immune, infection = one_round(immune, infection)
@@ -1391,6 +1467,8 @@ I did a binary search for this one. The players can get stuck in a draw, so we n
           if total == sum(x.n_units for x in immune + infection):
               return 0
       return sum(x.n_units for x in immune)
+
+
   high = 1
   while not winner(high):
       high *= 2
@@ -1409,6 +1487,7 @@ I did a binary search for this one. The players can get stuck in a draw, so we n
 I could write this by hand. Or I could realise that the problem description is perfectly suited for a union-find/disjoint set data structure:
 #+begin_src jupyter-python
   from scipy.cluster.hierarchy import DisjointSet
+
   points = [tuple(x) for x in load(25, "int")]
   disjoint_set = DisjointSet(points)
   for x in range(len(points)):

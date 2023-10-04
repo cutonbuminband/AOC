@@ -28,7 +28,7 @@
 * [[https://adventofcode.com/2017/day/1][Day 1: Inverse Captcha]]
 ** Part 1
 #+begin_src jupyter-python
-  data = np.array([int(x) for x in load(1)[0].strip()], dtype=int)
+  data = np.array([int(x) for x in load(1)[0]], dtype=int)
   data[np.where(data == np.roll(data, 1))].sum()
 #+end_src
 
@@ -40,8 +40,7 @@
 * [[https://adventofcode.com/2017/day/2][Day 2: Corruption Checksum]]
 ** Part 1
 #+begin_src jupyter-python
-  data = [sorted(map(lambda x: int(x), x.split()))
-          for x in load(2)]
+  data = [sorted(map(lambda x: int(x), x.split())) for x in load(2)]
   sum(a[-1] - a[0] for a in data)
 #+end_src
 
@@ -60,7 +59,7 @@
 #+begin_src jupyter-python
   puzzle_input = 368078
   completed_squares = (int(np.sqrt(puzzle_input) - 1) // 2 * 2) + 1
-  remainder = (puzzle_input - completed_squares ** 2) % (completed_squares + 1)
+  remainder = (puzzle_input - completed_squares**2) % (completed_squares + 1)
   (completed_squares // 2 + 1) + abs((completed_squares // 2) + 1 - remainder)
 #+end_src
 
@@ -84,7 +83,8 @@
           remainder += 1
       tmp = 0
       for x, y in itertools.product([-1, 0, 1], [-1j, 0, 1j]):
-          if not x and not y: continue
+          if not x and not y:
+              continue
           target = coord + x + y
           tmp += spiral[target]
       if tmp > puzzle_input:
@@ -102,7 +102,7 @@
 
 ** Part 2
 #+begin_src jupyter-python
-  sum(len(l) == len(set([''.join(sorted(w)) for w in l])) for l in lines)
+  sum(len(l) == len(set(["".join(sorted(w)) for w in l])) for l in lines)
 #+end_src
 
 * [[https://adventofcode.com/2017/day/5][Day 5: A Maze of Twisty Trampolines, All Alike]]
@@ -115,7 +115,6 @@
       ip += instructions[ip] - 1
       count += 1
   count
-
 #+end_src
 
 ** Part 2
@@ -137,20 +136,22 @@
   l = len(data)
   seen = {}
   i = 0
+
+
   def step(data):
       idx, maxval = data.argmax(), data.max()
       data[idx] = 0
       delta = np.ones(len(data), dtype=int) * (maxval // l)
-      delta[:maxval % l] += 1
+      delta[: maxval % l] += 1
       data += np.roll(delta, idx + 1)
       return data
+
 
   while tuple(data) not in seen:
       seen[tuple(data)] = i
       data = step(data)
       i += 1
   i
-
 #+end_src
 
 I was getting the wrong answer for this for the longest time until I realised I'd left off a "0" at the start of my input when I copied it over.
@@ -164,11 +165,10 @@ This was made trivial by tracking when a given configuration was seen.
 * [[https://adventofcode.com/2017/day/7][Day 7: Recursive Circus]]
 ** Part 1
 #+begin_src jupyter-python
-  data = map(str.strip, load(7))
   tree = {}
-  for line in data:
+  for line in load(7):
       name = line.split(" ")[0]
-      children  = line.split(" -> ")[1].split(", ") if " -> " in line else []
+      children = line.split(" -> ")[1].split(", ") if " -> " in line else []
       weight = int(re.findall("\d+", line)[0])
       tree[name] = {"weight": weight, "children": children}
   parents = {}
@@ -182,17 +182,20 @@ This was made trivial by tracking when a given configuration was seen.
 ** Part 2
 #+begin_src jupyter-python
   def weight(node):
-    return tree[node]["weight"] + sum(map(weight, tree[node]["children"]))
+      return tree[node]["weight"] + sum(map(weight, tree[node]["children"]))
+
 
   def is_balanced(node):
-    return (not tree[node]["children"] or
-            len(set(map(weight, tree[node]["children"]))) == 1)
+      return (
+          not tree[node]["children"] or len(set(map(weight, tree[node]["children"]))) == 1
+      )
+
 
   while not is_balanced(node):
-    weights = [weight(x) for x in tree[node]["children"]]
-    counts = collections.Counter(weights)
-    wrong_weight = min(counts, key=counts.get)
-    node = tree[node]["children"][weights.index(wrong_weight)]
+      weights = [weight(x) for x in tree[node]["children"]]
+      counts = collections.Counter(weights)
+      wrong_weight = min(counts, key=counts.get)
+      node = tree[node]["children"][weights.index(wrong_weight)]
 
   delta = max(counts, key=counts.get) - wrong_weight
   tree[node]["weight"] + delta
@@ -202,8 +205,9 @@ This was made trivial by tracking when a given configuration was seen.
 ** Part 1
 #+begin_src jupyter-python
   import operator as op
+
   registers = defaultdict(int)
-  instructions = [x.strip().split() for x in load(8)]
+  instructions = [x.split() for x in load(8)]
   ops = {"<": op.lt, "<=": op.le, "==": op.eq, ">=": op.ge, ">": op.gt, "!=": op.ne}
   signs = {"dec": -1, "inc": 1}
   for target, sign, inc_amount, _, comparator, comparison, cmp_value in instructions:
@@ -228,40 +232,41 @@ This was made trivial by tracking when a given configuration was seen.
 * [[https://adventofcode.com/2017/day/9][Day 9: Stream Processing]]
 ** Part 1
 #+begin_src jupyter-python
-def canonical_form(sequence):
-    count = 0
-    replacements = {'{': '[', ',': ',', '}': ']'}
-    mode = 'group'
-    skip = False
-    result = ''
-    for char in sequence:
-        if skip:
-            skip = False
-        elif char == '!':
-            skip = True
-        elif mode == 'group' and char == '<':
-            mode = 'garbage'
-        elif mode == 'garbage' and char == '>':
-            mode = 'group'
-        elif mode == 'garbage':
-            count += 1
-        elif mode == 'group':
-            if char == '}':
-                result += replacements[char]
-            if char == '{':
-                result += replacements[char]
-    return result, count
+  def canonical_form(sequence):
+      count = 0
+      replacements = {"{": "[", ",": ",", "}": "]"}
+      mode = "group"
+      skip = False
+      result = ""
+      for char in sequence:
+          if skip:
+              skip = False
+          elif char == "!":
+              skip = True
+          elif mode == "group" and char == "<":
+              mode = "garbage"
+          elif mode == "garbage" and char == ">":
+              mode = "group"
+          elif mode == "garbage":
+              count += 1
+          elif mode == "group":
+              if char == "}":
+                  result += replacements[char]
+              if char == "{":
+                  result += replacements[char]
+      return result, count
 
-data = load(9)[0].strip()
-data, count = canonical_form(data)
-total, counter = 0, 0
-for char in data:
-    if char == "[":
-        counter += 1
-    else:
-        total += counter
-        counter -= 1
-total
+
+  data = load(9)[0]
+  data, count = canonical_form(data)
+  total, counter = 0, 0
+  for char in data:
+      if char == "[":
+          counter += 1
+      else:
+          total += counter
+          counter -= 1
+  total
 #+end_src
 
 ** Part 2
@@ -274,6 +279,8 @@ count
 #+begin_src jupyter-python
   data = "165,1,255,31,87,52,24,113,0,91,148,254,158,2,73,153"
   lengths = [int(length) for length in data.split(",")]
+
+
   def knot_hash1(lengths):
       knots = collections.deque(range(256))
       total = 0
@@ -285,6 +292,8 @@ count
           total += length + idx
       knots.rotate(total)
       return knots
+
+
   knots = knot_hash1(lengths)
   knots.popleft() * knots.popleft()
 #+end_src
@@ -295,17 +304,21 @@ count
       numbers = [ord(x) for x in s] + [17, 31, 73, 47, 23]
       lengths = itertools.chain.from_iterable(itertools.repeat(numbers, 64))
       knots = list(knot_hash1(lengths))
-      digits = [functools.reduce(lambda x, y: x ^ y, knots[16*i: 16*(i+1)]) for i in range(16)]
-      return   ''.join(['{:0>2x}'.format(x) for x in digits])
-  knot_hash64(data)
+      digits = [
+          functools.reduce(lambda x, y: x ^ y, knots[16 * i : 16 * (i + 1)])
+          for i in range(16)
+      ]
+      return "".join(["{:0>2x}".format(x) for x in digits])
 
+
+  knot_hash64(data)
 #+end_src
 
 * [[https://adventofcode.com/2017/day/11][Day 11: Hex Ed]]
 ** Part 1
 To describe the hexgrid we'll use two basis vectors: x1, directed southeast, and x2, directed due north. All the other directions can be found as linear combinations of these, and the final position in this basis is just the sum of all the moves. Now, any move of the form (k, 1), with k in [-1, 0, 1] only takes one step, so the number of steps needed to reach the final position is just the value of whichever of the two basis vectors we have more of
 #+begin_src jupyter-python
-  data = open(load(11)[0].strip().split(",")
+  data = open(load(11)[0].split(",")
   coordinates = {"se": np.array((1, 0)),
                  "s": np.array((0, -1)),
                  "sw": np.array((-1, -1)),
@@ -363,10 +376,12 @@ The depths that divide one another exactly can be handled by unfolding the restr
 For most of these, there was only one such modulus. Taking all the ones for which that's the case we can use the chinese remainder theorem to solve that system of congruences, and then manually move to higher congruences to satisfy the remaining scanners.
 #+begin_src jupyter-python
   import math
+
   from utils import crt
+
   scanners = defaultdict(list)
   for position, depth in data:
-      scanners[2 * depth - 2].append((- position) % (2 * depth - 2))
+      scanners[2 * depth - 2].append((-position) % (2 * depth - 2))
       scanners[2 * depth - 2].sort()
   seen = []
   for s1, s2 in itertools.combinations(scanners.keys(), 2):
@@ -374,7 +389,9 @@ For most of these, there was only one such modulus. Taking all the ones for whic
       if (s1 % s2) == 0:
           seen.append(s2)
           offsets = list(range(0, s1, s2))
-          new_restrictions = list(map(sum, list(itertools.product(offsets, scanners[s2]))))
+          new_restrictions = list(
+              map(sum, list(itertools.product(offsets, scanners[s2])))
+          )
           restrictions = sorted(set(new_restrictions + scanners[s1]))
           scanners[s1] = restrictions
   for key in set(seen):
@@ -382,14 +399,19 @@ For most of these, there was only one such modulus. Taking all the ones for whic
   valid = {}
   for scanner in scanners:
       valid[scanner] = sorted(set(range(scanner)) - set(scanners[scanner]))
-  g = math.gcd(*(list(valid.keys()) + [element for numbers in valid.values() for element in numbers]))
+  g = math.gcd(
+      ,*(
+          list(valid.keys())
+          + [element for numbers in valid.values() for element in numbers]
+      )
+  )
   congruences = []
   remainder = {}
   for modulus in valid:
       if len(valid[modulus]) == 1:
-          congruences.append((int(modulus / g), int( valid[modulus][0]/ g)))
+          congruences.append((int(modulus / g), int(valid[modulus][0] / g)))
       else:
-          remainder[int(modulus / g)] = [int(x / g) for x in valid[modulus] ]
+          remainder[int(modulus / g)] = [int(x / g) for x in valid[modulus]]
   N = np.product([x[0] for x in congruences])
   x = crt(congruences) - N
   while True:
@@ -405,7 +427,7 @@ For most of these, there was only one such modulus. Taking all the ones for whic
 * [[https://adventofcode.com/2017/day/14][Day 14: Disk Defragmentation]]
 ** Part 1
 #+begin_src jupyter-python
-  prefix = load(14)[0].strip() + "-"
+  prefix = load(14)[0] + "-"
   hashes = [knot_hash64(prefix + str(i)) for i in range(128)]
   bitstrings = [f"{int(h, 16):0128b}" for h in hashes]
   sum(x.count("1") for x in bitstrings)
@@ -416,7 +438,7 @@ For most of these, there was only one such modulus. Taking all the ones for whic
   field = np.array([[ord(x) - ord("0") for x in b] for b in bitstrings])
   graph = defaultdict(list)
   for i, j in itertools.product(range(128), range(128)):
-      neighbors = [(i, j+1), (i + 1, j)]
+      neighbors = [(i, j + 1), (i + 1, j)]
       neighbors = [(x, y) for x, y in neighbors if (x < 128 and y < 128)]
       if not field[i, j]:
           continue
@@ -447,21 +469,23 @@ For most of these, there was only one such modulus. Taking all the ones for whic
   for i in range(40_000_000):
       a = (a * A) % 2147483647
       b = (b * B) % 2147483647
-      total +=  (a % 2**16) == (b % 2**16)
+      total += (a % 2**16) == (b % 2**16)
   total
-
 #+end_src
 ** Part 2
 #+begin_src jupyter-python
   a = 116
   b = 299
   total = 0
+
+
   def gen_a(start):
       current = start
       while True:
           current = (current * A) % 2147483647
           if current % 4 == 0:
               yield current
+
 
   def gen_b(start):
       current = start
@@ -470,44 +494,46 @@ For most of these, there was only one such modulus. Taking all the ones for whic
           if current % 8 == 0:
               yield current
 
+
   a = gen_a(a)
   b = gen_b(b)
   for i in range(5_000_000):
-      total +=  (next(a) % 2**16) == (next(b) % 2**16)
+      total += (next(a) % 2**16) == (next(b) % 2**16)
   total
-
 #+end_src
 * [[https://adventofcode.com/2017/day/16][Day 16: Permutation Promenade]]
 ** Part 1
 #+begin_src jupyter-python
-  moves = load(16)[0].strip().split(",")
+  moves = load(16)[0].split(",")
   permutations = list("abcdefghijklmnop")
+
 
   def dance(permutations, n):
       seen = []
       for i in range(n):
-          s = ''.join(permutations)
+          s = "".join(permutations)
           if s in seen:
               return seen[n % i]
           seen.append(s)
 
           for move in moves:
-              if move[0] == 's':
+              if move[0] == "s":
                   i = int(move[1:])
                   permutations = permutations[-i:] + permutations[:-i]
               else:
-                  if move[0] == 'x':
-                      a,b = map(int, move[1:].split('/'))
+                  if move[0] == "x":
+                      a, b = map(int, move[1:].split("/"))
                       permutations[a], permutations[b] = permutations[b], permutations[a]
-                  if move[0] == 'p':
-                      a,b = move[1:].split('/')
+                  if move[0] == "p":
+                      a, b = move[1:].split("/")
                       A = permutations.index(a)
                       B = permutations.index(b)
                       permutations[A], permutations[B] = permutations[B], permutations[A]
 
       return permutations
 
-  ''.join(dance(permutations[:], 1))
+
+  "".join(dance(permutations[:], 1))
 #+end_src
 ** Part 2
 For part 2, it would take too long to go through all the one billion cycles. But what if the dances hit a cycle at some point? That would make things a lot easier!
@@ -536,14 +562,15 @@ For part 2, it would take too long to go through all the one billion cycles. But
 * [[https://adventofcode.com/2017/day/18][Day 18: Duet]]
 ** Part 1
 #+begin_src jupyter-python
-  program = load(18)
-  program = [x.strip().split() for x in program]
+  program = [x.split() for x in load(18)]
   ip = 0
   registers = defaultdict(int)
-  binops = {"set": lambda x, y: y,
-            "add": lambda x, y: x + y,
-            "mul": lambda x, y: x * y,
-            "mod": lambda x, y: x % y}
+  binops = {
+      "set": lambda x, y: y,
+      "add": lambda x, y: x + y,
+      "mul": lambda x, y: x * y,
+      "mod": lambda x, y: x % y,
+  }
   memory = 0
   while 0 <= ip < len(program):
       instruction = program[ip]
@@ -583,7 +610,11 @@ There's a bunch of state to keep track of - let's make a class to hold it.
       def __next__(self):
           while 0 <= self.ip < len(self.program):
               instruction = self.program[self.ip]
-              instruction, register, argument = instruction[0], instruction[1], instruction[-1]
+              instruction, register, argument = (
+                  instruction[0],
+                  instruction[1],
+                  instruction[-1],
+              )
               try:
                   argument = int(argument)
               except ValueError:
@@ -609,7 +640,7 @@ There's a bunch of state to keep track of - let's make a class to hold it.
                   self.ip += 1
                   return argument
               self.ip += 1
-          self.state = 2 # terminated
+          self.state = 2  # terminated
           return None
 #+end_src
 
@@ -633,7 +664,6 @@ With that out of the way we can implement the collaboration as follows: run prog
       if bus_two and p0.state == 0:
           p0.state = 1
   p1.count
-
 #+end_src
 
 * [[https://adventofcode.com/2017/day/19][Day 19: A Series of Tubes]]
@@ -659,7 +689,7 @@ The hardest part for this was determining a sensible stopping condition -- that 
                   next_char = data[int(lookahead.imag)][int(lookahead.real)]
               except IndexError:
                   continue
-              if  next_char == char:
+              if next_char == char:
                   direction = delta
                   break
       elif character in string.ascii_letters:
@@ -702,7 +732,7 @@ This feels like the triumph of brute force over elegance. The process involves e
 
 #+begin_src jupyter-python
   translation = str.maketrans(".#/", "01\n")
-  data = [x.strip().translate(translation).split(" => ") for x in load(21)]
+  data = [x.translate(translation).split(" => ") for x in load(21)]
 
 
   def hashed(array):
@@ -724,6 +754,8 @@ This feels like the triumph of brute force over elegance. The process involves e
           src, flipped = np.rot90(src), np.rot90(flipped)
 
   array = np.reshape([int(x) for x in ".#...####".translate(translation)], (-1, 3))
+
+
   def solve(array, n):
       for i in range(n):
           s = array.shape[0]
@@ -741,6 +773,8 @@ This feels like the triumph of brute force over elegance. The process involves e
                   ] = new_square
           array = new_array
       return (1 * array).sum()
+
+
   solve(array, 5)
 #+end_src
 
@@ -752,9 +786,9 @@ This feels like the triumph of brute force over elegance. The process involves e
 ** Part 1
 #+begin_src jupyter-python
   direction = 1j
-  data = [[0 if char == "." else 1 for char in line.strip()] for line in load(22)]
+  data = [[0 if char == "." else 1 for char in line] for line in load(22)]
   size = len(data)
-  position = size // 2 + (size // 2)*1j
+  position = size // 2 + (size // 2) * 1j
   board = defaultdict(int)
   for y, line in enumerate(data):
       for x, val in enumerate(line):
@@ -762,7 +796,7 @@ This feels like the triumph of brute force over elegance. The process involves e
   total = 0
   for idx in range(10000):
       state = board[position]
-      total += (state == 0)
+      total += state == 0
       direction *= (1 - 2 * state) * 1j
       board[position] = 1 - state
       position += direction
@@ -773,9 +807,9 @@ This feels like the triumph of brute force over elegance. The process involves e
 The large number of iterations for part 2 seems to indicate that I should do something more clever here. But the following runs in about 20s on my machine, so nevermind. 
 #+begin_src jupyter-python
   direction = 1j
-  data = [[1j if char == "." else -1j for char in line.strip()] for line in load(22)]
+  data = [[1j if char == "." else -1j for char in line] for line in load(22)]
   size = len(data)
-  position = size // 2 + (size // 2)*1j
+  position = size // 2 + (size // 2) * 1j
   board = defaultdict(lambda: 1j)
   for y, line in enumerate(data):
       for x, val in enumerate(line):
@@ -783,7 +817,7 @@ The large number of iterations for part 2 seems to indicate that I should do som
   total = 0
   for idx in range(10000000):
       state = board[position]
-      total += (state == 1)
+      total += state == 1
       direction *= state
       board[position] = -state * 1j
       position += direction
@@ -794,13 +828,10 @@ The large number of iterations for part 2 seems to indicate that I should do som
 ** Part 1
 
 #+begin_src jupyter-python
-  program = load(23)
-  program = [x.strip().split() for x in program]
+  program = [x.split() for x in load(23)]
   ip = 0
   registers = {x: 0 for x in "abcdefgh"}
-  binops = {"set": lambda x, y: y,
-            "mul": lambda x, y: x * y,
-            "sub": lambda x, y: x - y}
+  binops = {"set": lambda x, y: y, "mul": lambda x, y: x * y, "sub": lambda x, y: x - y}
   count = 0
   while 0 <= ip < len(program):
       instruction = program[ip]
@@ -821,7 +852,6 @@ The large number of iterations for part 2 seems to indicate that I should do som
 ** Part 2
 The instructions warn you that trying to run part 2 as-is is a futile endeavour. And indeed, that is the case. Looking at the script there's a very clear setup section to start with, where variables are set to values; these lines can never be reached again. After that there's a huge loop which covers the rest of the program, and which basically says
 #+begin_src jupyter-python
-  # | eval: false
   while b != 0:
       ...
       b += 17
@@ -831,10 +861,12 @@ Inside this huge loop, we find a section at the start with two nested loops, fol
 
 #+begin_src jupyter-python
   def is_composite(n):
-      for i in range(2, int(n ** 0.5) + 1):
+      for i in range(2, int(n**0.5) + 1):
           if n % i == 0:
               return True
       return False
+
+
   b0 = 5700 + 100_000
   len(list(filter(is_composite, range(b0, b0 + 17000 + 1, 17))))
 #+end_src
@@ -900,5 +932,4 @@ A pretty mindless translation of the requirements into code. Parsing the data wa
       ip += direction
 
   sum(tape.values())
-
 #+end_src

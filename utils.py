@@ -125,7 +125,7 @@ def year_load(year):
             return open(filename).read()
         lines = open(filename).readlines()[header:footer]
         if output == "lines":
-            return lines
+            return [x.strip() for x in lines]
         if output == "int":
             regex = re.compile("-?\d+")
             integers = [[int(x) for x in re.findall(regex, line)] for line in lines]

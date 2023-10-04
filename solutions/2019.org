@@ -52,7 +52,9 @@
 * [[https://adventofcode.com/2019/day/2][Day 2: 1202 Program Alarm]]
 ** Part 1
 #+begin_src jupyter-python
-  program = IntCodeProgram([int(x) for x in load(2)[0].split(',')])
+  program = IntCodeProgram([int(x) for x in load(2)[0].split(",")])
+
+
   def solve(program, noun=12, verb=2):
       program.reset()
       program.program[1] = noun
@@ -61,6 +63,8 @@
           val = next(program.run())
       except StopIteration:
           return program.program[0]
+
+
   solve(program)
 #+end_src
 
@@ -78,10 +82,11 @@
 #+begin_src jupyter-python
   # | eval: true
   # | output: false
-  lines = [x.strip().split(',') for x in load(3)]
+  lines = [x.split(",") for x in load(3)]
+
 
   def path_to_segments(path):
-      directions = {"U": 1j, "D": -1j, "R": 1 , "L": -1}
+      directions = {"U": 1j, "D": -1j, "R": 1, "L": -1}
       deltas = [int(p[1:]) * directions[p[0]] for p in path]
       ends = np.cumsum(deltas)
       lengths = np.cumsum(np.abs(deltas))
@@ -90,24 +95,32 @@
       result[0, 2] = 0
       return result
 
+
   def intersection(s1, s2):
       if ((s1[1] - s1[0]) * (s2[1] - s2[0])).imag == 0:
           return False
       if (s1[0] - s1[1]).imag == 0:
           s2, s1 = s1, s2
-      if ((s1[0].real - s2[0].real) * (s1[1].real - s2[1].real) < 0
-          and (s1[0].imag - s2[0].imag) * (s1[1].imag - s2[1].imag) < 0):
+      if (s1[0].real - s2[0].real) * (s1[1].real - s2[1].real) < 0 and (
+          s1[0].imag - s2[0].imag
+      ) * (s1[1].imag - s2[1].imag) < 0:
           intersection_point = s1[0].real + 1j * s2[0].imag
-          total_length = (s1[2] + s2[2]
-                          + abs((s1[0] - intersection_point).imag)
-                          + abs((s2[0] - intersection_point).real))
+          total_length = (
+              s1[2]
+              + s2[2]
+              + abs((s1[0] - intersection_point).imag)
+              + abs((s2[0] - intersection_point).real)
+          )
           return intersection_point, total_length
       return False
 
+
   l1 = path_to_segments(lines[0])
   l2 = path_to_segments(lines[1])
-  intersections = [i for s1, s2 in itertools.product(l1, l2) if (i := intersection(s1, s2))]
-  int(min( abs(x[0].real) + abs(x[0].imag) for x in intersections))
+  intersections = [
+      i for s1, s2 in itertools.product(l1, l2) if (i := intersection(s1, s2))
+  ]
+  int(min(abs(x[0].real) + abs(x[0].imag) for x in intersections))
 #+end_src
 
 ** Part 2
@@ -122,12 +135,16 @@ As a bonus, we can visualize the walk through space
   # | fig-cap: How the two wires are arranged in space
   import matplotlib.pyplot as plt
   import seaborn as sns
+
   sns.set_theme()
+
 
   def plot_path(segments, **kwargs):
       x = segments[:, 0].real
       y = segments[:, 0].imag
       plt.plot(x, y, **kwargs)
+
+
   plot_path(l1)
   plot_path(l2)
   ax = plt.gca()
@@ -142,7 +159,7 @@ As a bonus, we can visualize the walk through space
   for i in range(low, high + 1):
       s = str(i)
       if list(s) == sorted(s):
-          for digit in '0123456789':
+          for digit in "0123456789":
               if s.count(digit) > 1:
                   total += 1
                   break
@@ -163,7 +180,6 @@ As a bonus, we can visualize the walk through space
                   total += 1
                   break
   total
-
 #+end_src
 
 * [[https://adventofcode.com/2019/day/5][Day 5: Sunny with a Chance of Asteroids]]
@@ -185,7 +201,8 @@ As a bonus, we can visualize the walk through space
 We construct the DAG as a dictionary, where graph[node] corresponds to node.parent.
 #+begin_src jupyter-python
   data = load(6)
-  graph = {child: parent for parent, child in map(lambda x: x.strip().split(")"), data)}
+  graph = {child: parent for parent, child in map(lambda x: x.split(")"), data)}
+
 
   @functools.cache
   def count_orbits(node):
@@ -193,6 +210,8 @@ We construct the DAG as a dictionary, where graph[node] corresponds to node.pare
           return 0, ()
       previous = count_orbits(graph[node])
       return previous[0] + 1, (graph[node],) + previous[1]
+
+
   sum(count_orbits(x)[0] for x in graph)
 #+end_src
 
@@ -243,10 +262,10 @@ Moving from orbit A to orbit B can be accomplished by moving to the last common 
 * [[https://adventofcode.com/2019/day/8][Day 8: Space Image Format]]
 ** Part 1
 #+begin_src jupyter-python
-  data = load(8)[0].strip()
+  data = load(8)[0]
   result = []
   for i in range(len(data) // (25 * 6))[::-1]:
-      substring = data[25*6*i: 25*6*(i+1)]
+      substring = data[25 * 6 * i : 25 * 6 * (i + 1)]
       result.append((substring.count("0"), substring.count("1") * substring.count("2")))
   min(result)[1]
 #+end_src
@@ -255,11 +274,17 @@ Moving from orbit A to orbit B can be accomplished by moving to the last common 
 #+begin_src jupyter-python
   result = list("1" * 25 * 6)
   for i in range(len(data) // (25 * 6))[::-1]:
-      substring = data[25*6*i: 25*6*(i+1)]
+      substring = data[25 * 6 * i : 25 * 6 * (i + 1)]
       result = [bottom if top == "2" else top for top, bottom in zip(substring, result)]
 
-  print("\n".join(["".join(["█" if char != "0" else " " for char in line])
-                   for line in  np.array(result).reshape(6, 25)]))
+  print(
+      "\n".join(
+          [
+              "".join(["█" if char != "0" else " " for char in line])
+              for line in np.array(result).reshape(6, 25)
+          ]
+      )
+  )
 #+end_src
 
 * [[https://adventofcode.com/2019/day/9][Day 9: Sensor Boost]]
@@ -284,16 +309,22 @@ Allowing arbitrary final addresses was accomplished by the very dirty hack of ch
 ** Part 1
 #+begin_src jupyter-python
   from math import gcd
+
+
   def simplify(x, y):
       if (x, y) == (0, 0):
           return 0, 0
       factor = gcd(x, y)
       return int(x / factor), int(y / factor)
 
-  data = np.array([[0 if char == '.' else 1 for char in line.strip()]
-                   for line in load(10)]).T
+
+  data = np.array(
+      [[0 if char == "." else 1 for char in line] for line in load(10)]
+  ).T
   ones = np.array(np.where(data)).T
-  scores = [len(set(map(lambda x: simplify(*x), ones - ones[i]))) for i in range(len(ones))]
+  scores = [
+      len(set(map(lambda x: simplify(*x), ones - ones[i]))) for i in range(len(ones))
+  ]
   position = ones[np.argmax(scores)]
   print(max(scores) - 1)
   print(position)
@@ -303,13 +334,23 @@ Allowing arbitrary final addresses was accomplished by the very dirty hack of ch
 
 There are more than 200 visible asteroids, so we only need to worry about the ones we meet on the first round - but that's exactly the simplified asteroids, as seen from our position. We take these, and sort them according to the angle they make with the negative y axis (negative because we have y increasing as it goes down in this coordinate system). The one we're interested in is the 201st asteroid according to this order (201st because the one we're measuring from will automatically have an angle of zero and should not be counted)
 #+begin_src jupyter-python
-  np.array(sorted(set([simplify(*x) for x in ones - position]), key = lambda x: (np.arctan2(x[0], -x[1])) % (2 * np.pi))[200]) + position
+  (
+      np.array(
+          sorted(
+              set([simplify(*x) for x in ones - position]),
+              key=lambda x: (np.arctan2(x[0], -x[1])) % (2 * np.pi),
+          )[200]
+      )
+      + position
+  )
 #+end_src
 
 * [[https://adventofcode.com/2019/day/11][Day 11: Space Police]]
 ** Part 1
 #+begin_src jupyter-python
   program = IntCodeProgram(load(11, "np"))
+
+
   def solve(startval):
       position, direction = 0 + 0j, 1j
       program.reset()
@@ -324,6 +365,8 @@ There are more than 200 visible asteroids, so we only need to worry about the on
           position += direction
           program.inputs.append(field[position])
       return painted, field
+
+
   len(solve(0)[0])
 #+end_src
 
@@ -331,13 +374,16 @@ There are more than 200 visible asteroids, so we only need to worry about the on
 #+begin_src jupyter-python
   _, field = solve(1)
   ones = np.array([x for x in field.keys() if field[x]])
-  offset = ones.real.min() + 1j*ones.imag.min()
+  offset = ones.real.min() + 1j * ones.imag.min()
   ones = ones - offset
   field = np.zeros((int(ones.real.max()) + 1, int(ones.imag.max()) + 1))
   for value in ones:
       field[int(value.real), int(value.imag)] = 1
-  print("\n".join(["".join(["█" if char else " " for char in line]) for line in np.rot90(field)]))
-
+  print(
+      "\n".join(
+          ["".join(["█" if char else " " for char in line]) for line in np.rot90(field)]
+      )
+  )
 #+end_src
 
 * [[https://adventofcode.com/2019/day/12][Day 12: The N-Body Problem]]
@@ -383,7 +429,6 @@ I don't know what optimizations are possible here, but an obvious one is to real
       if all(cycles):
           break
   math.lcm(*cycles)
-
 #+end_src
 
 * [[https://adventofcode.com/2019/day/13][Day 13: Care Package]]
@@ -402,13 +447,17 @@ I don't know what optimizations are possible here, but an obvious one is to real
   program.set(0, 2)
   ball, paddle = 0, 0
   result = 0
+
+
   def ai():
       global ball
       global paddle
       return (ball > paddle) - (ball < paddle)
+
+
   program.set_input(ai)
   values = more_itertools.chunked(program.run(), 3)
-  for x, y, kind  in values:
+  for x, y, kind in values:
       result = result if (x != -1) else kind
       paddle = paddle if (kind != 3) else x
       ball = ball if (kind != 4) else x
@@ -419,14 +468,19 @@ I don't know what optimizations are possible here, but an obvious one is to real
 * [[https://adventofcode.com/2019/day/14][Day 14: Space Stoichiometry]]
 ** Part 1
 #+begin_src jupyter-python
-  data = load(14)
   graph = {}
-  for line in data:
-      inputs, output = line.strip().split(" => ")
+  for line in load(14):
+      inputs, output = line.split(" => ")
       output_amount, output_resource = output.split()
       output_amount = int(output_amount)
       inputs = [pair.split() for pair in inputs.split(", ")]
-      graph[output_resource] = (output_amount, [x[1] for x in inputs], [int(x[0]) for x in inputs])
+      graph[output_resource] = (
+          output_amount,
+          [x[1] for x in inputs],
+          [int(x[0]) for x in inputs],
+      )
+
+
   def topological_sort(graph):
       if not graph:
           return []
@@ -438,6 +492,7 @@ I don't know what optimizations are possible here, but an obvious one is to real
       assert ready
       new_graph = {k: v for k, v in graph.items() if k not in ready}
       return ready + topological_sort(new_graph)
+
 
   def part1(n):
       order = topological_sort(graph)
@@ -451,6 +506,8 @@ I don't know what optimizations are possible here, but an obvious one is to real
                   requirements[kind] += n * amount
           del requirements[resource]
       return requirements["ORE"]
+
+
   part1(1)
 #+end_src
 
@@ -481,13 +538,16 @@ I really liked this puzzle! The approach I took is to first map out the entire a
   directions = {1: 1j, 2: -1j, 3: -1, 4: 1}
   reverse_directions = {v: k for k, v in directions.items()}
 
+
   def neighbors(state, edges=None):
       if edges is None:
           return []
       return [state + directions[neighbor] for neighbor in edges[state]]
 
+
   def update(steps, state, neighbor):
       return steps + [reverse_directions[neighbor - state]]
+
 
   queue = deque([(0, 0)])
   old_position = 0
@@ -504,7 +564,7 @@ I really liked this puzzle! The approach I took is to first map out the entire a
           _ = next(f)
       for direction in directions:
           new_position = position + directions[direction]
-          opposite_direction = direction + 2*(direction % 2) - 1
+          opposite_direction = direction + 2 * (direction % 2) - 1
           program.set_input([direction])
           val = next(f)
           if val == 0:
@@ -533,14 +593,14 @@ We mapped out the whole area for part 1, so part 2 is just a bfs with no stoppin
 ** Part 1
 For the first part all the numbers are small, so we don't need to be particularly clever
 #+begin_src jupyter-python
-  initial_data = [int(x) for x in load(16)[0].strip()]
+  initial_data = [int(x) for x in load(16)[0]]
   data = initial_data.copy()
   base_pattern = np.array([0, 1, 0, -1])
   factors = []
   for i in range(1, len(data) + 1):
       pattern = base_pattern.repeat(i)
       repeats = int(np.ceil((len(data) + 1) / len(pattern)))
-      factors.append(np.tile(pattern, repeats)[1:len(data) + 1])
+      factors.append(np.tile(pattern, repeats)[1 : len(data) + 1])
   factors = np.array(factors)
   for i in range(100):
       data = abs(factors @ data) % 10
@@ -549,11 +609,11 @@ For the first part all the numbers are small, so we don't need to be particularl
 
 ** Part 2
 
-For part 2, the numbers get so big that this approach is impossible (just the transition matrix  has len(data)**2 * 1e8 elements, so that's not going to work).
+For part 2, the numbers get so big that this approach is impossible (just the transition matrix  has $\textrm{len(data)}^2 \times10^8$ elements, so that's not going to work).
 
-The first optimization we can make is to realise that calculating the $k$th from last digit of the output only requires knowledge of the last $k$ digits of the input. So the last digit is always unchanged, the last-but-one digit is always the sum of the previous last two digits etc.
+The first optimization we can make is to realise that calculating the $k$-th from last digit of the output only requires knowledge of the last $k$ digits of the input. So the last digit is always unchanged, the last-but-one digit is always the sum of the previous last two digits etc.
 
-In fact, we can explicitly solve this reccurrence for the second half of the input data, and looking at the data provided, that's where the relevant digits are located! Denoting the $k$th digit from the end after the $n$th iteration as $d_k^n$, we can verify that
+In fact, we can explicitly solve this reccurrence for the second half of the input data, and looking at the data provided, that's where the relevant digits are located! Denoting the $k$-th digit from the end after the $n$-th iteration as $d_k^n$, we can verify that
 
 \begin{align*}
 d^n_0 &= d^{n-1}_0 = \ldots = d^0_0 \\
@@ -570,7 +630,7 @@ Explicitly solving the recurrences for all the digits in the second half is cert
   data = np.tile(initial_data, 10_000)
   counter_index = len(data) - index
   for i in range(counter_index):
-      active[0] = data[- 1 - i]
+      active[0] = data[-1 - i]
       active = np.cumsum(active) % 10
       results.append(active[-1])
   functools.reduce(lambda x, y: 10 * x + y, results[::-1][:8])
@@ -618,7 +678,7 @@ The points of interest are:
 The numbers here are barely small enough that the straightforward approach works: A BFS with a different visited list for each possible set of collected keys. To slightly improve the runtime, we'll start by eliminating dead ends so the BFS never has to consider them.
 
 #+begin_src jupyter-python
-  data = np.array([[ord(c) for c in line.strip()] for line in load(18)])
+  data = np.array([[ord(c) for c in line] for line in load(18)])
   indices = np.where(data == ord("@"))
   start = list(zip(*indices))[0]
   wall = ord("#")
@@ -740,7 +800,6 @@ For part 2 we need to keep track of four different robots, which increases the n
               q.put((steps + part2[position][neighbor], neighbor, new_state))
       total += steps
   total
-
 #+end_src
 
 * [[https://adventofcode.com/2019/day/19][Day 19: Tractor Beam]]
@@ -930,16 +989,16 @@ For part 2, we basically just need to add a level coordinate to our state, and c
 ** Part 1
 Part 1 is possible to brute force, even if a bit of thought is needed to do it. With 3 different commands available, with six options for their first argument and 2 for their second, there are are 36 possible SPRINGSCRIPT instructions; each program is a max of 15 instructions, so there are more than $2\times10^{23}$ possible programs. That's not the right way to go.
 
-On the other hand, there are only four inputs at any given stage, so there are only 16 distinct inputs to our assignments. The program we have to supply is just a way of mapping each input to either 0 or 1, and there are only 2**16 of those.
+On the other hand, there are only four inputs at any given stage, so there are only 16 distinct inputs to our assignments. The program we have to supply is just a way of mapping each input to either 0 or 1, and there are only $2^{16}$ of those.
 
 Additionally, we are told that jumping when there is a hole 4 tiles away will result in automatic loss, since that's how far we jump. Similarly, not jumping when there is a hole right in front of us will result in a loss. So any valid rule has to have the following structure (0 as input is hole, 1 is ground; 0 as output is don't jump, 1 is jump)
 
-0BCD -> 1
-ABC0 -> 0
+- 0BCD -> 1
+- ABC0 -> 0
 
 (this reveals that the input 0BC0 is an automatic loss)
 
-That also means that for anything else we can assume A = 1 and D = 1, since otherwise the output is fixed. So rally we just have to map the four BC states. That means there are only 16 possible programs, so we can enumerate them all. Especially since 8 of them are mirrors of the other 8.
+That also means that for anything else we can assume A = 1 and D = 1, since otherwise the output is fixed. So really we just have to map the four BC states. That means there are only 16 possible programs, so we can enumerate them all. Especially since 8 of them are mirrors of the other 8.
 
 #+begin_src jupyter-python
   springscript_programs = [
@@ -994,20 +1053,22 @@ Some thoughts:
 - If all of ABCD are ground there is no reason to jump, since we can just move forward. If A is a hole we have to jump, and if D is a hole we cannot jump. In general, if the landing is safe, we should try and jump early, since that'll give us more time to think on the other side. So if either B or C is a hole and D is safe we should jump. The exception is when H is a hole since then we cannot jump from D, and would be better off waiting to see what happens
 
 #+begin_src jupyter-python
-  springscript_program = ["NOT B J",
-                          "NOT C T",
-                          "OR T J",
-                          "AND D J", # if d is ground and there's a hole at B or C, we can jump to D
-                          "AND H J", # but only if H is also ground
-                          "NOT A T", # if next tile is a hole we have to jump
-                          "OR T J",
-                          "RUN"]
+  springscript_program = [
+      "NOT B J",
+      "NOT C T",
+      "OR T J",
+      "AND D J",  # if d is ground and there's a hole at B or C, we can jump to D
+      "AND H J",  # but only if H is also ground
+      "NOT A T",  # if next tile is a hole we have to jump
+      "OR T J",
+      "RUN",
+  ]
   encoded_program = [ord(char) for char in "\n".join(springscript_program) + "\n"]
   program.reset()
   program.set_input(encoded_program)
   for value in program.run():
       if value > 255:
-              break
+          break
       print(chr(value), end="")
   value
 #+end_src
@@ -1066,6 +1127,7 @@ The number of rounds is still prohibitive if we're stuck doing them one at a tim
   def compose(c1, c2):
       return (c1[0] * c2[0]) % l, (c2[0] * c1[1] + c2[1]) % l
 
+
   p = 2020
   i = 101741582076661
   while i:
@@ -1082,11 +1144,11 @@ The number of rounds is still prohibitive if we're stuck doing them one at a tim
 ** Part 1
 #+begin_src jupyter-python
   data = load(23, "np")
-  inputs = [[x] for x in list(range(50))]
+  bus = [[x] for x in list(range(50))]
 
   programs = []
   for i in range(50):
-      program = IntCodeProgram(data, inputs=inputs[i])
+      program = IntCodeProgram(data, inputs=bus[i])
       programs.append(program)
 
   idx = 0
@@ -1101,7 +1163,7 @@ The number of rounds is still prohibitive if we're stuck doing them one at a tim
               done = True
               break
           if program.state == 1:
-              inputs[idx].append(-1)
+              bus[idx].append(-1)
               break
           outputs += [value]
       if done:
@@ -1109,7 +1171,7 @@ The number of rounds is still prohibitive if we're stuck doing them one at a tim
           y = next(values)
           break
       for destination, x, y in more_itertools.chunked(outputs, 3):
-          inputs[destination] += [x, y]
+          bus[destination] += [x, y]
       idx = (idx + 1) % 50 if not outputs else destination
 
   y
@@ -1118,25 +1180,25 @@ The number of rounds is still prohibitive if we're stuck doing them one at a tim
 ** Part 2
 #+begin_src jupyter-python
   data = load(23, "np")
-  inputs = [[x] for x in list(range(50))]
+  bus = [[x] for x in list(range(50))]
 
   programs = []
   for i in range(50):
-      program = IntCodeProgram(data, inputs=inputs[i])
+      program = IntCodeProgram(data, inputs=bus[i])
       programs.append(program)
 
   idx = 0
   done = False
-  def is_idle(inputs):
-      return all(i == [-1] for i in inputs)
+  def is_idle(bus):
+      return all(i == [-1] for i in bus)
   nat = [x, y]
   old_y = -1
   while True:
-      if is_idle(inputs):
+      if is_idle(bus):
           if nat[1] == old_y:
               break
           new_input = nat.copy()
-          inputs[0] = new_input
+          bus[0] = new_input
           programs[0].set_input(new_input)
           old_y = nat[1]
           idx = 0
@@ -1145,14 +1207,14 @@ The number of rounds is still prohibitive if we're stuck doing them one at a tim
       outputs = []
       for value in values:
           if program.state == 1:
-              inputs[idx].append(-1)
+              bus[idx].append(-1)
               break
           outputs += [value]
       for destination, x, y in more_itertools.chunked(outputs, 3):
           if destination == 255:
               nat = [x, y]
           else:
-              inputs[destination] += [x, y]
+              bus[destination] += [x, y]
       idx = (idx + 1) % 50
   old_y
 #+end_src
@@ -1161,7 +1223,7 @@ The number of rounds is still prohibitive if we're stuck doing them one at a tim
 ** Part 1
 #+begin_src jupyter-python
   initial_state = np.array(
-      [[0 if char == "." else 1 for char in line.strip()] for line in load(24)]
+      [[0 if char == "." else 1 for char in line] for line in load(24)]
   )
   state = initial_state.copy()
   weights = [[0, 1, 0], [1, 0, 1], [0, 1, 0]]
@@ -1190,8 +1252,8 @@ We can get the in-plane neighbors exactly as before, and after far too much thou
   state[int(length // 2) + 1] = initial_state
   for i in range(length):
       neighbors = scipy.ndimage.convolve(state, [weights], mode="constant")
-      neighbors[:, (0, -1) , :] += np.roll(state[:, (1, 3), 2], 1, axis=0)[:, :, None]
-      neighbors[:, :, (0, -1) ] += np.roll(state[:, 2, (1, 3)], 1, axis=0)[:, None, :]
+      neighbors[:, (0, -1), :] += np.roll(state[:, (1, 3), 2], 1, axis=0)[:, :, None]
+      neighbors[:, :, (0, -1)] += np.roll(state[:, 2, (1, 3)], 1, axis=0)[:, None, :]
       neighbors[:, (1, 3), 2] += np.roll(state[:, (0, -1), :], -1, axis=0).sum(axis=2)
       neighbors[:, 2, (1, 3)] += np.roll(state[:, :, (0, -1)], -1, axis=0).sum(axis=1)
       changes = neighbors != 1
