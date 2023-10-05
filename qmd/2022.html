@@ -601,7 +601,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="part-1-7" class="level2">
 <h2 class="anchored" data-anchor-id="part-1-7">Part 1</h2>
 <p>It really feels like there should be a slick array-based solution to this: calculate the cumulative max from each of the four directions, take the minimum of those four and compare with our array. But it doesn’t seem like numpy has easy functionality for calculating the cumulative max.</p>
-<p>A bit off digging reveals the very useful ufunc `accumulate`, which does exactly what we need. Then it’s just a question of getting it to work in the four directions. Either we change the axis and direction of operation, or (as here) we transform the data from one orientation to another, do the accumulation, and transform back at the end.</p>
+<p>A bit off digging reveals the very useful ufunc <code>accumulate</code>, which does exactly what we need. Then it’s just a question of getting it to work in the four directions. Either we change the axis and direction of operation, or (as here) we transform the data from one orientation to another, do the accumulation, and transform back at the end.</p>
 <div class="cell" data-execution_count="16">
 <details open="">
 <summary>Code</summary>
@@ -2484,7 +2484,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb52-255"><a href="#cb52-255" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb52-256"><a href="#cb52-256" aria-hidden="true" tabindex="-1"></a>It really feels like there should be a slick array-based solution to this: calculate the cumulative max from each of the four directions, take the minimum of those four and compare with our array. But it doesn't seem like numpy has easy functionality for calculating the cumulative max.</span>
 <span id="cb52-257"><a href="#cb52-257" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb52-258"><a href="#cb52-258" aria-hidden="true" tabindex="-1"></a>A bit off digging reveals the very useful ufunc <span class="sc">\`</span>accumulate<span class="sc">\`</span>, which does exactly what we need. Then it's just a question of getting it to work in the four directions. Either we change the axis and direction of operation, or (as here) we transform the data from one orientation to another, do the accumulation, and transform back at the end.</span>
+<span id="cb52-258"><a href="#cb52-258" aria-hidden="true" tabindex="-1"></a>A bit off digging reveals the very useful ufunc <span class="in">`accumulate`</span>, which does exactly what we need. Then it's just a question of getting it to work in the four directions. Either we change the axis and direction of operation, or (as here) we transform the data from one orientation to another, do the accumulation, and transform back at the end.</span>
 <span id="cb52-259"><a href="#cb52-259" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb52-262"><a href="#cb52-262" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
 <span id="cb52-263"><a href="#cb52-263" aria-hidden="true" tabindex="-1"></a><span class="co"># | eval: true</span></span>
