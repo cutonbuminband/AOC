@@ -622,7 +622,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>The conceptual approach for this is similar - find a way of calculating the score in one direction, then transform the data to use that operation for the other directions.</p>
 <p>There are a couple of gotchas:</p>
 <ul>
-<li>The elves’ sightlines are blocked by trees of the same height, not just by trees of greater height. If we want to leverage `maximum` as an indicator, we need to decrease the value of the tree under consideration by one, since otherwise there’s no way of distinguishing between a, a - 1 (not blocked) and a, a (blocked).</li>
+<li>The elves’ sightlines are blocked by trees of the same height, not just by trees of greater height. If we want to leverage <code>maximum</code> as an indicator, we need to decrease the value of the tree under consideration by one, since otherwise there’s no way of distinguishing between a, a - 1 (not blocked) and a, a (blocked).</li>
 <li>The elves can see the tree that they’re being blocked by. If we try to account for this by just adding one to all the sightlines, we’ll get a bug when they can see all the way to the edge. Instead, we pretend that they can always see the last tree in the forest</li>
 </ul>
 <div class="cell" data-execution_count="17">
@@ -2506,7 +2506,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb52-279"><a href="#cb52-279" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb52-280"><a href="#cb52-280" aria-hidden="true" tabindex="-1"></a>There are a couple of gotchas:</span>
 <span id="cb52-281"><a href="#cb52-281" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb52-282"><a href="#cb52-282" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>The elves' sightlines are blocked by trees of the same height, not just by trees of greater height. If we want to leverage <span class="sc">\`</span>maximum<span class="sc">\`</span> as an indicator, we need to decrease the value of the tree under consideration by one, since otherwise there's no way of distinguishing between a, a - 1 (not blocked) and a, a (blocked).</span>
+<span id="cb52-282"><a href="#cb52-282" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>The elves' sightlines are blocked by trees of the same height, not just by trees of greater height. If we want to leverage <span class="in">`maximum`</span> as an indicator, we need to decrease the value of the tree under consideration by one, since otherwise there's no way of distinguishing between a, a - 1 (not blocked) and a, a (blocked).</span>
 <span id="cb52-283"><a href="#cb52-283" aria-hidden="true" tabindex="-1"></a><span class="ss">-   </span>The elves can see the tree that they're being blocked by. If we try to account for this by just adding one to all the sightlines, we'll get a bug when they can see all the way to the edge. Instead, we pretend that they can always see the last tree in the forest</span>
 <span id="cb52-284"><a href="#cb52-284" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb52-287"><a href="#cb52-287" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
