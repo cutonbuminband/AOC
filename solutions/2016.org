@@ -533,7 +533,7 @@ This is a fairly straightforward implementation of the problem description, with
   nth_key_index("yjdafjpo")
 #+end_src
 ** Part 2
-I was a little uncertain about how to write this cleanly -- all of the logic from part one is the same, the only difference is how the hash is generated. In the end, I made a toggle in the `infinite_triples` function, which is why part 2 can be solved by writing just:
+I was a little uncertain about how to write this cleanly -- all of the logic from part one is the same, the only difference is how the hash is generated. In the end, I made a toggle in the ~infinite_triples~ function, which is why part 2 can be solved by writing just:
 #+begin_src jupyter-python
   nth_key_index("yjdafjpo", part=2)
 #+end_src
@@ -768,7 +768,7 @@ We'll start by merging the overlapping banned ranges together. Then, the high po
 #+end_src
 
 ** Part 2
-Ouch. `Move`, `swap` and `reverse` should be easy to do backwards, since they're self-inverses (potentially with the arguments swapped). The issue is `rotate`. When we have to go left/right a fixed number of steps there's no problem, since we just go the other way. For the last one the issue is that the amount we have to rotate by depends on what the state was prior to the rotation. Luckily there aren't that many possible rotations, so the best approach seems to be to just to see which potential preimage string gives the correct answer when rotated.
+Ouch. ~move~, ~swap~ and ~reverse~ should be easy to do backwards, since they're self-inverses (potentially with the arguments swapped). The issue is ~rotate~. When we have to go left/right a fixed number of steps there's no problem, since we just go the other way. For the last one the issue is that the amount we have to rotate by depends on what the state was prior to the rotation. Luckily there aren't that many possible rotations, so the best approach seems to be to just to see which potential preimage string gives the correct answer when rotated.
 #+begin_src jupyter-python
   def rotate_based_on(s, char):
       index = s.index(char)
@@ -922,9 +922,9 @@ Just another graph search. There's only one empty space, so we can uniquely defi
 #+end_src
 
 ** Part 2
-Just setting the registers to `registers = {"a": 12, "b": 0, "c": 0, "d": 0}` didn't work, since the code was running incredibly slowly. I ended up analysing my input script instead. The first line copied a to b, and lines 2-16 multiplied a by (b - 1), decreased b by one and set c to 2b (ish). Then came the toggle instruction, and the two instructions after that sent us back to line 2.
+Just setting the registers to ~registers = {"a": 12, "b": 0, "c": 0, "d": 0}~ didn't work, since the code was running incredibly slowly. I ended up analysing my input script instead. The first line copied a to b, and lines 2-16 multiplied a by (b - 1), decreased b by one and set c to 2b (ish). Then came the toggle instruction, and the two instructions after that sent us back to line 2.
 
-Some things that stood out here were that c was an even number, decreasing by 2 each iteration so `tgl c` tried to toggle every other instruction, starting at the end of the program and moving back towards the `tgl` instruction itself. That means that the loop before the toggle instruction is unaffected for a long time, and so after the ith iteration we have a = n * (n - 1) * (n - 2) * ... * (n - i). This continues until b = 2, when the `tgl` instruction finally toggles the `jnz` on line 17. At that point we have `a = factorial(n)`. The (now-toggled) last section of the program then just adds the product of the numeric arguments on line 21 and 22.
+Some things that stood out here were that c was an even number, decreasing by 2 each iteration so ~tgl c~ tried to toggle every other instruction, starting at the end of the program and moving back towards the ~tgl~ instruction itself. That means that the loop before the toggle instruction is unaffected for a long time, and so after the ith iteration we have a = n * (n - 1) * (n - 2) * ... * (n - i). This continues until b = 2, when the ~tgl~ instruction finally toggles the ~jnz~ on line 17. At that point we have ~a = factorial(n)~. The (now-toggled) last section of the program then just adds the product of the numeric arguments on line 21 and 22.
 
 And that's the final answer.
 * [[https://adventofcode.com/2016/day/24][Day 24: Air Duct Spelunking]]

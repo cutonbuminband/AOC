@@ -219,7 +219,7 @@ The conceptual approach for this is similar - find a way of calculating the scor
 
 There are a couple of gotchas:
 
-- The elves' sightlines are blocked by trees of the same height, not just by trees of greater height. If we want to leverage `maximum` as an indicator, we need to decrease the value of the tree under consideration by one, since otherwise there's no way of distinguishing between a, a - 1 (not blocked) and a, a (blocked).
+- The elves' sightlines are blocked by trees of the same height, not just by trees of greater height. If we want to leverage ~maximum~ as an indicator, we need to decrease the value of the tree under consideration by one, since otherwise there's no way of distinguishing between a, a - 1 (not blocked) and a, a (blocked).
 - The elves can see the tree that they're being blocked by. If we try to account for this by just adding one to all the sightlines, we'll get a bug when they can see all the way to the edge. Instead, we pretend that they can always see the last tree in the forest
 #+begin_src jupyter-python
   # | eval: true
