@@ -492,6 +492,7 @@ We can see how at the edges of the forest shorter trees are visible, but towards
           y, x = start
   (board == sand).sum()
 #+end_src
+
 ** Part 2
 #+begin_src jupyter-python
   board = np.vstack([initial_board, np.zeros((2, board.shape[1]), dtype=int) + air])
@@ -556,6 +557,7 @@ We can see how at the edges of the forest shorter trees are visible, but towards
   intervals = combine_n_intervals(intervals)
   sum(x[1] - x[0] for x in intervals) - len(fixes)
 #+end_src
+
 ** Part 2
 * [[https://adventofcode.com/2021/day/16][Day 16: Proboscidea Volcanium]]
 ** Part 1
@@ -1178,6 +1180,7 @@ That gives us the new position on the grid. If this position is empty, we rotate
 * [[https://adventofcode.com/2022/day/24][Day 24: Blizzard Basin]]
 ** Part 1
 This is a problem that seems to call for some pathfinding algorithms. We can account for the movement of the blizzards by making a function to answer the question "Is there a blizzard at position y, x at time t?". With that in hand, we can just explore the full search space. To guide the search, we'll use the (current tiime + manhattan distance to the goal node) as a score and always expand the lowest scoring state first, and stop when we've reached the target.
+
 #+begin_src jupyter-python
   chart = np.array([list(x) for x in load(24)])[1:-1, 1:-1]
   chart_dict = {}
@@ -1243,6 +1246,7 @@ This is a problem that seems to call for some pathfinding algorithms. We can acc
   first_leg = travel(chart, start, end, 0)
   first_leg
 #+end_src
+
 ** Part 2
 The above takes ~7 seconds on my machine (and it took 13 before I added the A* scoring logic), so using it to do three searches through the search space might not be feasible. On the other hand, the three searches can be made completely independent of one another, since arriving later at a checkpoint will always be worse than arriving earlier, since an early arrival could always wait in place until the later time.
 
@@ -1278,3 +1282,4 @@ This actually works, but it still seems like there should be some slick-ish way 
 
   dec2snafu(total)
 #+end_src
+
