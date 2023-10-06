@@ -1,346 +1,346 @@
 [
   {
-    "objectID": "qmd/2021.html",
-    "href": "qmd/2021.html",
-    "title": "2021 Solutions",
-    "section": "",
-    "text": "Code\nimport functools\nimport itertools\nimport os\nimport queue\nimport sys\nfrom collections import defaultdict\nfrom pathlib import Path\n\nimport numpy as np\nimport pandas as pd\n\nsys.path.insert(1, os.path.join(sys.path[0], \"..\"))\nimport utils\n\nload = utils.year_load(2021)\ndatadir = Path(\"../data/2021\")"
-  },
-  {
-    "objectID": "qmd/2021.html#part-1",
-    "href": "qmd/2021.html#part-1",
-    "title": "2021 Solutions",
-    "section": "Part 1",
-    "text": "Part 1\n\n\nCode\ndata = load(1, \"np\")\n(np.diff(data) &gt; 0).sum()"
-  },
-  {
-    "objectID": "qmd/2021.html#part-2",
-    "href": "qmd/2021.html#part-2",
-    "title": "2021 Solutions",
-    "section": "Part 2",
-    "text": "Part 2\n\n\nCode\n(pd.Series(data).rolling(3).sum().diff() &gt; 0).sum()"
-  },
-  {
-    "objectID": "qmd/2021.html#part-1-1",
-    "href": "qmd/2021.html#part-1-1",
-    "title": "2021 Solutions",
-    "section": "Part 1",
-    "text": "Part 1\n\n\nCode\ndata = [x.split() for x in load(2)]\ndf = pd.DataFrame(data, columns=[\"instruction\", \"amount\"])\ndf[\"amount\"] = df[\"amount\"].apply(int)\ntotals = df.groupby(\"instruction\").sum()\n(totals.loc[\"forward\"] * (totals.loc[\"down\"] - totals.loc[\"up\"])).iat[0]"
-  },
-  {
-    "objectID": "qmd/2021.html#part-2-1",
-    "href": "qmd/2021.html#part-2-1",
-    "title": "2021 Solutions",
-    "section": "Part 2",
-    "text": "Part 2\n\n\nCode\nstate = (0, 0, 0)\nops = {\n    \"down\": lambda x, y: (x[0] + y, x[1], x[2]),\n    \"up\": lambda x, y: (x[0] - y, x[1], x[2]),\n    \"forward\": lambda x, y: (x[0], x[1] + y, x[2] + x[0] * y),\n}\nfor row in data:\n    state = ops[row[0]](state, int(row[1]))\nprint(state[1] * state[2])"
-  },
-  {
-    "objectID": "qmd/2021.html#part-1-2",
-    "href": "qmd/2021.html#part-1-2",
-    "title": "2021 Solutions",
-    "section": "Part 1",
-    "text": "Part 1\n\n\nCode\ndf = pd.read_fwf(datadir / \"3.txt\", widths=[1] * 12, header=None)\n\n\ndef binarize(array):\n    return int(\"\".join(str(x) for x in array.reshape(-1)), 2)\n\n\nbits = df.median().to_numpy(dtype=int)\nbinarize(bits) * binarize(1 - bits)"
-  },
-  {
-    "objectID": "qmd/2021.html#part-2-2",
-    "href": "qmd/2021.html#part-2-2",
-    "title": "2021 Solutions",
-    "section": "Part 2",
-    "text": "Part 2\n\n\nCode\noxygen = df\nco2 = df\nfor column in df.columns:\n    oxygen = oxygen[oxygen[column] == int(oxygen[column].median() + 0.5)]\n    if len(co2) &gt; 1:\n        co2 = co2[co2[column] != int(co2[column].median() + 0.5)]\nbinarize(oxygen.to_numpy()) * binarize(co2.to_numpy())"
-  },
-  {
-    "objectID": "qmd/2021.html#part-1-3",
-    "href": "qmd/2021.html#part-1-3",
-    "title": "2021 Solutions",
-    "section": "Part 1",
-    "text": "Part 1\n\n\nCode\ndata = load(4, \"raw\").split(\"\\n\\n\")\nnumbers = np.array([int(x) for x in data[0].strip().split(\",\")])\nboards = np.array(\n    [int(x) for x in \" \".join(data[1:]).replace(\"\\n\", \" \").split()]\n).reshape(-1, 5, 5)\n\n\ndef winning_array(boards):\n    return ((boards == -1).all(axis=2) | (boards == -1).all(axis=1)).any(axis=1)\n\n\nfor number in numbers:\n    boards[np.where(boards == number)] = -1\n    if winning_array(boards).any():\n        break\nindex = np.where(winning_array(boards))\nnp.sum(np.ma.array(boards, mask=(boards == -1))[index]) * number"
-  },
-  {
-    "objectID": "qmd/2021.html#part-2-3",
-    "href": "qmd/2021.html#part-2-3",
-    "title": "2021 Solutions",
-    "section": "Part 2",
-    "text": "Part 2\nFigure out which board will win last. Once it wins, what would its final score be?\n\n\nCode\nfor number in numbers:\n    boards[np.where(boards == number)] = -1\n    wins = winning_array(boards)\n    if wins.sum() == len(boards) - 1:\n        index = np.where(~wins)[0]\n    if wins.all():\n        break\nnp.sum(np.ma.array(boards, mask=(boards == -1))[index]) * number"
-  },
-  {
-    "objectID": "qmd/2021.html#part-1-4",
-    "href": "qmd/2021.html#part-1-4",
-    "title": "2021 Solutions",
-    "section": "Part 1",
-    "text": "Part 1\n\n\nCode\ndata = pd.read_csv(datadir / \"5.txt\", names=[\"x1\", \"middle\", \"y2\"])\ndata[[\"y1\", \"x2\"]] = data[\"middle\"].apply(\n    lambda x: pd.Series(x.split(\"-&gt;\")).astype(\"int\")\n)\ngrid = np.zeros((1000, 1000))\n\n\ndef endpoints_to_line(x1, x2, y1, y2):\n    steps = max(abs(x1 - x2), abs(y1 - y2))\n    delta = np.array([np.sign(x2 - x1), np.sign(y2 - y1)])\n    points = [np.array([x1, y1]) + delta * n for n in range(steps + 1)]\n    return tuple(np.array(points).T.tolist())\n\n\non_axis = data[(data[\"x1\"] == data[\"x2\"]) | (data[\"y1\"] == data[\"y2\"])]\nfor row in on_axis.itertuples():\n    grid[endpoints_to_line(row.x1, row.x2, row.y1, row.y2)] += 1\n\n(grid &gt; 1).sum()"
-  },
-  {
-    "objectID": "qmd/2021.html#part-2-4",
-    "href": "qmd/2021.html#part-2-4",
-    "title": "2021 Solutions",
-    "section": "Part 2",
-    "text": "Part 2\n\n\nCode\nskewed = data[(data[\"x1\"] != data[\"x2\"]) & (data[\"y1\"] != data[\"y2\"])]\nfor row in skewed.itertuples():\n    grid[endpoints_to_line(row.x1, row.x2, row.y1, row.y2)] += 1\n\n(grid &gt; 1).sum()"
-  },
-  {
-    "objectID": "qmd/2021.html#part-1-5",
-    "href": "qmd/2021.html#part-1-5",
-    "title": "2021 Solutions",
-    "section": "Part 1",
-    "text": "Part 1\n\n\nCode\ndata = load(6, \"np\")\npopulation, _ = np.histogram(data, range(10))\ntransition_matrix = np.roll(np.eye(9, dtype=int), 1, axis=1)\ntransition_matrix[6, 0] = 1\n(np.linalg.matrix_power(transition_matrix, 80) @ population).sum()"
-  },
-  {
-    "objectID": "qmd/2021.html#part-2-5",
-    "href": "qmd/2021.html#part-2-5",
-    "title": "2021 Solutions",
-    "section": "Part 2",
-    "text": "Part 2\n\n\nCode\n(np.linalg.matrix_power(transition_matrix, 256) @ population).sum()"
-  },
-  {
-    "objectID": "qmd/2021.html#part-1-6",
-    "href": "qmd/2021.html#part-1-6",
-    "title": "2021 Solutions",
-    "section": "Part 1",
-    "text": "Part 1\n\n\nCode\ndata = load(7, \"np\")\nnp.abs(data - np.median(data)).sum()"
-  },
-  {
-    "objectID": "qmd/2021.html#part-2-6",
-    "href": "qmd/2021.html#part-2-6",
-    "title": "2021 Solutions",
-    "section": "Part 2",
-    "text": "Part 2\n\n\nCode\ndef cost(position):\n    delta = np.abs(data - position)\n    return ((delta) * (delta + 1) / 2).sum()\n\n\noptions = [cost(int(data.mean())), cost(int(data.mean() + 0.5))]\nmin(options)"
-  },
-  {
-    "objectID": "qmd/2021.html#part-1-7",
-    "href": "qmd/2021.html#part-1-7",
-    "title": "2021 Solutions",
-    "section": "Part 1",
-    "text": "Part 1\n\n\nCode\nsegments = [line.split(\"|\")[1].split() for line in load(8)]\nmylen = np.vectorize(len)\nnp.isin(mylen(segments), [2, 3, 4, 7]).sum()"
-  },
-  {
-    "objectID": "qmd/2021.html#part-2-7",
-    "href": "qmd/2021.html#part-2-7",
-    "title": "2021 Solutions",
-    "section": "Part 2",
-    "text": "Part 2\nThis is an obvious task for constraint programming. It feels a bit like cheating, so I’ll see if I can come up with a home-grown approach at a later stage. I’ll start by describing the segment pattern of each digit. I’m deliberately using numbers for the segment positions and letters for the segment names so that I don’t get confused.\nWe can do part 2 by exploiting the structure in our data.\nWe know that every digit occurs before the pipe for every row in our input.\nUsing that, we can immediately identify segment 1, segments {36} segments {24} and segments {57}.\nThe three five segment numbers let us disambiguate {147}, {25}, {36}. 147 occur in every group, 25 in only 1 and 36 in two\nThe three six segment numbers let us disambiguate {1267}, {345}.\n\n1 is the segment present in 3 but not in 2.\n2 is the segment present in 4, not present in 2, and present in every 6\n3 is the segment present in 2 which is not present in every 6\n4 is the segment present in 4, not present in 2, and not present in every 6\n5 is the segment not present in 4 which only occurs once in 5\n6 is the segment which is present in 2 and is present in every 6\n7 is the segment present in every 5, not present in every 6, not present in 4\nIt’s not super elegant, and I kind of prefer just using the generalised constraints programming."
-  },
-  {
-    "objectID": "qmd/2021.html#part-1-8",
-    "href": "qmd/2021.html#part-1-8",
-    "title": "2021 Solutions",
-    "section": "Part 1",
-    "text": "Part 1\n\n\nCode\ndata = pd.read_fwf(datadir / \"9.txt\", widths=[1] * 100, header=None).to_numpy()\ndata = np.pad(data, pad_width=1, mode=\"constant\", constant_values=9)\nmask = (\n    (data &lt; np.roll(data, -1, axis=0))\n    & (data &lt; np.roll(data, 1, axis=0))\n    & (data &lt; np.roll(data, -1))\n    & (data &lt; np.roll(data, 1))\n)\nnp.ma.array(data + 1, mask=~mask).sum()"
-  },
-  {
-    "objectID": "qmd/2021.html#part-2-8",
-    "href": "qmd/2021.html#part-2-8",
-    "title": "2021 Solutions",
-    "section": "Part 2",
-    "text": "Part 2\n\n\nCode\ndef up(x, y):\n    return x, y + 1\n\n\ndef down(x, y):\n    return x, y - 1\n\n\ndef left(x, y):\n    return x - 1, y\n\n\ndef right(x, y):\n    return x + 1, y\n\n\nmoves = [up, down, left, right]\n\n\ndef basin(x, y):\n    visited = np.zeros(data.shape, dtype=bool)\n    neighbors = [(x, y)]\n    result = 0\n    while neighbors:\n        x, y = neighbors.pop()\n        if data[x, y] == 9 or visited[x, y]:\n            continue\n        result += 1\n        visited[x, y] = True\n        for move in moves:\n            new_x, new_y = move(x, y)\n            if not visited[new_x, new_y]:\n                neighbors.append((new_x, new_y))\n    return result\n\n\nlow_points = zip(*np.where(mask))\nsizes = list(map(lambda x: basin(*x), low_points))\nprint(np.product(sorted(sizes)[-3:]))"
-  },
-  {
-    "objectID": "qmd/2021.html#part-1-9",
-    "href": "qmd/2021.html#part-1-9",
-    "title": "2021 Solutions",
-    "section": "Part 1",
-    "text": "Part 1\n\n\nCode\nlines = load(10)\npairs = [\"[]\", \"()\", \"&lt;&gt;\", \"{}\"]\n\n\ndef normalize(string):\n    old_string = string\n    while True:\n        for pair in pairs:\n            string = string.replace(pair, \"\")\n        if string == old_string:\n            break\n        old_string = string\n    return string\n\n\nscores = {\")\": 3, \"]\": 57, \"}\": 1197, \"&gt;\": 25137}\ntotal = 0\nfor line in lines:\n    normalized = normalize(line)\n    indices = np.array([normalized.find(pair[1]) for pair in pairs])\n    if (indices == -1).all():\n        continue\n    index = min(index for index in indices if index != -1)\n    total += scores[normalized[index]]\nprint(total)"
-  },
-  {
-    "objectID": "qmd/2021.html#part-2-9",
-    "href": "qmd/2021.html#part-2-9",
-    "title": "2021 Solutions",
-    "section": "Part 2",
-    "text": "Part 2\n\n\nCode\ndelimiters = \" ([{&lt;\"\nscores = []\nfor line in lines:\n    normalized = normalize(line)\n    indices = np.array([normalized.find(pair[1]) for pair in pairs])\n    if (indices != -1).any():\n        continue\n    scores.append(\n        functools.reduce(lambda x, y: 5 * x + delimiters.find(y), normalized[::-1], 0)\n    )\nint(np.median(scores))"
-  },
-  {
-    "objectID": "qmd/2021.html#part-1-10",
-    "href": "qmd/2021.html#part-1-10",
-    "title": "2021 Solutions",
-    "section": "Part 1",
-    "text": "Part 1\n\n\nCode\ndef find_neighbors(x, y):\n    return (\n        (x - 1, x - 1, x - 1, x, x, x + 1, x + 1, x + 1),\n        (y - 1, y, y + 1, y - 1, y + 1, y - 1, y, y + 1),\n    )\n\n\ndef step(board):\n    board += 1\n    flashed = np.zeros(board.shape, dtype=bool)\n    indices = list(zip(*np.where(board &gt; 9)))\n    while indices:\n        x, y = indices.pop()\n        if flashed[x, y]:\n            continue\n        flashed[x, y] = True\n        neighbors = find_neighbors(x, y)\n        board[neighbors] += 1\n        for neighbor in zip(*neighbors):\n            if board[neighbor] &gt; 9:\n                indices.append(neighbor)\n    board[np.where(flashed)] = 0\n    return flashed.sum()\n\n\nresult = 0\ndata = pd.read_fwf(datadir / \"11.txt\", widths=[1] * 10, header=None).to_numpy(\n    dtype=float\n)\ndata = np.pad(data, pad_width=1, mode=\"constant\", constant_values=-np.inf)\narr = data.copy()\nfor i in range(100):\n    result += step(arr)\nprint(result)"
-  },
-  {
-    "objectID": "qmd/2021.html#part-2-10",
-    "href": "qmd/2021.html#part-2-10",
-    "title": "2021 Solutions",
-    "section": "Part 2",
-    "text": "Part 2\n\n\nCode\ncount = 0\narr = data.copy()\nwhile arr[1:-1, 1:-1].sum() &gt; 0:\n    step(arr)\n    count += 1\ncount"
-  },
-  {
-    "objectID": "qmd/2021.html#part-1-11",
-    "href": "qmd/2021.html#part-1-11",
-    "title": "2021 Solutions",
-    "section": "Part 1",
-    "text": "Part 1\n\n\nCode\ndef flatten(mylist):\n    return (element for sublist in mylist for element in sublist)\n\n\ndef edges_to_tree(edges, repeat_visits=0):\n    tree = defaultdict(set)\n    for e1, e2 in edges:\n        tree[e1].add(e2)\n        tree[e2].add(e1)\n    return tree\n\n\ndef remove_node(tree, node):\n    tree = tree.copy()\n    neighbors = tree[node]\n    del tree[node]\n    for neighbor in neighbors:\n        tree[neighbor] = tree[neighbor] - set([node])\n    return tree\n\n\ndef paths(tree, node, end):\n    if node == end:\n        return [(end,)]\n    if not tree[node]:\n        return []\n    new_tree = tree if node == node.upper() else remove_node(tree, node)\n    return [\n        (node,) + x\n        for x in flatten([paths(new_tree, neighbor, end) for neighbor in tree[node]])\n    ]\n\n\nedges = [line.split(\"-\") for line in load(12)]\ntree = edges_to_tree(edges)\nlen(paths(tree, \"start\", \"end\"))"
-  },
-  {
-    "objectID": "qmd/2021.html#part-2-11",
-    "href": "qmd/2021.html#part-2-11",
-    "title": "2021 Solutions",
-    "section": "Part 2",
-    "text": "Part 2\n\n\nCode\ndef paths(tree):\n    def inner(subtree, node, end, state):\n        if node == end:\n            return [(end,)]\n        if not subtree[node]:\n            return []\n        new_tree = subtree if node == node.upper() else remove_node(subtree, node)\n        tail = [inner(new_tree, neighbor, end, state) for neighbor in subtree[node]]\n        if state == 1 and node != \"start\":\n            tail += [inner(subtree, neighbor, end, 0) for neighbor in subtree[node]]\n        return [(node,) + x for x in flatten(tail)]\n\n    return inner(tree, \"start\", \"end\", 1)\n\n\nlen(set(paths(tree)))"
-  },
-  {
-    "objectID": "qmd/2021.html#part-1-12",
-    "href": "qmd/2021.html#part-1-12",
-    "title": "2021 Solutions",
-    "section": "Part 1",
-    "text": "Part 1\n\n\nCode\nstart = load(13, \"np\")\narr = np.zeros(start.max(axis=0) + 1, dtype=bool)\narr[start[:, 0], start[:, 1]] = 1\n\ntop = arr[:655]\nbottom = arr[656:]\nbottom = np.pad(bottom, ((0, top.shape[0] - bottom.shape[0]), (0, 0)))\nprint((top | np.flip(bottom, 0)).sum())"
-  },
-  {
-    "objectID": "qmd/2021.html#part-2-12",
-    "href": "qmd/2021.html#part-2-12",
-    "title": "2021 Solutions",
-    "section": "Part 2",
-    "text": "Part 2\n\n\nCode\nreplacement = np.vectorize(lambda x: \"█\" if x else \" \")\ninstructions = [\n    \"x=655\",\n    \"y=447\",\n    \"x=327\",\n    \"y=223\",\n    \"x=163\",\n    \"y=111\",\n    \"x=81\",\n    \"y=55\",\n    \"x=40\",\n    \"y=27\",\n    \"y=13\",\n    \"y=6\",\n]\nfor instruction in instructions:\n    direction, position = instruction.split(\"=\")\n    position = int(position)\n    arr = arr.T if direction == \"y\" else arr\n    top = arr[:position]\n    bottom = arr[position + 1 :]\n    if top.shape[0] &lt; bottom.shape[0]:\n        top = np.pad(top, ((bottom.shape[0] - top.shape[0], 0), (0, 0)))\n    else:\n        bottom = np.pad(bottom, ((0, top.shape[0] - bottom.shape[0]), (0, 0)))\n    arr = np.flip(bottom, 0) | top\n    arr = arr.T if direction == \"y\" else arr\nfor row in replacement(arr.T):\n    print(\"\".join(row))"
-  },
-  {
-    "objectID": "qmd/2021.html#part-1-13",
-    "href": "qmd/2021.html#part-1-13",
-    "title": "2021 Solutions",
-    "section": "Part 1",
-    "text": "Part 1\n\n\nCode\nstate_string = \"VCOPVNKPFOOVPVSBKCOF\"\ndata = load(14)\ntransition_elements = \"\".join(line.replace(\" -&gt; \", \"\") for line in data)\nelements = sorted(set(state_string + transition_elements))\nn = len(elements)\n\n\ndef encode(pair):\n    return elements.index(pair[0]) * n + elements.index(pair[1])\n\n\ninitial_pairs = [encode(state_string[i : i + 2]) for i in range(len(state_string) - 1)]\ninitial_state = np.zeros(n**2, dtype=np.int64)\nfor pair in initial_pairs:\n    initial_state[pair] += 1\ntransition_matrix = np.zeros((n**2, n**2), dtype=np.int64)\nfor line in data:\n    source, target = line.split(\" -&gt; \")\n    transition_matrix[encode(source), encode(source[0] + target)] = 1\n    transition_matrix[encode(source), encode(target + source[1])] = 1\n\n\ndef count(state):\n    result = defaultdict(int)\n    result[state_string[0]] += 1\n    result[state_string[-1]] += 1\n    for index, number in enumerate(state):\n        result[elements[int(index % n)]] += number\n        result[elements[int(index // n)]] += number\n    return {k: int(v / 2) for k, v in result.items()}\n\n\ntotals = count(initial_state.T @ (np.linalg.matrix_power(transition_matrix, 10)))\npd.Series(totals).max() - pd.Series(totals).min()"
-  },
-  {
-    "objectID": "qmd/2021.html#part-2-13",
-    "href": "qmd/2021.html#part-2-13",
-    "title": "2021 Solutions",
-    "section": "Part 2",
-    "text": "Part 2\n\n\nCode\ntotals = count(initial_state.T @ (np.linalg.matrix_power(transition_matrix, 40)))\npd.Series(totals).max() - pd.Series(totals).min()"
-  },
-  {
-    "objectID": "qmd/2021.html#part-1-14",
-    "href": "qmd/2021.html#part-1-14",
-    "title": "2021 Solutions",
-    "section": "Part 1",
-    "text": "Part 1\nThis is a shortest path search, where we’ll use a priority queue to store the items and their cost. Reusing my A* implementation then gives\n\n\nCode\ndata = pd.read_fwf(datadir / \"15.txt\", widths=[1] * 100, header=None).to_numpy(\n    dtype=int\n)\n\n\ndef neighbors(state, data=None):\n    x, y = state\n    if data is None:\n        return []\n    xmax, ymax = data.shape\n    candidates = [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)]\n    return [c for c in candidates if 0 &lt;= c[0] &lt; xmax and 0 &lt;= c[1] &lt; ymax]\n\n\ndef cost(state, neighbor, data=None):\n    return 1 if data is None else 0 if state == neighbor else data[neighbor]\n\n\ndef heuristic(node, end):\n    return abs(node[0] - end[0]) + abs(node[1] - end[1])\n\n\nutils.astar((0, 0), (99, 99), neighbors, heuristic, cost, data=data)"
-  },
-  {
-    "objectID": "qmd/2021.html#part-2-14",
-    "href": "qmd/2021.html#part-2-14",
-    "title": "2021 Solutions",
-    "section": "Part 2",
-    "text": "Part 2\n\n\nCode\nx, y = data.shape\narr = np.zeros([5 * x, 5 * y], dtype=int)\nfor i in range(5):\n    for j in range(5):\n        arr[i * x : (i + 1) * x, j * y : (j + 1) * y] = data + i + j\narr = ((arr - 1) % 9) + 1\nutils.astar((0, 0), (499, 499), neighbors, heuristic, cost, data=arr)"
-  },
-  {
-    "objectID": "qmd/2021.html#part-1-15",
-    "href": "qmd/2021.html#part-1-15",
-    "title": "2021 Solutions",
-    "section": "Part 1",
-    "text": "Part 1\n\n\nCode\nnybbles = {hex(i)[2:]: bin(i)[2:].rjust(4, \"0\") for i in range(16)}\n\n\ndef parse(bitstring):\n    if len(bitstring) == 0 or set(bitstring) == set(\"0\"):\n        return 0, 0\n    version = int(bitstring[:3], 2)\n    offset = 3\n    type_id = int(bitstring[offset : offset + 3], 2)\n    offset += 3\n    if type_id == 4:\n        while True:\n            chunk = bitstring[offset : offset + 5]\n            offset += 5\n            if chunk[0] != \"1\":\n                break\n        return version, offset\n    kind = bitstring[offset]\n    offset += 1\n    if kind == \"0\":\n        length = int(bitstring[offset : offset + 15], 2)\n        offset += 15\n        target = offset + length\n        while offset != target:\n            dv, do = parse(bitstring[offset:])\n            version += dv\n            offset += do\n        return version, target\n    if kind == \"1\":\n        n_operators = int(bitstring[offset : offset + 11], 2)\n        offset += 11\n        for i in range(n_operators):\n            dv, do = parse(bitstring[offset:])\n            version += dv\n            offset += do\n        return version, offset\n\n\ndata = load(16)[0]\nbits = \"\".join(nybbles[x.lower()] for x in data)\nparse(bits)"
-  },
-  {
-    "objectID": "qmd/2021.html#part-2-15",
-    "href": "qmd/2021.html#part-2-15",
-    "title": "2021 Solutions",
-    "section": "Part 2",
-    "text": "Part 2\nFor part 2, we have to completely ignore the version number and actually do something with the data associated with each packet. Actually moving through the packet happens in the same way, but what we have to do at each level is sufficiently different that it’s not worth it to try and reuse the parsing function.\n\n\nCode\ndef evaluate_one_packet(bitstring):\n    offset = 3\n    type_id = int(bitstring[offset : offset + 3], 2)\n    offset += 3\n    if type_id == 4:\n        result = \"\"\n        while True:\n            chunk = bitstring[offset : offset + 5]\n            result += chunk[1:]\n            offset += 5\n            if chunk[0] == \"0\":\n                break\n        return int(result, 2), offset\n    kind = bitstring[offset]\n    offset += 1\n    operands = []\n    if kind == \"0\":\n        length = int(bitstring[offset : offset + 15], 2)\n        offset += 15\n        target = offset + length\n        while offset &lt; target:\n            operand, do = evaluate_one_packet(bitstring[offset:])\n            operands.append(operand)\n            offset += do\n    elif kind == \"1\":\n        n_operators = int(bitstring[offset : offset + 11], 2)\n        offset += 11\n        for i in range(n_operators):\n            operand, do = evaluate_one_packet(bitstring[offset:])\n            operands.append(operand)\n            offset += do\n    operators = [\n        sum,\n        np.product,\n        min,\n        max,\n        None,\n        lambda x: x[0] &gt; x[1],\n        lambda x: x[0] &lt; x[1],\n        lambda x: x[0] == x[1],\n    ]\n    return operators[type_id](operands), offset\n\n\nprint(evaluate_one_packet(bits)[0])"
-  },
-  {
-    "objectID": "qmd/2021.html#part-1-16",
-    "href": "qmd/2021.html#part-1-16",
-    "title": "2021 Solutions",
-    "section": "Part 1",
-    "text": "Part 1\nFirst pen and paper solution for this year.\nThings to note:\n\nx and y are completely decoupled\nThere exists a time velocity x0 such that the probe will be within the target area for all t &gt; some ti\nAs long as the up velocity is greater than this, then by the time the probe reaches the baseline in y, it will have stopped in x.\nThe arc up and down is symmetric; a probe launched from y=0 at t=0 with v=v0 will hit y=0 at t=2v0 + 1\nThis probe will have velocity (-v0 - 1) at that point\nIf -v0 - 1 &lt; bottom of target, then the probe will entirely miss the target in the next step\nThe greater v0 is, the higher the probe will go; ymax = ½ v0 (v0 + 1)\nSo we just set -v0 - 1 = -126 =&gt; v0 = 125\nSo ymax = 125 * 126 / 2 = 7875.\n∎"
-  },
-  {
-    "objectID": "qmd/2021.html#part-2-16",
-    "href": "qmd/2021.html#part-2-16",
-    "title": "2021 Solutions",
-    "section": "Part 2",
-    "text": "Part 2\n\n\nCode\nxmin, xmax = 217, 240\nymin, ymax = -126, -69\nparabola = lambda v, t: (t * v - int(t * (t - 1) / 2))\n\ntime_map = defaultdict(list)\nfor vy in range(ymin, -ymin):\n    for time in [\n        t for t in range(1, 3 - 2 * ymin) if parabola(vy, t) in range(ymin, ymax + 1)\n    ]:\n        time_map[time].append(vy)\n\n\ndef x_times(vx):\n    times = [t for t in range(1, vx) if parabola(vx, t) in range(xmin, xmax + 1)]\n    if vx - 1 in times:\n        times += list(range(max(times) + 1, max(time_map.keys()) + 1))\n    return times\n\n\nresult = []\nfor vx in range(int(0.5 + np.sqrt(0.25 + 2 * xmin)), xmax + 1):\n    times = x_times(vx)\n    for time in times:\n        for vy in time_map[time]:\n            result.append((vx, vy))\nprint(len(set(result)))"
-  },
-  {
-    "objectID": "qmd/2021.html#part-1-17",
-    "href": "qmd/2021.html#part-1-17",
-    "title": "2021 Solutions",
-    "section": "Part 1",
-    "text": "Part 1\n\n\nCode\ndef to_node(thing, depth):\n    if isinstance(thing, int):\n        return thing\n    elif isinstance(thing, Pair):\n        for node in thing.traverse():\n            node.depth += 1\n        return thing\n    else:\n        return Pair(thing[0], thing[1], depth + 1)\n\n\nclass Pair:\n    def __init__(self, left, right, depth=0):\n        self.depth = depth\n        self.left = to_node(left, depth)\n        self.right = to_node(right, depth)\n\n    def leftmost(self):\n        return self if isinstance(self.left, int) else self.left.leftmost()\n\n    def rightmost(self):\n        return self if isinstance(self.right, int) else self.right.rightmost()\n\n    def sum(self):\n        left = self.left if isinstance(self.left, int) else self.left.sum()\n        right = self.right if isinstance(self.right, int) else self.right.sum()\n        return 3 * left + 2 * right\n\n    def traverse(self):\n        left = [] if isinstance(self.left, int) else self.left.traverse()\n        right = [] if isinstance(self.right, int) else self.right.traverse()\n        return left + [self] + right\n\n    def reduce(self):\n        while True:\n            altered = False\n            altered = self.explode()\n            if not altered:\n                altered = self.split()\n                if not altered:\n                    return self\n\n    def split(self):\n        for node in self.traverse():\n            for d in [\"left\", \"right\"]:\n                val = getattr(node, d)\n                if isinstance(val, int) and val &gt;= 10:\n                    setattr(node, d, Pair(val // 2, val // 2 + val % 2, node.depth + 1))\n                    return True\n        return False\n\n    def explode(self):\n        traversal = self.traverse()\n        for idx, node in enumerate(traversal):\n            if node.depth == 4:\n                if idx == len(traversal) - 1:\n                    parent = traversal[idx - 1]\n                    direction = \"right\"\n                elif traversal[idx + 1].left == node:\n                    parent = traversal[idx + 1]\n                    direction = \"left\"\n                else:\n                    parent = traversal[idx - 1]\n                    direction = \"right\"\n                setattr(parent, direction, 0)\n                if idx != 0:\n                    if isinstance(traversal[idx - 1].left, int):\n                        traversal[idx - 1].left += node.left\n                    else:\n                        left_neighbor = traversal[idx - 1].left.rightmost()\n                        left_neighbor.right += node.left\n\n                if idx != len(traversal) - 1:\n                    if isinstance(traversal[idx + 1].right, int):\n                        traversal[idx + 1].right += node.right\n                    else:\n                        right_neighbor = traversal[idx + 1].right.leftmost()\n                        right_neighbor.left += node.right\n                return True\n        return False\n\n\nsnumbers = [eval(line) for line in load(18)]\nresult = Pair(*snumbers[0])\nfor snumber in snumbers[1:]:\n    result = Pair(result, Pair(*snumber)).reduce()\nprint(result.sum())"
-  },
-  {
-    "objectID": "qmd/2021.html#part-2-17",
-    "href": "qmd/2021.html#part-2-17",
-    "title": "2021 Solutions",
-    "section": "Part 2",
-    "text": "Part 2\n\n\nCode\nmaxval = 0\nfor left, right in itertools.permutations(snumbers, 2):\n    total = (Pair(left, right).reduce()).sum()\n    maxval = total if total &gt; maxval else maxval\nmaxval"
-  },
-  {
-    "objectID": "qmd/2021.html#part-1-18",
-    "href": "qmd/2021.html#part-1-18",
-    "title": "2021 Solutions",
-    "section": "Part 1",
-    "text": "Part 1\nWe’ll start by generating the 24 rotation matrices. There are six possible ways of permuting the axes, and eight possible sign conventions. Half of the sign conventions will be left-handed, so we discard them\n\n\nCode\nrotations = []\nfor permutation in itertools.permutations([0, 1, 2], 3):\n    arr = np.zeros((3, 3), dtype=int)\n    arr[np.array([0, 1, 2]), permutation] = 1\n    for sign in itertools.product([-1, 1], repeat=3):\n        rotation = arr.copy() * sign\n        if np.linalg.det(rotation) &gt; 0:\n            rotations.append(rotation)\n\n\nThen we find overlapping scanners in the input and populate a map (x, y) with the matrices to convert from y coordinates to x coordinates\n\n\nCode\nfrom scipy.spatial.distance import pdist, squareform\n\nfoo = load(19, \"raw\")[:-1]\nscanners = foo.split(\"\\n\\n\")\nscanners = [\n    np.array(\n        [list(map(int, line.split(\",\"))) for line in scanner.split(\"\\n\")[1:]], dtype=int\n    )\n    for scanner in scanners\n]\n\ndistances = [squareform(pdist(scanner)) for scanner in scanners]\nmapping = {}\nfor a, b in itertools.combinations(range(len(scanners)), 2):\n    pairs = []\n    d0 = distances[a]\n    d1 = distances[b]\n    for i in range(len(d0)):\n        for j in range(len(d1)):\n            if len(np.intersect1d(d1[j], d0[i])) &gt;= 12:\n                pairs.append((i, j))\n    pairs = np.array(pairs)\n    if len(pairs) &lt; 12:\n        continue\n    x0 = scanners[a][pairs[:, 0]]\n    y0 = scanners[b][pairs[:, 1]]\n    for rotation in rotations:\n        c = x0[0] - y0[0] @ rotation\n        if (x0[1:] == (y0[1:] @ rotation + c)).all():\n            mapping[(a, b)] = [rotation, c]\n            mapping[(b, a)] = [rotation.T, -c @ rotation.T]\n            break\n\n\nWe do some linear algebra to extend this map to all the scanners\n\n\nCode\nwhile True:\n    done = True\n    for x in range(len(scanners)):\n        columns = [pair[1] for pair in mapping.keys() if pair[0] == x]\n        for y, z in itertools.combinations(columns, 2):\n            if (y, z) not in mapping:\n                done = False\n                Q1, a1 = mapping[(x, y)]\n                Q2, a2 = mapping[(x, z)]\n                mapping[(z, y)] = [Q1 @ Q2.T, (a1 - a2) @ Q2.T]\n                mapping[(y, z)] = [Q2 @ Q1.T, (a2 - a1) @ Q1.T]\n    if done:\n        break\n\n\nAnd then we convert all the initial coordinates to one representation and find its length\n\n\nCode\ncoords = [tuple(x) for x in scanners[0]]\nfor idx in range(1, len(scanners)):\n    Q, a = mapping[0, idx]\n    coords += [tuple(x) for x in (np.array(scanners[idx]) @ Q + a)]\nprint(len(set(coords)))"
-  },
-  {
-    "objectID": "qmd/2021.html#part-2-18",
-    "href": "qmd/2021.html#part-2-18",
-    "title": "2021 Solutions",
-    "section": "Part 2",
-    "text": "Part 2\nWhat is the largest Manhattan distance between any two scanners?\n\n\nCode\nmaxval = 0\nfor i, j in itertools.combinations(range(len(scanners)), 2):\n    total = sum(abs(mapping[(i, j)][1]))\n    if total &gt; maxval:\n        maxval = total\nmaxval"
-  },
-  {
-    "objectID": "qmd/2021.html#part-1-and-2",
-    "href": "qmd/2021.html#part-1-and-2",
-    "title": "2021 Solutions",
-    "section": "Part 1 and 2",
-    "text": "Part 1 and 2\n\n\nCode\ndata = load(20, \"raw\")\npixel_map = {\".\": 0, \"#\": 1}\nkey, array = data.split(\"\\n\\n\")\nkey = np.array([pixel_map[x] for x in key.strip()], dtype=bool)\nnew = np.array(\n    [[pixel_map[x] for x in line.strip()] for line in array.split(\"\\n\")[:-1]]\n)\nfor n in range(1, 51):\n    old = np.pad(new, 2, constant_values=(n % 2 == 0))\n    new = old.copy()\n    for i in range(1, len(old) - 1):\n        for j in range(1, len(old) - 1):\n            index = sum(\n                (2 ** np.arange(9)) * old[i - 1 : i + 2, j - 1 : j + 2].ravel()[::-1]\n            )\n            new[i, j] = key[index]\n    new = new[1:-1, 1:-1]\n    if n == 2 or n == 50:\n        print(new.sum())"
-  },
-  {
-    "objectID": "qmd/2021.html#part-1-19",
-    "href": "qmd/2021.html#part-1-19",
-    "title": "2021 Solutions",
-    "section": "Part 1",
-    "text": "Part 1\n\n\nCode\npositions, scores, count = [4, 6], [0, 0], 0\n\n\ndef step_one(position, score, count):\n    position = (position + 3 * count + 5) % 10 + 1\n    return position, score + position, count + 3\n\n\ni = 0\nwhile max(scores) &lt; 1000:\n    positions[i], scores[i % 2], count = step_one(\n        positions[i % 2], scores[i % 2], count\n    )\n    i = 1 - i\ncount * min(scores)"
-  },
-  {
-    "objectID": "qmd/2021.html#part-2-19",
-    "href": "qmd/2021.html#part-2-19",
-    "title": "2021 Solutions",
-    "section": "Part 2",
-    "text": "Part 2\n\n\nCode\nstates = {((4, 0), (6, 0)): 1}\nwins = [0, 0]\n# The frequency table for the 3x3 dice\nrolls = [0, 0, 0, 1, 3, 6, 7, 6, 3, 1]\n\n\ndef step_one(states, player):\n    new_states = defaultdict(int)\n    for state in states:\n        for step in range(3, 10):\n            new_position = ((state[player][0] + step) - 1) % 10 + 1\n            new_score = state[player][1] + new_position\n            if new_score &gt;= 21:\n                wins[player] += states[state] * rolls[step]\n            else:\n                new_state = list(state)\n                new_state[player] = (new_position, new_score)\n                new_states[tuple(new_state)] += states[state] * rolls[step]\n    return new_states, wins\n\n\ni = 0\nwhile states:\n    states, wins = step_one(states, i)\n    i = 1 - i\n\nmax(wins)"
-  },
-  {
-    "objectID": "qmd/2021.html#part-1-20",
-    "href": "qmd/2021.html#part-1-20",
-    "title": "2021 Solutions",
-    "section": "Part 1",
-    "text": "Part 1\nThe first part can be solved trivially by using numpy’s indexing\n\n\nCode\noffset = 50\nboard = np.zeros((101, 101, 101), dtype=int)\n\n\ndef parse_line(line):\n    command, line = line.split(\" \")\n    indices = [x.split(\"..\") for x in line.split(\",\")]\n    return command, [[int(x[0][2:]), int(x[1]) + 1] for x in indices]\n\n\ncommands = [parse_line(line) for line in load(22)]\nvalues = {\"on\": 1, \"off\": 0}\nmaxval = 0\nfor command, indices in commands:\n    idx = np.ravel(indices) + offset\n    if max(abs(idx)) &gt; maxval:\n        maxval = max(abs(idx))\n    if (idx &lt; 0).any() or (idx &gt; 100).any():\n        continue\n    board[idx[0] : idx[1], idx[2] : idx[3], idx[4] : idx[5]] = values[command]\nboard.sum()"
-  },
-  {
-    "objectID": "qmd/2021.html#part-2-20",
-    "href": "qmd/2021.html#part-2-20",
-    "title": "2021 Solutions",
-    "section": "Part 2",
-    "text": "Part 2\nThe above approach doesn’t work for part two since the field of play is too large; we have ~ 100k elements in each direction, which give ~10**15 elements in total; far too much to keep in memory.\nThe first step is to realise that the vast majority of the empty space is never touched – so there’s no reason to store all those zeros.\nWhat we can do instead is to store a set containing only the coordinates which are turned on. Turning on more coordinates corresponds to making the union with the new coordinate, while turning off coordinates is a set difference. This automatically accounts for not lighting coordinates which are already lit, and not turning off coordinates which are already off.\nUnfortunately, this is still too memory intensive – from the example solution, we see that at the end of the process, 2,758,514,936,282,235 coordinates are on, which is way too many to store individually.\nWe need an approach that only looks at corners of cuboids, and doesn’t need to store the individual coordinates at all.\nIf there were only “on” instructions, we could use the inclusion-exclusion principle, along with the fact that the intersection of two cuboids is always another cuboid, or empty.\nThat is, the volume lit by one “on” instruction is just the volume of the cuboid it represents. The volume lit by two is the sum of the volumes of each, minus the volume of their intersection. The volume lit by three is:\n\nThe volume of the individual cuboids\nMinus the volume of all the pairwise intersections\nPlus the volume of the triple intersection\n\nAnd this extends to the general case. The volume lit after the nth instruction, N, is:\nThe volume lit after the (n-1)th instruction plus the volume of N, minus the sum of the volumes of the pairwise intersection of N with all previous instructions, plus the sum of the volumes of intersection of N with all previously calculated pairs, and so on.\nTurning a cuboid off is equivalent to removing the intersection between it and all the other cuboids from the sum, and then accounting for the double counting by adding back the triple intersections etc. But that’s the same as we’re doing for the positive cuboid, except for the off cuboid we never add the volume of the individual cuboid\nWe’re going to need a way of calculating the intersection of two cuboids. But that’s just the intersection of 3 pairs of lines, since the cuboids are axis-aligned. And we can intersect two line segments and hence two cuboids as follows\n\n\nCode\ndef intersect_segments(x1, x2):\n    pair = [max(x1[0], x2[0]), min(x1[1], x2[1])]\n    return pair if pair[1] &gt; pair[0] else False\n\n\ndef intersect_cuboids(c1, c2):\n    result = [intersect_segments(*pair) for pair in zip(c1, c2)]\n    return result if all(result) else False\n\n\nThe segments were originally given as closed intervals, but the parsing converted them to open intervals. The length of each is thus the endpoint minus the starting point. The volume of a cuboid is just the product the three lengths:\n\n\nCode\ndef cuboid_volume(cuboid):\n    return np.product([[line[1] - line[0]] for line in cuboid])\n\n\nThe approach we’ll take is to process the list of instructions sequentially, calculating the various intersections as we go. They’ll go in a list where the first element represents the positive terms, and the second represents the negative terms. The final score is then just the sum of the positive values minus the sum of the negative values\nPutting it all together gives the following. For each instruction, we intersect with all previous cuboids, and swap the signs. If it’s an “on” instruction, we also add the whole region to the list of positive volumes.\n\n\nCode\ndef reboot(instructions):\n    state = [[], []]\n    for instruction, region in instructions:\n        extra = [region] if instruction == \"on\" else []\n        clipped_state = [\n            [c for cuboid in s if (c := intersect_cuboids(cuboid, region))]\n            for s in state\n        ]\n        state = [state[0] + clipped_state[1] + extra, state[1] + clipped_state[0]]\n    return sum(map(cuboid_volume, state[0])) - sum(map(cuboid_volume, state[1]))\n\n\nreboot(commands)"
-  },
-  {
-    "objectID": "qmd/2021.html#part-1-21",
-    "href": "qmd/2021.html#part-1-21",
-    "title": "2021 Solutions",
-    "section": "Part 1",
-    "text": "Part 1\nThis is definitely not pretty, and takes a bunch of time to run as well, but it works. This is a pathfinding problem: Given some initial state, our goal is to move to the final state with as small a cost as possible.\nThe tricky thing is to find the neighboring positions that can be reached from a given position with a valid move. There are only two types of moves\n\nRoom to hallway\nHallway to room\n\nThe third type (room straight to final room) is just the composition of the above two moves.\nOnce we have a method for finding neighbors, actually running the pathfinding is comparatively simple. This could probably be improved by including a heuristic for how far away a given state is from the finish, but getting finding and calculating a suitable heuristic is fiddly.\n\n\nCode\nvalue_to_letter = {0: \" \", 1: \"A\", 10: \"B\", 100: \"C\", 1000: \"D\"}\nletter_to_value = {v: k for k, v in value_to_letter.items()}\nnumber_to_room = {10**i: i for i in range(4)}\nroom_to_number = {v: k for k, v in number_to_room.items()}\n\n\ndef find_blockers(room, n):\n    top_row = list(range(4 * n, 4 * n + 7))\n    distances = [1, 2, 2, 2, 2, 2, 1]\n    left = top_row[: room + 2][::-1], np.cumsum(distances[: room + 2][::-1])\n    right = top_row[room + 2 :], np.cumsum(distances[room + 2 :])\n    return left, right\n\n\ndef find_moves(position, n=2):\n    position = np.array(position)\n\n    def is_endgame(room):\n        return set(position[n * room : n * (room + 1)]) &lt;= set(\n            [0, room_to_number[room]]\n        )\n\n    possible_moves = []\n    for i in [idx + 4 * n for idx, val in enumerate(position[4 * n :]) if val != 0]:\n\n        room = number_to_room[position[i]]\n        if not is_endgame(room):\n            continue\n\n        left, right = find_blockers(room, n)\n        moves, costs = left if i in left[0] else right\n\n        index = moves.index(i)\n        if (position[moves[:index]] != 0).any():\n            continue\n\n        offset = np.argwhere(position[n * room : n * (room + 1)] == 0)[0][0]\n        new_position = n * room + offset\n        cost = costs[index] + n - 1 - offset\n        possible_moves.append((i, new_position, cost))\n    for room in range(4):\n        target = room * n\n        if is_endgame(room):\n            continue\n        offset = np.argwhere(position[target : target + n])[-1][-1]\n        moves, costs = [], []\n        for block, steps in find_blockers(room, n):\n            free = np.maximum.accumulate(position[block]) == 0\n            if not free.any():\n                continue\n            n_free = np.argwhere(free)[-1][-1] + 1\n            moves += block[:n_free]\n            costs += list(steps[:n_free] + n - offset - 1)\n        possible_moves += [\n            (target + offset, move, cost) for move, cost in zip(moves, costs)\n        ]\n    return possible_moves\n\n\ndef navigate(source, destination):\n    n = (len(source) - 7) // 4\n    q = queue.PriorityQueue()\n    q.put((0, source))\n    seen = set()\n    while q:\n        cost, position = q.get()\n        if position == destination:\n            return cost\n        if position in seen:\n            continue\n        seen.add(tuple(position))\n        for source_index, target_index, distance in find_moves(position, n):\n            new_position = list(position)\n            value = position[source_index]\n            new_position[source_index] = 0\n            new_position[target_index] = value\n            q.put((cost + value * distance, tuple(new_position)))\n    return np.inf\n\n\nWith all of that out of the way, actually solving the puzzle is just a question of calling the navigate function. First for part 1\n\n\nCode\nsource = tuple(letter_to_value[x] for x in \"CDCABABD       \")\ndestination = tuple(letter_to_value[x] for x in \"AABBCCDD       \")\nnavigate(source, destination)"
-  },
-  {
-    "objectID": "qmd/2021.html#part-2-21",
-    "href": "qmd/2021.html#part-2-21",
-    "title": "2021 Solutions",
-    "section": "Part 2",
-    "text": "Part 2\nAnd then for part 2\n\n\nCode\ns = tuple(letter_to_value[x] for x in \"CDDDCBCABABABCAD       \")\nd = tuple(letter_to_value[x] for x in \"AAAABBBBCCCCDDDD       \")\nnavigate(s, d)"
-  },
-  {
-    "objectID": "qmd/2021.html#part-1-22",
-    "href": "qmd/2021.html#part-1-22",
-    "title": "2021 Solutions",
-    "section": "Part 1",
-    "text": "Part 1\nRarely in AOC have I had a worse ratio of thinking employed to code written - this code looks way simpler than for day 23, but getting there was a real challenge.\nI think this is the intended approach, since it uses the realisation that if we multiply z by 26 6 times, then to get back below zero, we need to divide 7 times. So each time there’s a divide, the value of w is fixed.\n\n\nCode\ndata = load(24, \"raw\")\nchunks = [[y.split() for y in x.split(\"\\n\") if y] for x in data.split(\"inp w\\n\")][1:]\n\nindices = [3, 4, 14]\ntable = [[chunk[index][2] for index in indices] for chunk in chunks]\ntriples = [[int(n) for n in row] for row in table]\n\n\ndef run(triple, z, w):\n    a, b, c = triple\n    if w == z % 26 + b:\n        return z // a\n    return (z // a) * 26 + w + c\n\n\nzs = [[0, 0]]\nfor triple in triples:\n    new_zs = []\n    for prefix, z in zs:\n        if triple[0] == 26:\n            w = z % 26 + triple[1]\n            ws = [w] if 1 &lt;= w &lt; 10 else []\n        else:\n            ws = range(1, 10)\n        new_zs += [(10 * prefix + w, run(triple, z, w)) for w in ws]\n    zs = new_zs\nmax(x[0] for x in zs)\n\n\nWe can be slightly smarter with pen and paper. The test is always z % 26 + something, which means that we always get out wn + cn for some n, since (z // a) * 26 % 26 = 0. Keeping track of the order in which the a = 1 and a = 26 instructions arrive, we can match each of the 14 instructions to exactly one other, giving a series of relationships like w1 = w14 + 8. Then it’s just a question of forcing the early digit of each pair to the highest possible allowed value."
-  },
-  {
-    "objectID": "qmd/2021.html#part-2-22",
-    "href": "qmd/2021.html#part-2-22",
-    "title": "2021 Solutions",
-    "section": "Part 2",
-    "text": "Part 2\nAfter all that, luckily part 2 is trivial\n\n\nCode\nmin(int(x[0]) for x in zs)"
-  },
-  {
-    "objectID": "qmd/index.html",
-    "href": "qmd/index.html",
+    "objectID": "index.html",
+    "href": "index.html",
     "title": "Solutions to the advent of code problems",
     "section": "",
     "text": "This is where I publish my solutions to the yearly Advent of Code problems. Most of the problems just get a short code snippet. The ones I had to think about slightly longer also have some text explaining my approach and talking through the problem. When I was feeling particularly inspired, I’ve also added some visualizations.\nEach year gets its own page - check them out on the sidebar to the left"
+  },
+  {
+    "objectID": "qmd/2020.html",
+    "href": "qmd/2020.html",
+    "title": "2020 Solutions",
+    "section": "",
+    "text": "Code\nimport functools\nimport itertools\nimport os\nimport re\nimport sys\nfrom collections import defaultdict, deque\n\nimport numpy as np\nimport scipy\n\nsys.path.insert(1, os.path.join(sys.path[0], \"..\"))\nimport utils\n\nload = utils.year_load(2020)"
+  },
+  {
+    "objectID": "qmd/2020.html#part-1",
+    "href": "qmd/2020.html#part-1",
+    "title": "2020 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\n\n\nCode\ndata = load(1, \"np\")\n[pair[0] * pair[1] for pair in itertools.product(data, data) if sum(pair) == 2020][0]"
+  },
+  {
+    "objectID": "qmd/2020.html#part-2",
+    "href": "qmd/2020.html#part-2",
+    "title": "2020 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\n\n\nCode\n[\n    triple[0] * triple[1] * triple[2]\n    for triple in itertools.product(data, data, data)\n    if sum(triple) == 2020\n][0]"
+  },
+  {
+    "objectID": "qmd/2020.html#part-1-1",
+    "href": "qmd/2020.html#part-1-1",
+    "title": "2020 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\n\n\nCode\ndef is_valid(interval, letters, password):\n    interval = [int(x) for x in interval.split(\"-\")]\n    occurrences = password.count(letters[0])\n    return interval[0] &lt;= occurrences &lt;= interval[1]\n\n\nlines = load(2)\nsum([is_valid(*line.split()) for line in lines])"
+  },
+  {
+    "objectID": "qmd/2020.html#part-2-1",
+    "href": "qmd/2020.html#part-2-1",
+    "title": "2020 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\n\n\nCode\nfrom operator import xor\n\n\ndef is_valid(interval, letters, password):\n    lower, upper = [int(x) - 1 for x in interval.split(\"-\")]\n    return xor(password[lower] == letters[0], password[upper] == letters[0])\n\n\nsum([is_valid(*line.split()) for line in lines])"
+  },
+  {
+    "objectID": "qmd/2020.html#part-1-2",
+    "href": "qmd/2020.html#part-1-2",
+    "title": "2020 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\n\n\nCode\ndata = np.array([[0 if char == \".\" else 1 for char in line] for line in load(3)])\n\n\ndef count_trees(data, width_change, height_change):\n    height, width = data.shape\n    result = 0\n    for i in range((height - 1) // height_change + 1):\n        result += data[i * height_change, (i * width_change) % width]\n    return result\n\n\ncount_trees(data, 3, 1)"
+  },
+  {
+    "objectID": "qmd/2020.html#part-2-2",
+    "href": "qmd/2020.html#part-2-2",
+    "title": "2020 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\n\n\nCode\nslopes = [[1, 1], [3, 1], [5, 1], [7, 1], [1, 2]]\nnp.prod([count_trees(data, slope[0], slope[1]) for slope in slopes])"
+  },
+  {
+    "objectID": "qmd/2020.html#part-1-3",
+    "href": "qmd/2020.html#part-1-3",
+    "title": "2020 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\n\n\nCode\ndata = load(4, \"raw\")\npassports = data.split(\"\\n\\n\")\npassport_dicts = [\n    dict(list(map(lambda x: x.split(\":\"), p.replace(\"\\n\", \" \").split())))\n    for p in passports\n]\nsum([len(set(p.keys()) - set([\"cid\"])) == 7 for p in passport_dicts])"
+  },
+  {
+    "objectID": "qmd/2020.html#part-2-3",
+    "href": "qmd/2020.html#part-2-3",
+    "title": "2020 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\n\n\nCode\ndef validate_key(key, value):\n    year_limits = {\"byr\": [1920, 2002], \"eyr\": [2020, 2030], \"iyr\": [2010, 2020]}\n    try:\n        if key in [\"byr\", \"eyr\", \"iyr\"]:\n            minval, maxval = year_limits[key]\n            return minval &lt;= int(value) &lt;= maxval\n        if key == \"hgt\":\n            value, unit = int(value[:-2]), value[-2:]\n            return (unit == \"cm\" and (150 &lt;= value &lt;= 193)) or (\n                unit == \"in\" and (59 &lt;= value &lt;= 76)\n            )\n        if key == \"hcl\":\n            return (\n                value[0] == \"#\"\n                and len(value) == 7\n                and not (set(value[1:]) - set(\"0123456789abcdef\"))\n            )\n        if key == \"ecl\":\n            return value in [\"amb\", \"blu\", \"brn\", \"gry\", \"grn\", \"hzl\", \"oth\"]\n        if key == \"pid\":\n            test = int(value)\n            return len(value) == 9\n        return True\n    except ValueError:\n        return False\n\n\ndef is_valid_passport(p):\n    return len(set(p.keys()) - set([\"cid\"])) == 7 and all(\n        [validate_key(key, p[key]) for key in p]\n    )\n\n\nsum([is_valid_passport(p) for p in passport_dicts])"
+  },
+  {
+    "objectID": "qmd/2020.html#part-1-4",
+    "href": "qmd/2020.html#part-1-4",
+    "title": "2020 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\n\n\nCode\n# \"BFFFBBFRRR\" -&gt; 70, column 7 -&gt; 567\ndef seat_id(instruction):\n    return int(instruction.translate(str.maketrans(\"BFRL\", \"1010\")), 2)\n\n\nseat_ids = [seat_id(x) for x in load(5)]\nmax(seat_ids)"
+  },
+  {
+    "objectID": "qmd/2020.html#part-2-4",
+    "href": "qmd/2020.html#part-2-4",
+    "title": "2020 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\n\n\nCode\n(set(range(min(seat_ids), max(seat_ids) + 1)) - set(seat_ids)).pop()"
+  },
+  {
+    "objectID": "qmd/2020.html#part-1-5",
+    "href": "qmd/2020.html#part-1-5",
+    "title": "2020 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\n\n\nCode\ndata = load(6, \"raw\")\ngroups = data.split(\"\\n\\n\")\nsum(len(set(list(group.replace(\"\\n\", \"\")))) for group in groups)"
+  },
+  {
+    "objectID": "qmd/2020.html#part-2-5",
+    "href": "qmd/2020.html#part-2-5",
+    "title": "2020 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\n\n\nCode\nsum(\n    len(functools.reduce(lambda x, y: set(x) & set(y), (group.splitlines())))\n    for group in groups\n)"
+  },
+  {
+    "objectID": "qmd/2020.html#part-1-6",
+    "href": "qmd/2020.html#part-1-6",
+    "title": "2020 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\nNothing super groundbreaking for part one. I thought of using a regex to parse the input, but splitting on commas and then into words works just fine.\n\n\nCode\ndata = load(7)\ntree = {}\nfor line in data:\n    bag, contents = line.split(\" bags contain \")\n    if \"no other\" in contents:\n        contents = {}\n    else:\n        elements = contents.split(\", \")\n        contents = {\n            \" \".join(words[1:-1]): int(words[0]) for words in map(str.split, elements)\n        }\n    tree[bag] = contents\n\n\n@functools.cache\ndef contains_gold(key):\n    return \"shiny gold\" in tree[key] or any(contains_gold(child) for child in tree[key])\n\n\nsum(contains_gold(key) for key in tree)"
+  },
+  {
+    "objectID": "qmd/2020.html#part-2-6",
+    "href": "qmd/2020.html#part-2-6",
+    "title": "2020 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\nThe key thing to remember is to include the bag itself, as well as the bags it contains, when calculating the total. That’s what the “+1” is for in the sum\n\n\nCode\n@functools.cache\ndef count_bags(bag):\n    return sum(tree[bag][key] * (count_bags(key) + 1) for key in tree[bag])\n\n\ncount_bags(\"shiny gold\")"
+  },
+  {
+    "objectID": "qmd/2020.html#part-1-7",
+    "href": "qmd/2020.html#part-1-7",
+    "title": "2020 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\n\n\nCode\ndata = [x.split() for x in load(8)]\ndata = [(x[0], int(x[1])) for x in data]\n\n\ndef terminal_run(program):\n    ip, accumulator = 0, 0\n    seen = {}\n    while ip != len(program):\n        if ip in seen:\n            return False, accumulator\n        seen[ip] = 1\n        instruction, operand = program[ip]\n        ip += 1\n        if instruction == \"jmp\":\n            ip += operand - 1\n        if instruction == \"acc\":\n            accumulator += operand\n    return True, accumulator\n\n\nterminal_run(data)[1]"
+  },
+  {
+    "objectID": "qmd/2020.html#part-2-7",
+    "href": "qmd/2020.html#part-2-7",
+    "title": "2020 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\n\n\nCode\ninstruction_map = {\"acc\": \"acc\", \"jmp\": \"nop\", \"nop\": \"jmp\"}\nfor idx, instruction in enumerate(data):\n    new_instruction = (instruction_map[instruction[0]], instruction[1])\n    status, value = terminal_run(data[:idx] + [new_instruction] + data[idx + 1 :])\n    if status:\n        break\nvalue"
+  },
+  {
+    "objectID": "qmd/2020.html#part-1-8",
+    "href": "qmd/2020.html#part-1-8",
+    "title": "2020 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\n\n\nCode\ndata = list(load(9, \"np\"))\nend = len(data) - 25\nfor window_start in range(end):\n    target = data[window_start + 25]\n    if (\n        min(\n            map(\n                lambda x: abs(target - sum(x)),\n                itertools.combinations(data[window_start : window_start + 25], 2),\n            )\n        )\n        != 0\n    ):\n        break\ninvalid_number = target\ninvalid_number"
+  },
+  {
+    "objectID": "qmd/2020.html#part-2-8",
+    "href": "qmd/2020.html#part-2-8",
+    "title": "2020 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\n\n\nCode\nstart_idx, end_idx = 0, 1\nwhile start_idx &lt; len(data):\n    total = sum(data[start_idx:end_idx])\n    if total == invalid_number:\n        break\n    if total &lt; invalid_number:\n        end_idx += 1\n    if total &gt; invalid_number:\n        start_idx += 1\n        end_idx = start_idx + 1\nmin(data[start_idx:end_idx]) + max(data[start_idx:end_idx])"
+  },
+  {
+    "objectID": "qmd/2020.html#part-1-9",
+    "href": "qmd/2020.html#part-1-9",
+    "title": "2020 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\n\n\nCode\ndata = [0] + sorted((load(10, \"np\")))\n(np.diff(data) == 1).sum() * ((np.diff(data) == 3).sum() + 1)"
+  },
+  {
+    "objectID": "qmd/2020.html#part-2-9",
+    "href": "qmd/2020.html#part-2-9",
+    "title": "2020 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\nSorting the values, we see a series of jumps of 1 and jumps of 3. If the value is allowed to jump by at most 3 every time, then we have to include both sides of every jump of 3.\nThe only interesting thing is then what to do with runs of 1 jumps. In general, we can count the number of ways, \\(f\\), as follows\n\\(f(n) = f(n - 1) + g(n-1)\\)\nThe first term comes from saying that we pick the first element, leaving us with a run of length \\((n - 1)\\), exactly as before. The second comes from saying that we skip the first element, and now have to find the number of ways of choosing for a series of gaps starting with \\(2\\), followed by \\(n - 2\\) ones. Similarly\n\\(g(n - 1) = f(n - 2) + f(n - 3)\\)\nIf we pick the element that resulted in a gap of two, then we just have to choose from a run of n - 2 ones, which is the \\(f\\) we are looking at. If we don’t pick it, we’ve created a gap of size \\(3\\) - but then we are forced to pick the next element, leaving us with a run of length \\(n - 3\\) to distribute.\nPutting everything together gives the recurrence\n\\(f(n) = f(n - 1) + f(n - 2) + f(n - 3)\\),\nwith initial conditions \\(f(0) = 1\\), \\(f(-1) = 0\\), \\(f(-2) = 0\\).\nThat recurrence can be written in matrix form as\n\\[\n\\begin{pmatrix}\n1 & 1 & 1 \\\\\n1 & 0 & 0 \\\\\n0 & 1 & 0 \\\\\n\\end{pmatrix}\\]\nAnd iterating the function is then just a question of matrix powers\n\n\nCode\ndef total_ways(n_ones):\n    matrix = np.array([[1, 1, 1], [1, 0, 0], [0, 1, 0]])\n    return (np.linalg.matrix_power(matrix, n_ones) @ [1, 0, 0])[0]\n\n\nnp.product(\n    [total_ways(len(x)) for x in \"\".join(str(x) for x in np.diff(data)).split(\"3\")]\n)"
+  },
+  {
+    "objectID": "qmd/2020.html#part-1-10",
+    "href": "qmd/2020.html#part-1-10",
+    "title": "2020 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\nFor the first part, we are taking the convolution of our original grid with a weights array that looks like \\[\n\\begin{pmatrix}\n1 & 1 & 1\\\\\n1 & 0 & 1\\\\\n1 & 1 & 1\\\\\n\\end{pmatrix}\n\\] Scipy has nice routines that handle all that indexing for us, so we’ll cheat and use them. The only slight issue is what to do at the edge of the grid, but using a constant value of 0 for any cells that would fall outside the grid works out of the box.\n\n\nCode\ndata = np.array([[1 if char == \".\" else 0 for char in line] for line in load(11)])\nmask = np.where(data)\nboard = np.zeros(data.shape, dtype=int)\nnew_board = np.ones(board.shape, dtype=int)\nnew_board[mask] = 0\nweights = [[1, 1, 1], [1, 0, 1], [1, 1, 1]]\nwhile (board != new_board).any():\n    board = new_board.copy()\n    convolution = scipy.ndimage.convolve(new_board, weights, mode=\"constant\")\n    new_board[np.where(convolution == 0)] = 1\n    new_board[np.where(convolution &gt;= 4)] = 0\n    new_board[mask] = 0\nboard.sum()"
+  },
+  {
+    "objectID": "qmd/2020.html#part-2-10",
+    "href": "qmd/2020.html#part-2-10",
+    "title": "2020 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\nFor part 2 I was unable to find a nice way of expressing the condition of “Look for the first grid position in a given direction which is not floor”. That means that I have to manually loop over the grid instead of using the convolution routine - and that really slows down the runtime!\n\n\nCode\nboard = np.zeros(data.shape, dtype=int)\nnew_board = np.ones(board.shape, dtype=int)\nnew_board[mask] = 0\n\n\ndef update(board):\n    new_board = board.copy()\n    directions = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]]\n    for row, col in itertools.product(*[range(x) for x in board.shape]):\n        total = 0\n        for direction in directions:\n            done = False\n            new_row, new_col = row, col\n            while not done:\n                new_row, new_col = new_row + direction[0], new_col + direction[1]\n                if (\n                    new_row &lt; 0\n                    or new_row &gt;= board.shape[0]\n                    or new_col &lt; 0\n                    or new_col &gt;= board.shape[1]\n                ):\n                    break\n                if not data[new_row, new_col]:\n                    done = True\n            else:  # no break - so a valid position\n                total += board[new_row, new_col]\n        if total == 0:\n            new_board[row, col] = 1\n        if total &gt;= 5:\n            new_board[row, col] = 0\n    new_board[mask] = 0\n    return new_board\n\n\nwhile (new_board != board).any():\n    board = new_board\n    new_board = update(new_board)\nnew_board.sum()"
+  },
+  {
+    "objectID": "qmd/2020.html#part-1-11",
+    "href": "qmd/2020.html#part-1-11",
+    "title": "2020 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\nI’ll use the usual trick of modelling the 2d grid as the complex plane.\n\n\nCode\ndirections = {\"N\": 1j, \"E\": 1, \"S\": -1j, \"W\": -1}\nturns = {\"L\": 1j, \"R\": -1j}\nposition, direction = 0, 1\n\n\ndef update_state(position, direction, instruction, value, part=1):\n    if instruction in directions:\n        offset = directions[instruction] * value\n        return (\n            (position + offset, direction)\n            if part == 1\n            else (position, direction + offset)\n        )\n    if instruction in turns:\n        return position, direction * turns[instruction] ** (int(value // 90))\n    return position + value * direction, direction\n\n\ninstructions = load(12)\nfor instruction, value in map(lambda x: (x[0], int(x[1:])), instructions):\n    position, direction = update_state(position, direction, instruction, value)\nint(abs(position.real) + abs(position.imag))"
+  },
+  {
+    "objectID": "qmd/2020.html#part-2-11",
+    "href": "qmd/2020.html#part-2-11",
+    "title": "2020 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\nPart 2 can be done basically the same way as part 1, with only a small change to the update state function. In part 1, nesw move the ship; in part 2 they move the waypoint. Everything else is the same.\n\n\nCode\nposition, waypoint = 0, 10 + 1j\nfor instruction, value in map(lambda x: (x[0], int(x[1:])), instructions):\n    position, waypoint = update_state(position, waypoint, instruction, value, part=2)\nint(abs(position.real) + abs(position.imag))"
+  },
+  {
+    "objectID": "qmd/2020.html#part-1-12",
+    "href": "qmd/2020.html#part-1-12",
+    "title": "2020 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\nThis one looks like a bunch of modular arithmetic. The first one is just whichever bus number n has the smallest -x (mod n)\n\n\nCode\nx = 1006726\nbuses = (\n    \"23,x,x,x,x,x,x,x,x,x,x,x,x,41,x,x,x,x,x,x,x,x,x,647,\"\n    \"x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,13,19,x,x,x,x,x,x,x\"\n    \",x,x,29,x,557,x,x,x,x,x,37,x,x,x,x,x,x,x,x,x,x,17\"\n)\nbus_moduli = [\n    (int(_), (-idx) % int(_)) for idx, _ in enumerate(buses.split(\",\")) if _ != \"x\"\n]\nbus_numbers = [n for n, a in bus_moduli]\nwaits = [-x % bus for bus in bus_numbers]\nmin(waits) * bus_numbers[np.argmin(waits)]"
+  },
+  {
+    "objectID": "qmd/2020.html#part-2-12",
+    "href": "qmd/2020.html#part-2-12",
+    "title": "2020 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\nFor the second, it’s the Chinese remainder theorem to the rescue. Code shamelessly copied from wikipedia.\n\n\nCode\nfrom utils import crt\n\ncrt(bus_moduli)"
+  },
+  {
+    "objectID": "qmd/2020.html#part-1-13",
+    "href": "qmd/2020.html#part-1-13",
+    "title": "2020 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\n\n\nCode\ndata = [line.split(\" = \") for line in load(14)]\nresult = defaultdict(int)\nmask = \"\"\nfor operation, operand in data:\n    if operation == \"mask\":\n        mask = operand\n    else:\n        new_operand = \"\".join(\n            [b1 if (b1 != \"X\") else b2 for b1, b2 in zip(mask, f\"{int(operand):036b}\")]\n        )\n        result[operation[4:-1]] = int(new_operand, 2)\nsum(result.values())\n\n\n\n\nCode\nresult = defaultdict(int)\nmask = \"\"\nfor operation, operand in data:\n    if operation == \"mask\":\n        mask = operand\n    else:\n        operand = int(operand)\n        operation = operation[4:-1]\n        addresses = [\"\"]\n        for b1, b2 in zip(mask, f\"{int(operation):036b}\"):\n            if b1 == \"X\":\n                addresses = [a + \"0\" for a in addresses] + [a + \"1\" for a in addresses]\n            elif b1 == \"1\":\n                addresses = [a + \"1\" for a in addresses]\n            else:\n                addresses = [a + b2 for a in addresses]\n        for address in addresses:\n            result[int(address, 2)] = operand\nsum(result.values())"
+  },
+  {
+    "objectID": "qmd/2020.html#part-1-14",
+    "href": "qmd/2020.html#part-1-14",
+    "title": "2020 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\n\n\nCode\nprefix = load(15, \"int\")[0]\nstate = {i: idx + 1 for idx, i in enumerate(prefix[:-1])}\ncurrent = prefix[-1]\n\n\ndef update(current, i):\n    if current not in state:\n        next_n = 0\n    else:\n        next_n = i - state[current]\n    state[current] = i\n    return next_n\n\n\nn_turns = 2020\nfor i in range(len(prefix), n_turns):\n    current = update(current, i)\ncurrent"
+  },
+  {
+    "objectID": "qmd/2020.html#part-2-13",
+    "href": "qmd/2020.html#part-2-13",
+    "title": "2020 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\n30 million is just within range where brute force would be plausible. Let’s try it:\n\n\nCode\nfor i in range(n_turns, 30_000_000):\n    current = update(current, i)\ncurrent"
+  },
+  {
+    "objectID": "qmd/2020.html#part-1-15",
+    "href": "qmd/2020.html#part-1-15",
+    "title": "2020 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\nI could do this by trying to merge ranges of valid values. Or I could just instantiate a set with every valid value…\n\n\nCode\ndata = load(16, \"raw\")\nrules, own, nearby = data[:-1].split(\"\\n\\n\")\nvalid = set()\nfor rule in rules.split(\"\\n\"):\n    limits = [int(x) for x in re.findall(r\"\\d+\", rule)]\n    for lower, upper in zip(limits[::2], limits[1::2]):\n        valid |= set(range(lower, upper + 1))\nsum(\n    map(\n        lambda x: 0 if int(x) in valid else int(x),\n        nearby[nearby.index(\"\\n\") + 1 :].replace(\"\\n\", \",\").split(\",\"),\n    )\n)"
+  },
+  {
+    "objectID": "qmd/2020.html#part-2-14",
+    "href": "qmd/2020.html#part-2-14",
+    "title": "2020 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\nI’m not entirely surprised that that’s where he went for part 2\n\n\nCode\nranges = defaultdict(set)\nfor rule in rules.split(\"\\n\"):\n    name, _ = rule.split(\":\")\n    limits = [int(x) for x in re.findall(r\"\\d+\", rule)]\n    for lower, upper in zip(limits[::2], limits[1::2]):\n        ranges[name] |= set(range(lower, upper + 1))\nown_ticket = [int(x) for x in own.split(\"\\n\")[1].split(\",\")]\nnearby_tickets = [[int(x) for x in line.split(\",\")] for line in nearby.split(\"\\n\")[1:]]\nnearby_tickets = np.array([x for x in nearby_tickets if all(y in valid for y in x)])\nassignments = [0] * len(own_ticket)\nwhile ranges:\n    for column in range(len(assignments)):\n        if assignments[column]:\n            continue\n        candidates = [\n            key\n            for key in ranges.keys()\n            if all(x in ranges[key] for x in nearby_tickets[:, column])\n        ]\n        if len(candidates) == 1:\n            assignments[column] = candidates[0]\n            del ranges[candidates[0]]\nnp.product(\n    [\n        own_ticket[idx]\n        for idx, assignment in enumerate(assignments)\n        if \"departure\" in assignment\n    ]\n)"
+  },
+  {
+    "objectID": "qmd/2020.html#part-1-16",
+    "href": "qmd/2020.html#part-1-16",
+    "title": "2020 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\nThis looks like another good time to use scipy’s handy correlate/convolve functions. At some point I should probably learn what the difference between those two is.\n\n\nCode\ndata = np.array(\n    [[1 if char == \"#\" else 0 for char in line] for line in load(17)], dtype=int\n)\n\n\ndef simulate(data, dimensions=3, ncycles=6):\n    weights = np.ones((3,) * dimensions)\n    missing_dimensions = dimensions - len(data.shape)\n    data = data.reshape(data.shape + (1,) * missing_dimensions)\n    data = np.pad(data, ncycles)\n    for i in range(ncycles):\n        convolution = scipy.ndimage.correlate(data, weights, mode=\"constant\")\n        data = (convolution == 3) | ((convolution == 4) & data)\n    return data.sum()\n\n\nsimulate(data)"
+  },
+  {
+    "objectID": "qmd/2020.html#part-2-15",
+    "href": "qmd/2020.html#part-2-15",
+    "title": "2020 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\n\n\nCode\nsimulate(data, 4)"
+  },
+  {
+    "objectID": "qmd/2020.html#part-1-17",
+    "href": "qmd/2020.html#part-1-17",
+    "title": "2020 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\n\n\nCode\nimport string\n\noperators = {\"*\": lambda x, y: x * y, \"+\": lambda x, y: x + y}\n\n\ndef find_closing_paren(s):\n    assert s[0] == \"(\"\n    count = 0\n    for idx, char in enumerate(s):\n        count += 1 if char == \"(\" else -1 if char == \")\" else 0\n        if count == 0:\n            return idx + 1\n\n\ndef evaluate(expression, part=1):\n    i = 0\n    ops = deque()\n    operands = deque()\n    while i &lt; len(expression):\n        char = expression[i]\n        if char in \"+*\":\n            ops.append(char)\n            i += 1\n            continue\n        if char == \"(\":\n            delta = find_closing_paren(expression[i:])\n            operands.append(evaluate(expression[i + 1 : i + delta - 1], part=part))\n            i += delta\n        elif char in string.digits:\n            operands.append(int(char))\n            i += 1\n\n        if part == 2 and ops and ops[-1] == \"+\":\n            ops.pop()\n            operands.append(operands.pop() + operands.pop())\n\n    while ops:\n        op = ops.popleft()\n        operands.appendleft(operators[op](operands.popleft(), operands.popleft()))\n    return operands.pop()\n\n\nlines = [x.replace(\" \", \"\") for x in load(18)]\nsum(evaluate(line) for line in lines)"
+  },
+  {
+    "objectID": "qmd/2020.html#part-2-16",
+    "href": "qmd/2020.html#part-2-16",
+    "title": "2020 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\nThe change for part 2 is so small that it can be included in part 1 as a flag\n\n\nCode\nsum(evaluate(line, part=2) for line in lines)"
+  },
+  {
+    "objectID": "qmd/2020.html#part-1-18",
+    "href": "qmd/2020.html#part-1-18",
+    "title": "2020 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\n\n\nCode\ndata = load(19, \"raw\")\nrelations, strings = map(lambda x: x.split(\"\\n\"), data.split(\"\\n\\n\"))\ndependencies = {}\nrules = {}\nfor relation in relations:\n    lhs, rhs = relation.split(\":\")\n    rules[int(lhs)] = (\n        {rhs.replace('\"', \"\").strip()}\n        if '\"' in rhs\n        else {tuple([int(y) for y in x.split()]) for x in rhs.split(\"|\")}\n    )\n\ndependencies = {\n    x: set().union(*rules[x]) if x not in [54, 20] else set() for x in rules\n}\n\n\ndef concat(l1, l2):\n    return {s1 + s2 for s1 in l1 for s2 in l2}\n\n\ndef expand(rule, rules, mappings):\n    result = set()\n    for option in rules[rule]:\n        if isinstance(option, str):\n            return rules[rule]\n        new_elements = (\n            mappings[option[0]]\n            if len(option) == 1\n            else concat(*[mappings[i] for i in option])\n        )\n        result |= new_elements\n    return result\n\n\ndef free_elements(mydict):\n    return [x for x in mydict if not mydict[x]]\n\n\nmappings = {}\nwhile dependencies:\n    k1 = free_elements(dependencies)[0]\n    mappings[k1] = expand(k1, rules, mappings)\n    for k2 in dependencies:\n        dependencies[k2].discard(k1)\n    del dependencies[k1]\nlen(list(filter(lambda x: x in mappings[0], strings[:-1])))"
+  },
+  {
+    "objectID": "qmd/2020.html#part-2-17",
+    "href": "qmd/2020.html#part-2-17",
+    "title": "2020 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\nWe have loops now! Analysing the new rules, we see that the system should accept all strings of the form 42m 13n, with m &gt; n &gt; 0. Looking at the previous part shows that rule 42 and rule 31 never overlap, and all the strings they match have length 8. That gives the following logic for part 2:\n\n\nCode\nfrom more_itertools import chunked\n\n\ndef part2(s):\n    chunks = [\"\".join(x).strip() for x in chunked(s, 8)]\n    r42, r31 = 0, 0\n    while chunks[r42] in mappings[42]:\n        r42 += 1\n        if r42 == len(chunks):\n            break\n    while r42 + r31 &lt; len(chunks):\n        if chunks[r42 + r31] not in mappings[31]:\n            break\n        r31 += 1\n\n    return r31 &gt;= 1 and r42 &gt; r31 and r42 + r31 == len(chunks)\n\n\nsum(part2(s) for s in strings[:-1])"
+  },
+  {
+    "objectID": "qmd/2020.html#part-1-19",
+    "href": "qmd/2020.html#part-1-19",
+    "title": "2020 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\n\n\nCode\ndata = load(20, \"raw\").split(\"\\n\\n\")\ndata[0]\ntiles = {}\n\n\ndef edge_hashes(t):\n    edges = [\n        t[0],\n        t[0][::-1],\n        t[:, -1],\n        t[:, -1][::-1],\n        t[-1][::-1],\n        t[-1],\n        t[:, 0][::-1],\n        t[:, 0],\n    ]\n    return {\n        idx: functools.reduce(lambda x, y: 2 * x + y, edge[::-1])\n        for idx, edge in enumerate(edges)\n    }\n\n\ndef fingerprint(tile):\n    return tile, edge_hashes(tile), {v: k for k, v in edge_hashes(tile).items()}\n\n\nfor entry in data:\n    header, *tile = entry.split(\"\\n\")\n    tile = np.array(\n        [[1 if char == \"#\" else 0 for char in line] for line in tile if line],\n        dtype=\"int\",\n    )\n    tile_id = int(re.findall(r\"\\d+\", header)[0])\n    tiles[tile_id] = fingerprint(tile)\nmatches = defaultdict(set)\nkeys = sorted(tiles.keys())\nfor x in range(len(keys)):\n    for y in range(x + 1, len(keys)):\n        if set(tiles[keys[x]][1].values()) & set(tiles[keys[y]][1].values()):\n            matches[keys[x]].add(keys[y])\n            matches[keys[y]].add(keys[x])\ncorners = [x for x in matches if len(matches[x]) == 2]\nnp.product(corners)"
+  },
+  {
+    "objectID": "qmd/2020.html#part-2-18",
+    "href": "qmd/2020.html#part-2-18",
+    "title": "2020 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\nDirect inspection shows that there are no false matches in the edge pairings, so we can proceed to place all the tiles without taking that into account. We’ll start by placing the tiles in the correct location without worrying about their orientation, and then rotate and flip them afterwards.\nThere are eight possible ways to fill the board (four different corners to put in the top left, and then for each of those, two different choices for how to flip around the main diagonal), so we’ll arbitrarily pick one of them.\nWe’ll start by placing a corner piece in the top left, and then one of its neighbors below it.\nWhen we place a tile, we mark the candidates for its unplaced neighbors: these are the intersection of whatever candidates were there before, and the unplaced matches of the current tile. We also remove the current tile as a candidate from any other open location, since it’s just been placed. Whenever a location has only one candidate, we can place that, and proceed until the whole board is filled.\n\n\nCode\ncorner = corners[0]\nmatch = next(iter(matches[corner]))\nlocations = defaultdict(lambda: set(keys))\nplaced = set()\n\n\ndef place(tile, location):\n    locations[location] = tile\n    placed.add(tile)\n    x, y = location\n    if x &lt; 11 and isinstance(locations[x + 1, y], set):\n        locations[x + 1, y] &= matches[tile] - placed\n    if y &lt; 11 and isinstance(locations[x, y + 1], set):\n        locations[x, y + 1] &= matches[tile] - placed\n    to_place = []\n    for location in locations:\n        if isinstance(locations[location], set):\n            locations[location].discard(tile)\n            if len(locations[location]) == 1:\n                to_place.append(location)\n    for placement in to_place:\n        if isinstance(locations[placement], set):\n            place(next(iter(locations[placement])), placement)\n\n\nplace(corner, (0, 0))\nplace(match, (1, 0))\ncoords = np.zeros((12, 12), dtype=int)\nfor location in locations:\n    coords[location] = locations[location]\n\n\nWith that out of the way, we need to orient the tiles correctly. We start by making sure the top left corner is oriented correctly, and then we match all of the other tiles to that structure.\nFor each row in the grid, we match the first cell to the first cell in the row above, and then we match all the other cells to the neighbor to their left.\n\n\nCode\n# start off by making sure that the right hand side matches\noverlap = [\n    tiles[coords[0, 0]][2][key]\n    for key in set(tiles[coords[0, 0]][2].keys()) & set(tiles[coords[0, 1]][2].keys())\n][0]\ndelta = (((overlap - overlap % 2) - 2) // 2) % 4\nif delta:\n    tile = np.rot90(tiles[coords[0, 0]][0], -delta)\n    tiles[coords[0, 0]] = fingerprint(tile)\n# Then check if the bottom of the tile is the one that matches [1, 0]. If not, flip it vertically.\noverlap = [\n    tiles[coords[0, 0]][2][key]\n    for key in set(tiles[coords[0, 0]][2].keys()) & set(tiles[coords[1, 0]][2].keys())\n][0]\nif overlap // 2 != 2:\n    tile = tile[::-1]\n    tiles[coords[0, 0]] = fingerprint(tile)\n\n\nAll the edges are labelled (not well, but they are labelled). To be oriented correctly, the 7 edge on a tile should match the 2 edge on the tile to its left, and/or the 0 edge on a tile should match the 5 edge on the tile above it.\n\n\nCode\nfor y in range(12):\n    for x in range(12):\n        if not x and not y:\n            continue\n        tile = tiles[coords[y, x]][0]\n        if not x:\n            old_edge = 5\n            target = 0\n            comparison = (y - 1, x)\n        else:\n            old_edge = 2\n            target = 7\n            comparison = (y, x - 1)\n        value = tiles[coords[comparison]][1][old_edge]\n        current = tiles[coords[y, x]][2][value]\n        if (target - current) % 2:\n            tile = tile.T\n            current = 7 - current\n        rotation = (current - target) // 2\n        tile = np.rot90(tile, rotation)\n        tiles[coords[y, x]] = fingerprint(tile)\n\n\nWe can now reconstruct the board, and go hunting for the sea monsters. The convolve/correlate functions are handy here as well, since we’re looking for an area where all of a subset of the neighboring cells are lit up. So we correlate with that mask, and check which correlations have the full set.\nThe following code will fail if any of the sea monsters overlap, but luckily they don’t.\n\n\nCode\nboard = np.zeros((8 * 12, 8 * 12), dtype=int)\nfor y in range(12):\n    for x in range(12):\n        board[y * 8 : (y + 1) * 8, x * 8 : (x + 1) * 8] = tiles[coords[y, x]][0][\n            1:-1, 1:-1\n        ]\npattern = [\n    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],\n    [1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1],\n    [0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0],\n]\n\ntotal = np.sum(pattern)\nmonsters = 0\nfor reflection in range(2):\n    for rotation in range(4):\n        convolution = scipy.ndimage.correlate(board, pattern, mode=\"constant\")\n        monsters += (convolution == total).sum()\n        board = np.rot90(board)\n    board = board.T\nboard.sum() - monsters * 15"
+  },
+  {
+    "objectID": "qmd/2020.html#part-1-20",
+    "href": "qmd/2020.html#part-1-20",
+    "title": "2020 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\nNice and easy one today, with just a bit of set intersection logic\n\n\nCode\ncounts = defaultdict(int)\nmappings = {}\nfor line in load(21):\n    ingredients, allergens = [\n        x.split() for x in line[:-2].replace(\",\", \"\").split(\"(contains\")\n    ]\n    for ingredient in ingredients:\n        counts[ingredient] += 1\n    for allergen in allergens:\n        if allergen in mappings:\n            mappings[allergen] &= set(ingredients)\n        else:\n            mappings[allergen] = set(ingredients)\npotential_allergens = set().union(*mappings.values())\nsum(counts[x] for x in counts if x not in potential_allergens)"
+  },
+  {
+    "objectID": "qmd/2020.html#part-2-19",
+    "href": "qmd/2020.html#part-2-19",
+    "title": "2020 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\nAnd part 2 isn’t much harder. Any allergens which have only one matching ingredient are fixed; and this ingredient can then be removed from all the other allergens. And then it’s a question of continuing until we have the full map\n\n\nCode\nassignments = {}\nassignable = {x for x in mappings if len(mappings[x]) == 1}\nwhile mappings:\n    key = assignable.pop()\n    value = mappings[key].pop()\n    del mappings[key]\n    assignments[key] = value\n    for mapping in mappings:\n        mappings[mapping].discard(value)\n        if len(mappings[mapping]) == 1:\n            assignable.add(mapping)\nprint(\",\".join(assignments[x] for x in sorted(list(assignments.keys()))))"
+  },
+  {
+    "objectID": "qmd/2020.html#part-1-21",
+    "href": "qmd/2020.html#part-1-21",
+    "title": "2020 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\n\n\nCode\np1, p2 = map(deque, np.array(load(22, \"int\")).reshape(2, -1)[:, 1:])\nwhile p1 and p2:\n    c1, c2 = p1[0], p2[0]\n    p1.rotate(-1)\n    p2.rotate(-1)\n    winner, loser = (p1, p2) if (c1 &gt; c2) else (p2, p1)\n    winner.append(loser.pop())\nresult = p1 if p1 else p2\n(np.array(result) * (np.arange(len(result)) + 1)[::-1]).sum()"
+  },
+  {
+    "objectID": "qmd/2020.html#part-2-20",
+    "href": "qmd/2020.html#part-2-20",
+    "title": "2020 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\nA fairly straightforward recursive implementation of the requirements\n\n\nCode\np1, p2 = map(deque, np.array(load(22, \"int\")).reshape(2, -1)[:, 1:])\n\n\ndef play(p1, p2):\n    seen = set()\n    while p1 and p2:\n        hashed = (tuple(p1), tuple(p2))\n        if hashed in seen:\n            return 1, 0\n        seen.add(hashed)\n        c1, c2 = p1[0], p2[0]\n        p1.rotate(-1)\n        p2.rotate(-1)\n        if c1 &lt; len(p1) and c2 &lt; len(p2):\n            new_p1 = deque(list(p1)[:c1])\n            new_p2 = deque(list(p2)[:c2])\n            recursive_battle = play(new_p1, new_p2)\n            winner, loser = (p1, p2) if recursive_battle[0] else (p2, p1)\n        else:\n            winner, loser = (p1, p2) if (c1 &gt; c2) else (p2, p1)\n        winner.append(loser.pop())\n    return p1, p2\n\n\nresult = play(p1, p2)\nresult = result[0] if result[0] else result[1]\n(np.array(result) * np.arange(1, len(result) + 1)[::-1]).sum()"
+  },
+  {
+    "objectID": "qmd/2020.html#part-1-22",
+    "href": "qmd/2020.html#part-1-22",
+    "title": "2020 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\n\n\nCode\ndata = [int(x) for x in \"583976241\"]\ns = deque(data)\nl = len(s)\nfor _ in range(100):\n    target = (s[0] - 2) % l + 1\n    s.rotate(-1)\n    pickup = [s.popleft() for i in range(3)]\n    while target in pickup:\n        target = (target - 2) % l + 1\n\n    count = 0\n    while s[0] != target:\n        s.rotate(-1)\n        count += 1\n    s.rotate(-1)\n    for value in pickup[::-1]:\n        s.appendleft(value)\n    s.rotate(count + 1)\nwhile s[0] != 1:\n    s.rotate()\ns.popleft()\n\"\".join(str(x) for x in s)"
+  },
+  {
+    "objectID": "qmd/2020.html#part-2-21",
+    "href": "qmd/2020.html#part-2-21",
+    "title": "2020 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\nThis approach is way too slow for part 2. Instead, we can build an implicit linked list in a numpy array, so that a[node] = next node for all nodes. To make that work with zero based indexing we relabel all the nodes. A single step can now be accomplished by just updating three array elements: the next pointer of the current node, the next pointer of the destination node, and the next pointer of the last of the moved elements.\n\n\nCode\ninitial_state = data + list(range(10, 1_000_001))\na = np.zeros(len(initial_state), dtype=int)\nminval = min(initial_state)\nfor c, n in zip(initial_state, initial_state[1:] + [initial_state[0]]):\n    a[c - 1] = n - 1\ncurrent = a[-1]\nfor _ in range(10_000_000):\n    to_move = [a[current], a[a[current]], a[a[a[current]]]]\n    destination = current - 1\n    while destination &lt; 0 or destination in to_move:\n        destination -= 1\n        if destination &lt; 0:\n            destination = 999_999\n    # next pointer of current is the one after the moved ones\n    a[current] = a[to_move[-1]]\n    # The next one after the moved three is the one after the destination\n    a[to_move[-1]] = a[destination]\n    # After the destination comes the first of the moved ones\n    a[destination] = to_move[0]\n    # And we move to the next node\n    current = a[current]\n(a[0] + 1) * (a[a[0]] + 1)"
+  },
+  {
+    "objectID": "qmd/2020.html#part-1-23",
+    "href": "qmd/2020.html#part-1-23",
+    "title": "2020 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\n\n\nCode\nvectors = {\n    \"e\": (1, 0),\n    \"ne\": (1, 1),\n    \"nw\": (0, 1),\n    \"w\": (-1, 0),\n    \"sw\": (-1, -1),\n    \"se\": (0, -1),\n}\ncurrent = \"\"\nterminals = \"ew\"\ntiles = defaultdict(bool)\nfor s in load(24):\n    result = []\n    for char in s:\n        current += char\n        if char in terminals:\n            result.append(vectors[current])\n            current = \"\"\n    coords = tuple(np.array(result).sum(axis=0))\n    tiles[coords] ^= 1\nnp.sum(list(tiles.values()))"
+  },
+  {
+    "objectID": "qmd/2020.html#part-2-22",
+    "href": "qmd/2020.html#part-2-22",
+    "title": "2020 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\nThis is a fairly simple convolution problem again. We’ll be working in the basis defined above, and in that basis, the neighbors are as given in the vectors dictionary. So the array of weights is the one below.\n\n\nCode\nkeys = list(tiles.keys())\nweights = [[1, 1, 0], [1, 0, 1], [0, 1, 1]]\nborder = 100\nsize = 2 * border + np.max(keys) - np.min(keys)\nboard = np.zeros((size, size), dtype=int)\nfor x, y in tiles:\n    board[x + size // 2, y + size // 2] = tiles[x, y]\nfor i in range(100):\n    neighbors = scipy.ndimage.correlate(board, weights, mode=\"constant\")\n    flips = ((board == 0) & (neighbors == 2)) | (\n        (board == 1) & ((neighbors == 0) | (neighbors &gt; 2))\n    )\n    board = (board + flips) % 2\nboard.sum()"
   },
   {
     "objectID": "qmd/2022.html",
@@ -2443,339 +2443,339 @@
     "text": "Part 1\nThis is an interesting problem, because it requires more thinking and less coding. Blindly running the code provided in my input leads to infinite loops, and the question is then how to analyse these. In particular, we’re asked for an input that matches an infinite sequence of alternating ones and zeros, and we don’t really have any way of knowing that a sequence that looks promising doesn’t start to diverge after 100, 1000 or even 1,000,000 terms. Instead, I decided to analyse the provided code and understand what it was doing. After a bit of conversion, I found it to be equivalent to the following snippet:\ndef clock(start):\n    a = 0\n    while True:\n        if a == 0:\n            a = start + 2550\n        yield a % 2\n        a = a // 2\nBut that’s just the binary representation of (start + 2550) reversed and repeated endlessly. So we’re looking for the smallest number \\(n\\) such that n + 2550 has a binary representation of the form \\(101010\\ldots\\)\n\n\nCode\nx = 2\nwhile x &lt; 2550:\n    x = 4 * x + 2\nx - 2550"
   },
   {
-    "objectID": "qmd/2020.html",
-    "href": "qmd/2020.html",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html",
+    "href": "qmd/2021.html",
+    "title": "2021 Solutions",
     "section": "",
-    "text": "Code\nimport functools\nimport itertools\nimport os\nimport re\nimport sys\nfrom collections import defaultdict, deque\n\nimport numpy as np\nimport scipy\n\nsys.path.insert(1, os.path.join(sys.path[0], \"..\"))\nimport utils\n\nload = utils.year_load(2020)"
+    "text": "Code\nimport functools\nimport itertools\nimport os\nimport queue\nimport sys\nfrom collections import defaultdict\nfrom pathlib import Path\n\nimport numpy as np\nimport pandas as pd\n\nsys.path.insert(1, os.path.join(sys.path[0], \"..\"))\nimport utils\n\nload = utils.year_load(2021)\ndatadir = Path(\"../data/2021\")"
   },
   {
-    "objectID": "qmd/2020.html#part-1",
-    "href": "qmd/2020.html#part-1",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-1",
+    "href": "qmd/2021.html#part-1",
+    "title": "2021 Solutions",
     "section": "Part 1",
-    "text": "Part 1\n\n\nCode\ndata = load(1, \"np\")\n[pair[0] * pair[1] for pair in itertools.product(data, data) if sum(pair) == 2020][0]"
+    "text": "Part 1\n\n\nCode\ndata = load(1, \"np\")\n(np.diff(data) &gt; 0).sum()"
   },
   {
-    "objectID": "qmd/2020.html#part-2",
-    "href": "qmd/2020.html#part-2",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-2",
+    "href": "qmd/2021.html#part-2",
+    "title": "2021 Solutions",
     "section": "Part 2",
-    "text": "Part 2\n\n\nCode\n[\n    triple[0] * triple[1] * triple[2]\n    for triple in itertools.product(data, data, data)\n    if sum(triple) == 2020\n][0]"
+    "text": "Part 2\n\n\nCode\n(pd.Series(data).rolling(3).sum().diff() &gt; 0).sum()"
   },
   {
-    "objectID": "qmd/2020.html#part-1-1",
-    "href": "qmd/2020.html#part-1-1",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-1-1",
+    "href": "qmd/2021.html#part-1-1",
+    "title": "2021 Solutions",
     "section": "Part 1",
-    "text": "Part 1\n\n\nCode\ndef is_valid(interval, letters, password):\n    interval = [int(x) for x in interval.split(\"-\")]\n    occurrences = password.count(letters[0])\n    return interval[0] &lt;= occurrences &lt;= interval[1]\n\n\nlines = load(2)\nsum([is_valid(*line.split()) for line in lines])"
+    "text": "Part 1\n\n\nCode\ndata = [x.split() for x in load(2)]\ndf = pd.DataFrame(data, columns=[\"instruction\", \"amount\"])\ndf[\"amount\"] = df[\"amount\"].apply(int)\ntotals = df.groupby(\"instruction\").sum()\n(totals.loc[\"forward\"] * (totals.loc[\"down\"] - totals.loc[\"up\"])).iat[0]"
   },
   {
-    "objectID": "qmd/2020.html#part-2-1",
-    "href": "qmd/2020.html#part-2-1",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-2-1",
+    "href": "qmd/2021.html#part-2-1",
+    "title": "2021 Solutions",
     "section": "Part 2",
-    "text": "Part 2\n\n\nCode\nfrom operator import xor\n\n\ndef is_valid(interval, letters, password):\n    lower, upper = [int(x) - 1 for x in interval.split(\"-\")]\n    return xor(password[lower] == letters[0], password[upper] == letters[0])\n\n\nsum([is_valid(*line.split()) for line in lines])"
+    "text": "Part 2\n\n\nCode\nstate = (0, 0, 0)\nops = {\n    \"down\": lambda x, y: (x[0] + y, x[1], x[2]),\n    \"up\": lambda x, y: (x[0] - y, x[1], x[2]),\n    \"forward\": lambda x, y: (x[0], x[1] + y, x[2] + x[0] * y),\n}\nfor row in data:\n    state = ops[row[0]](state, int(row[1]))\nprint(state[1] * state[2])"
   },
   {
-    "objectID": "qmd/2020.html#part-1-2",
-    "href": "qmd/2020.html#part-1-2",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-1-2",
+    "href": "qmd/2021.html#part-1-2",
+    "title": "2021 Solutions",
     "section": "Part 1",
-    "text": "Part 1\n\n\nCode\ndata = np.array([[0 if char == \".\" else 1 for char in line] for line in load(3)])\n\n\ndef count_trees(data, width_change, height_change):\n    height, width = data.shape\n    result = 0\n    for i in range((height - 1) // height_change + 1):\n        result += data[i * height_change, (i * width_change) % width]\n    return result\n\n\ncount_trees(data, 3, 1)"
+    "text": "Part 1\n\n\nCode\ndf = pd.read_fwf(datadir / \"3.txt\", widths=[1] * 12, header=None)\n\n\ndef binarize(array):\n    return int(\"\".join(str(x) for x in array.reshape(-1)), 2)\n\n\nbits = df.median().to_numpy(dtype=int)\nbinarize(bits) * binarize(1 - bits)"
   },
   {
-    "objectID": "qmd/2020.html#part-2-2",
-    "href": "qmd/2020.html#part-2-2",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-2-2",
+    "href": "qmd/2021.html#part-2-2",
+    "title": "2021 Solutions",
     "section": "Part 2",
-    "text": "Part 2\n\n\nCode\nslopes = [[1, 1], [3, 1], [5, 1], [7, 1], [1, 2]]\nnp.prod([count_trees(data, slope[0], slope[1]) for slope in slopes])"
+    "text": "Part 2\n\n\nCode\noxygen = df\nco2 = df\nfor column in df.columns:\n    oxygen = oxygen[oxygen[column] == int(oxygen[column].median() + 0.5)]\n    if len(co2) &gt; 1:\n        co2 = co2[co2[column] != int(co2[column].median() + 0.5)]\nbinarize(oxygen.to_numpy()) * binarize(co2.to_numpy())"
   },
   {
-    "objectID": "qmd/2020.html#part-1-3",
-    "href": "qmd/2020.html#part-1-3",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-1-3",
+    "href": "qmd/2021.html#part-1-3",
+    "title": "2021 Solutions",
     "section": "Part 1",
-    "text": "Part 1\n\n\nCode\ndata = load(4, \"raw\")\npassports = data.split(\"\\n\\n\")\npassport_dicts = [\n    dict(list(map(lambda x: x.split(\":\"), p.replace(\"\\n\", \" \").split())))\n    for p in passports\n]\nsum([len(set(p.keys()) - set([\"cid\"])) == 7 for p in passport_dicts])"
+    "text": "Part 1\n\n\nCode\ndata = load(4, \"raw\").split(\"\\n\\n\")\nnumbers = np.array([int(x) for x in data[0].strip().split(\",\")])\nboards = np.array(\n    [int(x) for x in \" \".join(data[1:]).replace(\"\\n\", \" \").split()]\n).reshape(-1, 5, 5)\n\n\ndef winning_array(boards):\n    return ((boards == -1).all(axis=2) | (boards == -1).all(axis=1)).any(axis=1)\n\n\nfor number in numbers:\n    boards[np.where(boards == number)] = -1\n    if winning_array(boards).any():\n        break\nindex = np.where(winning_array(boards))\nnp.sum(np.ma.array(boards, mask=(boards == -1))[index]) * number"
   },
   {
-    "objectID": "qmd/2020.html#part-2-3",
-    "href": "qmd/2020.html#part-2-3",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-2-3",
+    "href": "qmd/2021.html#part-2-3",
+    "title": "2021 Solutions",
     "section": "Part 2",
-    "text": "Part 2\n\n\nCode\ndef validate_key(key, value):\n    year_limits = {\"byr\": [1920, 2002], \"eyr\": [2020, 2030], \"iyr\": [2010, 2020]}\n    try:\n        if key in [\"byr\", \"eyr\", \"iyr\"]:\n            minval, maxval = year_limits[key]\n            return minval &lt;= int(value) &lt;= maxval\n        if key == \"hgt\":\n            value, unit = int(value[:-2]), value[-2:]\n            return (unit == \"cm\" and (150 &lt;= value &lt;= 193)) or (\n                unit == \"in\" and (59 &lt;= value &lt;= 76)\n            )\n        if key == \"hcl\":\n            return (\n                value[0] == \"#\"\n                and len(value) == 7\n                and not (set(value[1:]) - set(\"0123456789abcdef\"))\n            )\n        if key == \"ecl\":\n            return value in [\"amb\", \"blu\", \"brn\", \"gry\", \"grn\", \"hzl\", \"oth\"]\n        if key == \"pid\":\n            test = int(value)\n            return len(value) == 9\n        return True\n    except ValueError:\n        return False\n\n\ndef is_valid_passport(p):\n    return len(set(p.keys()) - set([\"cid\"])) == 7 and all(\n        [validate_key(key, p[key]) for key in p]\n    )\n\n\nsum([is_valid_passport(p) for p in passport_dicts])"
+    "text": "Part 2\nFigure out which board will win last. Once it wins, what would its final score be?\n\n\nCode\nfor number in numbers:\n    boards[np.where(boards == number)] = -1\n    wins = winning_array(boards)\n    if wins.sum() == len(boards) - 1:\n        index = np.where(~wins)[0]\n    if wins.all():\n        break\nnp.sum(np.ma.array(boards, mask=(boards == -1))[index]) * number"
   },
   {
-    "objectID": "qmd/2020.html#part-1-4",
-    "href": "qmd/2020.html#part-1-4",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-1-4",
+    "href": "qmd/2021.html#part-1-4",
+    "title": "2021 Solutions",
     "section": "Part 1",
-    "text": "Part 1\n\n\nCode\n# \"BFFFBBFRRR\" -&gt; 70, column 7 -&gt; 567\ndef seat_id(instruction):\n    return int(instruction.translate(str.maketrans(\"BFRL\", \"1010\")), 2)\n\n\nseat_ids = [seat_id(x) for x in load(5)]\nmax(seat_ids)"
+    "text": "Part 1\n\n\nCode\ndata = pd.read_csv(datadir / \"5.txt\", names=[\"x1\", \"middle\", \"y2\"])\ndata[[\"y1\", \"x2\"]] = data[\"middle\"].apply(\n    lambda x: pd.Series(x.split(\"-&gt;\")).astype(\"int\")\n)\ngrid = np.zeros((1000, 1000))\n\n\ndef endpoints_to_line(x1, x2, y1, y2):\n    steps = max(abs(x1 - x2), abs(y1 - y2))\n    delta = np.array([np.sign(x2 - x1), np.sign(y2 - y1)])\n    points = [np.array([x1, y1]) + delta * n for n in range(steps + 1)]\n    return tuple(np.array(points).T.tolist())\n\n\non_axis = data[(data[\"x1\"] == data[\"x2\"]) | (data[\"y1\"] == data[\"y2\"])]\nfor row in on_axis.itertuples():\n    grid[endpoints_to_line(row.x1, row.x2, row.y1, row.y2)] += 1\n\n(grid &gt; 1).sum()"
   },
   {
-    "objectID": "qmd/2020.html#part-2-4",
-    "href": "qmd/2020.html#part-2-4",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-2-4",
+    "href": "qmd/2021.html#part-2-4",
+    "title": "2021 Solutions",
     "section": "Part 2",
-    "text": "Part 2\n\n\nCode\n(set(range(min(seat_ids), max(seat_ids) + 1)) - set(seat_ids)).pop()"
+    "text": "Part 2\n\n\nCode\nskewed = data[(data[\"x1\"] != data[\"x2\"]) & (data[\"y1\"] != data[\"y2\"])]\nfor row in skewed.itertuples():\n    grid[endpoints_to_line(row.x1, row.x2, row.y1, row.y2)] += 1\n\n(grid &gt; 1).sum()"
   },
   {
-    "objectID": "qmd/2020.html#part-1-5",
-    "href": "qmd/2020.html#part-1-5",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-1-5",
+    "href": "qmd/2021.html#part-1-5",
+    "title": "2021 Solutions",
     "section": "Part 1",
-    "text": "Part 1\n\n\nCode\ndata = load(6, \"raw\")\ngroups = data.split(\"\\n\\n\")\nsum(len(set(list(group.replace(\"\\n\", \"\")))) for group in groups)"
+    "text": "Part 1\n\n\nCode\ndata = load(6, \"np\")\npopulation, _ = np.histogram(data, range(10))\ntransition_matrix = np.roll(np.eye(9, dtype=int), 1, axis=1)\ntransition_matrix[6, 0] = 1\n(np.linalg.matrix_power(transition_matrix, 80) @ population).sum()"
   },
   {
-    "objectID": "qmd/2020.html#part-2-5",
-    "href": "qmd/2020.html#part-2-5",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-2-5",
+    "href": "qmd/2021.html#part-2-5",
+    "title": "2021 Solutions",
     "section": "Part 2",
-    "text": "Part 2\n\n\nCode\nsum(\n    len(functools.reduce(lambda x, y: set(x) & set(y), (group.splitlines())))\n    for group in groups\n)"
+    "text": "Part 2\n\n\nCode\n(np.linalg.matrix_power(transition_matrix, 256) @ population).sum()"
   },
   {
-    "objectID": "qmd/2020.html#part-1-6",
-    "href": "qmd/2020.html#part-1-6",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-1-6",
+    "href": "qmd/2021.html#part-1-6",
+    "title": "2021 Solutions",
     "section": "Part 1",
-    "text": "Part 1\nNothing super groundbreaking for part one. I thought of using a regex to parse the input, but splitting on commas and then into words works just fine.\n\n\nCode\ndata = load(7)\ntree = {}\nfor line in data:\n    bag, contents = line.split(\" bags contain \")\n    if \"no other\" in contents:\n        contents = {}\n    else:\n        elements = contents.split(\", \")\n        contents = {\n            \" \".join(words[1:-1]): int(words[0]) for words in map(str.split, elements)\n        }\n    tree[bag] = contents\n\n\n@functools.cache\ndef contains_gold(key):\n    return \"shiny gold\" in tree[key] or any(contains_gold(child) for child in tree[key])\n\n\nsum(contains_gold(key) for key in tree)"
+    "text": "Part 1\n\n\nCode\ndata = load(7, \"np\")\nnp.abs(data - np.median(data)).sum()"
   },
   {
-    "objectID": "qmd/2020.html#part-2-6",
-    "href": "qmd/2020.html#part-2-6",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-2-6",
+    "href": "qmd/2021.html#part-2-6",
+    "title": "2021 Solutions",
     "section": "Part 2",
-    "text": "Part 2\nThe key thing to remember is to include the bag itself, as well as the bags it contains, when calculating the total. That’s what the “+1” is for in the sum\n\n\nCode\n@functools.cache\ndef count_bags(bag):\n    return sum(tree[bag][key] * (count_bags(key) + 1) for key in tree[bag])\n\n\ncount_bags(\"shiny gold\")"
+    "text": "Part 2\n\n\nCode\ndef cost(position):\n    delta = np.abs(data - position)\n    return ((delta) * (delta + 1) / 2).sum()\n\n\noptions = [cost(int(data.mean())), cost(int(data.mean() + 0.5))]\nmin(options)"
   },
   {
-    "objectID": "qmd/2020.html#part-1-7",
-    "href": "qmd/2020.html#part-1-7",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-1-7",
+    "href": "qmd/2021.html#part-1-7",
+    "title": "2021 Solutions",
     "section": "Part 1",
-    "text": "Part 1\n\n\nCode\ndata = [x.split() for x in load(8)]\ndata = [(x[0], int(x[1])) for x in data]\n\n\ndef terminal_run(program):\n    ip, accumulator = 0, 0\n    seen = {}\n    while ip != len(program):\n        if ip in seen:\n            return False, accumulator\n        seen[ip] = 1\n        instruction, operand = program[ip]\n        ip += 1\n        if instruction == \"jmp\":\n            ip += operand - 1\n        if instruction == \"acc\":\n            accumulator += operand\n    return True, accumulator\n\n\nterminal_run(data)[1]"
+    "text": "Part 1\n\n\nCode\nsegments = [line.split(\"|\")[1].split() for line in load(8)]\nmylen = np.vectorize(len)\nnp.isin(mylen(segments), [2, 3, 4, 7]).sum()"
   },
   {
-    "objectID": "qmd/2020.html#part-2-7",
-    "href": "qmd/2020.html#part-2-7",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-2-7",
+    "href": "qmd/2021.html#part-2-7",
+    "title": "2021 Solutions",
     "section": "Part 2",
-    "text": "Part 2\n\n\nCode\ninstruction_map = {\"acc\": \"acc\", \"jmp\": \"nop\", \"nop\": \"jmp\"}\nfor idx, instruction in enumerate(data):\n    new_instruction = (instruction_map[instruction[0]], instruction[1])\n    status, value = terminal_run(data[:idx] + [new_instruction] + data[idx + 1 :])\n    if status:\n        break\nvalue"
+    "text": "Part 2\nThis is an obvious task for constraint programming. It feels a bit like cheating, so I’ll see if I can come up with a home-grown approach at a later stage. I’ll start by describing the segment pattern of each digit. I’m deliberately using numbers for the segment positions and letters for the segment names so that I don’t get confused.\nWe can do part 2 by exploiting the structure in our data.\nWe know that every digit occurs before the pipe for every row in our input.\nUsing that, we can immediately identify segment 1, segments {36} segments {24} and segments {57}.\nThe three five segment numbers let us disambiguate {147}, {25}, {36}. 147 occur in every group, 25 in only 1 and 36 in two\nThe three six segment numbers let us disambiguate {1267}, {345}.\n\n1 is the segment present in 3 but not in 2.\n2 is the segment present in 4, not present in 2, and present in every 6\n3 is the segment present in 2 which is not present in every 6\n4 is the segment present in 4, not present in 2, and not present in every 6\n5 is the segment not present in 4 which only occurs once in 5\n6 is the segment which is present in 2 and is present in every 6\n7 is the segment present in every 5, not present in every 6, not present in 4\nIt’s not super elegant, and I kind of prefer just using the generalised constraints programming."
   },
   {
-    "objectID": "qmd/2020.html#part-1-8",
-    "href": "qmd/2020.html#part-1-8",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-1-8",
+    "href": "qmd/2021.html#part-1-8",
+    "title": "2021 Solutions",
     "section": "Part 1",
-    "text": "Part 1\n\n\nCode\ndata = list(load(9, \"np\"))\nend = len(data) - 25\nfor window_start in range(end):\n    target = data[window_start + 25]\n    if (\n        min(\n            map(\n                lambda x: abs(target - sum(x)),\n                itertools.combinations(data[window_start : window_start + 25], 2),\n            )\n        )\n        != 0\n    ):\n        break\ninvalid_number = target\ninvalid_number"
+    "text": "Part 1\n\n\nCode\ndata = pd.read_fwf(datadir / \"9.txt\", widths=[1] * 100, header=None).to_numpy()\ndata = np.pad(data, pad_width=1, mode=\"constant\", constant_values=9)\nmask = (\n    (data &lt; np.roll(data, -1, axis=0))\n    & (data &lt; np.roll(data, 1, axis=0))\n    & (data &lt; np.roll(data, -1))\n    & (data &lt; np.roll(data, 1))\n)\nnp.ma.array(data + 1, mask=~mask).sum()"
   },
   {
-    "objectID": "qmd/2020.html#part-2-8",
-    "href": "qmd/2020.html#part-2-8",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-2-8",
+    "href": "qmd/2021.html#part-2-8",
+    "title": "2021 Solutions",
     "section": "Part 2",
-    "text": "Part 2\n\n\nCode\nstart_idx, end_idx = 0, 1\nwhile start_idx &lt; len(data):\n    total = sum(data[start_idx:end_idx])\n    if total == invalid_number:\n        break\n    if total &lt; invalid_number:\n        end_idx += 1\n    if total &gt; invalid_number:\n        start_idx += 1\n        end_idx = start_idx + 1\nmin(data[start_idx:end_idx]) + max(data[start_idx:end_idx])"
+    "text": "Part 2\n\n\nCode\ndef up(x, y):\n    return x, y + 1\n\n\ndef down(x, y):\n    return x, y - 1\n\n\ndef left(x, y):\n    return x - 1, y\n\n\ndef right(x, y):\n    return x + 1, y\n\n\nmoves = [up, down, left, right]\n\n\ndef basin(x, y):\n    visited = np.zeros(data.shape, dtype=bool)\n    neighbors = [(x, y)]\n    result = 0\n    while neighbors:\n        x, y = neighbors.pop()\n        if data[x, y] == 9 or visited[x, y]:\n            continue\n        result += 1\n        visited[x, y] = True\n        for move in moves:\n            new_x, new_y = move(x, y)\n            if not visited[new_x, new_y]:\n                neighbors.append((new_x, new_y))\n    return result\n\n\nlow_points = zip(*np.where(mask))\nsizes = list(map(lambda x: basin(*x), low_points))\nprint(np.product(sorted(sizes)[-3:]))"
   },
   {
-    "objectID": "qmd/2020.html#part-1-9",
-    "href": "qmd/2020.html#part-1-9",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-1-9",
+    "href": "qmd/2021.html#part-1-9",
+    "title": "2021 Solutions",
     "section": "Part 1",
-    "text": "Part 1\n\n\nCode\ndata = [0] + sorted((load(10, \"np\")))\n(np.diff(data) == 1).sum() * ((np.diff(data) == 3).sum() + 1)"
+    "text": "Part 1\n\n\nCode\nlines = load(10)\npairs = [\"[]\", \"()\", \"&lt;&gt;\", \"{}\"]\n\n\ndef normalize(string):\n    old_string = string\n    while True:\n        for pair in pairs:\n            string = string.replace(pair, \"\")\n        if string == old_string:\n            break\n        old_string = string\n    return string\n\n\nscores = {\")\": 3, \"]\": 57, \"}\": 1197, \"&gt;\": 25137}\ntotal = 0\nfor line in lines:\n    normalized = normalize(line)\n    indices = np.array([normalized.find(pair[1]) for pair in pairs])\n    if (indices == -1).all():\n        continue\n    index = min(index for index in indices if index != -1)\n    total += scores[normalized[index]]\nprint(total)"
   },
   {
-    "objectID": "qmd/2020.html#part-2-9",
-    "href": "qmd/2020.html#part-2-9",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-2-9",
+    "href": "qmd/2021.html#part-2-9",
+    "title": "2021 Solutions",
     "section": "Part 2",
-    "text": "Part 2\nSorting the values, we see a series of jumps of 1 and jumps of 3. If the value is allowed to jump by at most 3 every time, then we have to include both sides of every jump of 3.\nThe only interesting thing is then what to do with runs of 1 jumps. In general, we can count the number of ways, \\(f\\), as follows\n\\(f(n) = f(n - 1) + g(n-1)\\)\nThe first term comes from saying that we pick the first element, leaving us with a run of length \\((n - 1)\\), exactly as before. The second comes from saying that we skip the first element, and now have to find the number of ways of choosing for a series of gaps starting with \\(2\\), followed by \\(n - 2\\) ones. Similarly\n\\(g(n - 1) = f(n - 2) + f(n - 3)\\)\nIf we pick the element that resulted in a gap of two, then we just have to choose from a run of n - 2 ones, which is the \\(f\\) we are looking at. If we don’t pick it, we’ve created a gap of size \\(3\\) - but then we are forced to pick the next element, leaving us with a run of length \\(n - 3\\) to distribute.\nPutting everything together gives the recurrence\n\\(f(n) = f(n - 1) + f(n - 2) + f(n - 3)\\),\nwith initial conditions \\(f(0) = 1\\), \\(f(-1) = 0\\), \\(f(-2) = 0\\).\nThat recurrence can be written in matrix form as\n\\[\n\\begin{pmatrix}\n1 & 1 & 1 \\\\\n1 & 0 & 0 \\\\\n0 & 1 & 0 \\\\\n\\end{pmatrix}\\]\nAnd iterating the function is then just a question of matrix powers\n\n\nCode\ndef total_ways(n_ones):\n    matrix = np.array([[1, 1, 1], [1, 0, 0], [0, 1, 0]])\n    return (np.linalg.matrix_power(matrix, n_ones) @ [1, 0, 0])[0]\n\n\nnp.product(\n    [total_ways(len(x)) for x in \"\".join(str(x) for x in np.diff(data)).split(\"3\")]\n)"
+    "text": "Part 2\n\n\nCode\ndelimiters = \" ([{&lt;\"\nscores = []\nfor line in lines:\n    normalized = normalize(line)\n    indices = np.array([normalized.find(pair[1]) for pair in pairs])\n    if (indices != -1).any():\n        continue\n    scores.append(\n        functools.reduce(lambda x, y: 5 * x + delimiters.find(y), normalized[::-1], 0)\n    )\nint(np.median(scores))"
   },
   {
-    "objectID": "qmd/2020.html#part-1-10",
-    "href": "qmd/2020.html#part-1-10",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-1-10",
+    "href": "qmd/2021.html#part-1-10",
+    "title": "2021 Solutions",
     "section": "Part 1",
-    "text": "Part 1\nFor the first part, we are taking the convolution of our original grid with a weights array that looks like \\[\n\\begin{pmatrix}\n1 & 1 & 1\\\\\n1 & 0 & 1\\\\\n1 & 1 & 1\\\\\n\\end{pmatrix}\n\\] Scipy has nice routines that handle all that indexing for us, so we’ll cheat and use them. The only slight issue is what to do at the edge of the grid, but using a constant value of 0 for any cells that would fall outside the grid works out of the box.\n\n\nCode\ndata = np.array([[1 if char == \".\" else 0 for char in line] for line in load(11)])\nmask = np.where(data)\nboard = np.zeros(data.shape, dtype=int)\nnew_board = np.ones(board.shape, dtype=int)\nnew_board[mask] = 0\nweights = [[1, 1, 1], [1, 0, 1], [1, 1, 1]]\nwhile (board != new_board).any():\n    board = new_board.copy()\n    convolution = scipy.ndimage.convolve(new_board, weights, mode=\"constant\")\n    new_board[np.where(convolution == 0)] = 1\n    new_board[np.where(convolution &gt;= 4)] = 0\n    new_board[mask] = 0\nboard.sum()"
+    "text": "Part 1\n\n\nCode\ndef find_neighbors(x, y):\n    return (\n        (x - 1, x - 1, x - 1, x, x, x + 1, x + 1, x + 1),\n        (y - 1, y, y + 1, y - 1, y + 1, y - 1, y, y + 1),\n    )\n\n\ndef step(board):\n    board += 1\n    flashed = np.zeros(board.shape, dtype=bool)\n    indices = list(zip(*np.where(board &gt; 9)))\n    while indices:\n        x, y = indices.pop()\n        if flashed[x, y]:\n            continue\n        flashed[x, y] = True\n        neighbors = find_neighbors(x, y)\n        board[neighbors] += 1\n        for neighbor in zip(*neighbors):\n            if board[neighbor] &gt; 9:\n                indices.append(neighbor)\n    board[np.where(flashed)] = 0\n    return flashed.sum()\n\n\nresult = 0\ndata = pd.read_fwf(datadir / \"11.txt\", widths=[1] * 10, header=None).to_numpy(\n    dtype=float\n)\ndata = np.pad(data, pad_width=1, mode=\"constant\", constant_values=-np.inf)\narr = data.copy()\nfor i in range(100):\n    result += step(arr)\nprint(result)"
   },
   {
-    "objectID": "qmd/2020.html#part-2-10",
-    "href": "qmd/2020.html#part-2-10",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-2-10",
+    "href": "qmd/2021.html#part-2-10",
+    "title": "2021 Solutions",
     "section": "Part 2",
-    "text": "Part 2\nFor part 2 I was unable to find a nice way of expressing the condition of “Look for the first grid position in a given direction which is not floor”. That means that I have to manually loop over the grid instead of using the convolution routine - and that really slows down the runtime!\n\n\nCode\nboard = np.zeros(data.shape, dtype=int)\nnew_board = np.ones(board.shape, dtype=int)\nnew_board[mask] = 0\n\n\ndef update(board):\n    new_board = board.copy()\n    directions = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]]\n    for row, col in itertools.product(*[range(x) for x in board.shape]):\n        total = 0\n        for direction in directions:\n            done = False\n            new_row, new_col = row, col\n            while not done:\n                new_row, new_col = new_row + direction[0], new_col + direction[1]\n                if (\n                    new_row &lt; 0\n                    or new_row &gt;= board.shape[0]\n                    or new_col &lt; 0\n                    or new_col &gt;= board.shape[1]\n                ):\n                    break\n                if not data[new_row, new_col]:\n                    done = True\n            else:  # no break - so a valid position\n                total += board[new_row, new_col]\n        if total == 0:\n            new_board[row, col] = 1\n        if total &gt;= 5:\n            new_board[row, col] = 0\n    new_board[mask] = 0\n    return new_board\n\n\nwhile (new_board != board).any():\n    board = new_board\n    new_board = update(new_board)\nnew_board.sum()"
+    "text": "Part 2\n\n\nCode\ncount = 0\narr = data.copy()\nwhile arr[1:-1, 1:-1].sum() &gt; 0:\n    step(arr)\n    count += 1\ncount"
   },
   {
-    "objectID": "qmd/2020.html#part-1-11",
-    "href": "qmd/2020.html#part-1-11",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-1-11",
+    "href": "qmd/2021.html#part-1-11",
+    "title": "2021 Solutions",
     "section": "Part 1",
-    "text": "Part 1\nI’ll use the usual trick of modelling the 2d grid as the complex plane.\n\n\nCode\ndirections = {\"N\": 1j, \"E\": 1, \"S\": -1j, \"W\": -1}\nturns = {\"L\": 1j, \"R\": -1j}\nposition, direction = 0, 1\n\n\ndef update_state(position, direction, instruction, value, part=1):\n    if instruction in directions:\n        offset = directions[instruction] * value\n        return (\n            (position + offset, direction)\n            if part == 1\n            else (position, direction + offset)\n        )\n    if instruction in turns:\n        return position, direction * turns[instruction] ** (int(value // 90))\n    return position + value * direction, direction\n\n\ninstructions = load(12)\nfor instruction, value in map(lambda x: (x[0], int(x[1:])), instructions):\n    position, direction = update_state(position, direction, instruction, value)\nint(abs(position.real) + abs(position.imag))"
+    "text": "Part 1\n\n\nCode\ndef flatten(mylist):\n    return (element for sublist in mylist for element in sublist)\n\n\ndef edges_to_tree(edges, repeat_visits=0):\n    tree = defaultdict(set)\n    for e1, e2 in edges:\n        tree[e1].add(e2)\n        tree[e2].add(e1)\n    return tree\n\n\ndef remove_node(tree, node):\n    tree = tree.copy()\n    neighbors = tree[node]\n    del tree[node]\n    for neighbor in neighbors:\n        tree[neighbor] = tree[neighbor] - set([node])\n    return tree\n\n\ndef paths(tree, node, end):\n    if node == end:\n        return [(end,)]\n    if not tree[node]:\n        return []\n    new_tree = tree if node == node.upper() else remove_node(tree, node)\n    return [\n        (node,) + x\n        for x in flatten([paths(new_tree, neighbor, end) for neighbor in tree[node]])\n    ]\n\n\nedges = [line.split(\"-\") for line in load(12)]\ntree = edges_to_tree(edges)\nlen(paths(tree, \"start\", \"end\"))"
   },
   {
-    "objectID": "qmd/2020.html#part-2-11",
-    "href": "qmd/2020.html#part-2-11",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-2-11",
+    "href": "qmd/2021.html#part-2-11",
+    "title": "2021 Solutions",
     "section": "Part 2",
-    "text": "Part 2\nPart 2 can be done basically the same way as part 1, with only a small change to the update state function. In part 1, nesw move the ship; in part 2 they move the waypoint. Everything else is the same.\n\n\nCode\nposition, waypoint = 0, 10 + 1j\nfor instruction, value in map(lambda x: (x[0], int(x[1:])), instructions):\n    position, waypoint = update_state(position, waypoint, instruction, value, part=2)\nint(abs(position.real) + abs(position.imag))"
+    "text": "Part 2\n\n\nCode\ndef paths(tree):\n    def inner(subtree, node, end, state):\n        if node == end:\n            return [(end,)]\n        if not subtree[node]:\n            return []\n        new_tree = subtree if node == node.upper() else remove_node(subtree, node)\n        tail = [inner(new_tree, neighbor, end, state) for neighbor in subtree[node]]\n        if state == 1 and node != \"start\":\n            tail += [inner(subtree, neighbor, end, 0) for neighbor in subtree[node]]\n        return [(node,) + x for x in flatten(tail)]\n\n    return inner(tree, \"start\", \"end\", 1)\n\n\nlen(set(paths(tree)))"
   },
   {
-    "objectID": "qmd/2020.html#part-1-12",
-    "href": "qmd/2020.html#part-1-12",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-1-12",
+    "href": "qmd/2021.html#part-1-12",
+    "title": "2021 Solutions",
     "section": "Part 1",
-    "text": "Part 1\nThis one looks like a bunch of modular arithmetic. The first one is just whichever bus number n has the smallest -x (mod n)\n\n\nCode\nx = 1006726\nbuses = (\n    \"23,x,x,x,x,x,x,x,x,x,x,x,x,41,x,x,x,x,x,x,x,x,x,647,\"\n    \"x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,13,19,x,x,x,x,x,x,x\"\n    \",x,x,29,x,557,x,x,x,x,x,37,x,x,x,x,x,x,x,x,x,x,17\"\n)\nbus_moduli = [\n    (int(_), (-idx) % int(_)) for idx, _ in enumerate(buses.split(\",\")) if _ != \"x\"\n]\nbus_numbers = [n for n, a in bus_moduli]\nwaits = [-x % bus for bus in bus_numbers]\nmin(waits) * bus_numbers[np.argmin(waits)]"
+    "text": "Part 1\n\n\nCode\nstart = load(13, \"np\")\narr = np.zeros(start.max(axis=0) + 1, dtype=bool)\narr[start[:, 0], start[:, 1]] = 1\n\ntop = arr[:655]\nbottom = arr[656:]\nbottom = np.pad(bottom, ((0, top.shape[0] - bottom.shape[0]), (0, 0)))\nprint((top | np.flip(bottom, 0)).sum())"
   },
   {
-    "objectID": "qmd/2020.html#part-2-12",
-    "href": "qmd/2020.html#part-2-12",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-2-12",
+    "href": "qmd/2021.html#part-2-12",
+    "title": "2021 Solutions",
     "section": "Part 2",
-    "text": "Part 2\nFor the second, it’s the Chinese remainder theorem to the rescue. Code shamelessly copied from wikipedia.\n\n\nCode\nfrom utils import crt\n\ncrt(bus_moduli)"
+    "text": "Part 2\n\n\nCode\nreplacement = np.vectorize(lambda x: \"█\" if x else \" \")\ninstructions = [\n    \"x=655\",\n    \"y=447\",\n    \"x=327\",\n    \"y=223\",\n    \"x=163\",\n    \"y=111\",\n    \"x=81\",\n    \"y=55\",\n    \"x=40\",\n    \"y=27\",\n    \"y=13\",\n    \"y=6\",\n]\nfor instruction in instructions:\n    direction, position = instruction.split(\"=\")\n    position = int(position)\n    arr = arr.T if direction == \"y\" else arr\n    top = arr[:position]\n    bottom = arr[position + 1 :]\n    if top.shape[0] &lt; bottom.shape[0]:\n        top = np.pad(top, ((bottom.shape[0] - top.shape[0], 0), (0, 0)))\n    else:\n        bottom = np.pad(bottom, ((0, top.shape[0] - bottom.shape[0]), (0, 0)))\n    arr = np.flip(bottom, 0) | top\n    arr = arr.T if direction == \"y\" else arr\nfor row in replacement(arr.T):\n    print(\"\".join(row))"
   },
   {
-    "objectID": "qmd/2020.html#part-1-13",
-    "href": "qmd/2020.html#part-1-13",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-1-13",
+    "href": "qmd/2021.html#part-1-13",
+    "title": "2021 Solutions",
     "section": "Part 1",
-    "text": "Part 1\n\n\nCode\ndata = [line.split(\" = \") for line in load(14)]\nresult = defaultdict(int)\nmask = \"\"\nfor operation, operand in data:\n    if operation == \"mask\":\n        mask = operand\n    else:\n        new_operand = \"\".join(\n            [b1 if (b1 != \"X\") else b2 for b1, b2 in zip(mask, f\"{int(operand):036b}\")]\n        )\n        result[operation[4:-1]] = int(new_operand, 2)\nsum(result.values())\n\n\n\n\nCode\nresult = defaultdict(int)\nmask = \"\"\nfor operation, operand in data:\n    if operation == \"mask\":\n        mask = operand\n    else:\n        operand = int(operand)\n        operation = operation[4:-1]\n        addresses = [\"\"]\n        for b1, b2 in zip(mask, f\"{int(operation):036b}\"):\n            if b1 == \"X\":\n                addresses = [a + \"0\" for a in addresses] + [a + \"1\" for a in addresses]\n            elif b1 == \"1\":\n                addresses = [a + \"1\" for a in addresses]\n            else:\n                addresses = [a + b2 for a in addresses]\n        for address in addresses:\n            result[int(address, 2)] = operand\nsum(result.values())"
+    "text": "Part 1\n\n\nCode\nstate_string = \"VCOPVNKPFOOVPVSBKCOF\"\ndata = load(14)\ntransition_elements = \"\".join(line.replace(\" -&gt; \", \"\") for line in data)\nelements = sorted(set(state_string + transition_elements))\nn = len(elements)\n\n\ndef encode(pair):\n    return elements.index(pair[0]) * n + elements.index(pair[1])\n\n\ninitial_pairs = [encode(state_string[i : i + 2]) for i in range(len(state_string) - 1)]\ninitial_state = np.zeros(n**2, dtype=np.int64)\nfor pair in initial_pairs:\n    initial_state[pair] += 1\ntransition_matrix = np.zeros((n**2, n**2), dtype=np.int64)\nfor line in data:\n    source, target = line.split(\" -&gt; \")\n    transition_matrix[encode(source), encode(source[0] + target)] = 1\n    transition_matrix[encode(source), encode(target + source[1])] = 1\n\n\ndef count(state):\n    result = defaultdict(int)\n    result[state_string[0]] += 1\n    result[state_string[-1]] += 1\n    for index, number in enumerate(state):\n        result[elements[int(index % n)]] += number\n        result[elements[int(index // n)]] += number\n    return {k: int(v / 2) for k, v in result.items()}\n\n\ntotals = count(initial_state.T @ (np.linalg.matrix_power(transition_matrix, 10)))\npd.Series(totals).max() - pd.Series(totals).min()"
   },
   {
-    "objectID": "qmd/2020.html#part-1-14",
-    "href": "qmd/2020.html#part-1-14",
-    "title": "2020 Solutions",
-    "section": "Part 1",
-    "text": "Part 1\n\n\nCode\nprefix = load(15, \"int\")[0]\nstate = {i: idx + 1 for idx, i in enumerate(prefix[:-1])}\ncurrent = prefix[-1]\n\n\ndef update(current, i):\n    if current not in state:\n        next_n = 0\n    else:\n        next_n = i - state[current]\n    state[current] = i\n    return next_n\n\n\nn_turns = 2020\nfor i in range(len(prefix), n_turns):\n    current = update(current, i)\ncurrent"
-  },
-  {
-    "objectID": "qmd/2020.html#part-2-13",
-    "href": "qmd/2020.html#part-2-13",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-2-13",
+    "href": "qmd/2021.html#part-2-13",
+    "title": "2021 Solutions",
     "section": "Part 2",
-    "text": "Part 2\n30 million is just within range where brute force would be plausible. Let’s try it:\n\n\nCode\nfor i in range(n_turns, 30_000_000):\n    current = update(current, i)\ncurrent"
+    "text": "Part 2\n\n\nCode\ntotals = count(initial_state.T @ (np.linalg.matrix_power(transition_matrix, 40)))\npd.Series(totals).max() - pd.Series(totals).min()"
   },
   {
-    "objectID": "qmd/2020.html#part-1-15",
-    "href": "qmd/2020.html#part-1-15",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-1-14",
+    "href": "qmd/2021.html#part-1-14",
+    "title": "2021 Solutions",
     "section": "Part 1",
-    "text": "Part 1\nI could do this by trying to merge ranges of valid values. Or I could just instantiate a set with every valid value…\n\n\nCode\ndata = load(16, \"raw\")\nrules, own, nearby = data[:-1].split(\"\\n\\n\")\nvalid = set()\nfor rule in rules.split(\"\\n\"):\n    limits = [int(x) for x in re.findall(r\"\\d+\", rule)]\n    for lower, upper in zip(limits[::2], limits[1::2]):\n        valid |= set(range(lower, upper + 1))\nsum(\n    map(\n        lambda x: 0 if int(x) in valid else int(x),\n        nearby[nearby.index(\"\\n\") + 1 :].replace(\"\\n\", \",\").split(\",\"),\n    )\n)"
+    "text": "Part 1\nThis is a shortest path search, where we’ll use a priority queue to store the items and their cost. Reusing my A* implementation then gives\n\n\nCode\ndata = pd.read_fwf(datadir / \"15.txt\", widths=[1] * 100, header=None).to_numpy(\n    dtype=int\n)\n\n\ndef neighbors(state, data=None):\n    x, y = state\n    if data is None:\n        return []\n    xmax, ymax = data.shape\n    candidates = [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)]\n    return [c for c in candidates if 0 &lt;= c[0] &lt; xmax and 0 &lt;= c[1] &lt; ymax]\n\n\ndef cost(state, neighbor, data=None):\n    return 1 if data is None else 0 if state == neighbor else data[neighbor]\n\n\ndef heuristic(node, end):\n    return abs(node[0] - end[0]) + abs(node[1] - end[1])\n\n\nutils.astar((0, 0), (99, 99), neighbors, heuristic, cost, data=data)"
   },
   {
-    "objectID": "qmd/2020.html#part-2-14",
-    "href": "qmd/2020.html#part-2-14",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-2-14",
+    "href": "qmd/2021.html#part-2-14",
+    "title": "2021 Solutions",
     "section": "Part 2",
-    "text": "Part 2\nI’m not entirely surprised that that’s where he went for part 2\n\n\nCode\nranges = defaultdict(set)\nfor rule in rules.split(\"\\n\"):\n    name, _ = rule.split(\":\")\n    limits = [int(x) for x in re.findall(r\"\\d+\", rule)]\n    for lower, upper in zip(limits[::2], limits[1::2]):\n        ranges[name] |= set(range(lower, upper + 1))\nown_ticket = [int(x) for x in own.split(\"\\n\")[1].split(\",\")]\nnearby_tickets = [[int(x) for x in line.split(\",\")] for line in nearby.split(\"\\n\")[1:]]\nnearby_tickets = np.array([x for x in nearby_tickets if all(y in valid for y in x)])\nassignments = [0] * len(own_ticket)\nwhile ranges:\n    for column in range(len(assignments)):\n        if assignments[column]:\n            continue\n        candidates = [\n            key\n            for key in ranges.keys()\n            if all(x in ranges[key] for x in nearby_tickets[:, column])\n        ]\n        if len(candidates) == 1:\n            assignments[column] = candidates[0]\n            del ranges[candidates[0]]\nnp.product(\n    [\n        own_ticket[idx]\n        for idx, assignment in enumerate(assignments)\n        if \"departure\" in assignment\n    ]\n)"
+    "text": "Part 2\n\n\nCode\nx, y = data.shape\narr = np.zeros([5 * x, 5 * y], dtype=int)\nfor i in range(5):\n    for j in range(5):\n        arr[i * x : (i + 1) * x, j * y : (j + 1) * y] = data + i + j\narr = ((arr - 1) % 9) + 1\nutils.astar((0, 0), (499, 499), neighbors, heuristic, cost, data=arr)"
   },
   {
-    "objectID": "qmd/2020.html#part-1-16",
-    "href": "qmd/2020.html#part-1-16",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-1-15",
+    "href": "qmd/2021.html#part-1-15",
+    "title": "2021 Solutions",
     "section": "Part 1",
-    "text": "Part 1\nThis looks like another good time to use scipy’s handy correlate/convolve functions. At some point I should probably learn what the difference between those two is.\n\n\nCode\ndata = np.array(\n    [[1 if char == \"#\" else 0 for char in line] for line in load(17)], dtype=int\n)\n\n\ndef simulate(data, dimensions=3, ncycles=6):\n    weights = np.ones((3,) * dimensions)\n    missing_dimensions = dimensions - len(data.shape)\n    data = data.reshape(data.shape + (1,) * missing_dimensions)\n    data = np.pad(data, ncycles)\n    for i in range(ncycles):\n        convolution = scipy.ndimage.correlate(data, weights, mode=\"constant\")\n        data = (convolution == 3) | ((convolution == 4) & data)\n    return data.sum()\n\n\nsimulate(data)"
+    "text": "Part 1\n\n\nCode\nnybbles = {hex(i)[2:]: bin(i)[2:].rjust(4, \"0\") for i in range(16)}\n\n\ndef parse(bitstring):\n    if len(bitstring) == 0 or set(bitstring) == set(\"0\"):\n        return 0, 0\n    version = int(bitstring[:3], 2)\n    offset = 3\n    type_id = int(bitstring[offset : offset + 3], 2)\n    offset += 3\n    if type_id == 4:\n        while True:\n            chunk = bitstring[offset : offset + 5]\n            offset += 5\n            if chunk[0] != \"1\":\n                break\n        return version, offset\n    kind = bitstring[offset]\n    offset += 1\n    if kind == \"0\":\n        length = int(bitstring[offset : offset + 15], 2)\n        offset += 15\n        target = offset + length\n        while offset != target:\n            dv, do = parse(bitstring[offset:])\n            version += dv\n            offset += do\n        return version, target\n    if kind == \"1\":\n        n_operators = int(bitstring[offset : offset + 11], 2)\n        offset += 11\n        for i in range(n_operators):\n            dv, do = parse(bitstring[offset:])\n            version += dv\n            offset += do\n        return version, offset\n\n\ndata = load(16)[0]\nbits = \"\".join(nybbles[x.lower()] for x in data)\nparse(bits)"
   },
   {
-    "objectID": "qmd/2020.html#part-2-15",
-    "href": "qmd/2020.html#part-2-15",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-2-15",
+    "href": "qmd/2021.html#part-2-15",
+    "title": "2021 Solutions",
     "section": "Part 2",
-    "text": "Part 2\n\n\nCode\nsimulate(data, 4)"
+    "text": "Part 2\nFor part 2, we have to completely ignore the version number and actually do something with the data associated with each packet. Actually moving through the packet happens in the same way, but what we have to do at each level is sufficiently different that it’s not worth it to try and reuse the parsing function.\n\n\nCode\ndef evaluate_one_packet(bitstring):\n    offset = 3\n    type_id = int(bitstring[offset : offset + 3], 2)\n    offset += 3\n    if type_id == 4:\n        result = \"\"\n        while True:\n            chunk = bitstring[offset : offset + 5]\n            result += chunk[1:]\n            offset += 5\n            if chunk[0] == \"0\":\n                break\n        return int(result, 2), offset\n    kind = bitstring[offset]\n    offset += 1\n    operands = []\n    if kind == \"0\":\n        length = int(bitstring[offset : offset + 15], 2)\n        offset += 15\n        target = offset + length\n        while offset &lt; target:\n            operand, do = evaluate_one_packet(bitstring[offset:])\n            operands.append(operand)\n            offset += do\n    elif kind == \"1\":\n        n_operators = int(bitstring[offset : offset + 11], 2)\n        offset += 11\n        for i in range(n_operators):\n            operand, do = evaluate_one_packet(bitstring[offset:])\n            operands.append(operand)\n            offset += do\n    operators = [\n        sum,\n        np.product,\n        min,\n        max,\n        None,\n        lambda x: x[0] &gt; x[1],\n        lambda x: x[0] &lt; x[1],\n        lambda x: x[0] == x[1],\n    ]\n    return operators[type_id](operands), offset\n\n\nprint(evaluate_one_packet(bits)[0])"
   },
   {
-    "objectID": "qmd/2020.html#part-1-17",
-    "href": "qmd/2020.html#part-1-17",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-1-16",
+    "href": "qmd/2021.html#part-1-16",
+    "title": "2021 Solutions",
     "section": "Part 1",
-    "text": "Part 1\n\n\nCode\nimport string\n\noperators = {\"*\": lambda x, y: x * y, \"+\": lambda x, y: x + y}\n\n\ndef find_closing_paren(s):\n    assert s[0] == \"(\"\n    count = 0\n    for idx, char in enumerate(s):\n        count += 1 if char == \"(\" else -1 if char == \")\" else 0\n        if count == 0:\n            return idx + 1\n\n\ndef evaluate(expression, part=1):\n    i = 0\n    ops = deque()\n    operands = deque()\n    while i &lt; len(expression):\n        char = expression[i]\n        if char in \"+*\":\n            ops.append(char)\n            i += 1\n            continue\n        if char == \"(\":\n            delta = find_closing_paren(expression[i:])\n            operands.append(evaluate(expression[i + 1 : i + delta - 1], part=part))\n            i += delta\n        elif char in string.digits:\n            operands.append(int(char))\n            i += 1\n\n        if part == 2 and ops and ops[-1] == \"+\":\n            ops.pop()\n            operands.append(operands.pop() + operands.pop())\n\n    while ops:\n        op = ops.popleft()\n        operands.appendleft(operators[op](operands.popleft(), operands.popleft()))\n    return operands.pop()\n\n\nlines = [x.replace(\" \", \"\") for x in load(18)]\nsum(evaluate(line) for line in lines)"
+    "text": "Part 1\nFirst pen and paper solution for this year.\nThings to note:\n\nx and y are completely decoupled\nThere exists a time velocity x0 such that the probe will be within the target area for all t &gt; some ti\nAs long as the up velocity is greater than this, then by the time the probe reaches the baseline in y, it will have stopped in x.\nThe arc up and down is symmetric; a probe launched from y=0 at t=0 with v=v0 will hit y=0 at t=2v0 + 1\nThis probe will have velocity (-v0 - 1) at that point\nIf -v0 - 1 &lt; bottom of target, then the probe will entirely miss the target in the next step\nThe greater v0 is, the higher the probe will go; ymax = ½ v0 (v0 + 1)\nSo we just set -v0 - 1 = -126 =&gt; v0 = 125\nSo ymax = 125 * 126 / 2 = 7875.\n∎"
   },
   {
-    "objectID": "qmd/2020.html#part-2-16",
-    "href": "qmd/2020.html#part-2-16",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-2-16",
+    "href": "qmd/2021.html#part-2-16",
+    "title": "2021 Solutions",
     "section": "Part 2",
-    "text": "Part 2\nThe change for part 2 is so small that it can be included in part 1 as a flag\n\n\nCode\nsum(evaluate(line, part=2) for line in lines)"
+    "text": "Part 2\n\n\nCode\nxmin, xmax = 217, 240\nymin, ymax = -126, -69\nparabola = lambda v, t: (t * v - int(t * (t - 1) / 2))\n\ntime_map = defaultdict(list)\nfor vy in range(ymin, -ymin):\n    for time in [\n        t for t in range(1, 3 - 2 * ymin) if parabola(vy, t) in range(ymin, ymax + 1)\n    ]:\n        time_map[time].append(vy)\n\n\ndef x_times(vx):\n    times = [t for t in range(1, vx) if parabola(vx, t) in range(xmin, xmax + 1)]\n    if vx - 1 in times:\n        times += list(range(max(times) + 1, max(time_map.keys()) + 1))\n    return times\n\n\nresult = []\nfor vx in range(int(0.5 + np.sqrt(0.25 + 2 * xmin)), xmax + 1):\n    times = x_times(vx)\n    for time in times:\n        for vy in time_map[time]:\n            result.append((vx, vy))\nprint(len(set(result)))"
   },
   {
-    "objectID": "qmd/2020.html#part-1-18",
-    "href": "qmd/2020.html#part-1-18",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-1-17",
+    "href": "qmd/2021.html#part-1-17",
+    "title": "2021 Solutions",
     "section": "Part 1",
-    "text": "Part 1\n\n\nCode\ndata = load(19, \"raw\")\nrelations, strings = map(lambda x: x.split(\"\\n\"), data.split(\"\\n\\n\"))\ndependencies = {}\nrules = {}\nfor relation in relations:\n    lhs, rhs = relation.split(\":\")\n    rules[int(lhs)] = (\n        {rhs.replace('\"', \"\").strip()}\n        if '\"' in rhs\n        else {tuple([int(y) for y in x.split()]) for x in rhs.split(\"|\")}\n    )\n\ndependencies = {\n    x: set().union(*rules[x]) if x not in [54, 20] else set() for x in rules\n}\n\n\ndef concat(l1, l2):\n    return {s1 + s2 for s1 in l1 for s2 in l2}\n\n\ndef expand(rule, rules, mappings):\n    result = set()\n    for option in rules[rule]:\n        if isinstance(option, str):\n            return rules[rule]\n        new_elements = (\n            mappings[option[0]]\n            if len(option) == 1\n            else concat(*[mappings[i] for i in option])\n        )\n        result |= new_elements\n    return result\n\n\ndef free_elements(mydict):\n    return [x for x in mydict if not mydict[x]]\n\n\nmappings = {}\nwhile dependencies:\n    k1 = free_elements(dependencies)[0]\n    mappings[k1] = expand(k1, rules, mappings)\n    for k2 in dependencies:\n        dependencies[k2].discard(k1)\n    del dependencies[k1]\nlen(list(filter(lambda x: x in mappings[0], strings[:-1])))"
+    "text": "Part 1\n\n\nCode\ndef to_node(thing, depth):\n    if isinstance(thing, int):\n        return thing\n    elif isinstance(thing, Pair):\n        for node in thing.traverse():\n            node.depth += 1\n        return thing\n    else:\n        return Pair(thing[0], thing[1], depth + 1)\n\n\nclass Pair:\n    def __init__(self, left, right, depth=0):\n        self.depth = depth\n        self.left = to_node(left, depth)\n        self.right = to_node(right, depth)\n\n    def leftmost(self):\n        return self if isinstance(self.left, int) else self.left.leftmost()\n\n    def rightmost(self):\n        return self if isinstance(self.right, int) else self.right.rightmost()\n\n    def sum(self):\n        left = self.left if isinstance(self.left, int) else self.left.sum()\n        right = self.right if isinstance(self.right, int) else self.right.sum()\n        return 3 * left + 2 * right\n\n    def traverse(self):\n        left = [] if isinstance(self.left, int) else self.left.traverse()\n        right = [] if isinstance(self.right, int) else self.right.traverse()\n        return left + [self] + right\n\n    def reduce(self):\n        while True:\n            altered = False\n            altered = self.explode()\n            if not altered:\n                altered = self.split()\n                if not altered:\n                    return self\n\n    def split(self):\n        for node in self.traverse():\n            for d in [\"left\", \"right\"]:\n                val = getattr(node, d)\n                if isinstance(val, int) and val &gt;= 10:\n                    setattr(node, d, Pair(val // 2, val // 2 + val % 2, node.depth + 1))\n                    return True\n        return False\n\n    def explode(self):\n        traversal = self.traverse()\n        for idx, node in enumerate(traversal):\n            if node.depth == 4:\n                if idx == len(traversal) - 1:\n                    parent = traversal[idx - 1]\n                    direction = \"right\"\n                elif traversal[idx + 1].left == node:\n                    parent = traversal[idx + 1]\n                    direction = \"left\"\n                else:\n                    parent = traversal[idx - 1]\n                    direction = \"right\"\n                setattr(parent, direction, 0)\n                if idx != 0:\n                    if isinstance(traversal[idx - 1].left, int):\n                        traversal[idx - 1].left += node.left\n                    else:\n                        left_neighbor = traversal[idx - 1].left.rightmost()\n                        left_neighbor.right += node.left\n\n                if idx != len(traversal) - 1:\n                    if isinstance(traversal[idx + 1].right, int):\n                        traversal[idx + 1].right += node.right\n                    else:\n                        right_neighbor = traversal[idx + 1].right.leftmost()\n                        right_neighbor.left += node.right\n                return True\n        return False\n\n\nsnumbers = [eval(line) for line in load(18)]\nresult = Pair(*snumbers[0])\nfor snumber in snumbers[1:]:\n    result = Pair(result, Pair(*snumber)).reduce()\nprint(result.sum())"
   },
   {
-    "objectID": "qmd/2020.html#part-2-17",
-    "href": "qmd/2020.html#part-2-17",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-2-17",
+    "href": "qmd/2021.html#part-2-17",
+    "title": "2021 Solutions",
     "section": "Part 2",
-    "text": "Part 2\nWe have loops now! Analysing the new rules, we see that the system should accept all strings of the form 42m 13n, with m &gt; n &gt; 0. Looking at the previous part shows that rule 42 and rule 31 never overlap, and all the strings they match have length 8. That gives the following logic for part 2:\n\n\nCode\nfrom more_itertools import chunked\n\n\ndef part2(s):\n    chunks = [\"\".join(x).strip() for x in chunked(s, 8)]\n    r42, r31 = 0, 0\n    while chunks[r42] in mappings[42]:\n        r42 += 1\n        if r42 == len(chunks):\n            break\n    while r42 + r31 &lt; len(chunks):\n        if chunks[r42 + r31] not in mappings[31]:\n            break\n        r31 += 1\n\n    return r31 &gt;= 1 and r42 &gt; r31 and r42 + r31 == len(chunks)\n\n\nsum(part2(s) for s in strings[:-1])"
+    "text": "Part 2\n\n\nCode\nmaxval = 0\nfor left, right in itertools.permutations(snumbers, 2):\n    total = (Pair(left, right).reduce()).sum()\n    maxval = total if total &gt; maxval else maxval\nmaxval"
   },
   {
-    "objectID": "qmd/2020.html#part-1-19",
-    "href": "qmd/2020.html#part-1-19",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-1-18",
+    "href": "qmd/2021.html#part-1-18",
+    "title": "2021 Solutions",
     "section": "Part 1",
-    "text": "Part 1\n\n\nCode\ndata = load(20, \"raw\").split(\"\\n\\n\")\ndata[0]\ntiles = {}\n\n\ndef edge_hashes(t):\n    edges = [\n        t[0],\n        t[0][::-1],\n        t[:, -1],\n        t[:, -1][::-1],\n        t[-1][::-1],\n        t[-1],\n        t[:, 0][::-1],\n        t[:, 0],\n    ]\n    return {\n        idx: functools.reduce(lambda x, y: 2 * x + y, edge[::-1])\n        for idx, edge in enumerate(edges)\n    }\n\n\ndef fingerprint(tile):\n    return tile, edge_hashes(tile), {v: k for k, v in edge_hashes(tile).items()}\n\n\nfor entry in data:\n    header, *tile = entry.split(\"\\n\")\n    tile = np.array(\n        [[1 if char == \"#\" else 0 for char in line] for line in tile if line],\n        dtype=\"int\",\n    )\n    tile_id = int(re.findall(r\"\\d+\", header)[0])\n    tiles[tile_id] = fingerprint(tile)\nmatches = defaultdict(set)\nkeys = sorted(tiles.keys())\nfor x in range(len(keys)):\n    for y in range(x + 1, len(keys)):\n        if set(tiles[keys[x]][1].values()) & set(tiles[keys[y]][1].values()):\n            matches[keys[x]].add(keys[y])\n            matches[keys[y]].add(keys[x])\ncorners = [x for x in matches if len(matches[x]) == 2]\nnp.product(corners)"
+    "text": "Part 1\nWe’ll start by generating the 24 rotation matrices. There are six possible ways of permuting the axes, and eight possible sign conventions. Half of the sign conventions will be left-handed, so we discard them\n\n\nCode\nrotations = []\nfor permutation in itertools.permutations([0, 1, 2], 3):\n    arr = np.zeros((3, 3), dtype=int)\n    arr[np.array([0, 1, 2]), permutation] = 1\n    for sign in itertools.product([-1, 1], repeat=3):\n        rotation = arr.copy() * sign\n        if np.linalg.det(rotation) &gt; 0:\n            rotations.append(rotation)\n\n\nThen we find overlapping scanners in the input and populate a map (x, y) with the matrices to convert from y coordinates to x coordinates\n\n\nCode\nfrom scipy.spatial.distance import pdist, squareform\n\nfoo = load(19, \"raw\")[:-1]\nscanners = foo.split(\"\\n\\n\")\nscanners = [\n    np.array(\n        [list(map(int, line.split(\",\"))) for line in scanner.split(\"\\n\")[1:]], dtype=int\n    )\n    for scanner in scanners\n]\n\ndistances = [squareform(pdist(scanner)) for scanner in scanners]\nmapping = {}\nfor a, b in itertools.combinations(range(len(scanners)), 2):\n    pairs = []\n    d0 = distances[a]\n    d1 = distances[b]\n    for i in range(len(d0)):\n        for j in range(len(d1)):\n            if len(np.intersect1d(d1[j], d0[i])) &gt;= 12:\n                pairs.append((i, j))\n    pairs = np.array(pairs)\n    if len(pairs) &lt; 12:\n        continue\n    x0 = scanners[a][pairs[:, 0]]\n    y0 = scanners[b][pairs[:, 1]]\n    for rotation in rotations:\n        c = x0[0] - y0[0] @ rotation\n        if (x0[1:] == (y0[1:] @ rotation + c)).all():\n            mapping[(a, b)] = [rotation, c]\n            mapping[(b, a)] = [rotation.T, -c @ rotation.T]\n            break\n\n\nWe do some linear algebra to extend this map to all the scanners\n\n\nCode\nwhile True:\n    done = True\n    for x in range(len(scanners)):\n        columns = [pair[1] for pair in mapping.keys() if pair[0] == x]\n        for y, z in itertools.combinations(columns, 2):\n            if (y, z) not in mapping:\n                done = False\n                Q1, a1 = mapping[(x, y)]\n                Q2, a2 = mapping[(x, z)]\n                mapping[(z, y)] = [Q1 @ Q2.T, (a1 - a2) @ Q2.T]\n                mapping[(y, z)] = [Q2 @ Q1.T, (a2 - a1) @ Q1.T]\n    if done:\n        break\n\n\nAnd then we convert all the initial coordinates to one representation and find its length\n\n\nCode\ncoords = [tuple(x) for x in scanners[0]]\nfor idx in range(1, len(scanners)):\n    Q, a = mapping[0, idx]\n    coords += [tuple(x) for x in (np.array(scanners[idx]) @ Q + a)]\nprint(len(set(coords)))"
   },
   {
-    "objectID": "qmd/2020.html#part-2-18",
-    "href": "qmd/2020.html#part-2-18",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-2-18",
+    "href": "qmd/2021.html#part-2-18",
+    "title": "2021 Solutions",
     "section": "Part 2",
-    "text": "Part 2\nDirect inspection shows that there are no false matches in the edge pairings, so we can proceed to place all the tiles without taking that into account. We’ll start by placing the tiles in the correct location without worrying about their orientation, and then rotate and flip them afterwards.\nThere are eight possible ways to fill the board (four different corners to put in the top left, and then for each of those, two different choices for how to flip around the main diagonal), so we’ll arbitrarily pick one of them.\nWe’ll start by placing a corner piece in the top left, and then one of its neighbors below it.\nWhen we place a tile, we mark the candidates for its unplaced neighbors: these are the intersection of whatever candidates were there before, and the unplaced matches of the current tile. We also remove the current tile as a candidate from any other open location, since it’s just been placed. Whenever a location has only one candidate, we can place that, and proceed until the whole board is filled.\n\n\nCode\ncorner = corners[0]\nmatch = next(iter(matches[corner]))\nlocations = defaultdict(lambda: set(keys))\nplaced = set()\n\n\ndef place(tile, location):\n    locations[location] = tile\n    placed.add(tile)\n    x, y = location\n    if x &lt; 11 and isinstance(locations[x + 1, y], set):\n        locations[x + 1, y] &= matches[tile] - placed\n    if y &lt; 11 and isinstance(locations[x, y + 1], set):\n        locations[x, y + 1] &= matches[tile] - placed\n    to_place = []\n    for location in locations:\n        if isinstance(locations[location], set):\n            locations[location].discard(tile)\n            if len(locations[location]) == 1:\n                to_place.append(location)\n    for placement in to_place:\n        if isinstance(locations[placement], set):\n            place(next(iter(locations[placement])), placement)\n\n\nplace(corner, (0, 0))\nplace(match, (1, 0))\ncoords = np.zeros((12, 12), dtype=int)\nfor location in locations:\n    coords[location] = locations[location]\n\n\nWith that out of the way, we need to orient the tiles correctly. We start by making sure the top left corner is oriented correctly, and then we match all of the other tiles to that structure.\nFor each row in the grid, we match the first cell to the first cell in the row above, and then we match all the other cells to the neighbor to their left.\n\n\nCode\n# start off by making sure that the right hand side matches\noverlap = [\n    tiles[coords[0, 0]][2][key]\n    for key in set(tiles[coords[0, 0]][2].keys()) & set(tiles[coords[0, 1]][2].keys())\n][0]\ndelta = (((overlap - overlap % 2) - 2) // 2) % 4\nif delta:\n    tile = np.rot90(tiles[coords[0, 0]][0], -delta)\n    tiles[coords[0, 0]] = fingerprint(tile)\n# Then check if the bottom of the tile is the one that matches [1, 0]. If not, flip it vertically.\noverlap = [\n    tiles[coords[0, 0]][2][key]\n    for key in set(tiles[coords[0, 0]][2].keys()) & set(tiles[coords[1, 0]][2].keys())\n][0]\nif overlap // 2 != 2:\n    tile = tile[::-1]\n    tiles[coords[0, 0]] = fingerprint(tile)\n\n\nAll the edges are labelled (not well, but they are labelled). To be oriented correctly, the 7 edge on a tile should match the 2 edge on the tile to its left, and/or the 0 edge on a tile should match the 5 edge on the tile above it.\n\n\nCode\nfor y in range(12):\n    for x in range(12):\n        if not x and not y:\n            continue\n        tile = tiles[coords[y, x]][0]\n        if not x:\n            old_edge = 5\n            target = 0\n            comparison = (y - 1, x)\n        else:\n            old_edge = 2\n            target = 7\n            comparison = (y, x - 1)\n        value = tiles[coords[comparison]][1][old_edge]\n        current = tiles[coords[y, x]][2][value]\n        if (target - current) % 2:\n            tile = tile.T\n            current = 7 - current\n        rotation = (current - target) // 2\n        tile = np.rot90(tile, rotation)\n        tiles[coords[y, x]] = fingerprint(tile)\n\n\nWe can now reconstruct the board, and go hunting for the sea monsters. The convolve/correlate functions are handy here as well, since we’re looking for an area where all of a subset of the neighboring cells are lit up. So we correlate with that mask, and check which correlations have the full set.\nThe following code will fail if any of the sea monsters overlap, but luckily they don’t.\n\n\nCode\nboard = np.zeros((8 * 12, 8 * 12), dtype=int)\nfor y in range(12):\n    for x in range(12):\n        board[y * 8 : (y + 1) * 8, x * 8 : (x + 1) * 8] = tiles[coords[y, x]][0][\n            1:-1, 1:-1\n        ]\npattern = [\n    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],\n    [1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1],\n    [0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0],\n]\n\ntotal = np.sum(pattern)\nmonsters = 0\nfor reflection in range(2):\n    for rotation in range(4):\n        convolution = scipy.ndimage.correlate(board, pattern, mode=\"constant\")\n        monsters += (convolution == total).sum()\n        board = np.rot90(board)\n    board = board.T\nboard.sum() - monsters * 15"
+    "text": "Part 2\nWhat is the largest Manhattan distance between any two scanners?\n\n\nCode\nmaxval = 0\nfor i, j in itertools.combinations(range(len(scanners)), 2):\n    total = sum(abs(mapping[(i, j)][1]))\n    if total &gt; maxval:\n        maxval = total\nmaxval"
   },
   {
-    "objectID": "qmd/2020.html#part-1-20",
-    "href": "qmd/2020.html#part-1-20",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-1-and-2",
+    "href": "qmd/2021.html#part-1-and-2",
+    "title": "2021 Solutions",
+    "section": "Part 1 and 2",
+    "text": "Part 1 and 2\n\n\nCode\ndata = load(20, \"raw\")\npixel_map = {\".\": 0, \"#\": 1}\nkey, array = data.split(\"\\n\\n\")\nkey = np.array([pixel_map[x] for x in key.strip()], dtype=bool)\nnew = np.array(\n    [[pixel_map[x] for x in line.strip()] for line in array.split(\"\\n\")[:-1]]\n)\nfor n in range(1, 51):\n    old = np.pad(new, 2, constant_values=(n % 2 == 0))\n    new = old.copy()\n    for i in range(1, len(old) - 1):\n        for j in range(1, len(old) - 1):\n            index = sum(\n                (2 ** np.arange(9)) * old[i - 1 : i + 2, j - 1 : j + 2].ravel()[::-1]\n            )\n            new[i, j] = key[index]\n    new = new[1:-1, 1:-1]\n    if n == 2 or n == 50:\n        print(new.sum())"
+  },
+  {
+    "objectID": "qmd/2021.html#part-1-19",
+    "href": "qmd/2021.html#part-1-19",
+    "title": "2021 Solutions",
     "section": "Part 1",
-    "text": "Part 1\nNice and easy one today, with just a bit of set intersection logic\n\n\nCode\ncounts = defaultdict(int)\nmappings = {}\nfor line in load(21):\n    ingredients, allergens = [\n        x.split() for x in line[:-2].replace(\",\", \"\").split(\"(contains\")\n    ]\n    for ingredient in ingredients:\n        counts[ingredient] += 1\n    for allergen in allergens:\n        if allergen in mappings:\n            mappings[allergen] &= set(ingredients)\n        else:\n            mappings[allergen] = set(ingredients)\npotential_allergens = set().union(*mappings.values())\nsum(counts[x] for x in counts if x not in potential_allergens)"
+    "text": "Part 1\n\n\nCode\npositions, scores, count = [4, 6], [0, 0], 0\n\n\ndef step_one(position, score, count):\n    position = (position + 3 * count + 5) % 10 + 1\n    return position, score + position, count + 3\n\n\ni = 0\nwhile max(scores) &lt; 1000:\n    positions[i], scores[i % 2], count = step_one(\n        positions[i % 2], scores[i % 2], count\n    )\n    i = 1 - i\ncount * min(scores)"
   },
   {
-    "objectID": "qmd/2020.html#part-2-19",
-    "href": "qmd/2020.html#part-2-19",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-2-19",
+    "href": "qmd/2021.html#part-2-19",
+    "title": "2021 Solutions",
     "section": "Part 2",
-    "text": "Part 2\nAnd part 2 isn’t much harder. Any allergens which have only one matching ingredient are fixed; and this ingredient can then be removed from all the other allergens. And then it’s a question of continuing until we have the full map\n\n\nCode\nassignments = {}\nassignable = {x for x in mappings if len(mappings[x]) == 1}\nwhile mappings:\n    key = assignable.pop()\n    value = mappings[key].pop()\n    del mappings[key]\n    assignments[key] = value\n    for mapping in mappings:\n        mappings[mapping].discard(value)\n        if len(mappings[mapping]) == 1:\n            assignable.add(mapping)\nprint(\",\".join(assignments[x] for x in sorted(list(assignments.keys()))))"
+    "text": "Part 2\n\n\nCode\nstates = {((4, 0), (6, 0)): 1}\nwins = [0, 0]\n# The frequency table for the 3x3 dice\nrolls = [0, 0, 0, 1, 3, 6, 7, 6, 3, 1]\n\n\ndef step_one(states, player):\n    new_states = defaultdict(int)\n    for state in states:\n        for step in range(3, 10):\n            new_position = ((state[player][0] + step) - 1) % 10 + 1\n            new_score = state[player][1] + new_position\n            if new_score &gt;= 21:\n                wins[player] += states[state] * rolls[step]\n            else:\n                new_state = list(state)\n                new_state[player] = (new_position, new_score)\n                new_states[tuple(new_state)] += states[state] * rolls[step]\n    return new_states, wins\n\n\ni = 0\nwhile states:\n    states, wins = step_one(states, i)\n    i = 1 - i\n\nmax(wins)"
   },
   {
-    "objectID": "qmd/2020.html#part-1-21",
-    "href": "qmd/2020.html#part-1-21",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-1-20",
+    "href": "qmd/2021.html#part-1-20",
+    "title": "2021 Solutions",
     "section": "Part 1",
-    "text": "Part 1\n\n\nCode\np1, p2 = map(deque, np.array(load(22, \"int\")).reshape(2, -1)[:, 1:])\nwhile p1 and p2:\n    c1, c2 = p1[0], p2[0]\n    p1.rotate(-1)\n    p2.rotate(-1)\n    winner, loser = (p1, p2) if (c1 &gt; c2) else (p2, p1)\n    winner.append(loser.pop())\nresult = p1 if p1 else p2\n(np.array(result) * (np.arange(len(result)) + 1)[::-1]).sum()"
+    "text": "Part 1\nThe first part can be solved trivially by using numpy’s indexing\n\n\nCode\noffset = 50\nboard = np.zeros((101, 101, 101), dtype=int)\n\n\ndef parse_line(line):\n    command, line = line.split(\" \")\n    indices = [x.split(\"..\") for x in line.split(\",\")]\n    return command, [[int(x[0][2:]), int(x[1]) + 1] for x in indices]\n\n\ncommands = [parse_line(line) for line in load(22)]\nvalues = {\"on\": 1, \"off\": 0}\nmaxval = 0\nfor command, indices in commands:\n    idx = np.ravel(indices) + offset\n    if max(abs(idx)) &gt; maxval:\n        maxval = max(abs(idx))\n    if (idx &lt; 0).any() or (idx &gt; 100).any():\n        continue\n    board[idx[0] : idx[1], idx[2] : idx[3], idx[4] : idx[5]] = values[command]\nboard.sum()"
   },
   {
-    "objectID": "qmd/2020.html#part-2-20",
-    "href": "qmd/2020.html#part-2-20",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-2-20",
+    "href": "qmd/2021.html#part-2-20",
+    "title": "2021 Solutions",
     "section": "Part 2",
-    "text": "Part 2\nA fairly straightforward recursive implementation of the requirements\n\n\nCode\np1, p2 = map(deque, np.array(load(22, \"int\")).reshape(2, -1)[:, 1:])\n\n\ndef play(p1, p2):\n    seen = set()\n    while p1 and p2:\n        hashed = (tuple(p1), tuple(p2))\n        if hashed in seen:\n            return 1, 0\n        seen.add(hashed)\n        c1, c2 = p1[0], p2[0]\n        p1.rotate(-1)\n        p2.rotate(-1)\n        if c1 &lt; len(p1) and c2 &lt; len(p2):\n            new_p1 = deque(list(p1)[:c1])\n            new_p2 = deque(list(p2)[:c2])\n            recursive_battle = play(new_p1, new_p2)\n            winner, loser = (p1, p2) if recursive_battle[0] else (p2, p1)\n        else:\n            winner, loser = (p1, p2) if (c1 &gt; c2) else (p2, p1)\n        winner.append(loser.pop())\n    return p1, p2\n\n\nresult = play(p1, p2)\nresult = result[0] if result[0] else result[1]\n(np.array(result) * np.arange(1, len(result) + 1)[::-1]).sum()"
+    "text": "Part 2\nThe above approach doesn’t work for part two since the field of play is too large; we have ~ 100k elements in each direction, which give ~10**15 elements in total; far too much to keep in memory.\nThe first step is to realise that the vast majority of the empty space is never touched – so there’s no reason to store all those zeros.\nWhat we can do instead is to store a set containing only the coordinates which are turned on. Turning on more coordinates corresponds to making the union with the new coordinate, while turning off coordinates is a set difference. This automatically accounts for not lighting coordinates which are already lit, and not turning off coordinates which are already off.\nUnfortunately, this is still too memory intensive – from the example solution, we see that at the end of the process, 2,758,514,936,282,235 coordinates are on, which is way too many to store individually.\nWe need an approach that only looks at corners of cuboids, and doesn’t need to store the individual coordinates at all.\nIf there were only “on” instructions, we could use the inclusion-exclusion principle, along with the fact that the intersection of two cuboids is always another cuboid, or empty.\nThat is, the volume lit by one “on” instruction is just the volume of the cuboid it represents. The volume lit by two is the sum of the volumes of each, minus the volume of their intersection. The volume lit by three is:\n\nThe volume of the individual cuboids\nMinus the volume of all the pairwise intersections\nPlus the volume of the triple intersection\n\nAnd this extends to the general case. The volume lit after the nth instruction, N, is:\nThe volume lit after the (n-1)th instruction plus the volume of N, minus the sum of the volumes of the pairwise intersection of N with all previous instructions, plus the sum of the volumes of intersection of N with all previously calculated pairs, and so on.\nTurning a cuboid off is equivalent to removing the intersection between it and all the other cuboids from the sum, and then accounting for the double counting by adding back the triple intersections etc. But that’s the same as we’re doing for the positive cuboid, except for the off cuboid we never add the volume of the individual cuboid\nWe’re going to need a way of calculating the intersection of two cuboids. But that’s just the intersection of 3 pairs of lines, since the cuboids are axis-aligned. And we can intersect two line segments and hence two cuboids as follows\n\n\nCode\ndef intersect_segments(x1, x2):\n    pair = [max(x1[0], x2[0]), min(x1[1], x2[1])]\n    return pair if pair[1] &gt; pair[0] else False\n\n\ndef intersect_cuboids(c1, c2):\n    result = [intersect_segments(*pair) for pair in zip(c1, c2)]\n    return result if all(result) else False\n\n\nThe segments were originally given as closed intervals, but the parsing converted them to open intervals. The length of each is thus the endpoint minus the starting point. The volume of a cuboid is just the product the three lengths:\n\n\nCode\ndef cuboid_volume(cuboid):\n    return np.product([[line[1] - line[0]] for line in cuboid])\n\n\nThe approach we’ll take is to process the list of instructions sequentially, calculating the various intersections as we go. They’ll go in a list where the first element represents the positive terms, and the second represents the negative terms. The final score is then just the sum of the positive values minus the sum of the negative values\nPutting it all together gives the following. For each instruction, we intersect with all previous cuboids, and swap the signs. If it’s an “on” instruction, we also add the whole region to the list of positive volumes.\n\n\nCode\ndef reboot(instructions):\n    state = [[], []]\n    for instruction, region in instructions:\n        extra = [region] if instruction == \"on\" else []\n        clipped_state = [\n            [c for cuboid in s if (c := intersect_cuboids(cuboid, region))]\n            for s in state\n        ]\n        state = [state[0] + clipped_state[1] + extra, state[1] + clipped_state[0]]\n    return sum(map(cuboid_volume, state[0])) - sum(map(cuboid_volume, state[1]))\n\n\nreboot(commands)"
   },
   {
-    "objectID": "qmd/2020.html#part-1-22",
-    "href": "qmd/2020.html#part-1-22",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-1-21",
+    "href": "qmd/2021.html#part-1-21",
+    "title": "2021 Solutions",
     "section": "Part 1",
-    "text": "Part 1\n\n\nCode\ndata = [int(x) for x in \"583976241\"]\ns = deque(data)\nl = len(s)\nfor _ in range(100):\n    target = (s[0] - 2) % l + 1\n    s.rotate(-1)\n    pickup = [s.popleft() for i in range(3)]\n    while target in pickup:\n        target = (target - 2) % l + 1\n\n    count = 0\n    while s[0] != target:\n        s.rotate(-1)\n        count += 1\n    s.rotate(-1)\n    for value in pickup[::-1]:\n        s.appendleft(value)\n    s.rotate(count + 1)\nwhile s[0] != 1:\n    s.rotate()\ns.popleft()\n\"\".join(str(x) for x in s)"
+    "text": "Part 1\nThis is definitely not pretty, and takes a bunch of time to run as well, but it works. This is a pathfinding problem: Given some initial state, our goal is to move to the final state with as small a cost as possible.\nThe tricky thing is to find the neighboring positions that can be reached from a given position with a valid move. There are only two types of moves\n\nRoom to hallway\nHallway to room\n\nThe third type (room straight to final room) is just the composition of the above two moves.\nOnce we have a method for finding neighbors, actually running the pathfinding is comparatively simple. This could probably be improved by including a heuristic for how far away a given state is from the finish, but getting finding and calculating a suitable heuristic is fiddly.\n\n\nCode\nvalue_to_letter = {0: \" \", 1: \"A\", 10: \"B\", 100: \"C\", 1000: \"D\"}\nletter_to_value = {v: k for k, v in value_to_letter.items()}\nnumber_to_room = {10**i: i for i in range(4)}\nroom_to_number = {v: k for k, v in number_to_room.items()}\n\n\ndef find_blockers(room, n):\n    top_row = list(range(4 * n, 4 * n + 7))\n    distances = [1, 2, 2, 2, 2, 2, 1]\n    left = top_row[: room + 2][::-1], np.cumsum(distances[: room + 2][::-1])\n    right = top_row[room + 2 :], np.cumsum(distances[room + 2 :])\n    return left, right\n\n\ndef find_moves(position, n=2):\n    position = np.array(position)\n\n    def is_endgame(room):\n        return set(position[n * room : n * (room + 1)]) &lt;= set(\n            [0, room_to_number[room]]\n        )\n\n    possible_moves = []\n    for i in [idx + 4 * n for idx, val in enumerate(position[4 * n :]) if val != 0]:\n\n        room = number_to_room[position[i]]\n        if not is_endgame(room):\n            continue\n\n        left, right = find_blockers(room, n)\n        moves, costs = left if i in left[0] else right\n\n        index = moves.index(i)\n        if (position[moves[:index]] != 0).any():\n            continue\n\n        offset = np.argwhere(position[n * room : n * (room + 1)] == 0)[0][0]\n        new_position = n * room + offset\n        cost = costs[index] + n - 1 - offset\n        possible_moves.append((i, new_position, cost))\n    for room in range(4):\n        target = room * n\n        if is_endgame(room):\n            continue\n        offset = np.argwhere(position[target : target + n])[-1][-1]\n        moves, costs = [], []\n        for block, steps in find_blockers(room, n):\n            free = np.maximum.accumulate(position[block]) == 0\n            if not free.any():\n                continue\n            n_free = np.argwhere(free)[-1][-1] + 1\n            moves += block[:n_free]\n            costs += list(steps[:n_free] + n - offset - 1)\n        possible_moves += [\n            (target + offset, move, cost) for move, cost in zip(moves, costs)\n        ]\n    return possible_moves\n\n\ndef navigate(source, destination):\n    n = (len(source) - 7) // 4\n    q = queue.PriorityQueue()\n    q.put((0, source))\n    seen = set()\n    while q:\n        cost, position = q.get()\n        if position == destination:\n            return cost\n        if position in seen:\n            continue\n        seen.add(tuple(position))\n        for source_index, target_index, distance in find_moves(position, n):\n            new_position = list(position)\n            value = position[source_index]\n            new_position[source_index] = 0\n            new_position[target_index] = value\n            q.put((cost + value * distance, tuple(new_position)))\n    return np.inf\n\n\nWith all of that out of the way, actually solving the puzzle is just a question of calling the navigate function. First for part 1\n\n\nCode\nsource = tuple(letter_to_value[x] for x in \"CDCABABD       \")\ndestination = tuple(letter_to_value[x] for x in \"AABBCCDD       \")\nnavigate(source, destination)"
   },
   {
-    "objectID": "qmd/2020.html#part-2-21",
-    "href": "qmd/2020.html#part-2-21",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-2-21",
+    "href": "qmd/2021.html#part-2-21",
+    "title": "2021 Solutions",
     "section": "Part 2",
-    "text": "Part 2\nThis approach is way too slow for part 2. Instead, we can build an implicit linked list in a numpy array, so that a[node] = next node for all nodes. To make that work with zero based indexing we relabel all the nodes. A single step can now be accomplished by just updating three array elements: the next pointer of the current node, the next pointer of the destination node, and the next pointer of the last of the moved elements.\n\n\nCode\ninitial_state = data + list(range(10, 1_000_001))\na = np.zeros(len(initial_state), dtype=int)\nminval = min(initial_state)\nfor c, n in zip(initial_state, initial_state[1:] + [initial_state[0]]):\n    a[c - 1] = n - 1\ncurrent = a[-1]\nfor _ in range(10_000_000):\n    to_move = [a[current], a[a[current]], a[a[a[current]]]]\n    destination = current - 1\n    while destination &lt; 0 or destination in to_move:\n        destination -= 1\n        if destination &lt; 0:\n            destination = 999_999\n    # next pointer of current is the one after the moved ones\n    a[current] = a[to_move[-1]]\n    # The next one after the moved three is the one after the destination\n    a[to_move[-1]] = a[destination]\n    # After the destination comes the first of the moved ones\n    a[destination] = to_move[0]\n    # And we move to the next node\n    current = a[current]\n(a[0] + 1) * (a[a[0]] + 1)"
+    "text": "Part 2\nAnd then for part 2\n\n\nCode\ns = tuple(letter_to_value[x] for x in \"CDDDCBCABABABCAD       \")\nd = tuple(letter_to_value[x] for x in \"AAAABBBBCCCCDDDD       \")\nnavigate(s, d)"
   },
   {
-    "objectID": "qmd/2020.html#part-1-23",
-    "href": "qmd/2020.html#part-1-23",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-1-22",
+    "href": "qmd/2021.html#part-1-22",
+    "title": "2021 Solutions",
     "section": "Part 1",
-    "text": "Part 1\n\n\nCode\nvectors = {\n    \"e\": (1, 0),\n    \"ne\": (1, 1),\n    \"nw\": (0, 1),\n    \"w\": (-1, 0),\n    \"sw\": (-1, -1),\n    \"se\": (0, -1),\n}\ncurrent = \"\"\nterminals = \"ew\"\ntiles = defaultdict(bool)\nfor s in load(24):\n    result = []\n    for char in s:\n        current += char\n        if char in terminals:\n            result.append(vectors[current])\n            current = \"\"\n    coords = tuple(np.array(result).sum(axis=0))\n    tiles[coords] ^= 1\nnp.sum(list(tiles.values()))"
+    "text": "Part 1\nRarely in AOC have I had a worse ratio of thinking employed to code written - this code looks way simpler than for day 23, but getting there was a real challenge.\nI think this is the intended approach, since it uses the realisation that if we multiply z by 26 6 times, then to get back below zero, we need to divide 7 times. So each time there’s a divide, the value of w is fixed.\n\n\nCode\ndata = load(24, \"raw\")\nchunks = [[y.split() for y in x.split(\"\\n\") if y] for x in data.split(\"inp w\\n\")][1:]\n\nindices = [3, 4, 14]\ntable = [[chunk[index][2] for index in indices] for chunk in chunks]\ntriples = [[int(n) for n in row] for row in table]\n\n\ndef run(triple, z, w):\n    a, b, c = triple\n    if w == z % 26 + b:\n        return z // a\n    return (z // a) * 26 + w + c\n\n\nzs = [[0, 0]]\nfor triple in triples:\n    new_zs = []\n    for prefix, z in zs:\n        if triple[0] == 26:\n            w = z % 26 + triple[1]\n            ws = [w] if 1 &lt;= w &lt; 10 else []\n        else:\n            ws = range(1, 10)\n        new_zs += [(10 * prefix + w, run(triple, z, w)) for w in ws]\n    zs = new_zs\nmax(x[0] for x in zs)\n\n\nWe can be slightly smarter with pen and paper. The test is always z % 26 + something, which means that we always get out wn + cn for some n, since (z // a) * 26 % 26 = 0. Keeping track of the order in which the a = 1 and a = 26 instructions arrive, we can match each of the 14 instructions to exactly one other, giving a series of relationships like w1 = w14 + 8. Then it’s just a question of forcing the early digit of each pair to the highest possible allowed value."
   },
   {
-    "objectID": "qmd/2020.html#part-2-22",
-    "href": "qmd/2020.html#part-2-22",
-    "title": "2020 Solutions",
+    "objectID": "qmd/2021.html#part-2-22",
+    "href": "qmd/2021.html#part-2-22",
+    "title": "2021 Solutions",
     "section": "Part 2",
-    "text": "Part 2\nThis is a fairly simple convolution problem again. We’ll be working in the basis defined above, and in that basis, the neighbors are as given in the vectors dictionary. So the array of weights is the one below.\n\n\nCode\nkeys = list(tiles.keys())\nweights = [[1, 1, 0], [1, 0, 1], [0, 1, 1]]\nborder = 100\nsize = 2 * border + np.max(keys) - np.min(keys)\nboard = np.zeros((size, size), dtype=int)\nfor x, y in tiles:\n    board[x + size // 2, y + size // 2] = tiles[x, y]\nfor i in range(100):\n    neighbors = scipy.ndimage.correlate(board, weights, mode=\"constant\")\n    flips = ((board == 0) & (neighbors == 2)) | (\n        (board == 1) & ((neighbors == 0) | (neighbors &gt; 2))\n    )\n    board = (board + flips) % 2\nboard.sum()"
+    "text": "Part 2\nAfter all that, luckily part 2 is trivial\n\n\nCode\nmin(int(x[0]) for x in zs)"
   }
 ]
