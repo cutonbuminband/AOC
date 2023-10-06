@@ -17,6 +17,8 @@ website:
     - qmd/2015.qmd
   page-footer:
     center:
+      - text: "Front page"
+        href: about.qmd
       - text: "Github"
         href: https://github.com/cutonbuminband/AOC
 format:

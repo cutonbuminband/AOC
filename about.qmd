@@ -1,0 +1,7 @@
+---
+title: "Solutions to the advent of code problems"
+---
+
+This is where I publish my solutions to the yearly [Advent of Code](adventofcode.com) problems. Most of the problems just get a short code snippet. The ones I had to think about slightly longer also have some text explaining my approach and talking through the problem. When I was feeling particularly inspired, I've also added some visualizations.
+
+Each year gets its own page - check them out on the sidebar to the left

@@ -4,5 +4,5 @@ data
 _site/
 _freeze/
 __pycache__
-/qmd
+/qmd/20*
 /.quarto/
