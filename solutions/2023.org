@@ -1,0 +1,38 @@
+#+PROPERTY: header-args:jupyter-python  :session aoc-2023 :kernel aoc
+#+PROPERTY: header-args    :pandoc t
+#+TITLE: 2023 Solutions
+
+* Imports
+#+begin_src jupyter-python
+  # | eval: true
+  # | output: false
+  import functools
+  import itertools
+  import os
+  import re
+  import sys
+  from collections import defaultdict, deque, namedtuple
+  from queue import PriorityQueue
+
+  import more_itertools
+  import numpy as np
+  import pandas as pd
+  import scipy
+
+  sys.path.insert(1, os.path.join(sys.path[0], ".."))
+
+  import utils
+
+  load = utils.year_load(2023)
+#+end_src
+
+* [https://adventofcode.com/2023/day/1][Day 1: Calorie Counting]
+** Part 1
+#+begin_src jupyter-python
+
+#+end_src
+
+** Part 2
+#+begin_src jupyter-python
+
+#+end_src
