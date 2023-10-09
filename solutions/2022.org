@@ -559,6 +559,70 @@ We can see how at the edges of the forest shorter trees are visible, but towards
 #+end_src
 
 ** Part 2
+To solve this quickly, we need to move from a representation of the problem in terms of the covered points to one that considers the beacons as the central object. From the problem description, we can see that the point we are interested in must lie just out of range of at least two beacons, since otherwise there would be more than one point which satisfies the criteria.
+
+We'll do a coordinate transformation so that we're working in a basis of (x + y, x - y) coordinates; in that basis, the area covered by each beacon is an axis-aligned square. Determining whether (and where) two squares intersect can be done by looking at the two axes of the square separately. We can thus loop over pairs of beacons, and for each pair identify the points which would be just out of range of both beacons; for each of these points we can check whether it is in range of any of the other beacons. If it is not, we have found the point we were interested in and we are finished.
+#+begin_src jupyter-python
+  data = np.array(load(15, "int"))
+  radii = abs(np.squeeze(np.diff(data.reshape(-1, 2, 2), axis=1))).sum(axis=1)
+  diamonds = np.hstack([data[:, :2] @ [[1, 1], [1, -1]], radii.reshape(-1, 1)])
+
+
+  def intersect_intervals(i0, i1):
+      new_left = max(i0[0], i1[0])
+      new_right = min(i0[1], i1[1])
+      return [new_left, new_right] if new_right >= new_left else []
+
+
+  def is_on_square(point, centre, radius):
+      return abs(point[0] - centre[0]) == radius or abs(point[1] - centre[1]) == radius
+
+
+  def intersect_diamonds(d0, d1):
+      x0, y0, r0 = d0
+      x1, y1, r1 = d1
+      if (x0 + r0) % 2 != (x1 + r1) % 2:
+          return []
+      result = []
+      for x in intersect_intervals((x0 - r0, x0 + r0), (x1 - r1, x1 + r1)):
+          for y in intersect_intervals((y0 - r0, y0 + r0), (y1 - r1, y1 + r1)):
+              if is_on_square((x, y), (x0, y0), r0) and is_on_square(
+                  (x, y), (x1, y1), r1
+              ):
+                  result.append((x, y))
+      return result
+
+
+  done = False
+  limit = 4000000
+  for d0 in diamonds + [0, 0, 1]:
+      for d1 in diamonds + [0, 0, 1]:
+          if (d0 == d1).all():
+              continue
+          for x0, y0 in intersect_diamonds(d0, d1):
+              for x, y, r in diamonds:
+                  if abs(x0 - x) <= r and abs(y0 - y) <= r:
+                      break
+              else:
+                  real_x, real_y = (x0 + y0) // 2, (x0 - y0) // 2
+                  if abs(real_x) <= limit and abs(real_y) <= limit:
+                      done = True
+                      break
+          if done:
+              break
+      if done:
+          break
+  limit * real_x + real_y
+#+end_src
+
+#+begin_src jupyter-python
+  centres = np.array([[1, 0], [0, 0]])
+  radii = np.array([1, 2])
+  d0, d1 = np.hstack([centres @ [[1, 1], [1, -1]], radii.reshape(-1, 1)])
+  intersect_diamonds(d0, d1)
+#+end_src
+
+
 * [[https://adventofcode.com/2021/day/16][Day 16: Proboscidea Volcanium]]
 ** Part 1
 We should start by loading the data, and trying to visualize the graph
