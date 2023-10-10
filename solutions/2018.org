@@ -14,6 +14,7 @@
   import sys
   from collections import defaultdict, deque
   from pathlib import Path
+  from queue import PriorityQueue
 
   import more_itertools
   import numpy as np
@@ -1257,7 +1258,7 @@ The next part is signifcantly more tricky. Blindly iterating through every point
 
 A first thing to realise is that the sets of points covered by any given nanobot is an axis-aligned octahedron, centered at the nanobot's position. The eight faces that define the octahedron have normal vectors [±1, ±1, ±1]. We can group these faces into four pairs of parallel faces, and each octahedron can be thought of as the intersection of the infinte regions between those pairs of planes. To intersect two octahedra, we can simply intersect the corresponding infinite regions, which in practice is done by intersecting the two intervals that represent the region.
 
-With the above considertaions in hand, we could create a list of (region, number of intersections) pairs, with initial state [(all space, 0)]. We could then loop over all the nanobots, and for each one, calculate all the intersections with the existing list, and if they are non-zero, append them to the list, with updated intersection count.
+With the above considerations in hand, we could create a list of (region, number of intersections) pairs, with initial state [(all space, 0)]. We could then loop over all the nanobots, and for each one, calculate all the intersections with the existing list, and if they are non-zero, append them to the list, with updated intersection count.
 
 That would build up a map of all the intersections, and the desired answer would be represented by the pair with greatest intersection count. That would look something like this:
 
@@ -1265,7 +1266,7 @@ That would build up a map of all the intersections, and the desired answer would
   normal_vectors = np.array([[1, 1, 1], [1, 1, -1], [1, -1, 1], [1, -1, -1]])
   centers = data[:, :-1] @ normal_vectors.T
   radii = data[:, -1].reshape(-1, 1)
-  c = np.transpose(np.stack([centers - radii, centers + radii]), axes=[1, 2, 0])
+  c = np.transpose(np.stack([centers - radii, centers + radii + 1]), axes=[1, 2, 0])
   intersections = {}
   for idx, row in enumerate(c):
       current = frozenset([idx])
@@ -1301,33 +1302,71 @@ If we focus on just one set of planes we can quite easily find where the biggest
           current_opening = openings.pop()
       else:
           total -= 1
-          edges[current_closing + 1] = total
+          edges[current_closing] = total
           current_closing = closings.pop()
   max(edges.values())
 #+end_src
 
-But extending this to all four planes is nob-obvious. Analysing the inputs shows that all the points overlap, apart from very few emitters. That means we can identify these, and the relevant points are just the intersection of all the other emitters, which can easily be found in the basis we've chosen.
+But extending this to all four planes is non-obvious. Analysing the inputs shows that all the points overlap, apart from very few emitters. That means we can identify these, and the relevant points are just the intersection of all the other emitters, which can easily be found in the basis we've chosen.
 
 #+begin_src jupyter-python
   adjacency_matrix = np.zeros((len(c), len(c)))
   for i, pi in enumerate(c):
       for j, pj in enumerate(c):
           new = np.hstack([np.maximum(pi, pj)[:, :1], np.minimum(pi, pj)[:, 1:]])
-          if (np.diff(new) >= 0).all():
+          if (np.diff(new) > 0).all():
               adjacency_matrix[i, j] = 1
   mask = (adjacency_matrix.sum(axis = 0) >= np.median(adjacency_matrix.sum(axis = 0)) / 2)
-  assert (adjacency_matrix[mask, mask == 1).all()
   indices = np.where(mask)[0]
   c[indices, :, :].max(axis=0)[0, 0]
 #+end_src
 
-This feels slightly like cheating, since it easily fails for other inputs. Looking up other solutions I saw that one option was to recursively partition space into boxes, and calculate how many emitters are in range of each box, and then just expand the most plausible candidate, until a 1x1x1 box is found. The expansion order should be
+This feels slightly like cheating, since it easily fails for other inputs.
 
-- Most bots in range of box 
-- Size of box  (expand smaller boxes first)
-- Distance to origin (expand closer boxes first)
+A better approach would be to iteratively zoom in on promising areas of space. That is, starting with a bounding box containing all the points of interest, iteratively split the box into 16 sub-boxes, and for each of these boxes ask how many of the beacons it intersects with. Expanding the boxes in the order:
 
-I don't think I'll implement that.  
+1. Most beacons in range first
+2. Larger boxes before smaller boxes
+3. Boxes closer to the origin before boxes further away
+
+Means that by the time we see a box of size 1, we know that it is the optimal box, since
+
+- All regions of space which could potentially contain more beacons have already been examined by criterion 1
+- All larger regions of space which can see the same number of beacons have already been examined by criterion 2
+- There are no closer boxes of the same size which can see the same number of beacons by criterion 3
+
+All we need to implement is thus a procedure for determining whether a box and a beacon intersect. But in the (s, t, u, v) basis, that's just determining whether the intervals that make up the box and the intervals that make up the beacon intersect. And it's not too difficult to verify that two half-open intervals $\left[ a, b\right)$ and $\left[x, y\right)$ intersect if $x \leq a < y$ or $a \leq x < b$. Putting everything together gives
+#+begin_src jupyter-python
+  def score_box(corner, length, c=c):
+      a = np.array(corner)[:, None]
+      b = (np.array(corner) + length)[:, None]
+      left = (c <= a)[:, :, 0] & (a < c)[:, :, 1]
+      right = (a <= c)[:, :, 0] & (c < b)[:, :, 0]
+      return -(left | right).all(axis=1).sum()
+
+
+  l = 2 ** (int(np.ceil(np.log2(abs(c).max()))))
+  corner = -l, -l, -l, -l
+  length = 2 * l
+  q = PriorityQueue()
+  initial_state = score_box(corner, length), -length, 0, corner
+  q.put(initial_state)
+  i = 0
+  while q.qsize() > 0 and i < 1000:
+      i += 1
+      s, neg_length, position, corner = q.get()
+      l = -neg_length
+      if l == 1:
+          break
+      for new_corner in (
+          np.array(list(itertools.product([0, 1], repeat=4))) * l // 2 + corner
+      ):
+          score = score_box(new_corner, l // 2)
+          position = 0 if l > 2 else max(abs(new_corner))
+          q.put((score, -l // 2, position, tuple(new_corner)))
+  position
+#+end_src
+
 * [[https://adventofcode.com/2018/day/24][Day 24: Immune System Simulator 20XX]]
 ** Part 1
 This was a bit of a slog, with a fair bit of attention needed to make sure that the requirements were implemented correctly.
