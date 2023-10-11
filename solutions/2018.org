@@ -1338,10 +1338,10 @@ Means that by the time we see a box of size 1, we know that it is the optimal bo
 All we need to implement is thus a procedure for determining whether a box and a beacon intersect. But in the $(s, t, u, v)$ basis, that's just determining whether the intervals that make up the box and the intervals that make up the beacon intersect. And it's not too difficult to verify that two half-open intervals $\left[ a, b\right)$ and $\left[x, y\right)$ intersect if $x \leq a < y$ or $a \leq x < b$. Putting everything together gives
 #+begin_src jupyter-python
   def score_box(corner, length, c=c):
-      a = np.array(corner)[:, None]
-      b = (np.array(corner) + length)[:, None]
-      left = (c <= a)[:, :, 0] & (a < c)[:, :, 1]
-      right = (a <= c)[:, :, 0] & (c < b)[:, :, 0]
+      x = c[:, :, 0]
+      y = c[:, :, 1]
+      left = (x <= corner) & (corner < y)
+      right = (corner <= x) & (x - length < corner)
       return -(left | right).all(axis=1).sum()
 
 
