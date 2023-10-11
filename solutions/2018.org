@@ -1256,7 +1256,7 @@ The first part is pretty simple
 ** Part 2
 The next part is signifcantly more tricky. Blindly iterating through every point and asking "how many are you in range of" is a non-starter, due to the sizes of the numbers involved. SImilarly, going the other way and generating all the covered points for each nanobot and adding those up runs into the same problem.
 
-A first thing to realise is that the sets of points covered by any given nanobot is an axis-aligned octahedron, centered at the nanobot's position. The eight faces that define the octahedron have normal vectors [±1, ±1, ±1]. We can group these faces into four pairs of parallel faces, and each octahedron can be thought of as the intersection of the infinte regions between those pairs of planes. To intersect two octahedra, we can simply intersect the corresponding infinite regions, which in practice is done by intersecting the two intervals that represent the region.
+A first thing to realise is that the sets of points covered by any given nanobot is an axis-aligned octahedron, centered at the nanobot's position. The eight faces that define the octahedron have normal vectors [±1, ±1, ±1]. We can group these faces into four pairs of parallel faces, and each octahedron can be thought of as the intersection of the infinte regions between those pairs of planes. That means we can represent an octahedron as four sets of intervals, which I will call the $(s, t, u, v)$ basis. To intersect two octahedra we can simply intersect the corresponding intervals of each octahedron.
 
 With the above considerations in hand, we could create a list of (region, number of intersections) pairs, with initial state [(all space, 0)]. We could then loop over all the nanobots, and for each one, calculate all the intersections with the existing list, and if they are non-zero, append them to the list, with updated intersection count.
 
@@ -1278,14 +1278,14 @@ That would build up a map of all the intersections, and the desired answer would
                   np.minimum(intersections[i], row)[:, 1:],
               ]
           )
-          if (np.diff(new_i) >= 0).all():
+          if (np.diff(new_i) > 0).all():
               to_add[current.union(i)] = new_i
       intersections = intersections | to_add
 
       break
   #+end_src
 
-Unfortunately, the above approach has a slight flaw: It ends up explicitly creating all ~ 2^n possible intersections. With 1000 nanobots, that's just not feasible.
+Unfortunately, the above approach has a slight flaw: It ends up explicitly creating all $\sim2^n$ possible intersections. With 1000 nanobots, that's just not feasible.
 
 If we focus on just one set of planes we can quite easily find where the biggest intersection is in that direction by scanning through from $-\infty$ to $\infty$, adding one for every left plane we encounter, and subtracting one for every right plane. 
 
@@ -1335,7 +1335,7 @@ Means that by the time we see a box of size 1, we know that it is the optimal bo
 - All larger regions of space which can see the same number of beacons have already been examined by criterion 2
 - There are no closer boxes of the same size which can see the same number of beacons by criterion 3
 
-All we need to implement is thus a procedure for determining whether a box and a beacon intersect. But in the (s, t, u, v) basis, that's just determining whether the intervals that make up the box and the intervals that make up the beacon intersect. And it's not too difficult to verify that two half-open intervals $\left[ a, b\right)$ and $\left[x, y\right)$ intersect if $x \leq a < y$ or $a \leq x < b$. Putting everything together gives
+All we need to implement is thus a procedure for determining whether a box and a beacon intersect. But in the $(s, t, u, v)$ basis, that's just determining whether the intervals that make up the box and the intervals that make up the beacon intersect. And it's not too difficult to verify that two half-open intervals $\left[ a, b\right)$ and $\left[x, y\right)$ intersect if $x \leq a < y$ or $a \leq x < b$. Putting everything together gives
 #+begin_src jupyter-python
   def score_box(corner, length, c=c):
       a = np.array(corner)[:, None]
