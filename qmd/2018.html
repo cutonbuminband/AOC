@@ -835,36 +835,36 @@ input[type=range].anim-slider {
 </style>
 
 <div class="animation">
-  <img id="_anim_imgb40452de534a4613a82d2828b5251fb1">
+  <img id="_anim_img87ce33a474884653830c36311eb66b8c">
   <div class="anim-controls">
-    <input id="_anim_sliderb40452de534a4613a82d2828b5251fb1" type="range" class="anim-slider" name="points" min="0" max="1" step="1" value="0" oninput="animb40452de534a4613a82d2828b5251fb1.set_frame(parseInt(this.value));">
+    <input id="_anim_slider87ce33a474884653830c36311eb66b8c" type="range" class="anim-slider" name="points" min="0" max="1" step="1" value="0" oninput="anim87ce33a474884653830c36311eb66b8c.set_frame(parseInt(this.value));">
     <div class="anim-buttons">
-      <button title="Decrease speed" aria-label="Decrease speed" onclick="animb40452de534a4613a82d2828b5251fb1.slower()">
+      <button title="Decrease speed" aria-label="Decrease speed" onclick="anim87ce33a474884653830c36311eb66b8c.slower()">
           <i class="fa fa-minus"></i></button>
-      <button title="First frame" aria-label="First frame" onclick="animb40452de534a4613a82d2828b5251fb1.first_frame()">
+      <button title="First frame" aria-label="First frame" onclick="anim87ce33a474884653830c36311eb66b8c.first_frame()">
         <i class="fa fa-fast-backward"></i></button>
-      <button title="Previous frame" aria-label="Previous frame" onclick="animb40452de534a4613a82d2828b5251fb1.previous_frame()">
+      <button title="Previous frame" aria-label="Previous frame" onclick="anim87ce33a474884653830c36311eb66b8c.previous_frame()">
           <i class="fa fa-step-backward"></i></button>
-      <button title="Play backwards" aria-label="Play backwards" onclick="animb40452de534a4613a82d2828b5251fb1.reverse_animation()">
+      <button title="Play backwards" aria-label="Play backwards" onclick="anim87ce33a474884653830c36311eb66b8c.reverse_animation()">
           <i class="fa fa-play fa-flip-horizontal"></i></button>
-      <button title="Pause" aria-label="Pause" onclick="animb40452de534a4613a82d2828b5251fb1.pause_animation()">
+      <button title="Pause" aria-label="Pause" onclick="anim87ce33a474884653830c36311eb66b8c.pause_animation()">
           <i class="fa fa-pause"></i></button>
-      <button title="Play" aria-label="Play" onclick="animb40452de534a4613a82d2828b5251fb1.play_animation()">
+      <button title="Play" aria-label="Play" onclick="anim87ce33a474884653830c36311eb66b8c.play_animation()">
           <i class="fa fa-play"></i></button>
-      <button title="Next frame" aria-label="Next frame" onclick="animb40452de534a4613a82d2828b5251fb1.next_frame()">
+      <button title="Next frame" aria-label="Next frame" onclick="anim87ce33a474884653830c36311eb66b8c.next_frame()">
           <i class="fa fa-step-forward"></i></button>
-      <button title="Last frame" aria-label="Last frame" onclick="animb40452de534a4613a82d2828b5251fb1.last_frame()">
+      <button title="Last frame" aria-label="Last frame" onclick="anim87ce33a474884653830c36311eb66b8c.last_frame()">
           <i class="fa fa-fast-forward"></i></button>
-      <button title="Increase speed" aria-label="Increase speed" onclick="animb40452de534a4613a82d2828b5251fb1.faster()">
+      <button title="Increase speed" aria-label="Increase speed" onclick="anim87ce33a474884653830c36311eb66b8c.faster()">
           <i class="fa fa-plus"></i></button>
     </div>
-    <form title="Repetition mode" aria-label="Repetition mode" action="#n" name="_anim_loop_selectb40452de534a4613a82d2828b5251fb1" class="anim-state">
-      <input type="radio" name="state" value="once" id="_anim_radio1_b40452de534a4613a82d2828b5251fb1">
-      <label for="_anim_radio1_b40452de534a4613a82d2828b5251fb1">Once</label>
-      <input type="radio" name="state" value="loop" id="_anim_radio2_b40452de534a4613a82d2828b5251fb1" checked="">
-      <label for="_anim_radio2_b40452de534a4613a82d2828b5251fb1">Loop</label>
-      <input type="radio" name="state" value="reflect" id="_anim_radio3_b40452de534a4613a82d2828b5251fb1">
-      <label for="_anim_radio3_b40452de534a4613a82d2828b5251fb1">Reflect</label>
+    <form title="Repetition mode" aria-label="Repetition mode" action="#n" name="_anim_loop_select87ce33a474884653830c36311eb66b8c" class="anim-state">
+      <input type="radio" name="state" value="once" id="_anim_radio1_87ce33a474884653830c36311eb66b8c">
+      <label for="_anim_radio1_87ce33a474884653830c36311eb66b8c">Once</label>
+      <input type="radio" name="state" value="loop" id="_anim_radio2_87ce33a474884653830c36311eb66b8c" checked="">
+      <label for="_anim_radio2_87ce33a474884653830c36311eb66b8c">Loop</label>
+      <input type="radio" name="state" value="reflect" id="_anim_radio3_87ce33a474884653830c36311eb66b8c">
+      <label for="_anim_radio3_87ce33a474884653830c36311eb66b8c">Reflect</label>
     </form>
   </div>
 </div>
@@ -874,9 +874,9 @@ input[type=range].anim-slider {
   /* Instantiate the Animation class. */
   /* The IDs given should match those used in the template above. */
   (function() {
-    var img_id = "_anim_imgb40452de534a4613a82d2828b5251fb1";
-    var slider_id = "_anim_sliderb40452de534a4613a82d2828b5251fb1";
-    var loop_select_id = "_anim_loop_selectb40452de534a4613a82d2828b5251fb1";
+    var img_id = "_anim_img87ce33a474884653830c36311eb66b8c";
+    var slider_id = "_anim_slider87ce33a474884653830c36311eb66b8c";
+    var loop_select_id = "_anim_loop_select87ce33a474884653830c36311eb66b8c";
     var frames = new Array(148);
     
   frames[0] = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEkCAYAAACVLgwYAAAAOXRFWHRTb2Z0d2FyZQBNYXRwbG90\
@@ -28688,7 +28688,7 @@ AAAASUVORK5CYII=\
     /* set a timeout to make sure all the above elements are created before
        the object is initialized. */
     setTimeout(function() {
-        animb40452de534a4613a82d2828b5251fb1 = new Animation(frames, img_id, slider_id, 10.0,
+        anim87ce33a474884653830c36311eb66b8c = new Animation(frames, img_id, slider_id, 10.0,
                                  loop_select_id);
     }, 0);
   })()
@@ -29856,7 +29856,7 @@ AAAASUVORK5CYII=\
 <section id="part-2-22" class="level2">
 <h2 class="anchored" data-anchor-id="part-2-22">Part 2</h2>
 <p>The next part is signifcantly more tricky. Blindly iterating through every point and asking “how many are you in range of” is a non-starter, due to the sizes of the numbers involved. SImilarly, going the other way and generating all the covered points for each nanobot and adding those up runs into the same problem.</p>
-<p>A first thing to realise is that the sets of points covered by any given nanobot is an axis-aligned octahedron, centered at the nanobot’s position. The eight faces that define the octahedron have normal vectors [±1, ±1, ±1]. We can group these faces into four pairs of parallel faces, and each octahedron can be thought of as the intersection of the infinte regions between those pairs of planes. To intersect two octahedra, we can simply intersect the corresponding infinite regions, which in practice is done by intersecting the two intervals that represent the region.</p>
+<p>A first thing to realise is that the sets of points covered by any given nanobot is an axis-aligned octahedron, centered at the nanobot’s position. The eight faces that define the octahedron have normal vectors [±1, ±1, ±1]. We can group these faces into four pairs of parallel faces, and each octahedron can be thought of as the intersection of the infinte regions between those pairs of planes. That means we can represent an octahedron as four sets of intervals, which I will call the <span class="math inline">\((s, t, u, v)\)</span> basis. To intersect two octahedra we can simply intersect the corresponding intervals of each octahedron.</p>
 <p>With the above considerations in hand, we could create a list of (region, number of intersections) pairs, with initial state [(all space, 0)]. We could then loop over all the nanobots, and for each one, calculate all the intersections with the existing list, and if they are non-zero, append them to the list, with updated intersection count.</p>
 <p>That would build up a map of all the intersections, and the desired answer would be represented by the pair with greatest intersection count. That would look something like this:</p>
 <div class="cell" data-execution_count="50">
@@ -31905,7 +31905,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb58-1440"><a href="#cb58-1440" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb58-1441"><a href="#cb58-1441" aria-hidden="true" tabindex="-1"></a>The next part is signifcantly more tricky. Blindly iterating through every point and asking "how many are you in range of" is a non-starter, due to the sizes of the numbers involved. SImilarly, going the other way and generating all the covered points for each nanobot and adding those up runs into the same problem.</span>
 <span id="cb58-1442"><a href="#cb58-1442" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb58-1443"><a href="#cb58-1443" aria-hidden="true" tabindex="-1"></a>A first thing to realise is that the sets of points covered by any given nanobot is an axis-aligned octahedron, centered at the nanobot's position. The eight faces that define the octahedron have normal vectors <span class="sc">\[</span>±1, ±1, ±1<span class="sc">\]</span>. We can group these faces into four pairs of parallel faces, and each octahedron can be thought of as the intersection of the infinte regions between those pairs of planes. To intersect two octahedra, we can simply intersect the corresponding infinite regions, which in practice is done by intersecting the two intervals that represent the region.</span>
+<span id="cb58-1443"><a href="#cb58-1443" aria-hidden="true" tabindex="-1"></a>A first thing to realise is that the sets of points covered by any given nanobot is an axis-aligned octahedron, centered at the nanobot's position. The eight faces that define the octahedron have normal vectors <span class="sc">\[</span>±1, ±1, ±1<span class="sc">\]</span>. We can group these faces into four pairs of parallel faces, and each octahedron can be thought of as the intersection of the infinte regions between those pairs of planes. That means we can represent an octahedron as four sets of intervals, which I will call the $(s, t, u, v)$ basis. To intersect two octahedra we can simply intersect the corresponding intervals of each octahedron.</span>
 <span id="cb58-1444"><a href="#cb58-1444" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb58-1445"><a href="#cb58-1445" aria-hidden="true" tabindex="-1"></a>With the above considerations in hand, we could create a list of (region, number of intersections) pairs, with initial state <span class="sc">\[</span>(all space, 0)<span class="sc">\]</span>. We could then loop over all the nanobots, and for each one, calculate all the intersections with the existing list, and if they are non-zero, append them to the list, with updated intersection count.</span>
 <span id="cb58-1446"><a href="#cb58-1446" aria-hidden="true" tabindex="-1"></a></span>
