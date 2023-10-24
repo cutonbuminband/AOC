@@ -26,10 +26,9 @@
   load = utils.year_load(2023)
 #+end_src
 
-* [https://adventofcode.com/2023/day/1][Day 1: Calorie Counting]
+* [[https://adventofcode.com/2023/day/1][]
 ** Part 1
 #+begin_src jupyter-python
-
 #+end_src
 
 ** Part 2
