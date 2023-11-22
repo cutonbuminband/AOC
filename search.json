@@ -1404,7 +1404,7 @@
     "href": "about.html",
     "title": "Solutions to the advent of code problems",
     "section": "",
-    "text": "This is where I publish my solutions to the yearly Advent of Code problems. Most of the problems just get a short code snippet. The ones I had to think about slightly longer also have some text explaining my approach and talking through the problem. When I was feeling particularly inspired, I’ve also added some visualizations.\nEach year gets its own page - check them out on the sidebar to the left"
+    "text": "This is where I publish my solutions to the yearly Advent of Code problems. Most of the problems just get a short code snippet. These snippets are more or less self-contained, apart from some global imports that are shared for all problems in a given year. Some of the problems rely on code written for previous days of the same year, in a not particularly organised fashion.\nThe ones I had to think about slightly longer also have some text explaining my approach and talking through the problem. When I was feeling particularly inspired, I’ve also added some visualizations.\nEach year gets its own page - check them out on the sidebar to the left."
   },
   {
     "objectID": "qmd/2015.html",
