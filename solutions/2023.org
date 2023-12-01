@@ -26,12 +26,36 @@
   load = utils.year_load(2023)
 #+end_src
 
-* [[https://adventofcode.com/2023/day/1][]
+* [[https://adventofcode.com/2023/day/1][Day 1: Trebuchet?!]]
 ** Part 1
+Not much going on in part one. We need to extract the digits in each line and then add together $10\times$ all the first digits and all the last digits.
 #+begin_src jupyter-python
+  data = [[int(char) for char in line if char in "0123456879"] for line in load(1)]
+  10 * sum(x[0] for x in data) + sum(x[-1] for x in data)
 #+end_src
 
 ** Part 2
-#+begin_src jupyter-python
+For part two, we need to work with the string representation of the numbers. The examples show that the numbers can overlap, so we want a string like "fiveight" to show a "5" first and then an "8".
 
+We are only interested in the first and last digits of the string, so this could be done using a sliding window. Or we could hack it by padding the string representation of the number and doing a search and replace:
+#+begin_src jupyter-python
+  number_names = [
+      ("one", "one1one"),
+      ("two", "two2two"),
+      ("three", "three3three"),
+      ("four", "four4four"),
+      ("five", "five5five"),
+      ("six", "six6six"),
+      ("seven", "seven7seven"),
+      ("eight", "eight8eight"),
+      ("nine", "nine9nine"),
+  ]
+  data = load(1, "raw")
+  for pair in number_names:
+      data = data.replace(pair[0], pair[1])
+
+  data = data.split("\n")[:-1]
+  data = [[int(char) for char in line if char in "0123456879"] for line in data]
+  10 * sum(x[0] for x in data) + sum(x[-1] for x in data)
 #+end_src
+
