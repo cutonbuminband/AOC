@@ -96,6 +96,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <link rel="stylesheet" href="../qmd/styles.css">
 </head>
@@ -252,37 +254,40 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h1><a href="https://adventofcode.com/2023/day/1">Day 1: Trebuchet?!</a></h1>
 <section id="part-1" class="level2">
 <h2 class="anchored" data-anchor-id="part-1">Part 1</h2>
+<p>Not much going on in part one. We need to extract the digits in each line and then add together <span class="math inline">\(10\times\)</span> all the first digits and all the last digits.</p>
 <div class="cell" data-execution_count="2">
 <details open="">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> [[char <span class="cf">for</span> char <span class="kw">in</span> line <span class="cf">if</span> char <span class="kw">in</span> <span class="st">"0123456879"</span>] <span class="cf">for</span> line <span class="kw">in</span> load(<span class="dv">1</span>)]</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="dv">10</span> <span class="op">*</span> <span class="bu">sum</span>(<span class="bu">int</span>(x[<span class="dv">0</span>]) <span class="cf">for</span> x <span class="kw">in</span> data) <span class="op">+</span> <span class="bu">sum</span>(<span class="bu">int</span>(x[<span class="op">-</span><span class="dv">1</span>]) <span class="cf">for</span> x <span class="kw">in</span> data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> [[<span class="bu">int</span>(char) <span class="cf">for</span> char <span class="kw">in</span> line <span class="cf">if</span> char <span class="kw">in</span> <span class="st">"0123456879"</span>] <span class="cf">for</span> line <span class="kw">in</span> load(<span class="dv">1</span>)]</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="dv">10</span> <span class="op">*</span> <span class="bu">sum</span>(x[<span class="dv">0</span>] <span class="cf">for</span> x <span class="kw">in</span> data) <span class="op">+</span> <span class="bu">sum</span>(x[<span class="op">-</span><span class="dv">1</span>] <span class="cf">for</span> x <span class="kw">in</span> data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
 <section id="part-2" class="level2">
 <h2 class="anchored" data-anchor-id="part-2">Part 2</h2>
+<p>For part two, we need to work with the string representation of the numebrs. The examples show that the numbers can overlap, so we want a string like “fiveight” to show a “5” first and then an “8”.</p>
+<p>We are only interested in the first and last digits of the string, so this could be done using a sliding window. Or we could hack it by padding the string representation of the number and doing a search and replace:</p>
 <div class="cell" data-execution_count="3">
 <details open="">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>number_names <span class="op">=</span> {</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"one"</span>: <span class="st">"one1one"</span>,</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"two"</span>: <span class="st">"two2two"</span>,</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"three"</span>: <span class="st">"three3three"</span>,</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"four"</span>: <span class="st">"four4four"</span>,</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"five"</span>: <span class="st">"five5five"</span>,</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"six"</span>: <span class="st">"six6six"</span>,</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"seven"</span>: <span class="st">"seven7seven"</span>,</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"eight"</span>: <span class="st">"eight8eight"</span>,</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"nine"</span>: <span class="st">"nine9nine"</span>,</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>}</span>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>number_names <span class="op">=</span> [</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"one"</span>, <span class="st">"one1one"</span>),</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"two"</span>, <span class="st">"two2two"</span>),</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"three"</span>, <span class="st">"three3three"</span>),</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"four"</span>, <span class="st">"four4four"</span>),</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"five"</span>, <span class="st">"five5five"</span>),</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"six"</span>, <span class="st">"six6six"</span>),</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"seven"</span>, <span class="st">"seven7seven"</span>),</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"eight"</span>, <span class="st">"eight8eight"</span>),</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"nine"</span>, <span class="st">"nine9nine"</span>),</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>]</span>
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> load(<span class="dv">1</span>, <span class="st">"raw"</span>)</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> key <span class="kw">in</span> number_names:</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> data.replace(key, number_names[key])</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> pair <span class="kw">in</span> number_names:</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> data.replace(pair[<span class="dv">0</span>], pair[<span class="dv">1</span>])</span>
 <span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> data.split(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span>)[:<span class="op">-</span><span class="dv">1</span>]</span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> [[char <span class="cf">for</span> char <span class="kw">in</span> line <span class="cf">if</span> char <span class="kw">in</span> <span class="st">"0123456879"</span>] <span class="cf">for</span> line <span class="kw">in</span> data]</span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="dv">10</span> <span class="op">*</span> <span class="bu">sum</span>(<span class="bu">int</span>(x[<span class="dv">0</span>]) <span class="cf">for</span> x <span class="kw">in</span> data) <span class="op">+</span> <span class="bu">sum</span>(<span class="bu">int</span>(x[<span class="op">-</span><span class="dv">1</span>]) <span class="cf">for</span> x <span class="kw">in</span> data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> [[<span class="bu">int</span>(char) <span class="cf">for</span> char <span class="kw">in</span> line <span class="cf">if</span> char <span class="kw">in</span> <span class="st">"0123456879"</span>] <span class="cf">for</span> line <span class="kw">in</span> data]</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="dv">10</span> <span class="op">*</span> <span class="bu">sum</span>(x[<span class="dv">0</span>] <span class="cf">for</span> x <span class="kw">in</span> data) <span class="op">+</span> <span class="bu">sum</span>(x[<span class="op">-</span><span class="dv">1</span>] <span class="cf">for</span> x <span class="kw">in</span> data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 
@@ -725,33 +730,39 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1</span></span>
 <span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> [[char <span class="cf">for</span> char <span class="kw">in</span> line <span class="cf">if</span> char <span class="kw">in</span> <span class="st">"0123456879"</span>] <span class="cf">for</span> line <span class="kw">in</span> load(<span class="dv">1</span>)]</span>
-<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a><span class="dv">10</span> <span class="op">*</span> <span class="bu">sum</span>(<span class="bu">int</span>(x[<span class="dv">0</span>]) <span class="cf">for</span> x <span class="kw">in</span> data) <span class="op">+</span> <span class="bu">sum</span>(<span class="bu">int</span>(x[<span class="op">-</span><span class="dv">1</span>]) <span class="cf">for</span> x <span class="kw">in</span> data)</span>
-<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>Not much going on in part one. We need to extract the digits in each line and then add together $10\times$ all the first digits and all the last digits.</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> [[<span class="bu">int</span>(char) <span class="cf">for</span> char <span class="kw">in</span> line <span class="cf">if</span> char <span class="kw">in</span> <span class="st">"0123456879"</span>] <span class="cf">for</span> line <span class="kw">in</span> load(<span class="dv">1</span>)]</span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a><span class="dv">10</span> <span class="op">*</span> <span class="bu">sum</span>(x[<span class="dv">0</span>] <span class="cf">for</span> x <span class="kw">in</span> data) <span class="op">+</span> <span class="bu">sum</span>(x[<span class="op">-</span><span class="dv">1</span>] <span class="cf">for</span> x <span class="kw">in</span> data)</span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>number_names <span class="op">=</span> {</span>
-<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>    <span class="st">"one"</span>: <span class="st">"one1one"</span>,</span>
-<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>    <span class="st">"two"</span>: <span class="st">"two2two"</span>,</span>
-<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>    <span class="st">"three"</span>: <span class="st">"three3three"</span>,</span>
-<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>    <span class="st">"four"</span>: <span class="st">"four4four"</span>,</span>
-<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>    <span class="st">"five"</span>: <span class="st">"five5five"</span>,</span>
-<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>    <span class="st">"six"</span>: <span class="st">"six6six"</span>,</span>
-<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>    <span class="st">"seven"</span>: <span class="st">"seven7seven"</span>,</span>
-<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>    <span class="st">"eight"</span>: <span class="st">"eight8eight"</span>,</span>
-<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>    <span class="st">"nine"</span>: <span class="st">"nine9nine"</span>,</span>
-<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> load(<span class="dv">1</span>, <span class="st">"raw"</span>)</span>
-<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> key <span class="kw">in</span> number_names:</span>
-<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> data.replace(key, number_names[key])</span>
-<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> data.split(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span>)[:<span class="op">-</span><span class="dv">1</span>]</span>
-<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> [[char <span class="cf">for</span> char <span class="kw">in</span> line <span class="cf">if</span> char <span class="kw">in</span> <span class="st">"0123456879"</span>] <span class="cf">for</span> line <span class="kw">in</span> data]</span>
-<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a><span class="dv">10</span> <span class="op">*</span> <span class="bu">sum</span>(<span class="bu">int</span>(x[<span class="dv">0</span>]) <span class="cf">for</span> x <span class="kw">in</span> data) <span class="op">+</span> <span class="bu">sum</span>(<span class="bu">int</span>(x[<span class="op">-</span><span class="dv">1</span>]) <span class="cf">for</span> x <span class="kw">in</span> data)</span>
-<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>For part two, we need to work with the string representation of the numebrs. The examples show that the numbers can overlap, so we want a string like "fiveight" to show a "5" first and then an "8".</span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>We are only interested in the first and last digits of the string, so this could be done using a sliding window. Or we could hack it by padding the string representation of the number and doing a search and replace:</span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>number_names <span class="op">=</span> [</span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"one"</span>, <span class="st">"one1one"</span>),</span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"two"</span>, <span class="st">"two2two"</span>),</span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"three"</span>, <span class="st">"three3three"</span>),</span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"four"</span>, <span class="st">"four4four"</span>),</span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"five"</span>, <span class="st">"five5five"</span>),</span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"six"</span>, <span class="st">"six6six"</span>),</span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"seven"</span>, <span class="st">"seven7seven"</span>),</span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"eight"</span>, <span class="st">"eight8eight"</span>),</span>
+<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"nine"</span>, <span class="st">"nine9nine"</span>),</span>
+<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> load(<span class="dv">1</span>, <span class="st">"raw"</span>)</span>
+<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> pair <span class="kw">in</span> number_names:</span>
+<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> data.replace(pair[<span class="dv">0</span>], pair[<span class="dv">1</span>])</span>
+<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> data.split(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span>)[:<span class="op">-</span><span class="dv">1</span>]</span>
+<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> [[<span class="bu">int</span>(char) <span class="cf">for</span> char <span class="kw">in</span> line <span class="cf">if</span> char <span class="kw">in</span> <span class="st">"0123456879"</span>] <span class="cf">for</span> line <span class="kw">in</span> data]</span>
+<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a><span class="dv">10</span> <span class="op">*</span> <span class="bu">sum</span>(x[<span class="dv">0</span>] <span class="cf">for</span> x <span class="kw">in</span> data) <span class="op">+</span> <span class="bu">sum</span>(x[<span class="op">-</span><span class="dv">1</span>] <span class="cf">for</span> x <span class="kw">in</span> data)</span>
+<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
