@@ -697,14 +697,14 @@
     "href": "qmd/2023.html#part-1",
     "title": "2023 Solutions",
     "section": "Part 1",
-    "text": "Part 1"
+    "text": "Part 1\n\n\nCode\ndata = [[char for char in line if char in \"0123456879\"] for line in load(1)]\n10 * sum(int(x[0]) for x in data) + sum(int(x[-1]) for x in data)"
   },
   {
     "objectID": "qmd/2023.html#part-2",
     "href": "qmd/2023.html#part-2",
     "title": "2023 Solutions",
     "section": "Part 2",
-    "text": "Part 2"
+    "text": "Part 2\n\n\nCode\nnumber_names = {\n    \"one\": \"one1one\",\n    \"two\": \"two2two\",\n    \"three\": \"three3three\",\n    \"four\": \"four4four\",\n    \"five\": \"five5five\",\n    \"six\": \"six6six\",\n    \"seven\": \"seven7seven\",\n    \"eight\": \"eight8eight\",\n    \"nine\": \"nine9nine\",\n}\ndata = load(1, \"raw\")\nfor key in number_names:\n    data = data.replace(key, number_names[key])\n\ndata = data.split(\"\\n\")[:-1]\ndata = [[char for char in line if char in \"0123456879\"] for line in data]\n10 * sum(int(x[0]) for x in data) + sum(int(x[-1]) for x in data)"
   },
   {
     "objectID": "qmd/2017.html",
