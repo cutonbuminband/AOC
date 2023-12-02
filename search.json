@@ -707,6 +707,20 @@
     "text": "Part 2\nFor part two, we need to work with the string representation of the numbers. The examples show that the numbers can overlap, so we want a string like “fiveight” to show a “5” first and then an “8”.\nWe are only interested in the first and last digits of the string, so this could be done using a sliding window. Or we could hack it by padding the string representation of the number and doing a search and replace:\n\n\nCode\nnumber_names = [\n    (\"one\", \"one1one\"),\n    (\"two\", \"two2two\"),\n    (\"three\", \"three3three\"),\n    (\"four\", \"four4four\"),\n    (\"five\", \"five5five\"),\n    (\"six\", \"six6six\"),\n    (\"seven\", \"seven7seven\"),\n    (\"eight\", \"eight8eight\"),\n    (\"nine\", \"nine9nine\"),\n]\ndata = load(1, \"raw\")\nfor pair in number_names:\n    data = data.replace(pair[0], pair[1])\n\ndata = data.split(\"\\n\")[:-1]\ndata = [[int(char) for char in line if char in \"0123456879\"] for line in data]\n10 * sum(x[0] for x in data) + sum(x[-1] for x in data)"
   },
   {
+    "objectID": "qmd/2023.html#part-1-1",
+    "href": "qmd/2023.html#part-1-1",
+    "title": "2023 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\nThe most fiddly task in part 1 is parsing the input. Each line is a single game, with the game id appearing first and then the game outcome, separated by a colon. Each game consists of multiple rounds (delimited by a semicolon) and each round reveals multiple colours (delimited by commas).\nSo we split on the colon to separate the game id from the outcome, then split the outcome on semicolons to get each round, and finally split each round on commas to find the colours. A bit of regex let’s us finally get to a list of three integers as the representation of a round.\nOnce we have that, we can compare each round in a game with the maximum number of [red, green, blue] cubes available and see if it is possible. A game fails if any single round is impossible.\n\n\nCode\ndef parse_game_round(game_round):\n    colormap = {\"red\": 0, \"green\": 1, \"blue\": 2}\n    regex = r\"([0-9]*) (red|green|blue)\"\n    result = [0, 0, 0]\n    for v, c in [re.search(regex, entry).groups() for entry in game_round.split(\",\")]:\n        result[colormap[c]] = int(v)\n    return result\n\n\ntotal = 0\navailable = [12, 13, 14]\nfor line in load(2):\n    game_id, game = line.split(\":\")\n    game = game.split(\";\")\n    if ((np.array([parse_game_round(x) for x in game]) - available) &lt;= 0).all():\n        total += int(re.search(\"([0-9]+)\", game_id).groups()[0])\ntotal"
+  },
+  {
+    "objectID": "qmd/2023.html#part-2-1",
+    "href": "qmd/2023.html#part-2-1",
+    "title": "2023 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\nWith part 1 out of the way, part 2 is trivial: we get the same representation for each game as before, and just calculate the maximum for each coordinate in any round, and then multiply those three numbers together.\n\n\nCode\ntotal = 0\nfor game in [line.split(\":\")[1].split(\";\") for line in load(2)]:\n    total += np.prod(np.array([parse_game_round(x) for x in game]).max(axis=0))\ntotal"
+  },
+  {
     "objectID": "qmd/2017.html",
     "href": "qmd/2017.html",
     "title": "2017 Solutions",
