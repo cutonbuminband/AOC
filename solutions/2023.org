@@ -59,3 +59,38 @@ We are only interested in the first and last digits of the string, so this could
   10 * sum(x[0] for x in data) + sum(x[-1] for x in data)
 #+end_src
 
+* [[https://adventofcode.com/2023/day/2][Day 2: Cube Conundrum]]
+
+** Part 1
+The most fiddly task in part 1 is parsing the input. Each line is a single game, with the game id appearing first and then the game outcome, separated by a colon. Each game consists of multiple rounds (delimited by a semicolon) and each round reveals multiple colours (delimited by commas).
+
+So we split on the colon to separate the game id from the outcome, then split the outcome on semicolons to get each round, and finally split each round on commas to find the colours. A bit of regex let's us finally get to a list of three integers as the representation of a round.
+
+Once we have that, we can compare each round in a game with the maximum number of =[red, green, blue]= cubes available and see if it is possible. A game fails if any single round is impossible.
+#+begin_src jupyter-python
+  def parse_game_round(game_round):
+      colormap = {"red": 0, "green": 1, "blue": 2}
+      regex = r"([0-9]*) (red|green|blue)"
+      result = [0, 0, 0]
+      for v, c in [re.search(regex, entry).groups() for entry in game_round.split(",")]:
+          result[colormap[c]] = int(v)
+      return result
+
+
+  total = 0
+  games = [
+      np.array([parse_game_round(x) for x in line.split(":")[1].split(";")])
+      for line in load(2)
+  ]
+
+  for idx, game in enumerate(games):
+      if ((game - [12, 13, 14]) <= 0).all():
+          total += idx + 1
+  total
+#+end_src
+
+** Part 2
+With part 1 out of the way, part 2 is trivial: we get the same representation for each game as before, and just calculate the maximum for each coordinate in any round, and then multiply those three numbers together.
+#+begin_src jupyter-python
+  sum(np.product(game.max(axis=0)) for game in games)
+#+end_src
