@@ -718,7 +718,7 @@
     "href": "qmd/2023.html#part-2-1",
     "title": "2023 Solutions",
     "section": "Part 2",
-    "text": "Part 2\nWith part 1 out of the way, part 2 is trivial: we get the same representation for each game as before, and just calculate the maximum for each coordinate in any round, and then multiply those three numbers together.\n\n\nCode\ntotal = 0\nfor game in [line.split(\":\")[1].split(\";\") for line in load(2)]:\n    total += np.prod(np.array([parse_game_round(x) for x in game]).max(axis=0))\ntotal"
+    "text": "Part 2\nWith part 1 out of the way, part 2 is trivial: we get the same representation for each game as before, and just calculate the maximum for each coordinate in any round, and then multiply those three numbers together.\n\n\nCode\ntotal = 0\nfor game in games:\n    total += np.prod(np.array([parse_game_round(x) for x in game]).max(axis=0))\ntotal"
   },
   {
     "objectID": "qmd/2017.html",

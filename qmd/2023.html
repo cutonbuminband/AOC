@@ -333,7 +333,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <details open="">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>total <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> game <span class="kw">in</span> [line.split(<span class="st">":"</span>)[<span class="dv">1</span>].split(<span class="st">";"</span>) <span class="cf">for</span> line <span class="kw">in</span> load(<span class="dv">2</span>)]:</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> game <span class="kw">in</span> games:</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    total <span class="op">+=</span> np.prod(np.array([parse_game_round(x) <span class="cf">for</span> x <span class="kw">in</span> game]).<span class="bu">max</span>(axis<span class="op">=</span><span class="dv">0</span>))</span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>total</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
@@ -847,7 +847,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb6-108"><a href="#cb6-108" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-111"><a href="#cb6-111" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
 <span id="cb6-112"><a href="#cb6-112" aria-hidden="true" tabindex="-1"></a>total <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb6-113"><a href="#cb6-113" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> game <span class="kw">in</span> [line.split(<span class="st">":"</span>)[<span class="dv">1</span>].split(<span class="st">";"</span>) <span class="cf">for</span> line <span class="kw">in</span> load(<span class="dv">2</span>)]:</span>
+<span id="cb6-113"><a href="#cb6-113" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> game <span class="kw">in</span> games:</span>
 <span id="cb6-114"><a href="#cb6-114" aria-hidden="true" tabindex="-1"></a>    total <span class="op">+=</span> np.prod(np.array([parse_game_round(x) <span class="cf">for</span> x <span class="kw">in</span> game]).<span class="bu">max</span>(axis<span class="op">=</span><span class="dv">0</span>))</span>
 <span id="cb6-115"><a href="#cb6-115" aria-hidden="true" tabindex="-1"></a>total</span>
 <span id="cb6-116"><a href="#cb6-116" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
