@@ -317,13 +317,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>total <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>available <span class="op">=</span> [<span class="dv">12</span>, <span class="dv">13</span>, <span class="dv">14</span>]</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> line <span class="kw">in</span> load(<span class="dv">2</span>):</span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    game_id, game <span class="op">=</span> line.split(<span class="st">":"</span>)</span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    game <span class="op">=</span> game.split(<span class="st">";"</span>)</span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> ((np.array([parse_game_round(x) <span class="cf">for</span> x <span class="kw">in</span> game]) <span class="op">-</span> available) <span class="op">&lt;=</span> <span class="dv">0</span>).<span class="bu">all</span>():</span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>        total <span class="op">+=</span> <span class="bu">int</span>(re.search(<span class="st">"([0-9]+)"</span>, game_id).groups()[<span class="dv">0</span>])</span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>total</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>games <span class="op">=</span> [line.split(<span class="st">":"</span>)[<span class="dv">1</span>].split(<span class="st">";"</span>) <span class="cf">for</span> line <span class="kw">in</span> load(<span class="dv">2</span>)]</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> idx, game <span class="kw">in</span> <span class="bu">enumerate</span>(games):</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> ((np.array([parse_game_round(x) <span class="cf">for</span> x <span class="kw">in</span> game]) <span class="op">-</span> [<span class="dv">12</span>, <span class="dv">13</span>, <span class="dv">14</span>]) <span class="op">&lt;=</span> <span class="dv">0</span>).<span class="bu">all</span>():</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        total <span class="op">+=</span> idx <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>total</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -834,26 +833,24 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb6-94"><a href="#cb6-94" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-95"><a href="#cb6-95" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-96"><a href="#cb6-96" aria-hidden="true" tabindex="-1"></a>total <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb6-97"><a href="#cb6-97" aria-hidden="true" tabindex="-1"></a>available <span class="op">=</span> [<span class="dv">12</span>, <span class="dv">13</span>, <span class="dv">14</span>]</span>
-<span id="cb6-98"><a href="#cb6-98" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> line <span class="kw">in</span> load(<span class="dv">2</span>):</span>
-<span id="cb6-99"><a href="#cb6-99" aria-hidden="true" tabindex="-1"></a>    game_id, game <span class="op">=</span> line.split(<span class="st">":"</span>)</span>
-<span id="cb6-100"><a href="#cb6-100" aria-hidden="true" tabindex="-1"></a>    game <span class="op">=</span> game.split(<span class="st">";"</span>)</span>
-<span id="cb6-101"><a href="#cb6-101" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> ((np.array([parse_game_round(x) <span class="cf">for</span> x <span class="kw">in</span> game]) <span class="op">-</span> available) <span class="op">&lt;=</span> <span class="dv">0</span>).<span class="bu">all</span>():</span>
-<span id="cb6-102"><a href="#cb6-102" aria-hidden="true" tabindex="-1"></a>        total <span class="op">+=</span> <span class="bu">int</span>(re.search(<span class="st">"([0-9]+)"</span>, game_id).groups()[<span class="dv">0</span>])</span>
-<span id="cb6-103"><a href="#cb6-103" aria-hidden="true" tabindex="-1"></a>total</span>
+<span id="cb6-97"><a href="#cb6-97" aria-hidden="true" tabindex="-1"></a>games <span class="op">=</span> [line.split(<span class="st">":"</span>)[<span class="dv">1</span>].split(<span class="st">";"</span>) <span class="cf">for</span> line <span class="kw">in</span> load(<span class="dv">2</span>)]</span>
+<span id="cb6-98"><a href="#cb6-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-99"><a href="#cb6-99" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> idx, game <span class="kw">in</span> <span class="bu">enumerate</span>(games):</span>
+<span id="cb6-100"><a href="#cb6-100" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> ((np.array([parse_game_round(x) <span class="cf">for</span> x <span class="kw">in</span> game]) <span class="op">-</span> [<span class="dv">12</span>, <span class="dv">13</span>, <span class="dv">14</span>]) <span class="op">&lt;=</span> <span class="dv">0</span>).<span class="bu">all</span>():</span>
+<span id="cb6-101"><a href="#cb6-101" aria-hidden="true" tabindex="-1"></a>        total <span class="op">+=</span> idx <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb6-102"><a href="#cb6-102" aria-hidden="true" tabindex="-1"></a>total</span>
+<span id="cb6-103"><a href="#cb6-103" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb6-104"><a href="#cb6-104" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-105"><a href="#cb6-105" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb6-105"><a href="#cb6-105" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
 <span id="cb6-106"><a href="#cb6-106" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-107"><a href="#cb6-107" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
+<span id="cb6-107"><a href="#cb6-107" aria-hidden="true" tabindex="-1"></a>With part 1 out of the way, part 2 is trivial: we get the same representation for each game as before, and just calculate the maximum for each coordinate in any round, and then multiply those three numbers together.</span>
 <span id="cb6-108"><a href="#cb6-108" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-109"><a href="#cb6-109" aria-hidden="true" tabindex="-1"></a>With part 1 out of the way, part 2 is trivial: we get the same representation for each game as before, and just calculate the maximum for each coordinate in any round, and then multiply those three numbers together.</span>
-<span id="cb6-110"><a href="#cb6-110" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-113"><a href="#cb6-113" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb6-114"><a href="#cb6-114" aria-hidden="true" tabindex="-1"></a>total <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb6-115"><a href="#cb6-115" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> game <span class="kw">in</span> [line.split(<span class="st">":"</span>)[<span class="dv">1</span>].split(<span class="st">";"</span>) <span class="cf">for</span> line <span class="kw">in</span> load(<span class="dv">2</span>)]:</span>
-<span id="cb6-116"><a href="#cb6-116" aria-hidden="true" tabindex="-1"></a>    total <span class="op">+=</span> np.prod(np.array([parse_game_round(x) <span class="cf">for</span> x <span class="kw">in</span> game]).<span class="bu">max</span>(axis<span class="op">=</span><span class="dv">0</span>))</span>
-<span id="cb6-117"><a href="#cb6-117" aria-hidden="true" tabindex="-1"></a>total</span>
-<span id="cb6-118"><a href="#cb6-118" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb6-111"><a href="#cb6-111" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb6-112"><a href="#cb6-112" aria-hidden="true" tabindex="-1"></a>total <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb6-113"><a href="#cb6-113" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> game <span class="kw">in</span> [line.split(<span class="st">":"</span>)[<span class="dv">1</span>].split(<span class="st">";"</span>) <span class="cf">for</span> line <span class="kw">in</span> load(<span class="dv">2</span>)]:</span>
+<span id="cb6-114"><a href="#cb6-114" aria-hidden="true" tabindex="-1"></a>    total <span class="op">+=</span> np.prod(np.array([parse_game_round(x) <span class="cf">for</span> x <span class="kw">in</span> game]).<span class="bu">max</span>(axis<span class="op">=</span><span class="dv">0</span>))</span>
+<span id="cb6-115"><a href="#cb6-115" aria-hidden="true" tabindex="-1"></a>total</span>
+<span id="cb6-116"><a href="#cb6-116" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
