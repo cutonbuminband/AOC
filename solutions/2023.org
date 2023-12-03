@@ -100,44 +100,28 @@ With part 1 out of the way, part 2 is trivial: we get the same representation fo
 ** Part 1
 It seems the theme for AOC this year is "let's make things annoying to parse".
 
-We'll need to extract the values and locations of all the numbers in the grid, and then compare that with the locations of the symbols. To get the coordinates that neighbor a symbol we can use a neat convolution trick; to get the values and coordinates of each number we'll loop over each row and each character in the row, and then build things up progressively.
+We'll need to extract the values and locations of all the numbers in the grid, and then compare that with the locations of the symbols. To get the coordinates that neighbor a symbol we can use a neat convolution trick. To get the coordinates of each number we'll loop over all the lines in the grid, and use a regex to find the numbers.
 
 Once we have that, we can find the desired value by finding the set intersetion of the number-coordinates and the neighbor coordinates; if that's non-empty, we add the number to a running total.
 #+begin_src jupyter-python
-  data = np.array([[char for char in line] for line in load(3)])
-  symbols = np.array(
-      [[(char not in "0123456789") and char != "." for char in line] for line in data]
-  )
-  weights = [[1, 1, 1], [1, 0, 1], [1, 1, 1]]
-  neighbors = scipy.ndimage.convolve(symbols, weights, mode="constant")
+  data = load(3)
+  symbols = np.array([[(c not in "0123456789") and c != "." for c in l] for l in data])
+  w = [[1, 1, 1], [1, 0, 1], [1, 1, 1]]
+  neighbors = scipy.ndimage.convolve(symbols, w, mode="constant")
   neighbors = set(zip(*np.where(neighbors)))
   numbers = {}
   for i, row in enumerate(data):
-      current = ""
-      coords = []
-      for j, char in enumerate(row):
-          if char in string.digits:
-              current += char
-              coords += [(i, j)]
-          elif current:
-              numbers[frozenset(coords)] = int(current)
-              current = ""
-              coords = []
-      if current:
-          numbers[frozenset(coords)] = int(current)
-  result = 0
-  for key in numbers:
-      if key & neighbors:
-          result += numbers[key]
-  result
+      for n in re.finditer("\d+", row):
+          numbers[frozenset((i, j) for j in range(*n.span()))] = int(n.group())
+  sum(numbers[key] if key & neighbors else 0 for key in numbers)
 #+end_src
 
 ** Part 2
 After part 1, part 2 is pretty simple. We can use the same (coordinates) -> number mapping as before, and then just loop over all locations in the grid that have a value of "*". We find the neighbors of each star, intersect with all the numbers coordinates, and only use the ones that intersect exactly two numbers
 #+begin_src jupyter-python
   total = 0
-  offsets = np.array(list(zip(*np.where(weights)))) - 1
-  for star in zip(*np.where(data == "*")):
+  offsets = np.array(list(zip(*np.where(w)))) - 1
+  for star in zip(*np.where(np.array([[c for c in l] for l in data]) == "*")):
       neighbors = set([tuple(x) for x in star + offsets])
       values = [numbers[key] for key in numbers if key & neighbors]
       total += values[0] * values[1] if len(values) == 2 else 0
