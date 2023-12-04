@@ -127,3 +127,26 @@ After part 1, part 2 is pretty simple. We can use the same (coordinates) -> numb
       total += values[0] * values[1] if len(values) == 2 else 0
   total
 #+end_src
+
+* [[https://adventofcode.com/2023/day/4][Day 4: Scratchcards]]
+
+** Part 1
+After the interesting parsing tasks of the last few days, today was straightforward. Part one can be boiled down to this oneliner, which I don't even think is completely illegible
+#+begin_src jupyter-python
+  sum(
+      2 ** (y - 1) if (y := len(set(row[1:11]) & set(row[11:]))) > 0 else 0
+      for row in load(4, "int")
+  )
+#+end_src
+
+** Part 2
+I could have found some way of saving the intersections from part 1 so that I didn't have to recalculate in part two, but it's not that complicated.
+#+begin_src jupyter-python
+  data = load(4, "int")
+  counts = np.ones(len(data), dtype=int)
+  for i, row in enumerate(data):
+      wins = len(set(row[1:11]) & set(row[11:]))
+      counts[i+1:i+wins+1] += counts[i]
+  sum(counts)
+#+end_src
+
