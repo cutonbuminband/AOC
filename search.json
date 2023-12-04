@@ -739,7 +739,7 @@
     "href": "qmd/2023.html#part-1-3",
     "title": "2023 Solutions",
     "section": "Part 1",
-    "text": "Part 1\nAfter the interesting parsing tasks of the last few days, today was straightforward. Part one can be boiled down to this oneliner, which I don’t even think is completely illegible\n\n\nCode\nsum(\n    2 ** (y - 1) if (y := len(set(row[1:11]) & set(row[11:]))) &gt; 0 else 0\n    for row in load(4, \"int\")\n)"
+    "text": "Part 1\nAfter the interesting parsing tasks of the last few days, today was straightforward. Part one can be boiled down to this oneliner, which I don’t even think is completely illegible\n\n\nCode\nsum(int(2 ** (len(set(row[1:11]) & set(row[11:])) - 1)) for row in load(4, \"int\"))"
   },
   {
     "objectID": "qmd/2023.html#part-2-3",

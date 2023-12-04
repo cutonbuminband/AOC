@@ -398,10 +398,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell" data-execution_count="8">
 <details open="">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span> <span class="op">**</span> (y <span class="op">-</span> <span class="dv">1</span>) <span class="cf">if</span> (y <span class="op">:=</span> <span class="bu">len</span>(<span class="bu">set</span>(row[<span class="dv">1</span>:<span class="dv">11</span>]) <span class="op">&amp;</span> <span class="bu">set</span>(row[<span class="dv">11</span>:]))) <span class="op">&gt;</span> <span class="dv">0</span> <span class="cf">else</span> <span class="dv">0</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> row <span class="kw">in</span> load(<span class="dv">4</span>, <span class="st">"int"</span>)</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(<span class="bu">int</span>(<span class="dv">2</span> <span class="op">**</span> (<span class="bu">len</span>(<span class="bu">set</span>(row[<span class="dv">1</span>:<span class="dv">11</span>]) <span class="op">&amp;</span> <span class="bu">set</span>(row[<span class="dv">11</span>:])) <span class="op">-</span> <span class="dv">1</span>)) <span class="cf">for</span> row <span class="kw">in</span> load(<span class="dv">4</span>, <span class="st">"int"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -977,24 +974,21 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb10-163"><a href="#cb10-163" aria-hidden="true" tabindex="-1"></a>After the interesting parsing tasks of the last few days, today was straightforward. Part one can be boiled down to this oneliner, which I don't even think is completely illegible</span>
 <span id="cb10-164"><a href="#cb10-164" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-167"><a href="#cb10-167" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb10-168"><a href="#cb10-168" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(</span>
-<span id="cb10-169"><a href="#cb10-169" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span> <span class="op">**</span> (y <span class="op">-</span> <span class="dv">1</span>) <span class="cf">if</span> (y <span class="op">:=</span> <span class="bu">len</span>(<span class="bu">set</span>(row[<span class="dv">1</span>:<span class="dv">11</span>]) <span class="op">&amp;</span> <span class="bu">set</span>(row[<span class="dv">11</span>:]))) <span class="op">&gt;</span> <span class="dv">0</span> <span class="cf">else</span> <span class="dv">0</span></span>
-<span id="cb10-170"><a href="#cb10-170" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> row <span class="kw">in</span> load(<span class="dv">4</span>, <span class="st">"int"</span>)</span>
-<span id="cb10-171"><a href="#cb10-171" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb10-172"><a href="#cb10-172" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb10-173"><a href="#cb10-173" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-174"><a href="#cb10-174" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
-<span id="cb10-175"><a href="#cb10-175" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-176"><a href="#cb10-176" aria-hidden="true" tabindex="-1"></a>I could have found some way of saving the intersections from part 1 so that I didn't have to recalculate in part two, but it's not that complicated.</span>
-<span id="cb10-177"><a href="#cb10-177" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-180"><a href="#cb10-180" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb10-181"><a href="#cb10-181" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> load(<span class="dv">4</span>, <span class="st">"int"</span>)</span>
-<span id="cb10-182"><a href="#cb10-182" aria-hidden="true" tabindex="-1"></a>counts <span class="op">=</span> np.ones(<span class="bu">len</span>(data), dtype<span class="op">=</span><span class="bu">int</span>)</span>
-<span id="cb10-183"><a href="#cb10-183" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, row <span class="kw">in</span> <span class="bu">enumerate</span>(data):</span>
-<span id="cb10-184"><a href="#cb10-184" aria-hidden="true" tabindex="-1"></a>    wins <span class="op">=</span> <span class="bu">len</span>(<span class="bu">set</span>(row[<span class="dv">1</span>:<span class="dv">11</span>]) <span class="op">&amp;</span> <span class="bu">set</span>(row[<span class="dv">11</span>:]))</span>
-<span id="cb10-185"><a href="#cb10-185" aria-hidden="true" tabindex="-1"></a>    counts[i<span class="op">+</span><span class="dv">1</span>:i<span class="op">+</span>wins<span class="op">+</span><span class="dv">1</span>] <span class="op">+=</span> counts[i]</span>
-<span id="cb10-186"><a href="#cb10-186" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(counts)</span>
-<span id="cb10-187"><a href="#cb10-187" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb10-168"><a href="#cb10-168" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(<span class="bu">int</span>(<span class="dv">2</span> <span class="op">**</span> (<span class="bu">len</span>(<span class="bu">set</span>(row[<span class="dv">1</span>:<span class="dv">11</span>]) <span class="op">&amp;</span> <span class="bu">set</span>(row[<span class="dv">11</span>:])) <span class="op">-</span> <span class="dv">1</span>)) <span class="cf">for</span> row <span class="kw">in</span> load(<span class="dv">4</span>, <span class="st">"int"</span>))</span>
+<span id="cb10-169"><a href="#cb10-169" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb10-170"><a href="#cb10-170" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-171"><a href="#cb10-171" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
+<span id="cb10-172"><a href="#cb10-172" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-173"><a href="#cb10-173" aria-hidden="true" tabindex="-1"></a>I could have found some way of saving the intersections from part 1 so that I didn't have to recalculate in part two, but it's not that complicated.</span>
+<span id="cb10-174"><a href="#cb10-174" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-177"><a href="#cb10-177" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb10-178"><a href="#cb10-178" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> load(<span class="dv">4</span>, <span class="st">"int"</span>)</span>
+<span id="cb10-179"><a href="#cb10-179" aria-hidden="true" tabindex="-1"></a>counts <span class="op">=</span> np.ones(<span class="bu">len</span>(data), dtype<span class="op">=</span><span class="bu">int</span>)</span>
+<span id="cb10-180"><a href="#cb10-180" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, row <span class="kw">in</span> <span class="bu">enumerate</span>(data):</span>
+<span id="cb10-181"><a href="#cb10-181" aria-hidden="true" tabindex="-1"></a>    wins <span class="op">=</span> <span class="bu">len</span>(<span class="bu">set</span>(row[<span class="dv">1</span>:<span class="dv">11</span>]) <span class="op">&amp;</span> <span class="bu">set</span>(row[<span class="dv">11</span>:]))</span>
+<span id="cb10-182"><a href="#cb10-182" aria-hidden="true" tabindex="-1"></a>    counts[i<span class="op">+</span><span class="dv">1</span>:i<span class="op">+</span>wins<span class="op">+</span><span class="dv">1</span>] <span class="op">+=</span> counts[i]</span>
+<span id="cb10-183"><a href="#cb10-183" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(counts)</span>
+<span id="cb10-184"><a href="#cb10-184" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
