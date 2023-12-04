@@ -133,10 +133,7 @@ After part 1, part 2 is pretty simple. We can use the same (coordinates) -> numb
 ** Part 1
 After the interesting parsing tasks of the last few days, today was straightforward. Part one can be boiled down to this oneliner, which I don't even think is completely illegible
 #+begin_src jupyter-python
-  sum(
-      2 ** (y - 1) if (y := len(set(row[1:11]) & set(row[11:]))) > 0 else 0
-      for row in load(4, "int")
-  )
+  sum(int(2 ** (len(set(row[1:11]) & set(row[11:])) - 1)) for row in load(4, "int"))
 #+end_src
 
 ** Part 2
