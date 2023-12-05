@@ -749,6 +749,20 @@
     "text": "Part 2\nI could have found some way of saving the intersections from part 1 so that I didn’t have to recalculate in part two, but it’s not that complicated.\n\n\nCode\ndata = load(4, \"int\")\ncounts = np.ones(len(data), dtype=int)\nfor i, row in enumerate(data):\n    wins = len(set(row[1:11]) & set(row[11:]))\n    counts[i+1:i+wins+1] += counts[i]\nsum(counts)"
   },
   {
+    "objectID": "qmd/2023.html#part-1-4",
+    "href": "qmd/2023.html#part-1-4",
+    "title": "2023 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\nThe first part is a straightforward implementation of the requirements.\nTo parse the file, we first split on “” to get each of the sections separately, then for each line of each section, we extract all of the integers. These are all positive, so we can do that with the regex “(+̣)”. After skipping through lines which don’t contain integers, we have a sensible representation for our data.\nAfter that it’s just a question of following through what happens to each initial value: for each one we scan through the rulesets in order, and when we find a rule in a ruleset that matches we convert it to the new value and move on. If we don’t find a rule that matches we’re told that the converted value is the same as the original one.\n\n\nCode\n[seeds], *rules = [\n    [\n        [int(x) for x in ints]\n        for line in groups.split(\"\\n\")\n        if (ints := re.findall(\"(\\d+)\", line))\n    ]\n    for groups in load(5, \"raw\").split(\"\\n\\n\")\n]\n\nminval = np.inf\nfor seed in seeds:\n    current = seed\n    for ruleset in rules:\n        for destination, source, length in ruleset:\n            if source &lt; current &lt; source + length:\n                current = current + destination - source\n                break\n    if current &lt; minval:\n        minval = current\nminval"
+  },
+  {
+    "objectID": "qmd/2023.html#part-2-4",
+    "href": "qmd/2023.html#part-2-4",
+    "title": "2023 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\nFor part two we need to be a bit cleverer. We know that each rule converts a specific source range to a specific destination range. So to apply a rule to an arbitrary range, we split the range into three: The parts of the range before the rule applies, the parts of the range that intersect the rule and the parts of the range after the rule. Some of these parts can be empty, but that’s OK.\nFrom there, building a routine to iteratively apply each ruleset to the original ranges is not too tricky.\n\n\nCode\ndef split_range(r, rule):\n    return [\n        x if x[0] &lt; x[1] else []\n        for x in [\n            (r[0], rule[0]),\n            (max(r[0], rule[0]), min(r[1], rule[1])),\n            (rule[1], r[1]),\n        ]\n    ]\n\n\ndef split_ranges(ranges, rule):\n    destination, source, length = rule\n    delta = destination - source\n    done, todo = [], []\n    intersections = [split_range(r, [source, source + length]) for r in ranges]\n    for (before, intersection, after), r in zip(intersections, ranges):\n        if not intersection:\n            todo.append(r)\n            continue\n        done.append((intersection[0] + delta, intersection[1] + delta))\n        if before:\n            todo.append(before)\n        if after:\n            todo.append(after)\n    return done, todo\n\n\nranges = [\n    (start, start + length) for start, length in more_itertools.chunked(seeds, 2)\n]\nfor ruleset in rules:\n    todo = ranges\n    ranges = []\n    for rule in ruleset:\n        new_ranges, todo = split_ranges(todo, rule)\n        ranges += new_ranges\n    ranges += todo\nmin(x[0] for x in ranges)"
+  },
+  {
     "objectID": "qmd/2017.html",
     "href": "qmd/2017.html",
     "title": "2017 Solutions",
