@@ -447,7 +447,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    current <span class="op">=</span> seed</span>
 <span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> ruleset <span class="kw">in</span> rules:</span>
 <span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> destination, source, length <span class="kw">in</span> ruleset:</span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> source <span class="op">&lt;</span> current <span class="op">&lt;</span> source <span class="op">+</span> length:</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> source <span class="op">&lt;=</span> current <span class="op">&lt;</span> source <span class="op">+</span> length:</span>
 <span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>                current <span class="op">=</span> current <span class="op">+</span> destination <span class="op">-</span> source</span>
 <span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>                <span class="cf">break</span></span>
 <span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> current <span class="op">&lt;</span> minval:</span>
@@ -1103,7 +1103,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb12-210"><a href="#cb12-210" aria-hidden="true" tabindex="-1"></a>    current <span class="op">=</span> seed</span>
 <span id="cb12-211"><a href="#cb12-211" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> ruleset <span class="kw">in</span> rules:</span>
 <span id="cb12-212"><a href="#cb12-212" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> destination, source, length <span class="kw">in</span> ruleset:</span>
-<span id="cb12-213"><a href="#cb12-213" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> source <span class="op">&lt;</span> current <span class="op">&lt;</span> source <span class="op">+</span> length:</span>
+<span id="cb12-213"><a href="#cb12-213" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> source <span class="op">&lt;=</span> current <span class="op">&lt;</span> source <span class="op">+</span> length:</span>
 <span id="cb12-214"><a href="#cb12-214" aria-hidden="true" tabindex="-1"></a>                current <span class="op">=</span> current <span class="op">+</span> destination <span class="op">-</span> source</span>
 <span id="cb12-215"><a href="#cb12-215" aria-hidden="true" tabindex="-1"></a>                <span class="cf">break</span></span>
 <span id="cb12-216"><a href="#cb12-216" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> current <span class="op">&lt;</span> minval:</span>
