@@ -467,9 +467,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> [</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>        x <span class="cf">if</span> x[<span class="dv">0</span>] <span class="op">&lt;</span> x[<span class="dv">1</span>] <span class="cf">else</span> []</span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> x <span class="kw">in</span> [</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>            (r[<span class="dv">0</span>], rule[<span class="dv">0</span>]),</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>            (r[<span class="dv">0</span>], <span class="bu">min</span>(rule[<span class="dv">0</span>], r[<span class="dv">1</span>])),</span>
 <span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>            (<span class="bu">max</span>(r[<span class="dv">0</span>], rule[<span class="dv">0</span>]), <span class="bu">min</span>(r[<span class="dv">1</span>], rule[<span class="dv">1</span>])),</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>            (rule[<span class="dv">1</span>], r[<span class="dv">1</span>]),</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>            (<span class="bu">max</span>(rule[<span class="dv">1</span>], r[<span class="dv">0</span>]), r[<span class="dv">1</span>]),</span>
 <span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>        ]</span>
 <span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    ]</span>
 <span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
@@ -480,28 +480,26 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    done, todo <span class="op">=</span> [], []</span>
 <span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>    intersections <span class="op">=</span> [split_range(r, [source, source <span class="op">+</span> length]) <span class="cf">for</span> r <span class="kw">in</span> ranges]</span>
 <span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (before, intersection, after), r <span class="kw">in</span> <span class="bu">zip</span>(intersections, ranges):</span>
-<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> intersection:</span>
-<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>            todo.append(r)</span>
-<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span></span>
-<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>        done.append((intersection[<span class="dv">0</span>] <span class="op">+</span> delta, intersection[<span class="dv">1</span>] <span class="op">+</span> delta))</span>
-<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> before:</span>
-<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>            todo.append(before)</span>
-<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> after:</span>
-<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>            todo.append(after)</span>
-<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> done, todo</span>
-<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>ranges <span class="op">=</span> [</span>
-<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>    (start, start <span class="op">+</span> length) <span class="cf">for</span> start, length <span class="kw">in</span> more_itertools.chunked(seeds, <span class="dv">2</span>)</span>
-<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>]</span>
-<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ruleset <span class="kw">in</span> rules:</span>
-<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>    todo <span class="op">=</span> ranges</span>
-<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>    ranges <span class="op">=</span> []</span>
-<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> rule <span class="kw">in</span> ruleset:</span>
-<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a>        new_ranges, todo <span class="op">=</span> split_ranges(todo, rule)</span>
-<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a>        ranges <span class="op">+=</span> new_ranges</span>
-<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a>    ranges <span class="op">+=</span> todo</span>
-<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a><span class="bu">min</span>(x[<span class="dv">0</span>] <span class="cf">for</span> x <span class="kw">in</span> ranges)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> intersection:</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>            done.append((intersection[<span class="dv">0</span>] <span class="op">+</span> delta, intersection[<span class="dv">1</span>] <span class="op">+</span> delta))</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> before:</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>            todo.append(before)</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> after:</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>            todo.append(after)</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> done, todo</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>ranges <span class="op">=</span> [</span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>    (start, start <span class="op">+</span> length) <span class="cf">for</span> start, length <span class="kw">in</span> more_itertools.chunked(seeds, <span class="dv">2</span>)</span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ruleset <span class="kw">in</span> rules:</span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>    todo <span class="op">=</span> ranges</span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>    ranges <span class="op">=</span> []</span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> rule <span class="kw">in</span> ruleset:</span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>        new_ranges, todo <span class="op">=</span> split_ranges(todo, rule)</span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a>        ranges <span class="op">+=</span> new_ranges</span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a>    ranges <span class="op">+=</span> todo</span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a><span class="bu">min</span>(x[<span class="dv">0</span>] <span class="cf">for</span> x <span class="kw">in</span> ranges)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 
@@ -1122,9 +1120,9 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb12-231"><a href="#cb12-231" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> [</span>
 <span id="cb12-232"><a href="#cb12-232" aria-hidden="true" tabindex="-1"></a>        x <span class="cf">if</span> x[<span class="dv">0</span>] <span class="op">&lt;</span> x[<span class="dv">1</span>] <span class="cf">else</span> []</span>
 <span id="cb12-233"><a href="#cb12-233" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> x <span class="kw">in</span> [</span>
-<span id="cb12-234"><a href="#cb12-234" aria-hidden="true" tabindex="-1"></a>            (r[<span class="dv">0</span>], rule[<span class="dv">0</span>]),</span>
+<span id="cb12-234"><a href="#cb12-234" aria-hidden="true" tabindex="-1"></a>            (r[<span class="dv">0</span>], <span class="bu">min</span>(rule[<span class="dv">0</span>], r[<span class="dv">1</span>])),</span>
 <span id="cb12-235"><a href="#cb12-235" aria-hidden="true" tabindex="-1"></a>            (<span class="bu">max</span>(r[<span class="dv">0</span>], rule[<span class="dv">0</span>]), <span class="bu">min</span>(r[<span class="dv">1</span>], rule[<span class="dv">1</span>])),</span>
-<span id="cb12-236"><a href="#cb12-236" aria-hidden="true" tabindex="-1"></a>            (rule[<span class="dv">1</span>], r[<span class="dv">1</span>]),</span>
+<span id="cb12-236"><a href="#cb12-236" aria-hidden="true" tabindex="-1"></a>            (<span class="bu">max</span>(rule[<span class="dv">1</span>], r[<span class="dv">0</span>]), r[<span class="dv">1</span>]),</span>
 <span id="cb12-237"><a href="#cb12-237" aria-hidden="true" tabindex="-1"></a>        ]</span>
 <span id="cb12-238"><a href="#cb12-238" aria-hidden="true" tabindex="-1"></a>    ]</span>
 <span id="cb12-239"><a href="#cb12-239" aria-hidden="true" tabindex="-1"></a></span>
@@ -1135,29 +1133,27 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb12-244"><a href="#cb12-244" aria-hidden="true" tabindex="-1"></a>    done, todo <span class="op">=</span> [], []</span>
 <span id="cb12-245"><a href="#cb12-245" aria-hidden="true" tabindex="-1"></a>    intersections <span class="op">=</span> [split_range(r, [source, source <span class="op">+</span> length]) <span class="cf">for</span> r <span class="kw">in</span> ranges]</span>
 <span id="cb12-246"><a href="#cb12-246" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (before, intersection, after), r <span class="kw">in</span> <span class="bu">zip</span>(intersections, ranges):</span>
-<span id="cb12-247"><a href="#cb12-247" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> intersection:</span>
-<span id="cb12-248"><a href="#cb12-248" aria-hidden="true" tabindex="-1"></a>            todo.append(r)</span>
-<span id="cb12-249"><a href="#cb12-249" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span></span>
-<span id="cb12-250"><a href="#cb12-250" aria-hidden="true" tabindex="-1"></a>        done.append((intersection[<span class="dv">0</span>] <span class="op">+</span> delta, intersection[<span class="dv">1</span>] <span class="op">+</span> delta))</span>
-<span id="cb12-251"><a href="#cb12-251" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> before:</span>
-<span id="cb12-252"><a href="#cb12-252" aria-hidden="true" tabindex="-1"></a>            todo.append(before)</span>
-<span id="cb12-253"><a href="#cb12-253" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> after:</span>
-<span id="cb12-254"><a href="#cb12-254" aria-hidden="true" tabindex="-1"></a>            todo.append(after)</span>
-<span id="cb12-255"><a href="#cb12-255" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> done, todo</span>
-<span id="cb12-256"><a href="#cb12-256" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-257"><a href="#cb12-257" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-258"><a href="#cb12-258" aria-hidden="true" tabindex="-1"></a>ranges <span class="op">=</span> [</span>
-<span id="cb12-259"><a href="#cb12-259" aria-hidden="true" tabindex="-1"></a>    (start, start <span class="op">+</span> length) <span class="cf">for</span> start, length <span class="kw">in</span> more_itertools.chunked(seeds, <span class="dv">2</span>)</span>
-<span id="cb12-260"><a href="#cb12-260" aria-hidden="true" tabindex="-1"></a>]</span>
-<span id="cb12-261"><a href="#cb12-261" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ruleset <span class="kw">in</span> rules:</span>
-<span id="cb12-262"><a href="#cb12-262" aria-hidden="true" tabindex="-1"></a>    todo <span class="op">=</span> ranges</span>
-<span id="cb12-263"><a href="#cb12-263" aria-hidden="true" tabindex="-1"></a>    ranges <span class="op">=</span> []</span>
-<span id="cb12-264"><a href="#cb12-264" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> rule <span class="kw">in</span> ruleset:</span>
-<span id="cb12-265"><a href="#cb12-265" aria-hidden="true" tabindex="-1"></a>        new_ranges, todo <span class="op">=</span> split_ranges(todo, rule)</span>
-<span id="cb12-266"><a href="#cb12-266" aria-hidden="true" tabindex="-1"></a>        ranges <span class="op">+=</span> new_ranges</span>
-<span id="cb12-267"><a href="#cb12-267" aria-hidden="true" tabindex="-1"></a>    ranges <span class="op">+=</span> todo</span>
-<span id="cb12-268"><a href="#cb12-268" aria-hidden="true" tabindex="-1"></a><span class="bu">min</span>(x[<span class="dv">0</span>] <span class="cf">for</span> x <span class="kw">in</span> ranges)</span>
-<span id="cb12-269"><a href="#cb12-269" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb12-247"><a href="#cb12-247" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> intersection:</span>
+<span id="cb12-248"><a href="#cb12-248" aria-hidden="true" tabindex="-1"></a>            done.append((intersection[<span class="dv">0</span>] <span class="op">+</span> delta, intersection[<span class="dv">1</span>] <span class="op">+</span> delta))</span>
+<span id="cb12-249"><a href="#cb12-249" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> before:</span>
+<span id="cb12-250"><a href="#cb12-250" aria-hidden="true" tabindex="-1"></a>            todo.append(before)</span>
+<span id="cb12-251"><a href="#cb12-251" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> after:</span>
+<span id="cb12-252"><a href="#cb12-252" aria-hidden="true" tabindex="-1"></a>            todo.append(after)</span>
+<span id="cb12-253"><a href="#cb12-253" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> done, todo</span>
+<span id="cb12-254"><a href="#cb12-254" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-255"><a href="#cb12-255" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-256"><a href="#cb12-256" aria-hidden="true" tabindex="-1"></a>ranges <span class="op">=</span> [</span>
+<span id="cb12-257"><a href="#cb12-257" aria-hidden="true" tabindex="-1"></a>    (start, start <span class="op">+</span> length) <span class="cf">for</span> start, length <span class="kw">in</span> more_itertools.chunked(seeds, <span class="dv">2</span>)</span>
+<span id="cb12-258"><a href="#cb12-258" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb12-259"><a href="#cb12-259" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ruleset <span class="kw">in</span> rules:</span>
+<span id="cb12-260"><a href="#cb12-260" aria-hidden="true" tabindex="-1"></a>    todo <span class="op">=</span> ranges</span>
+<span id="cb12-261"><a href="#cb12-261" aria-hidden="true" tabindex="-1"></a>    ranges <span class="op">=</span> []</span>
+<span id="cb12-262"><a href="#cb12-262" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> rule <span class="kw">in</span> ruleset:</span>
+<span id="cb12-263"><a href="#cb12-263" aria-hidden="true" tabindex="-1"></a>        new_ranges, todo <span class="op">=</span> split_ranges(todo, rule)</span>
+<span id="cb12-264"><a href="#cb12-264" aria-hidden="true" tabindex="-1"></a>        ranges <span class="op">+=</span> new_ranges</span>
+<span id="cb12-265"><a href="#cb12-265" aria-hidden="true" tabindex="-1"></a>    ranges <span class="op">+=</span> todo</span>
+<span id="cb12-266"><a href="#cb12-266" aria-hidden="true" tabindex="-1"></a><span class="bu">min</span>(x[<span class="dv">0</span>] <span class="cf">for</span> x <span class="kw">in</span> ranges)</span>
+<span id="cb12-267"><a href="#cb12-267" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
