@@ -150,6 +150,11 @@ I could have found some way of saving the intersections from part 1 so that I di
 * [[https://adventofcode.com/2023/day/5][Day 5: If You Give A Seed A Fertilizer]]
 
 ** Part 1
+The first part is a straightforward implementation of the requirements.
+
+To parse the file, we first split on "\n\n" to get each of the sections separately, then for each line of each section, we extract all of the integers. These are all positive, so we can do that with the regex "(\d+)". After skipping through lines which don't contain integers, we have a sensible representation for our data.
+
+After that it's just a question of following through what happens to each initial value: for each one we scan through the rulesets in order, and when we find a rule in a ruleset that matches we convert it to the new value and move on. If we don't find a rule that matches we're told that the converted value is the same as the original one.
 #+begin_src jupyter-python
   [seeds], *rules = [
       [
@@ -174,6 +179,9 @@ I could have found some way of saving the intersections from part 1 so that I di
 #+end_src
 
 ** Part 2
+For part two we need to be a bit cleverer. We know that each rule converts a specific source range to a specific destination range. So to apply a rule to an arbitrary range, we split the range into three: The parts of the range before the rule applies, the parts of the range that intersect the rule and the parts of the range after the rule. Some of these parts can be empty, but that's OK.
+
+From there, building a routine to iteratively apply each ruleset to the original ranges is not too tricky.
 #+begin_src jupyter-python
   def split_range(r, rule):
       return [
