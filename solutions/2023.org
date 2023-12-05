@@ -147,3 +147,62 @@ I could have found some way of saving the intersections from part 1 so that I di
   sum(counts)
 #+end_src
 
+* [[https://adventofcode.com/2023/day/5][Day 5: If You Give A Seed A Fertilizer]]
+
+** Part 1
+#+begin_src jupyter-python
+  [seeds], *rules = [
+      [
+          [int(x) for x in ints]
+          for line in groups.split("\n")
+          if (ints := re.findall("(\d+)", line))
+      ]
+      for groups in load(5, "raw").split("\n\n")
+  ]
+
+  minval = np.inf
+  for seed in seeds:
+      current = seed
+      for ruleset in rules:
+          for destination, source, length in ruleset:
+              if source <= current < source + length:
+                  current = current + destination - source
+                  break
+      if current < minval:
+          minval = current
+  minval
+#+end_src
+
+** Part 2
+#+begin_src jupyter-python
+  def split_range(r, rule):
+      return [
+          x if x[0] < x[1] else []
+          for x in [
+              (r[0], min(rule[0], r[1])),
+              (max(r[0], rule[0]), min(r[1], rule[1])),
+              (max(rule[1], r[0]), r[1]),
+          ]
+      ]
+
+
+  def split_ranges(ranges, rule):
+      dest, src, length = rule
+      done, todo = [], []
+      for l, m, r in [split_range(r, [src, src + length]) for r in ranges]:
+          todo += [l] if l else []
+          todo += [r] if r else []
+          done += [(m[0] + dest - src, m[1] + dest - src)] if m else []
+      return done, todo
+
+
+  ranges = [(start, start + l) for start, l in more_itertools.chunked(seeds, 2)]
+  for ruleset in rules:
+      todo = ranges
+      ranges = []
+      for rule in ruleset:
+          new_ranges, todo = split_ranges(todo, rule)
+          ranges += new_ranges
+      ranges += todo
+  min(x[0] for x in ranges)
+#+end_src
