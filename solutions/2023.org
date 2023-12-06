@@ -214,3 +214,32 @@ From there, building a routine to iteratively apply each ruleset to the original
       ranges += todo
   min(x[0] for x in ranges)
 #+end_src
+
+* [[https://adventofcode.com/2023/day/6][Day 6: Wait For It]]
+** Part 1
+We can set up an equation for how far the boat will move in a given time, $t$ when waiting for a given period $w$ at the start, to wit
+$$
+d(t, w) = w(t-w)
+$$
+
+We are interested in which values of $w$ give $d(t_0, w) > d_0$, for the $d_0, t_0$ pairs we are given in the input, which is the same as exploring when the parabola described by $-w^2 +wt_0 - d_0$ is positive. This parabola has a maximum at $w = \frac{t_0}{2}$, and it's positive region (if any) will lie between the two roots. The roots are given by
+
+$$
+w_{1,2} = \frac{t_0 \mp \sqrt{t_0^2 - 4d_0^2}}{2};
+$$
+
+and for each $(d_0, t_0)$ pair we are interested in how many integers lie in the open interval $(w_1, w_2)$
+#+begin_src jupyter-python
+  ts, ds = np.array(load(6, "int"))
+  Δs = np.sqrt(ts**2 - 4 * ds)
+  np.prod(np.floor(ts / 2 + Δs / 2 - 1e-10) - np.ceil(ts / 2 - Δs / 2 + 1e-10) + 1)
+#+end_src
+
+** Part 2
+For part 2, we don't need to change anything.
+#+begin_src jupyter-python
+  t = int("".join([str(x) for x in ts]))
+  d = int("".join([str(x) for x in ds]))
+  Δ = np.sqrt(t**2 - 4 * d)
+  np.floor(t / 2 + Δ / 2 - 1e-10) - np.ceil(t / 2 - Δ / 2 + 1e-10) + 1
+#+end_src
