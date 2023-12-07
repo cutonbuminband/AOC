@@ -243,3 +243,35 @@ For part 2, we don't need to change anything.
   Δ = np.sqrt(t**2 - 4 * d)
   np.floor(t / 2 + Δ / 2 - 1e-10) - np.ceil(t / 2 - Δ / 2 + 1e-10) + 1
 #+end_src
+
+* [[https://adventofcode.com/2023/day/7][Day 7: Camel Cards]]
+
+** Part 1
+This feels doable. The key is to find a method to compare two hands of cards. We can use =np.unique= to get the count of how many times each unique value appears in the hand, which is almost exactly what we need. If we sort this count, then two hands will compare correctly if we compare their count tuples, since tuples sort lexicographically. The final comparator is =[counts, [card_value for card in hand]]=, to correctly sort hands of the same type but with different values. 
+#+begin_src jupyter-python
+  def counts(hand, part=1):
+      hand = [x for x in hand if x != "J"] if part == 2 else hand
+      _, counts = np.unique([x for x in hand], return_counts=True)
+      counts = sorted(counts, reverse=True) if hand else [0]
+      counts[0] += 5 - len(hand)
+      return counts
+
+
+  data = [x.strip().split() for x in load(7)]
+  order = sorted(
+      data, key=lambda row: [counts(row[0]), ["23456789TJQKA".index(c) for c in row[0]]]
+  )
+
+  sum([int(x[1]) for x in order] * np.arange(1, 1 + len(order)))
+#+end_src
+
+** Part 2
+Part 2 was similar enough to part 1 that I just made a flag in the =counts= function and changed the order of the card values
+#+begin_src jupyter-python
+  order = sorted(
+      data,
+      key=lambda row: [counts(row[0], part=2), ["J23456789TQKA".index(c) for c in row[0]]],
+  )
+
+  sum([int(x[1]) for x in order] * np.arange(1, 1 + len(order)))
+#+end_src
