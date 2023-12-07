@@ -546,37 +546,36 @@ w_{1,2} = \frac{t_0 \mp \sqrt{t_0^2 - 4d_0^2}}{2};
 <h1><a href="https://adventofcode.com/2023/day/7">Day 7: Camel Cards</a></h1>
 <section id="part-1-6" class="level2">
 <h2 class="anchored" data-anchor-id="part-1-6">Part 1</h2>
-<p>This feels doable. The key is to find a method to compare two hands of cards. To find the type of hand, <code class="verbatim">np.uniq</code> gets us most of the way there, since it can also return a count how many times the values appeared. Once we have the type, we can make use of the fact that tuples and lists sort lexicographically to make the final comparator <code class="verbatim">[type, [card_value for card in hand]]</code>. Passing that to the built-in sort ensures that: two cards differing in type will sort the higher type last, while two cards with the same type will sort based on the card values.</p>
+<p>This feels doable. The key is to find a method to compare two hands of cards. We can use <code class="verbatim">np.unique</code> to get the count of how many times each unique value appears in the hand, which is almost exactly what we need. If we sort this count, then two hands will compare correctly if we compare their count tuples, since tuples sort lexicographically. The final comparator is <code class="verbatim">[counts, [card_value for card in hand]]</code>, to correctly sort hands of the same type but with different values.</p>
 <div class="cell" data-execution_count="14">
 <details open="">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> type_(hand, part<span class="op">=</span><span class="dv">1</span>):</span>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> counts(hand, part<span class="op">=</span><span class="dv">1</span>):</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    hand <span class="op">=</span> [x <span class="cf">for</span> x <span class="kw">in</span> hand <span class="cf">if</span> x <span class="op">!=</span> <span class="st">"J"</span>] <span class="cf">if</span> part <span class="op">==</span> <span class="dv">2</span> <span class="cf">else</span> hand</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    _, counts <span class="op">=</span> np.unique([x <span class="cf">for</span> x <span class="kw">in</span> hand], return_counts<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    counts <span class="op">=</span> <span class="bu">sorted</span>(counts, reverse<span class="op">=</span><span class="va">True</span>) <span class="cf">if</span> hand <span class="cf">else</span> [<span class="dv">0</span>]</span>
 <span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    counts[<span class="dv">0</span>] <span class="op">+=</span> <span class="dv">5</span> <span class="op">-</span> <span class="bu">len</span>(hand)</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    types <span class="op">=</span> [(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>), (<span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>), (<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">1</span>), (<span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">1</span>), (<span class="dv">3</span>, <span class="dv">2</span>), (<span class="dv">4</span>, <span class="dv">1</span>), (<span class="dv">5</span>,)]</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> types.index(<span class="bu">tuple</span>(counts))</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> counts</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> [x.strip().split() <span class="cf">for</span> x <span class="kw">in</span> load(<span class="dv">7</span>)]</span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>order <span class="op">=</span> <span class="bu">sorted</span>(</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    data, key<span class="op">=</span><span class="kw">lambda</span> row: [type_(row[<span class="dv">0</span>]), [<span class="st">"23456789TJQKA"</span>.index(c) <span class="cf">for</span> c <span class="kw">in</span> row[<span class="dv">0</span>]]]</span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>([<span class="bu">int</span>(x[<span class="dv">1</span>]) <span class="cf">for</span> x <span class="kw">in</span> order] <span class="op">*</span> np.arange(<span class="dv">1</span>, <span class="dv">1</span> <span class="op">+</span> <span class="bu">len</span>(order)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> [x.strip().split() <span class="cf">for</span> x <span class="kw">in</span> load(<span class="dv">7</span>)]</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>order <span class="op">=</span> <span class="bu">sorted</span>(</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    data, key<span class="op">=</span><span class="kw">lambda</span> row: [counts(row[<span class="dv">0</span>]), [<span class="st">"23456789TJQKA"</span>.index(c) <span class="cf">for</span> c <span class="kw">in</span> row[<span class="dv">0</span>]]]</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>([<span class="bu">int</span>(x[<span class="dv">1</span>]) <span class="cf">for</span> x <span class="kw">in</span> order] <span class="op">*</span> np.arange(<span class="dv">1</span>, <span class="dv">1</span> <span class="op">+</span> <span class="bu">len</span>(order)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
 <section id="part-2-6" class="level2">
 <h2 class="anchored" data-anchor-id="part-2-6">Part 2</h2>
-<p>Part 2 was similar enough to part 1 that I just made a flag in the <code class="verbatim">type_</code> function and changed the order of the card values</p>
+<p>Part 2 was similar enough to part 1 that I just made a flag in the <code class="verbatim">counts</code> function and changed the order of the card values</p>
 <div class="cell" data-execution_count="15">
 <details open="">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>order <span class="op">=</span> <span class="bu">sorted</span>(</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    data,</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    key<span class="op">=</span><span class="kw">lambda</span> row: [type_(row[<span class="dv">0</span>], part<span class="op">=</span><span class="dv">2</span>), [<span class="st">"J23456789TQKA"</span>.index(c) <span class="cf">for</span> c <span class="kw">in</span> row[<span class="dv">0</span>]]],</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    key<span class="op">=</span><span class="kw">lambda</span> row: [counts(row[<span class="dv">0</span>], part<span class="op">=</span><span class="dv">2</span>), [<span class="st">"J23456789TQKA"</span>.index(c) <span class="cf">for</span> c <span class="kw">in</span> row[<span class="dv">0</span>]]],</span>
 <span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>([<span class="bu">int</span>(x[<span class="dv">1</span>]) <span class="cf">for</span> x <span class="kw">in</span> order] <span class="op">*</span> np.arange(<span class="dv">1</span>, <span class="dv">1</span> <span class="op">+</span> <span class="bu">len</span>(order)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1265,38 +1264,37 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb16-300"><a href="#cb16-300" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb16-301"><a href="#cb16-301" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1</span></span>
 <span id="cb16-302"><a href="#cb16-302" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-303"><a href="#cb16-303" aria-hidden="true" tabindex="-1"></a>This feels doable. The key is to find a method to compare two hands of cards. To find the type of hand, <span class="in">`np.uniq`</span>{.verbatim} gets us most of the way there, since it can also return a count how many times the values appeared. Once we have the type, we can make use of the fact that tuples and lists sort lexicographically to make the final comparator <span class="in">`[type, [card_value for card in hand]]`</span>{.verbatim}. Passing that to the built-in sort ensures that: two cards differing in type will sort the higher type last, while two cards with the same type will sort based on the card values.</span>
+<span id="cb16-303"><a href="#cb16-303" aria-hidden="true" tabindex="-1"></a>This feels doable. The key is to find a method to compare two hands of cards. We can use <span class="in">`np.unique`</span>{.verbatim} to get the count of how many times each unique value appears in the hand, which is almost exactly what we need. If we sort this count, then two hands will compare correctly if we compare their count tuples, since tuples sort lexicographically. The final comparator is <span class="in">`[counts, [card_value for card in hand]]`</span>{.verbatim}, to correctly sort hands of the same type but with different values.</span>
 <span id="cb16-304"><a href="#cb16-304" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb16-307"><a href="#cb16-307" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb16-308"><a href="#cb16-308" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> type_(hand, part<span class="op">=</span><span class="dv">1</span>):</span>
+<span id="cb16-308"><a href="#cb16-308" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> counts(hand, part<span class="op">=</span><span class="dv">1</span>):</span>
 <span id="cb16-309"><a href="#cb16-309" aria-hidden="true" tabindex="-1"></a>    hand <span class="op">=</span> [x <span class="cf">for</span> x <span class="kw">in</span> hand <span class="cf">if</span> x <span class="op">!=</span> <span class="st">"J"</span>] <span class="cf">if</span> part <span class="op">==</span> <span class="dv">2</span> <span class="cf">else</span> hand</span>
 <span id="cb16-310"><a href="#cb16-310" aria-hidden="true" tabindex="-1"></a>    _, counts <span class="op">=</span> np.unique([x <span class="cf">for</span> x <span class="kw">in</span> hand], return_counts<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb16-311"><a href="#cb16-311" aria-hidden="true" tabindex="-1"></a>    counts <span class="op">=</span> <span class="bu">sorted</span>(counts, reverse<span class="op">=</span><span class="va">True</span>) <span class="cf">if</span> hand <span class="cf">else</span> [<span class="dv">0</span>]</span>
 <span id="cb16-312"><a href="#cb16-312" aria-hidden="true" tabindex="-1"></a>    counts[<span class="dv">0</span>] <span class="op">+=</span> <span class="dv">5</span> <span class="op">-</span> <span class="bu">len</span>(hand)</span>
-<span id="cb16-313"><a href="#cb16-313" aria-hidden="true" tabindex="-1"></a>    types <span class="op">=</span> [(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>), (<span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>), (<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">1</span>), (<span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">1</span>), (<span class="dv">3</span>, <span class="dv">2</span>), (<span class="dv">4</span>, <span class="dv">1</span>), (<span class="dv">5</span>,)]</span>
-<span id="cb16-314"><a href="#cb16-314" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> types.index(<span class="bu">tuple</span>(counts))</span>
+<span id="cb16-313"><a href="#cb16-313" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> counts</span>
+<span id="cb16-314"><a href="#cb16-314" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb16-315"><a href="#cb16-315" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-316"><a href="#cb16-316" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-317"><a href="#cb16-317" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> [x.strip().split() <span class="cf">for</span> x <span class="kw">in</span> load(<span class="dv">7</span>)]</span>
-<span id="cb16-318"><a href="#cb16-318" aria-hidden="true" tabindex="-1"></a>order <span class="op">=</span> <span class="bu">sorted</span>(</span>
-<span id="cb16-319"><a href="#cb16-319" aria-hidden="true" tabindex="-1"></a>    data, key<span class="op">=</span><span class="kw">lambda</span> row: [type_(row[<span class="dv">0</span>]), [<span class="st">"23456789TJQKA"</span>.index(c) <span class="cf">for</span> c <span class="kw">in</span> row[<span class="dv">0</span>]]]</span>
-<span id="cb16-320"><a href="#cb16-320" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb16-321"><a href="#cb16-321" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-322"><a href="#cb16-322" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>([<span class="bu">int</span>(x[<span class="dv">1</span>]) <span class="cf">for</span> x <span class="kw">in</span> order] <span class="op">*</span> np.arange(<span class="dv">1</span>, <span class="dv">1</span> <span class="op">+</span> <span class="bu">len</span>(order)))</span>
-<span id="cb16-323"><a href="#cb16-323" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb16-324"><a href="#cb16-324" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-325"><a href="#cb16-325" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
-<span id="cb16-326"><a href="#cb16-326" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-327"><a href="#cb16-327" aria-hidden="true" tabindex="-1"></a>Part 2 was similar enough to part 1 that I just made a flag in the <span class="in">`type_`</span>{.verbatim} function and changed the order of the card values</span>
-<span id="cb16-328"><a href="#cb16-328" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-331"><a href="#cb16-331" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb16-332"><a href="#cb16-332" aria-hidden="true" tabindex="-1"></a>order <span class="op">=</span> <span class="bu">sorted</span>(</span>
-<span id="cb16-333"><a href="#cb16-333" aria-hidden="true" tabindex="-1"></a>    data,</span>
-<span id="cb16-334"><a href="#cb16-334" aria-hidden="true" tabindex="-1"></a>    key<span class="op">=</span><span class="kw">lambda</span> row: [type_(row[<span class="dv">0</span>], part<span class="op">=</span><span class="dv">2</span>), [<span class="st">"J23456789TQKA"</span>.index(c) <span class="cf">for</span> c <span class="kw">in</span> row[<span class="dv">0</span>]]],</span>
-<span id="cb16-335"><a href="#cb16-335" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb16-336"><a href="#cb16-336" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-337"><a href="#cb16-337" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>([<span class="bu">int</span>(x[<span class="dv">1</span>]) <span class="cf">for</span> x <span class="kw">in</span> order] <span class="op">*</span> np.arange(<span class="dv">1</span>, <span class="dv">1</span> <span class="op">+</span> <span class="bu">len</span>(order)))</span>
-<span id="cb16-338"><a href="#cb16-338" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-316"><a href="#cb16-316" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> [x.strip().split() <span class="cf">for</span> x <span class="kw">in</span> load(<span class="dv">7</span>)]</span>
+<span id="cb16-317"><a href="#cb16-317" aria-hidden="true" tabindex="-1"></a>order <span class="op">=</span> <span class="bu">sorted</span>(</span>
+<span id="cb16-318"><a href="#cb16-318" aria-hidden="true" tabindex="-1"></a>    data, key<span class="op">=</span><span class="kw">lambda</span> row: [counts(row[<span class="dv">0</span>]), [<span class="st">"23456789TJQKA"</span>.index(c) <span class="cf">for</span> c <span class="kw">in</span> row[<span class="dv">0</span>]]]</span>
+<span id="cb16-319"><a href="#cb16-319" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-320"><a href="#cb16-320" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-321"><a href="#cb16-321" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>([<span class="bu">int</span>(x[<span class="dv">1</span>]) <span class="cf">for</span> x <span class="kw">in</span> order] <span class="op">*</span> np.arange(<span class="dv">1</span>, <span class="dv">1</span> <span class="op">+</span> <span class="bu">len</span>(order)))</span>
+<span id="cb16-322"><a href="#cb16-322" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-323"><a href="#cb16-323" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-324"><a href="#cb16-324" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
+<span id="cb16-325"><a href="#cb16-325" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-326"><a href="#cb16-326" aria-hidden="true" tabindex="-1"></a>Part 2 was similar enough to part 1 that I just made a flag in the <span class="in">`counts`</span>{.verbatim} function and changed the order of the card values</span>
+<span id="cb16-327"><a href="#cb16-327" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-330"><a href="#cb16-330" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb16-331"><a href="#cb16-331" aria-hidden="true" tabindex="-1"></a>order <span class="op">=</span> <span class="bu">sorted</span>(</span>
+<span id="cb16-332"><a href="#cb16-332" aria-hidden="true" tabindex="-1"></a>    data,</span>
+<span id="cb16-333"><a href="#cb16-333" aria-hidden="true" tabindex="-1"></a>    key<span class="op">=</span><span class="kw">lambda</span> row: [counts(row[<span class="dv">0</span>], part<span class="op">=</span><span class="dv">2</span>), [<span class="st">"J23456789TQKA"</span>.index(c) <span class="cf">for</span> c <span class="kw">in</span> row[<span class="dv">0</span>]]],</span>
+<span id="cb16-334"><a href="#cb16-334" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-335"><a href="#cb16-335" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-336"><a href="#cb16-336" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>([<span class="bu">int</span>(x[<span class="dv">1</span>]) <span class="cf">for</span> x <span class="kw">in</span> order] <span class="op">*</span> np.arange(<span class="dv">1</span>, <span class="dv">1</span> <span class="op">+</span> <span class="bu">len</span>(order)))</span>
+<span id="cb16-337"><a href="#cb16-337" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

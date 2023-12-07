@@ -2188,14 +2188,14 @@
     "href": "qmd/2023.html#part-1-6",
     "title": "2023 Solutions",
     "section": "Part 1",
-    "text": "Part 1\nThis feels doable. The key is to find a method to compare two hands of cards. To find the type of hand, np.uniq gets us most of the way there, since it can also return a count how many times the values appeared. Once we have the type, we can make use of the fact that tuples and lists sort lexicographically to make the final comparator [type, [card_value for card in hand]]. Passing that to the built-in sort ensures that: two cards differing in type will sort the higher type last, while two cards with the same type will sort based on the card values.\n\n\nCode\ndef type_(hand, part=1):\n    hand = [x for x in hand if x != \"J\"] if part == 2 else hand\n    _, counts = np.unique([x for x in hand], return_counts=True)\n    counts = sorted(counts, reverse=True) if hand else [0]\n    counts[0] += 5 - len(hand)\n    types = [(1, 1, 1, 1, 1), (2, 1, 1, 1), (2, 2, 1), (3, 1, 1), (3, 2), (4, 1), (5,)]\n    return types.index(tuple(counts))\n\n\ndata = [x.strip().split() for x in load(7)]\norder = sorted(\n    data, key=lambda row: [type_(row[0]), [\"23456789TJQKA\".index(c) for c in row[0]]]\n)\n\nsum([int(x[1]) for x in order] * np.arange(1, 1 + len(order)))"
+    "text": "Part 1\nThis feels doable. The key is to find a method to compare two hands of cards. We can use np.unique to get the count of how many times each unique value appears in the hand, which is almost exactly what we need. If we sort this count, then two hands will compare correctly if we compare their count tuples, since tuples sort lexicographically. The final comparator is [counts, [card_value for card in hand]], to correctly sort hands of the same type but with different values.\n\n\nCode\ndef counts(hand, part=1):\n    hand = [x for x in hand if x != \"J\"] if part == 2 else hand\n    _, counts = np.unique([x for x in hand], return_counts=True)\n    counts = sorted(counts, reverse=True) if hand else [0]\n    counts[0] += 5 - len(hand)\n    return counts\n\n\ndata = [x.strip().split() for x in load(7)]\norder = sorted(\n    data, key=lambda row: [counts(row[0]), [\"23456789TJQKA\".index(c) for c in row[0]]]\n)\n\nsum([int(x[1]) for x in order] * np.arange(1, 1 + len(order)))"
   },
   {
     "objectID": "qmd/2023.html#part-2-6",
     "href": "qmd/2023.html#part-2-6",
     "title": "2023 Solutions",
     "section": "Part 2",
-    "text": "Part 2\nPart 2 was similar enough to part 1 that I just made a flag in the type_ function and changed the order of the card values\n\n\nCode\norder = sorted(\n    data,\n    key=lambda row: [type_(row[0], part=2), [\"J23456789TQKA\".index(c) for c in row[0]]],\n)\n\nsum([int(x[1]) for x in order] * np.arange(1, 1 + len(order)))"
+    "text": "Part 2\nPart 2 was similar enough to part 1 that I just made a flag in the counts function and changed the order of the card values\n\n\nCode\norder = sorted(\n    data,\n    key=lambda row: [counts(row[0], part=2), [\"J23456789TQKA\".index(c) for c in row[0]]],\n)\n\nsum([int(x[1]) for x in order] * np.arange(1, 1 + len(order)))"
   },
   {
     "objectID": "qmd/2016.html",
