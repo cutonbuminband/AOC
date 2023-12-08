@@ -275,3 +275,41 @@ Part 2 was similar enough to part 1 that I just made a flag in the =counts= func
 
   sum([int(x[1]) for x in order] * np.arange(1, 1 + len(order)))
 #+end_src
+
+* [[https://adventofcode.com/2023/day/8][Day 8: Haunted Wasteland]]
+** Part 1
+For part 1 we build a dictionary of left, right instructions for each node, which makes following a path from start to end easy.
+#+begin_src jupyter-python
+  instructions, lines = load(8, "raw").split("\n\n")
+  instructions = instructions.strip()
+  data = [words for line in lines.split("\n") if (words := re.findall("[A-Z]+", line))]
+  nodes = {node: {"L": left, "R": right} for node, left, right in data}
+  node = "AAA"
+  i = 0
+  while node != "ZZZ":
+      node = nodes[node][instructions[i % len(instructions)]]
+      i += 1
+  i
+#+end_src
+
+** Part 2
+Part 2 screams cycle checking, and indeed it is. The state at any given time is given by the current node and the index of the instruction list. If we ever see the same state twice, we know we're in a cycle, and can figure out the period. All of the cycles turn out to have periods that match the offset from the start, so we can just use the =lcm= to find the common period. If some of the cycles had had a different offset, we would have need the full chinese remainder theorem.
+#+begin_src jupyter-python
+  import math
+  i = 0
+  periods = []
+  def find_cycle(node):
+      seen = {}
+      i = 0
+      z = None
+      while (node, i % len(instructions)) not in seen:
+          seen[node, i % len(instructions)] = i
+          node = nodes[node][instructions[i % len(instructions)]]
+          i += 1
+          if node[-1] == "Z":
+              z = i
+      period = i - seen[(node, i % len(instructions))]
+      return period, z % period
+  periods, congruences = list(zip(*[find_cycle(node) for node in nodes if node[-1] == "A"]))
+  math.lcm(*periods)
+#+end_src
