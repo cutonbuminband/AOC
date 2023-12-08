@@ -22,4 +22,4 @@ do
 done
 
 . $HOME/.venvs/aoc/bin/activate
-quarto publish gh-pages
+quarto publish gh-pages --no-prompt
