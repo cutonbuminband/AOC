@@ -2198,6 +2198,20 @@
     "text": "Part 2\nPart 2 was similar enough to part 1 that I just made a flag in the counts function and changed the order of the card values\n\n\nCode\norder = sorted(\n    data,\n    key=lambda row: [counts(row[0], part=2), [\"J23456789TQKA\".index(c) for c in row[0]]],\n)\n\nsum([int(x[1]) for x in order] * np.arange(1, 1 + len(order)))"
   },
   {
+    "objectID": "qmd/2023.html#part-1-7",
+    "href": "qmd/2023.html#part-1-7",
+    "title": "2023 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\nFor part 1 we build a dictionary of left, right instructions for each node, which makes following a path from start to end easy.\n\n\nCode\ninstructions, lines = load(8, \"raw\").split(\"\\n\\n\")\ninstructions = instructions.strip()\ndata = [words for line in lines.split(\"\\n\") if (words := re.findall(\"[A-Z]+\", line))]\nnodes = {node: {\"L\": left, \"R\": right} for node, left, right in data}\nnode = \"AAA\"\ni = 0\nwhile node != \"ZZZ\":\n    node = nodes[node][instructions[i % len(instructions)]]\n    i += 1\ni"
+  },
+  {
+    "objectID": "qmd/2023.html#part-2-7",
+    "href": "qmd/2023.html#part-2-7",
+    "title": "2023 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\nPart 2 screams cycle checking, and indeed it is. The state at any given time is given by the current node and the index of the instruction list. If we ever see the same state twice, we know we’re in a cycle, and can figure out the period. All of the cycles turn out to have periods that match the offset from the start, so we can just use the lcm to find the common period. If some of the cycles had had a different offset, we would have need the full chinese remainder theorem.\n\n\nCode\nimport math\ni = 0\nperiods = []\ndef find_cycle(node):\n    seen = {}\n    i = 0\n    z = None\n    while (node, i % len(instructions)) not in seen:\n        seen[node, i % len(instructions)] = i\n        node = nodes[node][instructions[i % len(instructions)]]\n        i += 1\n        if node[-1] == \"Z\":\n            z = i\n    period = i - seen[(node, i % len(instructions))]\n    return period, z % period\nperiods, congruences = list(zip(*[find_cycle(node) for node in nodes if node[-1] == \"A\"]))\nmath.lcm(*periods)"
+  },
+  {
     "objectID": "qmd/2016.html",
     "href": "qmd/2016.html",
     "title": "2016 Solutions",
