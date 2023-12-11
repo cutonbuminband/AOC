@@ -313,3 +313,26 @@ Part 2 screams cycle checking, and indeed it is. The state at any given time is 
   periods, congruences = list(zip(*[find_cycle(node) for node in nodes if node[-1] == "A"]))
   math.lcm(*periods)
 #+end_src
+
+* [[https://adventofcode.com/2023/day/9][Day 9: Mirage Maintenance]]
+** Part 1
+This one's pretty straightforward: calculate all the needed differences; add the last element of each difference to the calculation.
+#+begin_src jupyter-python
+  def score(line, part=1):
+      total = 0
+      if part == 2:
+          line = line[::-1]
+      while any(line):
+          total += line[-1]
+          line = [line[i] - line[i - 1] for i in range(1, len(line))]
+      return total
+
+
+  sum(score(line) for line in load(9, "int"))
+#+end_src
+
+** Part 2
+...and part 2 is simple enough that it can be included in part 1 with a flag
+#+begin_src jupyter-python
+  sum(score(line, part=2) for line in load(9, "int"))
+#+end_src
