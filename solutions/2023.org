@@ -336,6 +336,79 @@ This one's pretty straightforward: calculate all the needed differences; add the
 #+begin_src jupyter-python
   sum(score(line, part=2) for line in load(9, "int"))
 #+end_src
+
+* [[https://adventofcode.com/2023/day/10][Day 10: Pipe Maze]]
+
+** Part 1
+For part 1 we find the two directions leading away from the starting point, and follow the path along each one at the same pace. The point where they overlap is the point furthest away from the start, so we return that.
+#+begin_src jupyter-python
+  data = np.pad(
+      np.array([[char for char in line.strip()] for line in load(10)]),
+      1,
+      constant_values=".",
+  )
+  connections = {
+      "-": [(0, -1), (0, 1)],
+      "|": [(-1, 0), (1, 0)],
+      "L": [(-1, 0), (0, 1)],
+      "J": [(-1, 0), (0, -1)],
+      "7": [(1, 0), (0, -1)],
+      "F": [(1, 0), (0, 1)],
+      ".": [],
+  }
+  Δs = np.array([[1, 0], [0, 1], [-1, 0], [0, -1]])
+  point = np.array(next(zip(*np.where(data == "S"))))
+  (lx, lv), (rx, rv) = [
+      (point + Δ, Δ) for Δ in Δs if tuple(-Δ) in connections[data[tuple(point + Δ)]]
+  ]
+
+
+  def update(point, direction):
+      options = connections[data[tuple(point)]]
+      new_direction = np.array(
+          options[1] if tuple(-direction) == options[0] else options[0]
+      )
+      return point + new_direction, new_direction
+
+
+  i = 1
+  left_path = [point, lx]
+  right_path = [rx]
+  while not np.allclose(lx, rx):
+      lx, lv = update(lx, lv)
+      left_path.append(lx)
+      rx, rv = update(rx, rv)
+      right_path.append(rx)
+      i += 1
+  i
+#+end_src
+
+** Part 2
+For part 2, we need some way of distinguishing points inside from outside the circuit. Since the lines that make up the boundary of the circuit never cross, this is a point in polygon problem. We could solve it by raytracing: for every point in the polygon we can draw all rays to the outside edge and see if they cross the boundary of the polygon an odd number of times. If they do, the point is inside the polygon. We could also look at the winding number of the polygon with respect the the point: points inside will have a nonzero winding number, while points outside will have a positive winding number.
+
+Ultimately, what I ended up doing was just blowing up the grid to double size, flood filling the outside and looking at the even coordinate values of whatever was left. It's stupid, but it works.
+#+begin_src jupyter-python
+  ys, xs = zip(*(left_path + right_path[:-1][::-1]))
+  dy, dx = np.diff([ys + (ys[0],), xs + (xs[0],)], axis=1)
+  board = np.ones((data.shape[0] * 2, data.shape[1] * 2))
+  ys, xs = map(np.array, [ys, xs])
+  board[2 * ys, 2 * xs] = 0
+
+  board[2 * ys + dy, 2 * xs + dx] = 0
+  board = np.pad(board[1:-1, 1:-1], 1, constant_values=0)
+  points = deque([(1, 1)])
+  while points:
+      point = points.popleft()
+      if board[point] == 0:
+          continue
+      board[point] = 0
+      for Δ in Δs:
+          nb = tuple(Δ + point)
+          if board[nb]:
+              points.append(nb)
+  int(board[::2, ::2].sum())
+#+end_src
+
 * [[https://adventofcode.com/2023/day/11][Day 11: Cosmic Expansion]]
 
 ** Part 1
