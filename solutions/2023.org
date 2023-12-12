@@ -336,3 +336,31 @@ This one's pretty straightforward: calculate all the needed differences; add the
 #+begin_src jupyter-python
   sum(score(line, part=2) for line in load(9, "int"))
 #+end_src
+* [[https://adventofcode.com/2023/day/11][Day 11: Cosmic Expansion]]
+
+** Part 1
+I liked this puzzle, and I feel that I managed to come up with an OK slick array solution. We can get the coordinates of the original galaxies and the empty rows using =np.where=. For each empty row we can increase the first coordinate of the galaxies below it by some amount, and, mutatis mutandis, we can do the same for the empty columns.
+
+That gives us a set of new coordinates, and we need to find the sum of all the manhattan distances from one point to the others. for any pair of points $i, j$, that's $\left|x_i - x_j\right| +\left|y_i - y_j\right|$; we can construct the entire matrix by taking the row vector of coordinates, and subtracting from it the column vector of the same coordinates and relying on =numpy='s broadcasting magic.
+#+begin_src jupyter-python
+  def solve(s=1):
+      y, x = np.where(data == "#")
+
+      empty_r = [i for i in range(len(data)) if all(data[i] == ".")]
+      empty_c = [i for i in range(len(data)) if all(data[:, i] == ".")]
+      new_y = y + s * np.array([y > empty_r[i] for i in range(len(empty_r))]).sum(axis=0)
+      new_x = x + s * np.array([x > empty_c[i] for i in range(len(empty_c))]).sum(axis=0)
+      return (
+          abs(new_y - new_y.reshape(-1, 1)) + abs(new_x - new_x.reshape(-1, 1))
+      ).sum() // 2
+
+
+  data = load(11, "chararray")
+  solve()
+#+end_src
+
+** Part 2
+The second part is pretty reivially included in the first
+#+begin_src jupyter-python
+  solve(999_999)
+#+end_src

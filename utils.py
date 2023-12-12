@@ -134,5 +134,7 @@ def year_load(year):
             if "delimiter" not in kwargs:
                 kwargs["delimiter"] = ","
             return np.loadtxt(filename, dtype=int, **kwargs)
+        if output == "chararray":
+            return np.array([[char for char in line.strip()] for line in lines])
 
     return load
