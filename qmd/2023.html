@@ -818,7 +818,7 @@ w_{1,2} = \frac{t_0 \mp \sqrt{t_0^2 - 4d_0^2}}{2};
 <li>If the sum of block lengths is zero, exactly one assignment is possible</li>
 </ul>
 <p>Otherwise, if the first character is off, then the count is the same as the count ignoring that assignment and we can recurse.</p>
-<p>If the first character is on, we can check whether the first <code class="verbatim">l</code> characters would fit the first block, and the =l+1=th character is either the end of the string or compatible with an off state. If it is, the count is the same as the count for the remainder of the string on the remainder of the blocks and we can recurse.</p>
+<p>If the first character is on, we can check whether the first <code class="verbatim">l</code> characters would fit the first block, and the <code class="verbatim">l+1</code>’th character is either the end of the string or compatible with an off state. If it is, the count is the same as the count for the remainder of the string on the remainder of the blocks and we can recurse.</p>
 <p>Finally, if the first character is ambiguous, the count is the sum of the counts for the two possible assignments of the character, and we can recurse.</p>
 <div class="cell" data-execution_count="24">
 <details open="">
@@ -1781,7 +1781,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb26-546"><a href="#cb26-546" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb26-547"><a href="#cb26-547" aria-hidden="true" tabindex="-1"></a>Otherwise, if the first character is off, then the count is the same as the count ignoring that assignment and we can recurse.</span>
 <span id="cb26-548"><a href="#cb26-548" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-549"><a href="#cb26-549" aria-hidden="true" tabindex="-1"></a>If the first character is on, we can check whether the first <span class="in">`l`</span>{.verbatim} characters would fit the first block, and the =l+1=th character is either the end of the string or compatible with an off state. If it is, the count is the same as the count for the remainder of the string on the remainder of the blocks and we can recurse.</span>
+<span id="cb26-549"><a href="#cb26-549" aria-hidden="true" tabindex="-1"></a>If the first character is on, we can check whether the first <span class="in">`l`</span>{.verbatim} characters would fit the first block, and the <span class="in">`l+1`</span>{.verbatim}'th character is either the end of the string or compatible with an off state. If it is, the count is the same as the count for the remainder of the string on the remainder of the blocks and we can recurse.</span>
 <span id="cb26-550"><a href="#cb26-550" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb26-551"><a href="#cb26-551" aria-hidden="true" tabindex="-1"></a>Finally, if the first character is ambiguous, the count is the sum of the counts for the two possible assignments of the character, and we can recurse.</span>
 <span id="cb26-552"><a href="#cb26-552" aria-hidden="true" tabindex="-1"></a></span>
