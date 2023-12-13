@@ -433,7 +433,7 @@ That gives us a set of new coordinates, and we need to find the sum of all the m
 #+end_src
 
 ** Part 2
-The second part is pretty reivially included in the first
+The second part is pretty trivially included in the first
 #+begin_src jupyter-python
   solve(999_999)
 #+end_src
@@ -451,7 +451,7 @@ It's recursive, with the following base cases; the third is checked last:
 
 Otherwise, if the first character is off, then the count is the same as the count ignoring that assignment and we can recurse.
 
-If the first character is on, we can check whether the first =l= characters would fit the first block, and the =l+1=th character is either the end of the string or compatible with an off state. If it is, the count is the same as the count for the remainder of the string on the remainder of the blocks and we can recurse.
+If the first character is on, we can check whether the first =l= characters would fit the first block, and the =l+1='th character is either the end of the string or compatible with an off state. If it is, the count is the same as the count for the remainder of the string on the remainder of the blocks and we can recurse.
 
 Finally, if the first character is ambiguous, the count is the sum of the counts for the two possible assignments of the character, and we can recurse.
 #+begin_src jupyter-python
