@@ -985,18 +985,17 @@ w_{1,2} = \frac{t_0 \mp \sqrt{t_0^2 - 4d_0^2}}{2};
 <span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>seen, scores <span class="op">=</span> {}, {}</span>
-<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>scores <span class="op">=</span> {}</span>
-<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>maxval <span class="op">=</span> <span class="dv">1_000_000_000</span></span>
-<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(maxval):</span>
-<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>    h <span class="op">=</span> hash_(array)</span>
-<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> h <span class="kw">in</span> seen:</span>
-<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">break</span></span>
-<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a>    seen[h] <span class="op">=</span> i</span>
-<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a>    scores[i] <span class="op">=</span> score(array)</span>
-<span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a>    array <span class="op">=</span> cycle(array)</span>
-<span id="cb29-22"><a href="#cb29-22" aria-hidden="true" tabindex="-1"></a>cycle_length <span class="op">=</span> i <span class="op">-</span> seen[h]</span>
-<span id="cb29-23"><a href="#cb29-23" aria-hidden="true" tabindex="-1"></a>index <span class="op">=</span> seen[h] <span class="op">+</span> (maxval <span class="op">-</span> seen[h]) <span class="op">%</span> cycle_length</span>
-<span id="cb29-24"><a href="#cb29-24" aria-hidden="true" tabindex="-1"></a>scores[index]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>maxval <span class="op">=</span> <span class="dv">1_000_000_000</span></span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(maxval):</span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>    h <span class="op">=</span> hash_(array)</span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> h <span class="kw">in</span> seen:</span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">break</span></span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a>    seen[h] <span class="op">=</span> i</span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a>    scores[i] <span class="op">=</span> score(array)</span>
+<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a>    array <span class="op">=</span> cycle(array)</span>
+<span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a>cycle_length <span class="op">=</span> i <span class="op">-</span> seen[h]</span>
+<span id="cb29-22"><a href="#cb29-22" aria-hidden="true" tabindex="-1"></a>index <span class="op">=</span> seen[h] <span class="op">+</span> (maxval <span class="op">-</span> seen[h]) <span class="op">%</span> cycle_length</span>
+<span id="cb29-23"><a href="#cb29-23" aria-hidden="true" tabindex="-1"></a>scores[index]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 
@@ -2055,19 +2054,18 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb30-705"><a href="#cb30-705" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb30-706"><a href="#cb30-706" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb30-707"><a href="#cb30-707" aria-hidden="true" tabindex="-1"></a>seen, scores <span class="op">=</span> {}, {}</span>
-<span id="cb30-708"><a href="#cb30-708" aria-hidden="true" tabindex="-1"></a>scores <span class="op">=</span> {}</span>
-<span id="cb30-709"><a href="#cb30-709" aria-hidden="true" tabindex="-1"></a>maxval <span class="op">=</span> <span class="dv">1_000_000_000</span></span>
-<span id="cb30-710"><a href="#cb30-710" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(maxval):</span>
-<span id="cb30-711"><a href="#cb30-711" aria-hidden="true" tabindex="-1"></a>    h <span class="op">=</span> hash_(array)</span>
-<span id="cb30-712"><a href="#cb30-712" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> h <span class="kw">in</span> seen:</span>
-<span id="cb30-713"><a href="#cb30-713" aria-hidden="true" tabindex="-1"></a>        <span class="cf">break</span></span>
-<span id="cb30-714"><a href="#cb30-714" aria-hidden="true" tabindex="-1"></a>    seen[h] <span class="op">=</span> i</span>
-<span id="cb30-715"><a href="#cb30-715" aria-hidden="true" tabindex="-1"></a>    scores[i] <span class="op">=</span> score(array)</span>
-<span id="cb30-716"><a href="#cb30-716" aria-hidden="true" tabindex="-1"></a>    array <span class="op">=</span> cycle(array)</span>
-<span id="cb30-717"><a href="#cb30-717" aria-hidden="true" tabindex="-1"></a>cycle_length <span class="op">=</span> i <span class="op">-</span> seen[h]</span>
-<span id="cb30-718"><a href="#cb30-718" aria-hidden="true" tabindex="-1"></a>index <span class="op">=</span> seen[h] <span class="op">+</span> (maxval <span class="op">-</span> seen[h]) <span class="op">%</span> cycle_length</span>
-<span id="cb30-719"><a href="#cb30-719" aria-hidden="true" tabindex="-1"></a>scores[index]</span>
-<span id="cb30-720"><a href="#cb30-720" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb30-708"><a href="#cb30-708" aria-hidden="true" tabindex="-1"></a>maxval <span class="op">=</span> <span class="dv">1_000_000_000</span></span>
+<span id="cb30-709"><a href="#cb30-709" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(maxval):</span>
+<span id="cb30-710"><a href="#cb30-710" aria-hidden="true" tabindex="-1"></a>    h <span class="op">=</span> hash_(array)</span>
+<span id="cb30-711"><a href="#cb30-711" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> h <span class="kw">in</span> seen:</span>
+<span id="cb30-712"><a href="#cb30-712" aria-hidden="true" tabindex="-1"></a>        <span class="cf">break</span></span>
+<span id="cb30-713"><a href="#cb30-713" aria-hidden="true" tabindex="-1"></a>    seen[h] <span class="op">=</span> i</span>
+<span id="cb30-714"><a href="#cb30-714" aria-hidden="true" tabindex="-1"></a>    scores[i] <span class="op">=</span> score(array)</span>
+<span id="cb30-715"><a href="#cb30-715" aria-hidden="true" tabindex="-1"></a>    array <span class="op">=</span> cycle(array)</span>
+<span id="cb30-716"><a href="#cb30-716" aria-hidden="true" tabindex="-1"></a>cycle_length <span class="op">=</span> i <span class="op">-</span> seen[h]</span>
+<span id="cb30-717"><a href="#cb30-717" aria-hidden="true" tabindex="-1"></a>index <span class="op">=</span> seen[h] <span class="op">+</span> (maxval <span class="op">-</span> seen[h]) <span class="op">%</span> cycle_length</span>
+<span id="cb30-718"><a href="#cb30-718" aria-hidden="true" tabindex="-1"></a>scores[index]</span>
+<span id="cb30-719"><a href="#cb30-719" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
