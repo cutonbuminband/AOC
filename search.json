@@ -2282,6 +2282,20 @@
     "text": "Part 2\nPart 2 is so similar to part 1 that we can include it as a flag there; instead of a perfect match, the test is that exactly one pair of elements should be different on the two sides of the mirror line. Conceptually, that means that the sum of the differences should be exactly 1.\n\n\nCode\nsum(\n    100 * y\n    if (y := find_reflection(array, part=2)) is not None\n    else find_reflection(np.rot90(array, -1), part=2)\n    for array in arrays\n)"
   },
   {
+    "objectID": "qmd/2023.html#part-1-13",
+    "href": "qmd/2023.html#part-1-13",
+    "title": "2023 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\nPart 1 needs a bit of thought. I’ll represent the data as a numpy array, with -1 corresponding to unmoveable rock, 0 to rolling rock, and 1 to empty space. To roll all the rocks northwards, we should focus one column at a time, and between every pair of unmoveable rocks, we sort the intervening data.\nOnce that’s done, we can just score the whole array\n\n\nCode\nmap_ = {\"#\": -1, \"O\": 0, \".\": 1}\narray = np.array([[map_[char] for char in line] for line in load(14)])\nnrows, ncols = array.shape\n\n\ndef score(array):\n    rolls = np.where(array == 0)[0]\n    return (nrows - rolls).sum()\n\n\ndef roll(array):\n    for i in range(ncols):\n        rocks = [-1] + list(np.where(array[:, i] == -1)[0]) + [None]\n        for j in range(len(rocks) - 1):\n            left, right = rocks[j] + 1, rocks[j + 1]\n            array[left:right, i] = np.sort(array[left:right, i])\n    return array\n\n\nscore(roll(array))"
+  },
+  {
+    "objectID": "qmd/2023.html#part-2-13",
+    "href": "qmd/2023.html#part-2-13",
+    "title": "2023 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\nThe numbers in part 2 are ridiculous enough that we obviously have to hope for some pattern in how the rocks move. We’ll store a fingerprint of the current state, and after each cycle, check if we’re in a state we’ve seen before. If we are, we’ve found a cycle and can skip straight to the end.\n\n\nCode\ndef cycle(array):\n    for i in range(4):\n        array = roll(array)\n        array = np.rot90(array, -1)\n    return array\n\n\ndef hash_(array):\n    return tuple(array.ravel())\n\n\nseen = {}\nscores = {}\nmaxval = 1_000_000_000\nreverse_map = {-1: \"#\", 0: \"O\", 1: \".\"}\nfor i in range(maxval):\n    h = hash_(array)\n    if h in seen:\n        break\n    seen[h] = i\n    scores[i] = score(array)\n    array = cycle(array)\ncycle_length = i - seen[h]\nindex = seen[h] + (maxval - seen[h]) % cycle_length\nscores[index]"
+  },
+  {
     "objectID": "qmd/2016.html",
     "href": "qmd/2016.html",
     "title": "2016 Solutions",
