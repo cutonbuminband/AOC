@@ -542,3 +542,61 @@ Part 2 is so similar to part 1 that we can include it as a flag there; instead o
       for array in arrays
   )
 #+end_src
+
+* [[https://adventofcode.com/2023/day/14][Day 14: Parabolic Reflector Dish]]
+
+** Part 1
+Part 1 needs a bit of thought. I'll represent the data as a =numpy= array, with -1 corresponding to unmoveable rock, 0 to rolling rock, and 1 to empty space. To roll all the rocks northwards, we should focus one column at a time, and between every pair of unmoveable rocks, we sort the intervening data.
+
+Once that's done, we can just score the whole array
+#+begin_src jupyter-python
+  map_ = {"#": -1, "O": 0, ".": 1}
+  array = np.array([[map_[char] for char in line] for line in load(14)])
+  nrows, ncols = array.shape
+
+
+  def score(array):
+      rolls = np.where(array == 0)[0]
+      return (nrows - rolls).sum()
+
+
+  def roll(array):
+      for i in range(ncols):
+          rocks = [-1] + list(np.where(array[:, i] == -1)[0]) + [None]
+          for j in range(len(rocks) - 1):
+              left, right = rocks[j] + 1, rocks[j + 1]
+              array[left:right, i] = np.sort(array[left:right, i])
+      return array
+
+
+  score(roll(array))
+#+end_src
+
+** Part 2
+The numbers in part 2 are ridiculous enough that we obviously have to hope for some pattern in how the rocks move. We'll store a fingerprint of the current state, and after each cycle, check if we're in a state we've seen before. If we are, we've found a cycle and can skip straight to the end.
+#+begin_src jupyter-python
+  def cycle(array):
+      for i in range(4):
+          array = roll(array)
+          array = np.rot90(array, -1)
+      return array
+
+
+  def hash_(array):
+      return tuple(array.ravel())
+
+
+  seen, scores = {}, {}
+  maxval = 1_000_000_000
+  for i in range(maxval):
+      h = hash_(array)
+      if h in seen:
+          break
+      seen[h] = i
+      scores[i] = score(array)
+      array = cycle(array)
+  cycle_length = i - seen[h]
+  index = seen[h] + (maxval - seen[h]) % cycle_length
+  scores[index]
+#+end_src
+
