@@ -2268,6 +2268,20 @@
     "text": "Part 2\nWith the memoization added to part 1, part 2 runs in 8s with no changes needed. Not great, but not terrible\n\n\nCode\nsum(count(((chars + (1,)) * 5)[:-1], blocks * 5) for chars, blocks in data)"
   },
   {
+    "objectID": "qmd/2023.html#part-1-12",
+    "href": "qmd/2023.html#part-1-12",
+    "title": "2023 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\nThis wasn’t too tricky. The idea is that we test all horizontal lines of reflection to see if there are any that match the given condition; if none are found, we rotate the array by 90 degrees clockwise and try again. For part 1, the test is that the two halves should line up exactly after flipping.\nThe only bit that requires some thought is how to account for the points beyond the top/bottom edge. We do that by saying that the number of lines on either side of the mirror line is the shortest distance to the top/bottom edge, so that only relevant lines are compared.\n\n\nCode\ndef find_reflection(array, part=1):\n    if part == 1:\n        test = lambda a, b: (a == b[::-1]).all()\n    else:\n        test = lambda a, b: (a != b[::-1]).sum() == 1\n    for i in range(1, len(array)):\n        l = min(len(array) - i, i)\n        if test(array[i - l : i], array[i : i + l]):\n            return i\n    return None\n\n\narrays = [\n    np.array([[char for char in line.strip()] for line in array.split(\"\\n\")])\n    for array in load(13, \"raw\").split(\"\\n\\n\")\n]\n\nsum(\n    100 * y\n    if (y := find_reflection(array)) is not None\n    else find_reflection(np.rot90(array, -1))\n    for array in arrays\n)"
+  },
+  {
+    "objectID": "qmd/2023.html#part-2-12",
+    "href": "qmd/2023.html#part-2-12",
+    "title": "2023 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\nPart 2 is so similar to part 1 that we can include it as a flag there; instead of a perfect match, the test is that exactly one pair of elements should be different on the two sides of the mirror line. Conceptually, that means that the sum of the differences should be exactly 1.\n\n\nCode\nsum(\n    100 * y\n    if (y := find_reflection(array, part=2)) is not None\n    else find_reflection(np.rot90(array, -1), part=2)\n    for array in arrays\n)"
+  },
+  {
     "objectID": "qmd/2016.html",
     "href": "qmd/2016.html",
     "title": "2016 Solutions",
