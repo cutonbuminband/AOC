@@ -499,3 +499,46 @@ With the memoization added to part 1, part 2 runs in 8s with no changes needed. 
 #+begin_src jupyter-python
   sum(count(((chars + (1,)) * 5)[:-1], blocks * 5) for chars, blocks in data)
 #+end_src
+
+* [[https://adventofcode.com/2023/day/13][Day 13: Point of Incidence]]
+
+** Part 1
+This wasn't too tricky. The idea is that we test all horizontal lines of reflection to see if there are any that match the given condition; if none are found, we rotate the array by 90 degrees clockwise and try again. For part 1, the test is that the two halves should line up exactly after flipping.
+
+The only bit that requires some thought is how to account for the points beyond the top/bottom edge. We do that by saying that the number of lines on either side of the mirror line is the shortest distance to the top/bottom edge, so that only relevant lines are compared. 
+#+begin_src jupyter-python
+  def find_reflection(array, part=1):
+      if part == 1:
+          test = lambda a, b: (a == b[::-1]).all()
+      else:
+          test = lambda a, b: (a != b[::-1]).sum() == 1
+      for i in range(1, len(array)):
+          l = min(len(array) - i, i)
+          if test(array[i - l : i], array[i : i + l]):
+              return i
+      return None
+
+
+  arrays = [
+      np.array([[char for char in line.strip()] for line in array.split("\n")])
+      for array in load(13, "raw").split("\n\n")
+  ]
+
+  sum(
+      100 * y
+      if (y := find_reflection(array)) is not None
+      else find_reflection(np.rot90(array, -1))
+      for array in arrays
+  )
+#+end_src
+
+** Part 2
+Part 2 is so similar to part 1 that we can include it as a flag there; instead of a perfect match, the test is that exactly one pair of elements should be different on the two sides of the mirror line. Conceptually, that means that the sum of the differences should be exactly 1.
+#+begin_src jupyter-python
+  sum(
+      100 * y
+      if (y := find_reflection(array, part=2)) is not None
+      else find_reflection(np.rot90(array, -1), part=2)
+      for array in arrays
+  )
+#+end_src
