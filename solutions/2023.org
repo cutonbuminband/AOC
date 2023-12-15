@@ -616,26 +616,20 @@ Part 1 can be done with a single expression. Always nice when that happens. I or
 ** Part 2
 Part 2 is fiddly and less fun. We need to run through each of the instructions and apply the procedure described. There might be better ways than this, but the below works:
 #+begin_src jupyter-python
-  boxes = defaultdict(list)
+  boxes = [{} for i in range(256)]
   for instruction in instructions:
       label, f = instruction.replace("-", "=").split("=")
       destination = hash_(label)
-      indices = [
-          i for i in range(len(boxes[destination])) if boxes[destination][i][0] == label
-      ]
       if "=" in instruction:
-          if indices:
-              boxes[destination][indices[0]] = (label, int(f))
-          else:
-              boxes[destination].append((label, int(f)))
-      elif indices:
-          boxes[destination].pop(indices[0])
+          boxes[destination][label] = int(f)
+      elif label in boxes[destination]:
+          del boxes[destination][label]
 
 
   def score(box):
-      return ([x[1] for x in box] * np.arange(1, len(box) + 1)).sum()
+      return (list(box.values()) * np.arange(1, len(box) + 1)).sum()
 
 
-  int(sum(np.arange(1, 257) * [score(boxes[i]) for i in range(256)]))
+  int(sum(np.arange(1, 257) * [score(box) for box in boxes]))
 #+end_src
 
