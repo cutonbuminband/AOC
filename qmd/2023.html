@@ -1028,27 +1028,21 @@ w_{1,2} = \frac{t_0 \mp \sqrt{t_0^2 - 4d_0^2}}{2};
 <div class="cell" data-execution_count="31">
 <details open="">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>boxes <span class="op">=</span> defaultdict(<span class="bu">list</span>)</span>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>boxes <span class="op">=</span> [{} <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">256</span>)]</span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> instruction <span class="kw">in</span> instructions:</span>
 <span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    label, f <span class="op">=</span> instruction.replace(<span class="st">"-"</span>, <span class="st">"="</span>).split(<span class="st">"="</span>)</span>
 <span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>    destination <span class="op">=</span> hash_(label)</span>
-<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>    indices <span class="op">=</span> [</span>
-<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>        i <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(boxes[destination])) <span class="cf">if</span> boxes[destination][i][<span class="dv">0</span>] <span class="op">==</span> label</span>
-<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>    ]</span>
-<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="st">"="</span> <span class="kw">in</span> instruction:</span>
-<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> indices:</span>
-<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>            boxes[destination][indices[<span class="dv">0</span>]] <span class="op">=</span> (label, <span class="bu">int</span>(f))</span>
-<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
-<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>            boxes[destination].append((label, <span class="bu">int</span>(f)))</span>
-<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> indices:</span>
-<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a>        boxes[destination].pop(indices[<span class="dv">0</span>])</span>
-<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-16"><a href="#cb31-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-17"><a href="#cb31-17" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> score(box):</span>
-<span id="cb31-18"><a href="#cb31-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ([x[<span class="dv">1</span>] <span class="cf">for</span> x <span class="kw">in</span> box] <span class="op">*</span> np.arange(<span class="dv">1</span>, <span class="bu">len</span>(box) <span class="op">+</span> <span class="dv">1</span>)).<span class="bu">sum</span>()</span>
-<span id="cb31-19"><a href="#cb31-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-20"><a href="#cb31-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-21"><a href="#cb31-21" aria-hidden="true" tabindex="-1"></a><span class="bu">int</span>(<span class="bu">sum</span>(np.arange(<span class="dv">1</span>, <span class="dv">257</span>) <span class="op">*</span> [score(boxes[i]) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">256</span>)]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="st">"="</span> <span class="kw">in</span> instruction:</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>        boxes[destination][label] <span class="op">=</span> <span class="bu">int</span>(f)</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> label <span class="kw">in</span> boxes[destination]:</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>        <span class="kw">del</span> boxes[destination][label]</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> score(box):</span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (<span class="bu">list</span>(box.values()) <span class="op">*</span> np.arange(<span class="dv">1</span>, <span class="bu">len</span>(box) <span class="op">+</span> <span class="dv">1</span>)).<span class="bu">sum</span>()</span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a><span class="bu">int</span>(<span class="bu">sum</span>(np.arange(<span class="dv">1</span>, <span class="dv">257</span>) <span class="op">*</span> [score(box) <span class="cf">for</span> box <span class="kw">in</span> boxes]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 
@@ -2140,28 +2134,22 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb32-740"><a href="#cb32-740" aria-hidden="true" tabindex="-1"></a>Part 2 is fiddly and less fun. We need to run through each of the instructions and apply the procedure described. There might be better ways than this, but the below works:</span>
 <span id="cb32-741"><a href="#cb32-741" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb32-744"><a href="#cb32-744" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb32-745"><a href="#cb32-745" aria-hidden="true" tabindex="-1"></a>boxes <span class="op">=</span> defaultdict(<span class="bu">list</span>)</span>
+<span id="cb32-745"><a href="#cb32-745" aria-hidden="true" tabindex="-1"></a>boxes <span class="op">=</span> [{} <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">256</span>)]</span>
 <span id="cb32-746"><a href="#cb32-746" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> instruction <span class="kw">in</span> instructions:</span>
 <span id="cb32-747"><a href="#cb32-747" aria-hidden="true" tabindex="-1"></a>    label, f <span class="op">=</span> instruction.replace(<span class="st">"-"</span>, <span class="st">"="</span>).split(<span class="st">"="</span>)</span>
 <span id="cb32-748"><a href="#cb32-748" aria-hidden="true" tabindex="-1"></a>    destination <span class="op">=</span> hash_(label)</span>
-<span id="cb32-749"><a href="#cb32-749" aria-hidden="true" tabindex="-1"></a>    indices <span class="op">=</span> [</span>
-<span id="cb32-750"><a href="#cb32-750" aria-hidden="true" tabindex="-1"></a>        i <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(boxes[destination])) <span class="cf">if</span> boxes[destination][i][<span class="dv">0</span>] <span class="op">==</span> label</span>
-<span id="cb32-751"><a href="#cb32-751" aria-hidden="true" tabindex="-1"></a>    ]</span>
-<span id="cb32-752"><a href="#cb32-752" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="st">"="</span> <span class="kw">in</span> instruction:</span>
-<span id="cb32-753"><a href="#cb32-753" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> indices:</span>
-<span id="cb32-754"><a href="#cb32-754" aria-hidden="true" tabindex="-1"></a>            boxes[destination][indices[<span class="dv">0</span>]] <span class="op">=</span> (label, <span class="bu">int</span>(f))</span>
-<span id="cb32-755"><a href="#cb32-755" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
-<span id="cb32-756"><a href="#cb32-756" aria-hidden="true" tabindex="-1"></a>            boxes[destination].append((label, <span class="bu">int</span>(f)))</span>
-<span id="cb32-757"><a href="#cb32-757" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> indices:</span>
-<span id="cb32-758"><a href="#cb32-758" aria-hidden="true" tabindex="-1"></a>        boxes[destination].pop(indices[<span class="dv">0</span>])</span>
-<span id="cb32-759"><a href="#cb32-759" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-760"><a href="#cb32-760" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-761"><a href="#cb32-761" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> score(box):</span>
-<span id="cb32-762"><a href="#cb32-762" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ([x[<span class="dv">1</span>] <span class="cf">for</span> x <span class="kw">in</span> box] <span class="op">*</span> np.arange(<span class="dv">1</span>, <span class="bu">len</span>(box) <span class="op">+</span> <span class="dv">1</span>)).<span class="bu">sum</span>()</span>
-<span id="cb32-763"><a href="#cb32-763" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-764"><a href="#cb32-764" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-765"><a href="#cb32-765" aria-hidden="true" tabindex="-1"></a><span class="bu">int</span>(<span class="bu">sum</span>(np.arange(<span class="dv">1</span>, <span class="dv">257</span>) <span class="op">*</span> [score(boxes[i]) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">256</span>)]))</span>
-<span id="cb32-766"><a href="#cb32-766" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb32-749"><a href="#cb32-749" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="st">"="</span> <span class="kw">in</span> instruction:</span>
+<span id="cb32-750"><a href="#cb32-750" aria-hidden="true" tabindex="-1"></a>        boxes[destination][label] <span class="op">=</span> <span class="bu">int</span>(f)</span>
+<span id="cb32-751"><a href="#cb32-751" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> label <span class="kw">in</span> boxes[destination]:</span>
+<span id="cb32-752"><a href="#cb32-752" aria-hidden="true" tabindex="-1"></a>        <span class="kw">del</span> boxes[destination][label]</span>
+<span id="cb32-753"><a href="#cb32-753" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-754"><a href="#cb32-754" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-755"><a href="#cb32-755" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> score(box):</span>
+<span id="cb32-756"><a href="#cb32-756" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (<span class="bu">list</span>(box.values()) <span class="op">*</span> np.arange(<span class="dv">1</span>, <span class="bu">len</span>(box) <span class="op">+</span> <span class="dv">1</span>)).<span class="bu">sum</span>()</span>
+<span id="cb32-757"><a href="#cb32-757" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-758"><a href="#cb32-758" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-759"><a href="#cb32-759" aria-hidden="true" tabindex="-1"></a><span class="bu">int</span>(<span class="bu">sum</span>(np.arange(<span class="dv">1</span>, <span class="dv">257</span>) <span class="op">*</span> [score(box) <span class="cf">for</span> box <span class="kw">in</span> boxes]))</span>
+<span id="cb32-760"><a href="#cb32-760" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
