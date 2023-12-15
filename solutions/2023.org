@@ -600,3 +600,42 @@ The numbers in part 2 are ridiculous enough that we obviously have to hope for s
   scores[index]
 #+end_src
 
+* [[https://adventofcode.com/2023/day/15][Day 15: Lens Library]]
+
+** Part 1
+Part 1 can be done with a single expression. Always nice when that happens. I originally had both the hash function and the data loading directly in the sum generator expression, but I needed them for part two so I pulled them out to their own lines.
+#+begin_src jupyter-python
+  def hash_(s):
+      return functools.reduce(lambda x, y: (17 * (x + ord(y))) % 256, s, 0)
+
+
+  instructions = load(15, "raw").split(",")
+  sum(hash_(i) for i in instructions)
+#+end_src
+
+** Part 2
+Part 2 is fiddly and less fun. We need to run through each of the instructions and apply the procedure described. There might be better ways than this, but the below works:
+#+begin_src jupyter-python
+  boxes = defaultdict(list)
+  for instruction in instructions:
+      label, f = instruction.replace("-", "=").split("=")
+      destination = hash_(label)
+      indices = [
+          i for i in range(len(boxes[destination])) if boxes[destination][i][0] == label
+      ]
+      if "=" in instruction:
+          if indices:
+              boxes[destination][indices[0]] = (label, int(f))
+          else:
+              boxes[destination].append((label, int(f)))
+      elif indices:
+          boxes[destination].pop(indices[0])
+
+
+  def score(box):
+      return ([x[1] for x in box] * np.arange(1, len(box) + 1)).sum()
+
+
+  int(sum(np.arange(1, 257) * [score(boxes[i]) for i in range(256)]))
+#+end_src
+
