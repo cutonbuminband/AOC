@@ -2296,6 +2296,20 @@
     "text": "Part 2\nThe numbers in part 2 are ridiculous enough that we obviously have to hope for some pattern in how the rocks move. We’ll store a fingerprint of the current state, and after each cycle, check if we’re in a state we’ve seen before. If we are, we’ve found a cycle and can skip straight to the end.\n\n\nCode\ndef cycle(array):\n    for i in range(4):\n        array = roll(array)\n        array = np.rot90(array, -1)\n    return array\n\n\ndef hash_(array):\n    return tuple(array.ravel())\n\n\nseen, scores = {}, {}\nmaxval = 1_000_000_000\nfor i in range(maxval):\n    h = hash_(array)\n    if h in seen:\n        break\n    seen[h] = i\n    scores[i] = score(array)\n    array = cycle(array)\ncycle_length = i - seen[h]\nindex = seen[h] + (maxval - seen[h]) % cycle_length\nscores[index]"
   },
   {
+    "objectID": "qmd/2023.html#part-1-14",
+    "href": "qmd/2023.html#part-1-14",
+    "title": "2023 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\nPart 1 can be done with a single expression. Always nice when that happens. I originally had both the hash function and the data loading directly in the sum generator expression, but I needed them for part two so I pulled them out to their own lines.\n\n\nCode\ndef hash_(s):\n    return functools.reduce(lambda x, y: (17 * (x + ord(y))) % 256, s, 0)\n\n\ninstructions = load(15, \"raw\").split(\",\")\nsum(hash_(i) for i in instructions)"
+  },
+  {
+    "objectID": "qmd/2023.html#part-2-14",
+    "href": "qmd/2023.html#part-2-14",
+    "title": "2023 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\nPart 2 is fiddly and less fun. We need to run through each of the instructions and apply the procedure described. There might be better ways than this, but the below works:\n\n\nCode\nboxes = defaultdict(list)\nfor instruction in instructions:\n    label, f = instruction.replace(\"-\", \"=\").split(\"=\")\n    destination = hash_(label)\n    indices = [\n        i for i in range(len(boxes[destination])) if boxes[destination][i][0] == label\n    ]\n    if \"=\" in instruction:\n        if indices:\n            boxes[destination][indices[0]] = (label, int(f))\n        else:\n            boxes[destination].append((label, int(f)))\n    elif indices:\n        boxes[destination].pop(indices[0])\n\n\ndef score(box):\n    return ([x[1] for x in box] * np.arange(1, len(box) + 1)).sum()\n\n\nint(sum(np.arange(1, 257) * [score(boxes[i]) for i in range(256)]))"
+  },
+  {
     "objectID": "qmd/2016.html",
     "href": "qmd/2016.html",
     "title": "2016 Solutions",
