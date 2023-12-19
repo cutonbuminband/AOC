@@ -633,3 +633,62 @@ Part 2 is fiddly and less fun. We need to run through each of the instructions a
   int(sum(np.arange(1, 257) * [score(box) for box in boxes]))
 #+end_src
 
+* [[https://adventofcode.com/2023/day/16][Day 16: The Floor Will Be Lava]]
+
+** Part 1
+Part 1 is fairly straightforward. We'll need a way of tracking states we've already seen, and a recipe for moving from one state to the next. A state consists of a (position, direction) pair; if we ever hit a position and direction we've seen before we know we're not going to do anything new (and that there's an infinite loop in the light circuit).
+
+We'll store the grid as a dictionary of coordinates -> value, with the x and y coordinates encoded as a single complex number. That makes checking for when we've left the edge of the grid easy; we just have to check if the current coordinates are in the dictionary.
+
+The diagonal mirrors transpose the coordinates of our direction, so that horizontal movement becomes vertical and vice versa. The beam splitters force us into vertical/horizontal movement and make us add an extra beam to the queue we're going through.
+#+begin_src jupyter-python
+  data = load(16, "chararray")
+  grid = {
+      1j * y + x: data[y, x] for x in range(data.shape[1]) for y in range(data.shape[0])
+  }
+
+  def count_points(position, direction):
+      positions = deque([(position, direction)])
+      seen = set()
+      while positions:
+          position, direction = positions.popleft()
+          while position in grid:
+              if (position, direction) in seen:
+                  break
+              seen.add((position, direction))
+              char = grid[position]
+              if char in "/\\":
+                  direction = int(direction.imag) + 1j * int(direction.real)
+                  direction *= -1 if char == "/" else 1
+              elif char == "-" and direction.imag:
+                  positions.append((position - 1, -1))
+                  direction = 1
+              elif char == "|" and direction.real:
+                  positions.append((position - 1j, -1j))
+                  direction = 1j
+              position += direction
+      return len(set(x[0] for x in seen))
+
+  count_points(0, 1)
+#+end_src
+
+** Part 2
+For part two we could probably do some clever memoization by making the above function recurse on beam splitters.
+
+One potential disadvantage of that is that the input might contain infinite loops of light which require global information to be discovered. Passing this information to the memoized function would mean that we almost never get a cache hit, while not passing it risks getting stuck in an infinite loop.
+
+Finally, brute force runs in an acceptable amount of time:
+#+begin_src jupyter-python
+  def starting_position(direction, length):
+      offset = data.shape[0] if (direction.imag + direction.real) < 0 else 0
+      offset *= 1j if direction.imag else 1
+      return offset + (1j if direction.real else 1) * length
+
+
+  max(
+      count_points(starting_position(direction, x), direction)
+      for x in range(data.shape[0])
+      for direction in (-1, 1, -1j, 1j)
+  )
+#+end_src
+
