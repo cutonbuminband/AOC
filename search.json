@@ -2310,6 +2310,48 @@
     "text": "Part 2\nPart 2 is fiddly and less fun. We need to run through each of the instructions and apply the procedure described. There might be better ways than this, but the below works:\n\n\nCode\nboxes = [{} for i in range(256)]\nfor instruction in instructions:\n    label, f = instruction.replace(\"-\", \"=\").split(\"=\")\n    destination = hash_(label)\n    if \"=\" in instruction:\n        boxes[destination][label] = int(f)\n    elif label in boxes[destination]:\n        del boxes[destination][label]\n\n\ndef score(box):\n    return (list(box.values()) * np.arange(1, len(box) + 1)).sum()\n\n\nint(sum(np.arange(1, 257) * [score(box) for box in boxes]))"
   },
   {
+    "objectID": "qmd/2023.html#part-1-15",
+    "href": "qmd/2023.html#part-1-15",
+    "title": "2023 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\nPart 1 is fairly straightforward. We’ll need a way of tracking states we’ve already seen, and a recipe for moving from one state to the next. A state consists of a (position, direction) pair; if we ever hit a position and direction we’ve seen before we know we’re not going to do anything new (and that there’s an infinite loop in the light circuit).\nWe’ll store the grid as a dictionary of coordinates -&gt; value, with the x and y coordinates encoded as a single complex number. That makes checking for when we’ve left the edge of the grid easy; we just have to check if the current coordinates are in the dictionary.\nThe diagonal mirrors transpose the coordinates of our direction, so that horizontal movement becomes vertical and vice versa. The beam splitters force us into vertical/horizontal movement and make us add an extra beam to the queue we’re going through.\n\n\nCode\ndata = load(16, \"chararray\")\ngrid = {\n    1j * y + x: data[y, x] for x in range(data.shape[1]) for y in range(data.shape[0])\n}\n\ndef count_points(position, direction):\n    positions = deque([(position, direction)])\n    seen = set()\n    while positions:\n        position, direction = positions.popleft()\n        while position in grid:\n            if (position, direction) in seen:\n                break\n            seen.add((position, direction))\n            char = grid[position]\n            if char in \"/\\\\\":\n                direction = int(direction.imag) + 1j * int(direction.real)\n                direction *= -1 if char == \"/\" else 1\n            elif char == \"-\" and direction.imag:\n                positions.append((position - 1, -1))\n                direction = 1\n            elif char == \"|\" and direction.real:\n                positions.append((position - 1j, -1j))\n                direction = 1j\n            position += direction\n    return len(set(x[0] for x in seen))\n\ncount_points(0, 1)"
+  },
+  {
+    "objectID": "qmd/2023.html#part-2-15",
+    "href": "qmd/2023.html#part-2-15",
+    "title": "2023 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\nFor part two we could probably do some clever memoization by making the above function recurse on beam splitters.\nOne potential disadvantage of that is that the input might contain infinite loops of light which require global information to be discovered. Passing this information to the memoized function would mean that we almost never get a cache hit, while not passing it risks getting stuck in an infinite loop.\nFinally, brute force runs in an acceptable amount of time:\n\n\nCode\ndef starting_position(direction, length):\n    offset = data.shape[0] if (direction.imag + direction.real) &lt; 0 else 0\n    offset *= 1j if direction.imag else 1\n    return offset + (1j if direction.real else 1) * length\n\n\nmax(\n    count_points(starting_position(direction, x), direction)\n    for x in range(data.shape[0])\n    for direction in (-1, 1, -1j, 1j)\n)"
+  },
+  {
+    "objectID": "qmd/2023.html#part-1-16",
+    "href": "qmd/2023.html#part-1-16",
+    "title": "2023 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\nOur first pathfinding task! I couldn’t think of a good & simple-to-calculate heuristic, so we’ll just go with Dijkstra instead of A*.\nWe’re given the restriction that a cart must turn after at most three moves. The cost for a move can just be read out from the input grid, so the only question is how we represent a state and what the neighbors of each state are.\nWith the turning restriction, it makes sense to focus on where the cart turns, rather than where it moves. This means that a state can be represented by a tuple of (y, x, direction), where direction is 0 if the cart is moving vertically after the turn and 1 if it’s moving horizontally. The neighbors of a state are then the places where the cart could have its next turn, i.e. the points up to three tiles away vertically or horizontally, with movement along the other axis after the turn.\nImplementing it looks like this:\n\n\nCode\ndef navigate(grid, minval=1, maxval=3):\n    q = PriorityQueue()\n    max_y, max_x = (v - 1 for v in grid.shape)\n    goal = max_y, max_x\n    q.put((0, (0, 0, 0)))\n    q.put((0, (0, 0, 1)))\n    seen = set()\n\n    while q:\n        cost, (y, x, direction) = q.get()\n        if (y, x) == goal:\n            break\n        if (y, x, direction) in seen:\n            continue\n        seen.add((y, x, direction))\n        original_cost = cost\n        for s in [-1, 1]:\n            cost = original_cost\n            new_y, new_x = y, x\n            for i in range(1, maxval + 1):\n                if direction == 1:\n                    new_x = x + i * s\n                else:\n                    new_y = y + i * s\n                if new_x &lt; 0 or new_y &lt; 0 or new_x &gt; max_x or new_y &gt; max_y:\n                    break\n                cost += grid[new_y, new_x]\n                if ((new_y, new_x, 1 - direction)) in seen:\n                    continue\n                if i &gt;= minval:\n                    q.put((cost, (new_y, new_x, 1 - direction)))\n    return cost\n\n\ngrid = np.array([[int(char) for char in line.strip()] for line in load(17)])\nnavigate(grid)"
+  },
+  {
+    "objectID": "qmd/2023.html#part-2-16",
+    "href": "qmd/2023.html#part-2-16",
+    "title": "2023 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\nPart 2 can be incorporated into the above code by changing the maximum number of allowed moves before a turn, and by only allowing turns after the crucible has moved at least minval steps. That’s easy to incorporate into the function for part 1, so the code just looks like:\n\n\nCode\nnavigate(grid, 4, 10)"
+  },
+  {
+    "objectID": "qmd/2023.html#part-1-17",
+    "href": "qmd/2023.html#part-1-17",
+    "title": "2023 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\nWe’ll run through the list of instructions and make a list of the coordinates of all the vertices. Then we’ll use the shoelace formula to calculate the area of the described polygon. To account for the line of paint at the edge of the polygon, we’ll add half the perimeter of the polygon (which corresponds to increasing the total thickness of the polygon by 1 everywhere), and finally add one to correct for the missing paint in the exterior corners. There will always be four more exterior corners than interior corners, since going all the way around the polygon once is a 360 degree rotation.\n\n\nCode\nys, xs = [0], [0]\nposition = np.array([0, 0])\ndirections = {\"U\": [0, 1], \"R\": [1, 0], \"D\": [0, -1], \"L\": [-1, 0]}\nfor direction, count, _ in map(str.split, load(18)):\n    position += np.array(directions[direction]) * (int(count))\n    xs.append(position[0])\n    ys.append(position[1])\nint(\n    ((xs * (np.roll(ys, 1) - np.roll(ys, -1))).sum()) / 2\n    + sum(abs(np.diff(ys)) + abs(np.diff(xs))) / 2\n    + 1\n)"
+  },
+  {
+    "objectID": "qmd/2023.html#part-2-17",
+    "href": "qmd/2023.html#part-2-17",
+    "title": "2023 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\nI was not expecting part 2 to go there! Luckily, nothing changes with respect to what we did above apart from how we build the path around the polygon\n\n\nCode\nys, xs = [0], [0]\nposition = np.array([0, 0])\norder = \"RDLU\"\nfor real_instruction in map(lambda x: x.split()[-1][2:-1], load(18)):\n    count, direction = real_instruction[:-1], real_instruction[-1]\n    position += np.array(directions[order[int(direction)]]) * int(count, 16)\n    xs.append(position[0])\n    ys.append(position[1])\nint(\n    ((xs * (np.roll(ys, 1) - np.roll(ys, -1))).sum()) / 2\n    + sum(abs(np.diff(ys)) + abs(np.diff(xs))) / 2\n    + 1\n)"
+  },
+  {
     "objectID": "qmd/2016.html",
     "href": "qmd/2016.html",
     "title": "2016 Solutions",
