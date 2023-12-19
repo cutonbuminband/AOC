@@ -747,3 +747,40 @@ Part 2 can be incorporated into the above code by changing the maximum number of
   navigate(grid, 4, 10)
 #+end_src
 
+* [[https://adventofcode.com/2023/day/18][Day 18: Lavaduct Lagoon]]
+
+** Part 1
+We'll run through the list of instructions and make a list of the coordinates of all the vertices. Then we'll use the shoelace formula to calculate the area of the described polygon. To account for the line of paint at the edge of the polygon, we'll add half the perimeter of the polygon (which corresponds to increasing the total thickness of the polygon by 1 everywhere), and finally add one to correct for the missing paint in the exterior corners. There will always be four more exterior corners than interior corners, since going all the way around the polygon once is a 360 degree rotation.
+#+begin_src jupyter-python
+  ys, xs = [0], [0]
+  position = np.array([0, 0])
+  directions = {"U": [0, 1], "R": [1, 0], "D": [0, -1], "L": [-1, 0]}
+  for direction, count, _ in map(str.split, load(18)):
+      position += np.array(directions[direction]) * (int(count))
+      xs.append(position[0])
+      ys.append(position[1])
+  int(
+      ((xs * (np.roll(ys, 1) - np.roll(ys, -1))).sum()) / 2
+      + sum(abs(np.diff(ys)) + abs(np.diff(xs))) / 2
+      + 1
+  )
+#+end_src
+
+** Part 2
+I was not expecting part 2 to go there! Luckily, nothing changes with respect to what we did above apart from how we build the path around the polygon
+#+begin_src jupyter-python
+  ys, xs = [0], [0]
+  position = np.array([0, 0])
+  order = "RDLU"
+  for real_instruction in map(lambda x: x.split()[-1][2:-1], load(18)):
+      count, direction = real_instruction[:-1], real_instruction[-1]
+      position += np.array(directions[order[int(direction)]]) * int(count, 16)
+      xs.append(position[0])
+      ys.append(position[1])
+  int(
+      ((xs * (np.roll(ys, 1) - np.roll(ys, -1))).sum()) / 2
+      + sum(abs(np.diff(ys)) + abs(np.diff(xs))) / 2
+      + 1
+  )
+#+end_src
+
