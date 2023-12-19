@@ -4,9 +4,9 @@ Each year is structured as a single `org` file, with text and code blocks mixed 
 
 Here's a table with my solutions for each year. The links take you to the rendered solution file for each year
 
-|                            Year                            |   Stars |
+| Year                                                       |   Stars |
 |:----------------------------------------------------------:|--------:|
-| [2023](https://cutonbuminband.github.io/AOC/qmd/2023.html) | 32/50⭐ |
+| [2023](https://cutonbuminband.github.io/AOC/qmd/2023.html) | 34/50⭐ |
 | [2022](https://cutonbuminband.github.io/AOC/qmd/2022.html) | 50/50⭐ |
 | [2021](https://cutonbuminband.github.io/AOC/qmd/2021.html) | 50/50⭐ |
 | [2020](https://cutonbuminband.github.io/AOC/qmd/2020.html) | 50/50⭐ |

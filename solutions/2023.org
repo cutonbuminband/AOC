@@ -692,3 +692,58 @@ Finally, brute force runs in an acceptable amount of time:
   )
 #+end_src
 
+* [[https://adventofcode.com/2023/day/17][Day 17: Clumsy Crucible]]
+
+** Part 1
+Our first pathfinding task! I couldn't think of a good & simple-to-calculate heuristic, so we'll just go with Dijkstra instead of A*.
+
+We're given the restriction that a cart must turn after at most three moves. The cost for a move can just be read out from the input grid, so the only question is how we represent a state and what the neighbors of each state are.
+
+With the turning restriction, it makes sense to focus on where the cart turns, rather than where it moves. This means that a state can be represented by a tuple of =(y, x, direction)=, where direction is 0 if the cart is moving vertically after the turn and 1 if it's moving horizontally. The neighbors of a state are then the places where the cart could have its next turn, i.e. the points up to three tiles away vertically or horizontally, with movement along the other axis after the turn.
+
+Implementing it looks like this:
+#+begin_src jupyter-python
+  def navigate(grid, minval=1, maxval=3):
+      q = PriorityQueue()
+      max_y, max_x = (v - 1 for v in grid.shape)
+      goal = max_y, max_x
+      q.put((0, (0, 0, 0)))
+      q.put((0, (0, 0, 1)))
+      seen = set()
+
+      while q:
+          cost, (y, x, direction) = q.get()
+          if (y, x) == goal:
+              break
+          if (y, x, direction) in seen:
+              continue
+          seen.add((y, x, direction))
+          original_cost = cost
+          for s in [-1, 1]:
+              cost = original_cost
+              new_y, new_x = y, x
+              for i in range(1, maxval + 1):
+                  if direction == 1:
+                      new_x = x + i * s
+                  else:
+                      new_y = y + i * s
+                  if new_x < 0 or new_y < 0 or new_x > max_x or new_y > max_y:
+                      break
+                  cost += grid[new_y, new_x]
+                  if ((new_y, new_x, 1 - direction)) in seen:
+                      continue
+                  if i >= minval:
+                      q.put((cost, (new_y, new_x, 1 - direction)))
+      return cost
+
+
+  grid = np.array([[int(char) for char in line.strip()] for line in load(17)])
+  navigate(grid)
+#+end_src
+
+** Part 2
+Part 2 can be incorporated into the above code by changing the maximum number of allowed moves before a turn, and by only allowing turns after the crucible has moved at least =minval= steps. That's easy to incorporate into the function for part 1, so the code just looks like:
+#+begin_src jupyter-python
+  navigate(grid, 4, 10)
+#+end_src
+
