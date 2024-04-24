@@ -6,6 +6,7 @@
 #+begin_src jupyter-python
   # | eval: true
   # | output: false
+  import dataclasses
   import functools
   import itertools
   import os
@@ -782,5 +783,120 @@ I was not expecting part 2 to go there! Luckily, nothing changes with respect to
       + sum(abs(np.diff(ys)) + abs(np.diff(xs))) / 2
       + 1
   )
+#+end_src
+
+* [[https://adventofcode.com/2023/day/19][Day 19: Aplenty]]
+
+** Part 1
+#+begin_src jupyter-python
+  workflows, parts = [x.split("\n") for x in load(19, "raw").split("\n\n")]
+  Part = namedtuple("Part", "x m a s")
+  parts = [Part(*[int(x) for x in re.findall(r"\+?-?\d+", part)]) for part in parts]
+  name, instructions = workflows[0][:-1].split("{")
+  instruction_map = {}
+  for name, instructions in map(lambda x: x[:-1].split("{"), workflows):
+      rules = [
+          rule.split(":") if ":" in rule else [lambda y: True, rule]
+          for rule in instructions.split(",")
+      ]
+      rules = [
+          (eval("lambda y: y." + rule[0]), rule[1]) if isinstance(rule[0], str) else rule
+          for rule in rules
+      ]
+      instruction_map[name] = instructions, rules
+
+
+  def follow(part, state):
+      s, tests = instruction_map[state]
+      for test, output in tests:
+          if test(part):
+              if output == "A":
+                  return True
+              if output == "R":
+                  return False
+              return follow(part, output)
+
+
+  sum(x.x + x.m + x.a + x.s for x in parts if follow(x, "in"))
+#+end_src
+
+** Part 2
+So, I thought I was being clever above by =eval='ing the instructions to convert them directly to python functions. Unfortunately we have to modify the above approach to work with ranges of values rather than specific values, which has the effect of converting the filters from pass/faill to ones that split ranges in two - the parts that pass the filter, and the parts that don't. I could go back and rework how I parsed the instructions in part 1 to fit with what I need to do for part 2, or I could just redo the parsing.
+
+I'll store each range as a dataclass of tuples, and each filter splits a range into at most two parts. The are half-open on the left, so that x = tuple(0, 5) represents the values [1, 2, 3, 4, 5]. The fact that they're half-open lets us find the size of a range by just subtracting the endpoints, without having to fiddle with off-by one errors, and I chose to do it on the left so that the inital range can be represented by the pair of numbers (0, 4000) rather than the more ugly (1, 4001).
+#+begin_src jupyter-python
+  @dataclasses.dataclass
+  class PartRange:
+      x: tuple[int]
+      m: tuple[int]
+      a: tuple[int]
+      s: tuple[int]
+
+
+  def is_valid(interval):
+      return interval[1] > interval[0]
+
+
+  def split_coords(part_range, coordinate, cutoff, test):
+      coord_range = getattr(part_range, coordinate)
+      if test == ">":
+          new_coords = ((cutoff, coord_range[1]), (coord_range[0], cutoff))
+      elif test == "<":
+          new_coords = ((coord_range[0], cutoff - 1), (cutoff - 1, coord_range[1]))
+      else:
+          raise ValueError("This shouldn't be possible")
+      result = []
+      for interval in new_coords:
+          if not is_valid(interval):
+              result.append(None)
+          else:
+              result.append(dataclasses.replace(part_range, **{coordinate: interval}))
+      return result
+
+
+  def size(part_range):
+      return np.product([np.diff(getattr(part_range, i)) for i in "xmas"])
+
+
+  def parse_rule_string(rule):
+      if ":" not in rule:
+          return rule
+      coordinate = rule[0]
+      test = rule[1]
+      cutoff, destination = rule[2:].split(":")
+      return coordinate, int(cutoff), test, destination
+
+
+  instructions = {}
+  for name, rules in map(lambda x: x[:-1].split("{"), workflows):
+      instructions[name] = [parse_rule_string(rule) for rule in rules.split(",")]
+
+
+  def follow(instructions):
+      def inner(part_range, state):
+          if state == "R":
+              return 0
+          if state == "A":
+              return size(part_range)
+          rules = instructions[state]
+          result = 0
+          remainder = part_range
+          for rule in rules:
+              if remainder is None:
+                  break
+              if isinstance(rule, str):
+                  result += inner(remainder, rule)
+                  break
+              else:
+                  coordinate, cutoff, test, destination = rule
+                  passed, remainder = split_coords(remainder, coordinate, cutoff, test)
+                  result += inner(passed, destination) if passed is not None else 0
+          return result
+
+      initial = PartRange((0, 4000), (0, 4000), (0, 4000), (0, 4000))
+      return inner(initial, "in")
+
+
+  follow(instructions)
 #+end_src
 
