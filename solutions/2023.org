@@ -1030,3 +1030,28 @@ I'll store each range as a dataclass of tuples, and each filter splits a range i
   import matplotlib
   for c in plt.cm.tab10.colors: print(matplotlib.colors.to_hex(c))
 #+end_src
+
+* [[https://adventofcode.com/2023/day/21][Day 21: Step Counter]]
+
+** Part 1
+#+begin_src jupyter-python
+  data = np.array([list(line) for line in load(21)])
+  data = np.pad(data, 1, constant_values = "#")
+  y, x = [x[0] for x in np.where(data == "S")]
+  data[y, x] = "."
+  def step(positions):
+      result = set()
+      for y, x in positions:
+          for dy in [-1, 1]:
+              if data[y + dy, x] == ".":
+                  result.add((y + dy, x))
+          for dx in [-1, 1]:
+              if data[y, x + dx] == ".":
+                  result.add((y, x + dx))
+      return result
+  positions = [(y, x)]
+  for _ in range(64):
+      positions = step(positions)
+  len(positions)
+#+end_src
+
