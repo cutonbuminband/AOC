@@ -900,3 +900,133 @@ I'll store each range as a dataclass of tuples, and each filter splits a range i
   follow(instructions)
 #+end_src
 
+* [[https://adventofcode.com/2023/day/20][Day 20: Pulse Propagation]]
+#+begin_src jupyter-python
+  data = load(20)
+  bus = []
+
+
+  class Module:
+      def __init__(self, name, destinations):
+          self.name = name
+          self.destinations = destinations
+
+      def send(self):
+          for destination in self.destinations:
+              bus.append((self.name, destination, self.state))
+
+      def instantiate_destinations(self):
+          destinations = []
+          for dest in self.destinations:
+              if isinstance(dest, str):
+                  try:
+                      dest = modules[dest]
+                  except KeyError:
+                      dest = Module(dest, [])
+              destinations.append(dest)
+          self.destinations = destinations
+
+      def recv(self, source, signal):
+          pass
+
+      def reset(self):
+          pass
+
+
+  class FlipFlop(Module):
+      def __init__(self, name, destinations):
+          super().__init__(name, destinations)
+          self.state = 0
+
+      def recv(self, source, signal):
+          if signal == 1:
+              pass
+          else:
+              self.state ^= 1
+              self.send()
+
+      def reset(self):
+          self.state = 0
+
+
+  class Conjunction(Module):
+      def __init__(self, name, destinations, sources):
+          super().__init__(name, destinations)
+          self.signals = {x: 0 for x in sources}
+
+      @property
+      def state(self):
+          return int(not all(self.signals.values()))
+
+      def recv(self, source, signal):
+          self.signals[source] = signal
+          self.send()
+
+      def reset(self):
+          self.signals = {x: 0 for x in self.signals}
+
+
+  class Broadcaster(Module):
+      def recv(self, source, signal):
+          self.state = signal
+          self.send()
+
+
+  def strip_prefix(name):
+      return name[1:] if name[0] in "%&" else name
+
+
+  network = {}
+  modules = {}
+  for source, destinations in map(lambda x: x.split(" -> "), data):
+      network[source] = destinations.split(", ")
+  for key in network.keys():
+      if key[0] == "%":
+          modules[key[1:]] = FlipFlop(key[1:], network[key])
+      elif key[0] == "&":
+          sources = [strip_prefix(k) for k in network if key[1:] in network[k]]
+          modules[key[1:]] = Conjunction(key[1:], network[key], sources)
+      elif key == "broadcaster":
+          modules[key] = Broadcaster(key, network[key])
+  for key in modules:
+      modules[key].instantiate_destinations()
+#+end_src
+
+#+begin_src jupyter-python
+  counts = [0, 0]
+  for _ in range(1000):
+      bus = [("button", modules["broadcaster"], 0)]
+      while bus:
+          source, destination, signal = bus.pop(0)
+          counts[signal] += 1
+          destination.recv(source, signal)
+  counts[0] * counts[1]
+#+end_src
+
+
+** Part 2
+#+begin_src jupyter-python
+  # for module in modules:
+  #     modules[module].reset()
+  bus = [("button", modules["broadcaster"], 0)]
+  while bus:
+      source, destination, signal = bus.pop(0)
+      print(source, destination.name, signal, "conjunction" if hasattr(destination, "signals") else "flipflop")
+      destination.recv(source, signal)
+#+end_src
+
+#+begin_src jupyter-python
+  import matplotlib.pyplot as plt
+  G = nx.from_dict_of_lists({strip_prefix(k) : v for k, v in network.items()}, create_using=nx.DiGraph)
+  nodes, prefices = zip(*([(strip_prefix(k), k[0]) for k in network] + [("rx", "d")]))
+  colormap = {"%": "#1f77b4", "&": "#ff7f0e", "b": "#2ca02c", "d": "#d62728"}
+  colors = [colormap[prefix] for prefix in prefices]
+  nx.draw_networkx(G, nodelist=nodes, node_color=colors, arrows=True, pos=nx.bfs_layout(G))
+  plt.tight_layout()
+  plt.axis("off")
+  #+end_src
+
+#+begin_src jupyter-python
+  import matplotlib
+  for c in plt.cm.tab10.colors: print(matplotlib.colors.to_hex(c))
+#+end_src
