@@ -1,0 +1,46 @@
+#+PROPERTY: header-args:jupyter-python  :session aoc-2024 :kernel aoc
+#+PROPERTY: header-args    :pandoc t
+#+TITLE: 2024 Solutions
+
+* Imports
+#+begin_src jupyter-python
+# | eval: true
+# | output: false
+import dataclasses
+import functools
+import itertools
+import os
+import re
+import sys
+from collections import defaultdict, deque, namedtuple
+from queue import PriorityQueue
+
+import more_itertools
+import numpy as np
+import pandas as pd
+import scipy
+
+sys.path.insert(1, "..")
+
+import utils
+
+load = utils.year_load(2024)
+#+end_src
+
+* [[https://adventofcode.com/2024/day/1][Day 1: Historian Hysteria]]
+** Part 1
+Load the data, sort the two columns, find the absolute difference between them and sum the result.
+#+begin_src jupyter-python
+data = np.sort(load(1, "int"), axis=0)
+abs(np.diff(data)).sum()
+#+end_src
+
+** Part 2
+`numpy` has a handy method to find the unique values in an array, and their counts. Let's use that to make a dictionary of `value -> count` pairs for the right list with a default value of zero, and then just look up that value for each element of the left list.
+#+begin_src jupyter-python
+lookup = defaultdict(int)
+lookup.update(
+    {value: count for value, count in zip(*np.unique(data[:, 1], return_counts=True))}
+)
+sum(x * lookup[x] for x in data[:, 0])
+#+end_src
