@@ -1418,7 +1418,7 @@
     "href": "qmd/2024.html#part-2",
     "title": "2024 Solutions",
     "section": "Part 2",
-    "text": "Part 2\n`numpy` has a handy method to find the unique values in an array, and their counts. Let’s use that to make a dictionary of `value -&gt; count` pairs for the right list with a default value of zero, and then just look up that value for each element of the left list.\n\n\nCode\nlookup = defaultdict(int)\nlookup.update(\n    {value: count for value, count in zip(*np.unique(data[:, 1], return_counts=True))}\n)\nsum(x * lookup[x] for x in data[:, 0])"
+    "text": "Part 2\nnumpy has a handy method to find the unique values in an array, and their counts. Let’s use that to make a dictionary of value -&gt; count pairs for the right list with a default value of zero, and then just look up that value for each element of the left list.\n\n\nCode\nlookup = defaultdict(int)\nlookup.update(\n    {value: count for value, count in zip(*np.unique(data[:, 1], return_counts=True))}\n)\nsum(x * lookup[x] for x in data[:, 0])"
   },
   {
     "objectID": "qmd/2019.html",
