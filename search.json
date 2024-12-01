@@ -1400,6 +1400,27 @@
     "text": "Part 1\n\n\nCode\ndef coordinates_to_n(row, column):\n    n = row + column\n    complete_triangles = (n - 1) * (n - 2) / 2\n    return int(complete_triangles) + column\nrow, column = 3010, 3019\nn = coordinates_to_n(row, column)\ns = 20151125\nfor i in range(n - 1):\n    s = (s * (252533)) % 33554393\ns"
   },
   {
+    "objectID": "qmd/2024.html",
+    "href": "qmd/2024.html",
+    "title": "2024 Solutions",
+    "section": "",
+    "text": "Code\nimport dataclasses\nimport functools\nimport itertools\nimport os\nimport re\nimport sys\nfrom collections import defaultdict, deque, namedtuple\nfrom queue import PriorityQueue\n\nimport more_itertools\nimport numpy as np\nimport pandas as pd\nimport scipy\n\nsys.path.insert(1, \"..\")\n\nimport utils\n\nload = utils.year_load(2024)"
+  },
+  {
+    "objectID": "qmd/2024.html#part-1",
+    "href": "qmd/2024.html#part-1",
+    "title": "2024 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\nLoad the data, sort the two columns, find the absolute difference between them and sum the result.\n\n\nCode\ndata = np.sort(load(1, \"int\"), axis=0)\nabs(np.diff(data)).sum()"
+  },
+  {
+    "objectID": "qmd/2024.html#part-2",
+    "href": "qmd/2024.html#part-2",
+    "title": "2024 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\n`numpy` has a handy method to find the unique values in an array, and their counts. Let’s use that to make a dictionary of `value -&gt; count` pairs for the right list with a default value of zero, and then just look up that value for each element of the left list.\n\n\nCode\nlookup = defaultdict(int)\nlookup.update(\n    {value: count for value, count in zip(*np.unique(data[:, 1], return_counts=True))}\n)\nsum(x * lookup[x] for x in data[:, 0])"
+  },
+  {
     "objectID": "qmd/2019.html",
     "href": "qmd/2019.html",
     "title": "2019 Solutions",
@@ -2097,7 +2118,7 @@
     "href": "qmd/2023.html",
     "title": "2023 Solutions",
     "section": "",
-    "text": "Code\nimport dataclasses\nimport functools\nimport itertools\nimport os\nimport re\nimport sys\nfrom collections import defaultdict, deque, namedtuple\nfrom queue import PriorityQueue\n\nimport more_itertools\nimport numpy as np\nimport pandas as pd\nimport scipy\n\nsys.path.insert(1, os.path.join(sys.path[0], \"..\"))\n\nimport utils\n\nload = utils.year_load(2023)"
+    "text": "Code\nimport dataclasses\nimport functools\nimport itertools\nimport os\nimport re\nimport sys\nfrom collections import defaultdict, deque, namedtuple\nfrom queue import PriorityQueue\n\nimport more_itertools\nimport numpy as np\nimport pandas as pd\nimport scipy\n\nsys.path.insert(1, \"..\")\n\nimport utils\n\nload = utils.year_load(2023)"
   },
   {
     "objectID": "qmd/2023.html#part-1",
@@ -2364,6 +2385,20 @@
     "title": "2023 Solutions",
     "section": "Part 2",
     "text": "Part 2\nSo, I thought I was being clever above by eval’ing the instructions to convert them directly to python functions. Unfortunately we have to modify the above approach to work with ranges of values rather than specific values, which has the effect of converting the filters from pass/faill to ones that split ranges in two - the parts that pass the filter, and the parts that don’t. I could go back and rework how I parsed the instructions in part 1 to fit with what I need to do for part 2, or I could just redo the parsing.\nI’ll store each range as a dataclass of tuples, and each filter splits a range into at most two parts. The are half-open on the left, so that x = tuple(0, 5) represents the values [1, 2, 3, 4, 5]. The fact that they’re half-open lets us find the size of a range by just subtracting the endpoints, without having to fiddle with off-by one errors, and I chose to do it on the left so that the inital range can be represented by the pair of numbers (0, 4000) rather than the more ugly (1, 4001).\n\n\nCode\n@dataclasses.dataclass\nclass PartRange:\n    x: tuple[int]\n    m: tuple[int]\n    a: tuple[int]\n    s: tuple[int]\n\n\ndef is_valid(interval):\n    return interval[1] &gt; interval[0]\n\n\ndef split_coords(part_range, coordinate, cutoff, test):\n    coord_range = getattr(part_range, coordinate)\n    if test == \"&gt;\":\n        new_coords = ((cutoff, coord_range[1]), (coord_range[0], cutoff))\n    elif test == \"&lt;\":\n        new_coords = ((coord_range[0], cutoff - 1), (cutoff - 1, coord_range[1]))\n    else:\n        raise ValueError(\"This shouldn't be possible\")\n    result = []\n    for interval in new_coords:\n        if not is_valid(interval):\n            result.append(None)\n        else:\n            result.append(dataclasses.replace(part_range, **{coordinate: interval}))\n    return result\n\n\ndef size(part_range):\n    return np.product([np.diff(getattr(part_range, i)) for i in \"xmas\"])\n\n\ndef parse_rule_string(rule):\n    if \":\" not in rule:\n        return rule\n    coordinate = rule[0]\n    test = rule[1]\n    cutoff, destination = rule[2:].split(\":\")\n    return coordinate, int(cutoff), test, destination\n\n\ninstructions = {}\nfor name, rules in map(lambda x: x[:-1].split(\"{\"), workflows):\n    instructions[name] = [parse_rule_string(rule) for rule in rules.split(\",\")]\n\n\ndef follow(instructions):\n    def inner(part_range, state):\n        if state == \"R\":\n            return 0\n        if state == \"A\":\n            return size(part_range)\n        rules = instructions[state]\n        result = 0\n        remainder = part_range\n        for rule in rules:\n            if remainder is None:\n                break\n            if isinstance(rule, str):\n                result += inner(remainder, rule)\n                break\n            else:\n                coordinate, cutoff, test, destination = rule\n                passed, remainder = split_coords(remainder, coordinate, cutoff, test)\n                result += inner(passed, destination) if passed is not None else 0\n        return result\n\n    initial = PartRange((0, 4000), (0, 4000), (0, 4000), (0, 4000))\n    return inner(initial, \"in\")\n\n\nfollow(instructions)"
+  },
+  {
+    "objectID": "qmd/2023.html#part-2-19",
+    "href": "qmd/2023.html#part-2-19",
+    "title": "2023 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\n\n\nCode\n# for module in modules:\n#     modules[module].reset()\nbus = [(\"button\", modules[\"broadcaster\"], 0)]\nwhile bus:\n    source, destination, signal = bus.pop(0)\n    print(source, destination.name, signal, \"conjunction\" if hasattr(destination, \"signals\") else \"flipflop\")\n    destination.recv(source, signal)\n\n\n\n\nCode\nimport matplotlib.pyplot as plt\nG = nx.from_dict_of_lists({strip_prefix(k) : v for k, v in network.items()}, create_using=nx.DiGraph)\nnodes, prefices = zip(*([(strip_prefix(k), k[0]) for k in network] + [(\"rx\", \"d\")]))\ncolormap = {\"%\": \"#1f77b4\", \"&\": \"#ff7f0e\", \"b\": \"#2ca02c\", \"d\": \"#d62728\"}\ncolors = [colormap[prefix] for prefix in prefices]\nnx.draw_networkx(G, nodelist=nodes, node_color=colors, arrows=True, pos=nx.bfs_layout(G))\nplt.tight_layout()\nplt.axis(\"off\")\n\n\n\n\nCode\nimport matplotlib\nfor c in plt.cm.tab10.colors: print(matplotlib.colors.to_hex(c))"
+  },
+  {
+    "objectID": "qmd/2023.html#part-1-19",
+    "href": "qmd/2023.html#part-1-19",
+    "title": "2023 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\n\n\nCode\ndata = np.array([list(line) for line in load(21)])\ndata = np.pad(data, 1, constant_values = \"#\")\ny, x = [x[0] for x in np.where(data == \"S\")]\ndata[y, x] = \".\"\ndef step(positions):\n    result = set()\n    for y, x in positions:\n        for dy in [-1, 1]:\n            if data[y + dy, x] == \".\":\n                result.add((y + dy, x))\n        for dx in [-1, 1]:\n            if data[y, x + dx] == \".\":\n                result.add((y, x + dx))\n    return result\npositions = [(y, x)]\nfor _ in range(64):\n    positions = step(positions)\nlen(positions)"
   },
   {
     "objectID": "qmd/2016.html",
