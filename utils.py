@@ -1,8 +1,9 @@
-from collections import deque, defaultdict
 import queue
-import numpy as np
-from pathlib import Path
 import re
+from collections import defaultdict, deque
+from pathlib import Path
+
+import numpy as np
 
 datadir = Path(__file__).parent / "data"
 
@@ -128,7 +129,7 @@ def year_load(year):
         if output == "lines":
             return [x.strip() for x in lines]
         if output == "int":
-            regex = re.compile("-?\d+")
+            regex = re.compile(r"-?\d+")
             integers = [[int(x) for x in re.findall(regex, line)] for line in lines]
             return [integer for integer in integers if integer]
         if output == "np":
