@@ -7,6 +7,7 @@ website:
     style: "floating"
     search: false
     contents:
+    - qmd/2024.qmd
     - qmd/2023.qmd
     - qmd/2022.qmd
     - qmd/2021.qmd
