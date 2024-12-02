@@ -1421,6 +1421,20 @@
     "text": "Part 2\nnumpy has a handy method to find the unique values in an array, and their counts. Let’s use that to make a dictionary of value -&gt; count pairs for the right list with a default value of zero, and then just look up that value for each element of the left list.\n\n\nCode\nlookup = defaultdict(int)\nlookup.update(\n    {value: count for value, count in zip(*np.unique(data[:, 1], return_counts=True))}\n)\nsum(x * lookup[x] for x in data[:, 0])"
   },
   {
+    "objectID": "qmd/2024.html#part-1-1",
+    "href": "qmd/2024.html#part-1-1",
+    "title": "2024 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\n\n\nCode\ndata = load(2, \"int\")\ndef is_safe(line):\n    diff = np.diff(line)\n    diff = diff * np.sign(diff[0])\n    return int(((diff &gt; 0) & (diff &lt;= 3)).all())\nsum(is_safe(line) for line in data)"
+  },
+  {
+    "objectID": "qmd/2024.html#part-2-1",
+    "href": "qmd/2024.html#part-2-1",
+    "title": "2024 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\n\n\nCode\ntotal = 0\nfor line in data:\n    if is_safe(line):\n        total += 1\n        continue\n    for idx in range(len(line)):\n        if is_safe(line[:idx] + line[idx + 1 :]):\n            total += 1\n            break\ntotal"
+  },
+  {
     "objectID": "qmd/2019.html",
     "href": "qmd/2019.html",
     "title": "2019 Solutions",
