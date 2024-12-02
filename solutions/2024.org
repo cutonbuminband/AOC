@@ -36,11 +36,35 @@ abs(np.diff(data)).sum()
 #+end_src
 
 ** Part 2
-`numpy` has a handy method to find the unique values in an array, and their counts. Let's use that to make a dictionary of `value -> count` pairs for the right list with a default value of zero, and then just look up that value for each element of the left list.
+~numpy~ has a handy method to find the unique values in an array, and their counts. Let's use that to make a dictionary of ~value -> count~ pairs for the right list with a default value of zero, and then just look up that value for each element of the left list.
 #+begin_src jupyter-python
 lookup = defaultdict(int)
 lookup.update(
     {value: count for value, count in zip(*np.unique(data[:, 1], return_counts=True))}
 )
 sum(x * lookup[x] for x in data[:, 0])
+#+end_src
+
+* [[https://adventofcode.com/2024/day/2][Day 2: Red-Nosed Reports]]
+** Part 1
+#+begin_src jupyter-python
+data = load(2, "int")
+def is_safe(line):
+    diff = np.diff(line)
+    diff = diff * np.sign(diff[0])
+    return int(((diff > 0) & (diff <= 3)).all())
+sum(is_safe(line) for line in data)
+#+end_src
+** Part 2
+#+begin_src jupyter-python
+total = 0
+for line in data:
+    if is_safe(line):
+        total += 1
+        continue
+    for idx in range(len(line)):
+        if is_safe(line[:idx] + line[idx + 1 :]):
+            total += 1
+            break
+total
 #+end_src
