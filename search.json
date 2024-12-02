@@ -1425,14 +1425,14 @@
     "href": "qmd/2024.html#part-1-1",
     "title": "2024 Solutions",
     "section": "Part 1",
-    "text": "Part 1\n\n\nCode\ndata = load(2, \"int\")\ndef is_safe(line):\n    diff = np.diff(line)\n    diff = diff * np.sign(diff[0])\n    return int(((diff &gt; 0) & (diff &lt;= 3)).all())\nsum(is_safe(line) for line in data)"
+    "text": "Part 1\nNothing too complicated going on here: load the data, and find the difference between successive values. To account for decreasing sequences, multiply by the sign of the first difference and then require that all the differences be greater than one and less than or equal to three.\n\n\nCode\ndata = load(2, \"int\")\ndef is_safe(line):\n    diff = np.diff(line)\n    diff = diff * np.sign(diff[0])\n    return int(((diff &gt; 0) & (diff &lt;= 3)).all())\nsum(is_safe(line) for line in data)"
   },
   {
     "objectID": "qmd/2024.html#part-2-1",
     "href": "qmd/2024.html#part-2-1",
     "title": "2024 Solutions",
     "section": "Part 2",
-    "text": "Part 2\n\n\nCode\ntotal = 0\nfor line in data:\n    if is_safe(line):\n        total += 1\n        continue\n    for idx in range(len(line)):\n        if is_safe(line[:idx] + line[idx + 1 :]):\n            total += 1\n            break\ntotal"
+    "text": "Part 2\nI spent a bit of time trying to see if there was a neat way of incorporating the “is valid if any one number is deleted” requirement, but I couldn’t immediately see it, so I ended up just iterating over all the possible deletions instead.\n\n\nCode\ntotal = 0\nfor line in data:\n    if is_safe(line):\n        total += 1\n        continue\n    for idx in range(len(line)):\n        if is_safe(line[:idx] + line[idx + 1 :]):\n            total += 1\n            break\ntotal"
   },
   {
     "objectID": "qmd/2019.html",

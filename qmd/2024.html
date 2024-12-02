@@ -109,9 +109,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">
-      AOC
-      </li></ol></nav>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../qmd/2024.html">2024 Solutions</a></li></ol></nav>
       <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
       </a>
     </div>
@@ -131,6 +129,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       </div>
     <div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../qmd/2024.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">2024 Solutions</span></a>
+  </div>
+</li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../qmd/2023.html" class="sidebar-item-text sidebar-link">
@@ -288,6 +292,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h1><a href="https://adventofcode.com/2024/day/2">Day 2: Red-Nosed Reports</a></h1>
 <section id="part-1-1" class="level2">
 <h2 class="anchored" data-anchor-id="part-1-1">Part 1</h2>
+<p>Nothing too complicated going on here: load the data, and find the difference between successive values. To account for decreasing sequences, multiply by the sign of the first difference and then require that all the differences be greater than one and less than or equal to three.</p>
 <div class="cell" data-execution_count="4">
 <details open="">
 <summary>Code</summary>
@@ -302,6 +307,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="part-2-1" class="level2">
 <h2 class="anchored" data-anchor-id="part-2-1">Part 2</h2>
+<p>I spent a bit of time trying to see if there was a neat way of incorporating the “is valid if any one number is deleted” requirement, but I couldn’t immediately see it, so I ended up just iterating over all the possible deletions instead.</p>
 <div class="cell" data-execution_count="5">
 <details open="">
 <summary>Code</summary>
@@ -781,29 +787,33 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1</span></span>
 <span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> load(<span class="dv">2</span>, <span class="st">"int"</span>)</span>
-<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> is_safe(line):</span>
-<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a>    diff <span class="op">=</span> np.diff(line)</span>
-<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a>    diff <span class="op">=</span> diff <span class="op">*</span> np.sign(diff[<span class="dv">0</span>])</span>
-<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">int</span>(((diff <span class="op">&gt;</span> <span class="dv">0</span>) <span class="op">&amp;</span> (diff <span class="op">&lt;=</span> <span class="dv">3</span>)).<span class="bu">all</span>())</span>
-<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(is_safe(line) <span class="cf">for</span> line <span class="kw">in</span> data)</span>
-<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
+<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a>Nothing too complicated going on here: load the data, and find the difference between successive values. To account for decreasing sequences, multiply by the sign of the first difference and then require that all the differences be greater than one and less than or equal to three.</span>
+<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> load(<span class="dv">2</span>, <span class="st">"int"</span>)</span>
+<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> is_safe(line):</span>
+<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a>    diff <span class="op">=</span> np.diff(line)</span>
+<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a>    diff <span class="op">=</span> diff <span class="op">*</span> np.sign(diff[<span class="dv">0</span>])</span>
+<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">int</span>(((diff <span class="op">&gt;</span> <span class="dv">0</span>) <span class="op">&amp;</span> (diff <span class="op">&lt;=</span> <span class="dv">3</span>)).<span class="bu">all</span>())</span>
+<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(is_safe(line) <span class="cf">for</span> line <span class="kw">in</span> data)</span>
+<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-79"><a href="#cb6-79" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb6-80"><a href="#cb6-80" aria-hidden="true" tabindex="-1"></a>total <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb6-81"><a href="#cb6-81" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> line <span class="kw">in</span> data:</span>
-<span id="cb6-82"><a href="#cb6-82" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> is_safe(line):</span>
-<span id="cb6-83"><a href="#cb6-83" aria-hidden="true" tabindex="-1"></a>        total <span class="op">+=</span> <span class="dv">1</span></span>
-<span id="cb6-84"><a href="#cb6-84" aria-hidden="true" tabindex="-1"></a>        <span class="cf">continue</span></span>
-<span id="cb6-85"><a href="#cb6-85" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> idx <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(line)):</span>
-<span id="cb6-86"><a href="#cb6-86" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> is_safe(line[:idx] <span class="op">+</span> line[idx <span class="op">+</span> <span class="dv">1</span> :]):</span>
-<span id="cb6-87"><a href="#cb6-87" aria-hidden="true" tabindex="-1"></a>            total <span class="op">+=</span> <span class="dv">1</span></span>
-<span id="cb6-88"><a href="#cb6-88" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
-<span id="cb6-89"><a href="#cb6-89" aria-hidden="true" tabindex="-1"></a>total</span>
-<span id="cb6-90"><a href="#cb6-90" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb6-77"><a href="#cb6-77" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
+<span id="cb6-78"><a href="#cb6-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-79"><a href="#cb6-79" aria-hidden="true" tabindex="-1"></a>I spent a bit of time trying to see if there was a neat way of incorporating the "is valid if any one number is deleted" requirement, but I couldn't immediately see it, so I ended up just iterating over all the possible deletions instead.</span>
+<span id="cb6-80"><a href="#cb6-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-83"><a href="#cb6-83" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb6-84"><a href="#cb6-84" aria-hidden="true" tabindex="-1"></a>total <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb6-85"><a href="#cb6-85" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> line <span class="kw">in</span> data:</span>
+<span id="cb6-86"><a href="#cb6-86" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> is_safe(line):</span>
+<span id="cb6-87"><a href="#cb6-87" aria-hidden="true" tabindex="-1"></a>        total <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb6-88"><a href="#cb6-88" aria-hidden="true" tabindex="-1"></a>        <span class="cf">continue</span></span>
+<span id="cb6-89"><a href="#cb6-89" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> idx <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(line)):</span>
+<span id="cb6-90"><a href="#cb6-90" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> is_safe(line[:idx] <span class="op">+</span> line[idx <span class="op">+</span> <span class="dv">1</span> :]):</span>
+<span id="cb6-91"><a href="#cb6-91" aria-hidden="true" tabindex="-1"></a>            total <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb6-92"><a href="#cb6-92" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
+<span id="cb6-93"><a href="#cb6-93" aria-hidden="true" tabindex="-1"></a>total</span>
+<span id="cb6-94"><a href="#cb6-94" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
