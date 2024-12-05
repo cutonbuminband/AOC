@@ -118,3 +118,74 @@ def x_mas(chararray):
     return 0
 scipy.ndimage.generic_filter(data, x_mas, footprint=footprint, mode="constant").sum()
 #+end_src
+
+* [[https://adventofcode.com/2024/day/5][Day 5: Print Queue]]
+This problem screams topological sort, so that's what I'm going with. For part one, to account for the case where multiple orderings of a line might obey the rules, the we'll use a function to check whether the line order is compatible with the order given in the update.
+
+That's not too tricky: just iterate through the update, and for each item in the update
+
+1. Check that it's not blocked by any later items
+2. Remove any blocks that the current item is placing on later items, since it's successfully been placed
+
+If we get through the whole update without finding a blocked item, then the order is valid and we should include it in the sum.   
+
+** Part 1
+#+begin_src jupyter-python
+rules, updates = [x.split("\n") for x in load(5, "raw").split("\n\n")]
+updates = [[int(x) for x in line.split(",")] for line in updates]
+ancestors = defaultdict(list)
+descendents = defaultdict(list)
+for rule in rules:
+    first, last = map(int, rule.split("|"))
+    ancestors[last].append(first)
+    descendents[first].append(last)
+
+
+def restriction(rules, keys):
+    return {key: [x for x in rules[key] if x in keys] for key in keys}
+
+
+def is_sorted(keys):
+    keys = keys.copy()
+    pre = restriction(ancestors, keys)
+    post = restriction(descendents, keys)
+    while keys:
+        current = keys.pop(0)
+        if pre[current]:
+            return False
+        del pre[current]
+        for item in post[current]:
+            pre[item] = [x for x in pre[item] if x != current]
+    return True
+
+
+sum(update[len(update) // 2] for update in updates if is_sorted(update))
+#+end_src
+
+** Part 2
+For part 2 we'll actually implement the topological sort. I vaguely remembered how to do this, but it took a couple of iterations to get right.
+
+The idea is that we start by scanning the rules dictionary for items which are eligible for immediate placement, and remove them from the list.
+
+We then iteratively place these items, and for each item we place, we remove any blocks that they might have placed on later items. That might mean that new items are eligible for placement, and in this way we iterate through the entire list and output an order compatible with the rules.
+#+begin_src jupyter-python
+def topological_sort(keys):
+    pre = restriction(ancestors, keys)
+    post = restriction(descendents, keys)
+    result = []
+    to_delete = [key for key in pre if not pre[key]]
+    for key in to_delete:
+        del pre[key]
+    while to_delete:
+        n = to_delete.pop()
+        result.append(n)
+        for item in post[n]:
+            pre[item] = [x for x in pre[item] if x != n]
+            if not pre[item]:
+                to_delete.append(item)
+                del pre[item]
+    return result
+
+
+sum(topological_sort(line)[len(line) // 2] for line in updates if not is_sorted(line))
+#+end_src
