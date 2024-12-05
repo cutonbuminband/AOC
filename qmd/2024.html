@@ -220,6 +220,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#part-1-3" id="toc-part-1-3" class="nav-link" data-scroll-target="#part-1-3">Part 1</a></li>
   <li><a href="#part-2-3" id="toc-part-2-3" class="nav-link" data-scroll-target="#part-2-3">Part 2</a></li>
   </ul></li>
+  <li><a href="#day-5-print-queue" id="toc-day-5-print-queue" class="nav-link" data-scroll-target="#day-5-print-queue">Day 5: Print Queue</a>
+  <ul class="collapse">
+  <li><a href="#part-1-4" id="toc-part-1-4" class="nav-link" data-scroll-target="#part-1-4">Part 1</a></li>
+  <li><a href="#part-2-4" id="toc-part-2-4" class="nav-link" data-scroll-target="#part-2-4">Part 2</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -402,6 +407,83 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="dv">1</span></span>
 <span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">0</span></span>
 <span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>scipy.ndimage.generic_filter(data, x_mas, footprint<span class="op">=</span>footprint, mode<span class="op">=</span><span class="st">"constant"</span>).<span class="bu">sum</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+<section id="day-5-print-queue" class="level1">
+<h1><a href="https://adventofcode.com/2024/day/5">Day 5: Print Queue</a></h1>
+<p>This problem screams topological sort, so that’s what I’m going with. For part one, to account for the case where multiple orderings of a line might obey the rules, the we’ll use a function to check whether the line order is compatible with the order given in the update.</p>
+<p>That’s not too tricky: just iterate through the update, and for each item in the update</p>
+<ol type="1">
+<li>Check that it’s not blocked by any later items</li>
+<li>Remove any blocks that the current item is placing on later items, since it’s successfully been placed</li>
+</ol>
+<p>If we get through the whole update without finding a blocked item, then the order is valid and we should include it in the sum.</p>
+<section id="part-1-4" class="level2">
+<h2 class="anchored" data-anchor-id="part-1-4">Part 1</h2>
+<div class="cell" data-execution_count="10">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>rules, updates <span class="op">=</span> [x.split(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span>) <span class="cf">for</span> x <span class="kw">in</span> load(<span class="dv">5</span>, <span class="st">"raw"</span>).split(<span class="st">"</span><span class="ch">\n\n</span><span class="st">"</span>)]</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>updates <span class="op">=</span> [[<span class="bu">int</span>(x) <span class="cf">for</span> x <span class="kw">in</span> line.split(<span class="st">","</span>)] <span class="cf">for</span> line <span class="kw">in</span> updates]</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>ancestors <span class="op">=</span> defaultdict(<span class="bu">list</span>)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>descendents <span class="op">=</span> defaultdict(<span class="bu">list</span>)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> rule <span class="kw">in</span> rules:</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    first, last <span class="op">=</span> <span class="bu">map</span>(<span class="bu">int</span>, rule.split(<span class="st">"|"</span>))</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    ancestors[last].append(first)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    descendents[first].append(last)</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> restriction(rules, keys):</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {key: [x <span class="cf">for</span> x <span class="kw">in</span> rules[key] <span class="cf">if</span> x <span class="kw">in</span> keys] <span class="cf">for</span> key <span class="kw">in</span> keys}</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> is_sorted(keys):</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    keys <span class="op">=</span> keys.copy()</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    pre <span class="op">=</span> restriction(ancestors, keys)</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    post <span class="op">=</span> restriction(descendents, keys)</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> keys:</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>        current <span class="op">=</span> keys.pop(<span class="dv">0</span>)</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> pre[current]:</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="va">False</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>        <span class="kw">del</span> pre[current]</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> item <span class="kw">in</span> post[current]:</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>            pre[item] <span class="op">=</span> [x <span class="cf">for</span> x <span class="kw">in</span> pre[item] <span class="cf">if</span> x <span class="op">!=</span> current]</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">True</span></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(update[<span class="bu">len</span>(update) <span class="op">//</span> <span class="dv">2</span>] <span class="cf">for</span> update <span class="kw">in</span> updates <span class="cf">if</span> is_sorted(update))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="part-2-4" class="level2">
+<h2 class="anchored" data-anchor-id="part-2-4">Part 2</h2>
+<p>For part 2 we’ll actually implement the topological sort. I vaguely remembered how to do this, but it took a couple of iterations to get right.</p>
+<p>The idea is that we start by scanning the rules dictionary for items which are eligible for immediate placement, and remove them from the list.</p>
+<p>We then iteratively place these items, and for each item we place, we remove any blocks that they might have placed on later items. That might mean that new items are eligible for placement, and in this way we iterate through the entire list and output an order compatible with the rules.</p>
+<div class="cell" data-execution_count="11">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> topological_sort(keys):</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    pre <span class="op">=</span> restriction(ancestors, keys)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    post <span class="op">=</span> restriction(descendents, keys)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> []</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    to_delete <span class="op">=</span> [key <span class="cf">for</span> key <span class="kw">in</span> pre <span class="cf">if</span> <span class="kw">not</span> pre[key]]</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> key <span class="kw">in</span> to_delete:</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">del</span> pre[key]</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> to_delete:</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>        n <span class="op">=</span> to_delete.pop()</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>        result.append(n)</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> item <span class="kw">in</span> post[n]:</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>            pre[item] <span class="op">=</span> [x <span class="cf">for</span> x <span class="kw">in</span> pre[item] <span class="cf">if</span> x <span class="op">!=</span> n]</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="kw">not</span> pre[item]:</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>                to_delete.append(item)</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>                <span class="kw">del</span> pre[item]</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> result</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(topological_sort(line)[<span class="bu">len</span>(line) <span class="op">//</span> <span class="dv">2</span>] <span class="cf">for</span> line <span class="kw">in</span> updates <span class="cf">if</span> <span class="kw">not</span> is_sorted(line))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 
@@ -811,149 +893,224 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="sourceCode" id="cb10" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> 2024 Solutions</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="fu"># Imports</span></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="co"># | eval: true</span></span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="co"># | output: false</span></span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> dataclasses</span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> functools</span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> itertools</span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sys</span>
-<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> defaultdict, deque, namedtuple</span>
-<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> queue <span class="im">import</span> PriorityQueue</span>
-<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> more_itertools</span>
-<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> scipy</span>
-<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>sys.path.insert(<span class="dv">1</span>, <span class="st">".."</span>)</span>
-<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> utils</span>
-<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>load <span class="op">=</span> utils.year_load(<span class="dv">2024</span>)</span>
-<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a><span class="fu"># [Day 1: Historian Hysteria](https://adventofcode.com/2024/day/1)</span></span>
-<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1</span></span>
-<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>Load the data, sort the two columns, find the absolute difference between them and sum the result.</span>
-<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> np.sort(load(<span class="dv">1</span>, <span class="st">"int"</span>), axis<span class="op">=</span><span class="dv">0</span>)</span>
-<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a><span class="bu">abs</span>(np.diff(data)).<span class="bu">sum</span>()</span>
-<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
-<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a><span class="in">`numpy`</span> has a handy method to find the unique values in an array, and their counts. Let's use that to make a dictionary of <span class="in">`value -&gt; count`</span> pairs for the right list with a default value of zero, and then just look up that value for each element of the left list.</span>
-<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a>lookup <span class="op">=</span> defaultdict(<span class="bu">int</span>)</span>
-<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a>lookup.update(</span>
-<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a>    {value: count <span class="cf">for</span> value, count <span class="kw">in</span> <span class="bu">zip</span>(<span class="op">*</span>np.unique(data[:, <span class="dv">1</span>], return_counts<span class="op">=</span><span class="va">True</span>))}</span>
-<span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(x <span class="op">*</span> lookup[x] <span class="cf">for</span> x <span class="kw">in</span> data[:, <span class="dv">0</span>])</span>
-<span id="cb10-58"><a href="#cb10-58" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb10-59"><a href="#cb10-59" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-60"><a href="#cb10-60" aria-hidden="true" tabindex="-1"></a><span class="fu"># [Day 2: Red-Nosed Reports](https://adventofcode.com/2024/day/2)</span></span>
-<span id="cb10-61"><a href="#cb10-61" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-62"><a href="#cb10-62" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1</span></span>
-<span id="cb10-63"><a href="#cb10-63" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-64"><a href="#cb10-64" aria-hidden="true" tabindex="-1"></a>Nothing too complicated going on here: load the data, and find the difference between successive values. To account for decreasing sequences, multiply by the sign of the first difference and then require that all the differences be greater than one and less than or equal to three.</span>
-<span id="cb10-65"><a href="#cb10-65" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-68"><a href="#cb10-68" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb10-69"><a href="#cb10-69" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> load(<span class="dv">2</span>, <span class="st">"int"</span>)</span>
-<span id="cb10-70"><a href="#cb10-70" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-71"><a href="#cb10-71" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-72"><a href="#cb10-72" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> is_safe(line):</span>
-<span id="cb10-73"><a href="#cb10-73" aria-hidden="true" tabindex="-1"></a>    diff <span class="op">=</span> np.diff(line)</span>
-<span id="cb10-74"><a href="#cb10-74" aria-hidden="true" tabindex="-1"></a>    diff <span class="op">=</span> diff <span class="op">*</span> np.sign(diff[<span class="dv">0</span>])</span>
-<span id="cb10-75"><a href="#cb10-75" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">int</span>(((diff <span class="op">&gt;</span> <span class="dv">0</span>) <span class="op">&amp;</span> (diff <span class="op">&lt;=</span> <span class="dv">3</span>)).<span class="bu">all</span>())</span>
-<span id="cb10-76"><a href="#cb10-76" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-77"><a href="#cb10-77" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-78"><a href="#cb10-78" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(is_safe(line) <span class="cf">for</span> line <span class="kw">in</span> data)</span>
-<span id="cb10-79"><a href="#cb10-79" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb10-80"><a href="#cb10-80" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-81"><a href="#cb10-81" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
-<span id="cb10-82"><a href="#cb10-82" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-83"><a href="#cb10-83" aria-hidden="true" tabindex="-1"></a>I spent a bit of time trying to see if there was a neat way of incorporating the "is valid if any one number is deleted" requirement, but I couldn't immediately see it, so I ended up just iterating over all the possible deletions instead.</span>
-<span id="cb10-84"><a href="#cb10-84" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-87"><a href="#cb10-87" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb10-88"><a href="#cb10-88" aria-hidden="true" tabindex="-1"></a>total <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb10-89"><a href="#cb10-89" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> line <span class="kw">in</span> data:</span>
-<span id="cb10-90"><a href="#cb10-90" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> idx <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(line)):</span>
-<span id="cb10-91"><a href="#cb10-91" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> is_safe(line[:idx] <span class="op">+</span> line[idx <span class="op">+</span> <span class="dv">1</span> :]):</span>
-<span id="cb10-92"><a href="#cb10-92" aria-hidden="true" tabindex="-1"></a>            total <span class="op">+=</span> <span class="dv">1</span></span>
-<span id="cb10-93"><a href="#cb10-93" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
-<span id="cb10-94"><a href="#cb10-94" aria-hidden="true" tabindex="-1"></a>total</span>
-<span id="cb10-95"><a href="#cb10-95" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb10-96"><a href="#cb10-96" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-97"><a href="#cb10-97" aria-hidden="true" tabindex="-1"></a><span class="fu"># [Day 3: Mull It Over](https://adventofcode.com/2024/day/3)</span></span>
-<span id="cb10-98"><a href="#cb10-98" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-99"><a href="#cb10-99" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1</span></span>
-<span id="cb10-100"><a href="#cb10-100" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-101"><a href="#cb10-101" aria-hidden="true" tabindex="-1"></a>We get to play with <span class="in">`regex`</span>! Well, I do – there might be better ways of tackling this. The format for a valid <span class="in">`mul`</span> instruction is quite strict, encoding that as a regex is fairly straightforward. Once we have that, we can use <span class="in">`re.findall`</span> to find all the occurrences and extract the integers.</span>
-<span id="cb10-102"><a href="#cb10-102" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-105"><a href="#cb10-105" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb10-106"><a href="#cb10-106" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> load(<span class="dv">3</span>, <span class="st">"raw"</span>)</span>
-<span id="cb10-107"><a href="#cb10-107" aria-hidden="true" tabindex="-1"></a>mul <span class="op">=</span> <span class="vs">r"mul\((\d{1,3}),(\d{1,3})\)"</span></span>
-<span id="cb10-108"><a href="#cb10-108" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(<span class="bu">int</span>(pair[<span class="dv">0</span>]) <span class="op">*</span> <span class="bu">int</span>(pair[<span class="dv">1</span>]) <span class="cf">for</span> pair <span class="kw">in</span> re.findall(mul, data))</span>
-<span id="cb10-109"><a href="#cb10-109" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb10-110"><a href="#cb10-110" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-111"><a href="#cb10-111" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2:</span></span>
-<span id="cb10-112"><a href="#cb10-112" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-113"><a href="#cb10-113" aria-hidden="true" tabindex="-1"></a>I'm pretty happy with my part two, which I managed to do fairly elegantly. We can ignore all the sections immediately after a <span class="in">`don't()`</span> instruction by splitting the string on those, and then discarding the start of each substring up to the first <span class="in">`do()`</span> instruction. Concatenating all the substrings gives us a clean string with just the segments we are interested in, and we can proceed as before.</span>
-<span id="cb10-114"><a href="#cb10-114" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-117"><a href="#cb10-117" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb10-118"><a href="#cb10-118" aria-hidden="true" tabindex="-1"></a>clean <span class="op">=</span> <span class="st">""</span>.join(</span>
-<span id="cb10-119"><a href="#cb10-119" aria-hidden="true" tabindex="-1"></a>    [segment[segment.find(<span class="st">"do()"</span>) :] <span class="cf">for</span> segment <span class="kw">in</span> (<span class="st">"do()"</span> <span class="op">+</span> data).split(<span class="st">"don't()"</span>)]</span>
-<span id="cb10-120"><a href="#cb10-120" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb10-121"><a href="#cb10-121" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(<span class="bu">int</span>(pair[<span class="dv">0</span>]) <span class="op">*</span> <span class="bu">int</span>(pair[<span class="dv">1</span>]) <span class="cf">for</span> pair <span class="kw">in</span> re.findall(mul, clean))</span>
-<span id="cb10-122"><a href="#cb10-122" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb10-123"><a href="#cb10-123" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-124"><a href="#cb10-124" aria-hidden="true" tabindex="-1"></a><span class="fu"># [Day 4: Ceres Search](https://adventofcode.com/2024/day/4)</span></span>
-<span id="cb10-125"><a href="#cb10-125" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-126"><a href="#cb10-126" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1</span></span>
-<span id="cb10-127"><a href="#cb10-127" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-130"><a href="#cb10-130" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb10-131"><a href="#cb10-131" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> np.array([[<span class="bu">ord</span>(char) <span class="cf">for</span> char <span class="kw">in</span> line] <span class="cf">for</span> line <span class="kw">in</span> load(<span class="dv">4</span>)])</span>
-<span id="cb10-132"><a href="#cb10-132" aria-hidden="true" tabindex="-1"></a>mask <span class="op">=</span> np.array([<span class="bu">ord</span>(char) <span class="cf">for</span> char <span class="kw">in</span> <span class="st">"XMAS"</span>])</span>
-<span id="cb10-133"><a href="#cb10-133" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-134"><a href="#cb10-134" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-135"><a href="#cb10-135" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> xmas(chararray):</span>
-<span id="cb10-136"><a href="#cb10-136" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (chararray <span class="op">==</span> mask).<span class="bu">all</span>() <span class="kw">or</span> (chararray <span class="op">==</span> mask[::<span class="op">-</span><span class="dv">1</span>]).<span class="bu">all</span>()</span>
-<span id="cb10-137"><a href="#cb10-137" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-138"><a href="#cb10-138" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-139"><a href="#cb10-139" aria-hidden="true" tabindex="-1"></a>footprints <span class="op">=</span> [np.eye(<span class="dv">4</span>), np.fliplr(np.eye(<span class="dv">4</span>)), [[<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>]], [[<span class="dv">1</span>], [<span class="dv">1</span>], [<span class="dv">1</span>], [<span class="dv">1</span>]]]</span>
-<span id="cb10-140"><a href="#cb10-140" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-141"><a href="#cb10-141" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(</span>
-<span id="cb10-142"><a href="#cb10-142" aria-hidden="true" tabindex="-1"></a>    scipy.ndimage.generic_filter(data, xmas, footprint<span class="op">=</span>footprint, mode<span class="op">=</span><span class="st">"constant"</span>).<span class="bu">sum</span>()</span>
-<span id="cb10-143"><a href="#cb10-143" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> footprint <span class="kw">in</span> footprints</span>
-<span id="cb10-144"><a href="#cb10-144" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb10-145"><a href="#cb10-145" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb10-146"><a href="#cb10-146" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-147"><a href="#cb10-147" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
-<span id="cb10-148"><a href="#cb10-148" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-151"><a href="#cb10-151" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb10-152"><a href="#cb10-152" aria-hidden="true" tabindex="-1"></a>masks <span class="op">=</span> [<span class="st">"MMASS"</span>, <span class="st">"SMASM"</span>, <span class="st">"MSAMS"</span>, <span class="st">"SSAMM"</span>]</span>
-<span id="cb10-153"><a href="#cb10-153" aria-hidden="true" tabindex="-1"></a>encoded_masks <span class="op">=</span> [np.array([<span class="bu">ord</span>(char) <span class="cf">for</span> char <span class="kw">in</span> mask]) <span class="cf">for</span> mask <span class="kw">in</span> masks]</span>
-<span id="cb10-154"><a href="#cb10-154" aria-hidden="true" tabindex="-1"></a>footprint <span class="op">=</span> [[<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>], [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>], [<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>]]</span>
-<span id="cb10-155"><a href="#cb10-155" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> x_mas(chararray):</span>
-<span id="cb10-156"><a href="#cb10-156" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> mask <span class="kw">in</span> encoded_masks:</span>
-<span id="cb10-157"><a href="#cb10-157" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (chararray <span class="op">==</span> mask).<span class="bu">all</span>():</span>
-<span id="cb10-158"><a href="#cb10-158" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="dv">1</span></span>
-<span id="cb10-159"><a href="#cb10-159" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">0</span></span>
-<span id="cb10-160"><a href="#cb10-160" aria-hidden="true" tabindex="-1"></a>scipy.ndimage.generic_filter(data, x_mas, footprint<span class="op">=</span>footprint, mode<span class="op">=</span><span class="st">"constant"</span>).<span class="bu">sum</span>()</span>
-<span id="cb10-161"><a href="#cb10-161" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<div class="sourceCode" id="cb12" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> 2024 Solutions</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="fu"># Imports</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="co"># | eval: true</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="co"># | output: false</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> dataclasses</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> functools</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> itertools</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sys</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> defaultdict, deque, namedtuple</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> queue <span class="im">import</span> PriorityQueue</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> more_itertools</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> scipy</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>sys.path.insert(<span class="dv">1</span>, <span class="st">".."</span>)</span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> utils</span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>load <span class="op">=</span> utils.year_load(<span class="dv">2024</span>)</span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a><span class="fu"># [Day 1: Historian Hysteria](https://adventofcode.com/2024/day/1)</span></span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1</span></span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>Load the data, sort the two columns, find the absolute difference between them and sum the result.</span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> np.sort(load(<span class="dv">1</span>, <span class="st">"int"</span>), axis<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a><span class="bu">abs</span>(np.diff(data)).<span class="bu">sum</span>()</span>
+<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
+<span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a><span class="in">`numpy`</span> has a handy method to find the unique values in an array, and their counts. Let's use that to make a dictionary of <span class="in">`value -&gt; count`</span> pairs for the right list with a default value of zero, and then just look up that value for each element of the left list.</span>
+<span id="cb12-49"><a href="#cb12-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-52"><a href="#cb12-52" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb12-53"><a href="#cb12-53" aria-hidden="true" tabindex="-1"></a>lookup <span class="op">=</span> defaultdict(<span class="bu">int</span>)</span>
+<span id="cb12-54"><a href="#cb12-54" aria-hidden="true" tabindex="-1"></a>lookup.update(</span>
+<span id="cb12-55"><a href="#cb12-55" aria-hidden="true" tabindex="-1"></a>    {value: count <span class="cf">for</span> value, count <span class="kw">in</span> <span class="bu">zip</span>(<span class="op">*</span>np.unique(data[:, <span class="dv">1</span>], return_counts<span class="op">=</span><span class="va">True</span>))}</span>
+<span id="cb12-56"><a href="#cb12-56" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-57"><a href="#cb12-57" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(x <span class="op">*</span> lookup[x] <span class="cf">for</span> x <span class="kw">in</span> data[:, <span class="dv">0</span>])</span>
+<span id="cb12-58"><a href="#cb12-58" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb12-59"><a href="#cb12-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-60"><a href="#cb12-60" aria-hidden="true" tabindex="-1"></a><span class="fu"># [Day 2: Red-Nosed Reports](https://adventofcode.com/2024/day/2)</span></span>
+<span id="cb12-61"><a href="#cb12-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-62"><a href="#cb12-62" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1</span></span>
+<span id="cb12-63"><a href="#cb12-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-64"><a href="#cb12-64" aria-hidden="true" tabindex="-1"></a>Nothing too complicated going on here: load the data, and find the difference between successive values. To account for decreasing sequences, multiply by the sign of the first difference and then require that all the differences be greater than one and less than or equal to three.</span>
+<span id="cb12-65"><a href="#cb12-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-68"><a href="#cb12-68" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb12-69"><a href="#cb12-69" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> load(<span class="dv">2</span>, <span class="st">"int"</span>)</span>
+<span id="cb12-70"><a href="#cb12-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-71"><a href="#cb12-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-72"><a href="#cb12-72" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> is_safe(line):</span>
+<span id="cb12-73"><a href="#cb12-73" aria-hidden="true" tabindex="-1"></a>    diff <span class="op">=</span> np.diff(line)</span>
+<span id="cb12-74"><a href="#cb12-74" aria-hidden="true" tabindex="-1"></a>    diff <span class="op">=</span> diff <span class="op">*</span> np.sign(diff[<span class="dv">0</span>])</span>
+<span id="cb12-75"><a href="#cb12-75" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">int</span>(((diff <span class="op">&gt;</span> <span class="dv">0</span>) <span class="op">&amp;</span> (diff <span class="op">&lt;=</span> <span class="dv">3</span>)).<span class="bu">all</span>())</span>
+<span id="cb12-76"><a href="#cb12-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-77"><a href="#cb12-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-78"><a href="#cb12-78" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(is_safe(line) <span class="cf">for</span> line <span class="kw">in</span> data)</span>
+<span id="cb12-79"><a href="#cb12-79" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb12-80"><a href="#cb12-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-81"><a href="#cb12-81" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
+<span id="cb12-82"><a href="#cb12-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-83"><a href="#cb12-83" aria-hidden="true" tabindex="-1"></a>I spent a bit of time trying to see if there was a neat way of incorporating the "is valid if any one number is deleted" requirement, but I couldn't immediately see it, so I ended up just iterating over all the possible deletions instead.</span>
+<span id="cb12-84"><a href="#cb12-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-87"><a href="#cb12-87" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb12-88"><a href="#cb12-88" aria-hidden="true" tabindex="-1"></a>total <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb12-89"><a href="#cb12-89" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> line <span class="kw">in</span> data:</span>
+<span id="cb12-90"><a href="#cb12-90" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> idx <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(line)):</span>
+<span id="cb12-91"><a href="#cb12-91" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> is_safe(line[:idx] <span class="op">+</span> line[idx <span class="op">+</span> <span class="dv">1</span> :]):</span>
+<span id="cb12-92"><a href="#cb12-92" aria-hidden="true" tabindex="-1"></a>            total <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb12-93"><a href="#cb12-93" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
+<span id="cb12-94"><a href="#cb12-94" aria-hidden="true" tabindex="-1"></a>total</span>
+<span id="cb12-95"><a href="#cb12-95" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb12-96"><a href="#cb12-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-97"><a href="#cb12-97" aria-hidden="true" tabindex="-1"></a><span class="fu"># [Day 3: Mull It Over](https://adventofcode.com/2024/day/3)</span></span>
+<span id="cb12-98"><a href="#cb12-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-99"><a href="#cb12-99" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1</span></span>
+<span id="cb12-100"><a href="#cb12-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-101"><a href="#cb12-101" aria-hidden="true" tabindex="-1"></a>We get to play with <span class="in">`regex`</span>! Well, I do – there might be better ways of tackling this. The format for a valid <span class="in">`mul`</span> instruction is quite strict, encoding that as a regex is fairly straightforward. Once we have that, we can use <span class="in">`re.findall`</span> to find all the occurrences and extract the integers.</span>
+<span id="cb12-102"><a href="#cb12-102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-105"><a href="#cb12-105" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb12-106"><a href="#cb12-106" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> load(<span class="dv">3</span>, <span class="st">"raw"</span>)</span>
+<span id="cb12-107"><a href="#cb12-107" aria-hidden="true" tabindex="-1"></a>mul <span class="op">=</span> <span class="vs">r"mul\((\d{1,3}),(\d{1,3})\)"</span></span>
+<span id="cb12-108"><a href="#cb12-108" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(<span class="bu">int</span>(pair[<span class="dv">0</span>]) <span class="op">*</span> <span class="bu">int</span>(pair[<span class="dv">1</span>]) <span class="cf">for</span> pair <span class="kw">in</span> re.findall(mul, data))</span>
+<span id="cb12-109"><a href="#cb12-109" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb12-110"><a href="#cb12-110" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-111"><a href="#cb12-111" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2:</span></span>
+<span id="cb12-112"><a href="#cb12-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-113"><a href="#cb12-113" aria-hidden="true" tabindex="-1"></a>I'm pretty happy with my part two, which I managed to do fairly elegantly. We can ignore all the sections immediately after a <span class="in">`don't()`</span> instruction by splitting the string on those, and then discarding the start of each substring up to the first <span class="in">`do()`</span> instruction. Concatenating all the substrings gives us a clean string with just the segments we are interested in, and we can proceed as before.</span>
+<span id="cb12-114"><a href="#cb12-114" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-117"><a href="#cb12-117" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb12-118"><a href="#cb12-118" aria-hidden="true" tabindex="-1"></a>clean <span class="op">=</span> <span class="st">""</span>.join(</span>
+<span id="cb12-119"><a href="#cb12-119" aria-hidden="true" tabindex="-1"></a>    [segment[segment.find(<span class="st">"do()"</span>) :] <span class="cf">for</span> segment <span class="kw">in</span> (<span class="st">"do()"</span> <span class="op">+</span> data).split(<span class="st">"don't()"</span>)]</span>
+<span id="cb12-120"><a href="#cb12-120" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-121"><a href="#cb12-121" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(<span class="bu">int</span>(pair[<span class="dv">0</span>]) <span class="op">*</span> <span class="bu">int</span>(pair[<span class="dv">1</span>]) <span class="cf">for</span> pair <span class="kw">in</span> re.findall(mul, clean))</span>
+<span id="cb12-122"><a href="#cb12-122" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb12-123"><a href="#cb12-123" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-124"><a href="#cb12-124" aria-hidden="true" tabindex="-1"></a><span class="fu"># [Day 4: Ceres Search](https://adventofcode.com/2024/day/4)</span></span>
+<span id="cb12-125"><a href="#cb12-125" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-126"><a href="#cb12-126" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1</span></span>
+<span id="cb12-127"><a href="#cb12-127" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-130"><a href="#cb12-130" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb12-131"><a href="#cb12-131" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> np.array([[<span class="bu">ord</span>(char) <span class="cf">for</span> char <span class="kw">in</span> line] <span class="cf">for</span> line <span class="kw">in</span> load(<span class="dv">4</span>)])</span>
+<span id="cb12-132"><a href="#cb12-132" aria-hidden="true" tabindex="-1"></a>mask <span class="op">=</span> np.array([<span class="bu">ord</span>(char) <span class="cf">for</span> char <span class="kw">in</span> <span class="st">"XMAS"</span>])</span>
+<span id="cb12-133"><a href="#cb12-133" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-134"><a href="#cb12-134" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-135"><a href="#cb12-135" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> xmas(chararray):</span>
+<span id="cb12-136"><a href="#cb12-136" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (chararray <span class="op">==</span> mask).<span class="bu">all</span>() <span class="kw">or</span> (chararray <span class="op">==</span> mask[::<span class="op">-</span><span class="dv">1</span>]).<span class="bu">all</span>()</span>
+<span id="cb12-137"><a href="#cb12-137" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-138"><a href="#cb12-138" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-139"><a href="#cb12-139" aria-hidden="true" tabindex="-1"></a>footprints <span class="op">=</span> [np.eye(<span class="dv">4</span>), np.fliplr(np.eye(<span class="dv">4</span>)), [[<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>]], [[<span class="dv">1</span>], [<span class="dv">1</span>], [<span class="dv">1</span>], [<span class="dv">1</span>]]]</span>
+<span id="cb12-140"><a href="#cb12-140" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-141"><a href="#cb12-141" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(</span>
+<span id="cb12-142"><a href="#cb12-142" aria-hidden="true" tabindex="-1"></a>    scipy.ndimage.generic_filter(data, xmas, footprint<span class="op">=</span>footprint, mode<span class="op">=</span><span class="st">"constant"</span>).<span class="bu">sum</span>()</span>
+<span id="cb12-143"><a href="#cb12-143" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> footprint <span class="kw">in</span> footprints</span>
+<span id="cb12-144"><a href="#cb12-144" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-145"><a href="#cb12-145" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb12-146"><a href="#cb12-146" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-147"><a href="#cb12-147" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
+<span id="cb12-148"><a href="#cb12-148" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-151"><a href="#cb12-151" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb12-152"><a href="#cb12-152" aria-hidden="true" tabindex="-1"></a>masks <span class="op">=</span> [<span class="st">"MMASS"</span>, <span class="st">"SMASM"</span>, <span class="st">"MSAMS"</span>, <span class="st">"SSAMM"</span>]</span>
+<span id="cb12-153"><a href="#cb12-153" aria-hidden="true" tabindex="-1"></a>encoded_masks <span class="op">=</span> [np.array([<span class="bu">ord</span>(char) <span class="cf">for</span> char <span class="kw">in</span> mask]) <span class="cf">for</span> mask <span class="kw">in</span> masks]</span>
+<span id="cb12-154"><a href="#cb12-154" aria-hidden="true" tabindex="-1"></a>footprint <span class="op">=</span> [[<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>], [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>], [<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>]]</span>
+<span id="cb12-155"><a href="#cb12-155" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> x_mas(chararray):</span>
+<span id="cb12-156"><a href="#cb12-156" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> mask <span class="kw">in</span> encoded_masks:</span>
+<span id="cb12-157"><a href="#cb12-157" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (chararray <span class="op">==</span> mask).<span class="bu">all</span>():</span>
+<span id="cb12-158"><a href="#cb12-158" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="dv">1</span></span>
+<span id="cb12-159"><a href="#cb12-159" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">0</span></span>
+<span id="cb12-160"><a href="#cb12-160" aria-hidden="true" tabindex="-1"></a>scipy.ndimage.generic_filter(data, x_mas, footprint<span class="op">=</span>footprint, mode<span class="op">=</span><span class="st">"constant"</span>).<span class="bu">sum</span>()</span>
+<span id="cb12-161"><a href="#cb12-161" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb12-162"><a href="#cb12-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-163"><a href="#cb12-163" aria-hidden="true" tabindex="-1"></a><span class="fu"># [Day 5: Print Queue](https://adventofcode.com/2024/day/5)</span></span>
+<span id="cb12-164"><a href="#cb12-164" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-165"><a href="#cb12-165" aria-hidden="true" tabindex="-1"></a>This problem screams topological sort, so that's what I'm going with. For part one, to account for the case where multiple orderings of a line might obey the rules, the we'll use a function to check whether the line order is compatible with the order given in the update.</span>
+<span id="cb12-166"><a href="#cb12-166" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-167"><a href="#cb12-167" aria-hidden="true" tabindex="-1"></a>That's not too tricky: just iterate through the update, and for each item in the update</span>
+<span id="cb12-168"><a href="#cb12-168" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-169"><a href="#cb12-169" aria-hidden="true" tabindex="-1"></a><span class="ss">1.  </span>Check that it's not blocked by any later items</span>
+<span id="cb12-170"><a href="#cb12-170" aria-hidden="true" tabindex="-1"></a><span class="ss">2.  </span>Remove any blocks that the current item is placing on later items, since it's successfully been placed</span>
+<span id="cb12-171"><a href="#cb12-171" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-172"><a href="#cb12-172" aria-hidden="true" tabindex="-1"></a>If we get through the whole update without finding a blocked item, then the order is valid and we should include it in the sum.</span>
+<span id="cb12-173"><a href="#cb12-173" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-174"><a href="#cb12-174" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1</span></span>
+<span id="cb12-175"><a href="#cb12-175" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-178"><a href="#cb12-178" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb12-179"><a href="#cb12-179" aria-hidden="true" tabindex="-1"></a>rules, updates <span class="op">=</span> [x.split(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span>) <span class="cf">for</span> x <span class="kw">in</span> load(<span class="dv">5</span>, <span class="st">"raw"</span>).split(<span class="st">"</span><span class="ch">\n\n</span><span class="st">"</span>)]</span>
+<span id="cb12-180"><a href="#cb12-180" aria-hidden="true" tabindex="-1"></a>updates <span class="op">=</span> [[<span class="bu">int</span>(x) <span class="cf">for</span> x <span class="kw">in</span> line.split(<span class="st">","</span>)] <span class="cf">for</span> line <span class="kw">in</span> updates]</span>
+<span id="cb12-181"><a href="#cb12-181" aria-hidden="true" tabindex="-1"></a>ancestors <span class="op">=</span> defaultdict(<span class="bu">list</span>)</span>
+<span id="cb12-182"><a href="#cb12-182" aria-hidden="true" tabindex="-1"></a>descendents <span class="op">=</span> defaultdict(<span class="bu">list</span>)</span>
+<span id="cb12-183"><a href="#cb12-183" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> rule <span class="kw">in</span> rules:</span>
+<span id="cb12-184"><a href="#cb12-184" aria-hidden="true" tabindex="-1"></a>    first, last <span class="op">=</span> <span class="bu">map</span>(<span class="bu">int</span>, rule.split(<span class="st">"|"</span>))</span>
+<span id="cb12-185"><a href="#cb12-185" aria-hidden="true" tabindex="-1"></a>    ancestors[last].append(first)</span>
+<span id="cb12-186"><a href="#cb12-186" aria-hidden="true" tabindex="-1"></a>    descendents[first].append(last)</span>
+<span id="cb12-187"><a href="#cb12-187" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-188"><a href="#cb12-188" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-189"><a href="#cb12-189" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> restriction(rules, keys):</span>
+<span id="cb12-190"><a href="#cb12-190" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {key: [x <span class="cf">for</span> x <span class="kw">in</span> rules[key] <span class="cf">if</span> x <span class="kw">in</span> keys] <span class="cf">for</span> key <span class="kw">in</span> keys}</span>
+<span id="cb12-191"><a href="#cb12-191" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-192"><a href="#cb12-192" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-193"><a href="#cb12-193" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> is_sorted(keys):</span>
+<span id="cb12-194"><a href="#cb12-194" aria-hidden="true" tabindex="-1"></a>    keys <span class="op">=</span> keys.copy()</span>
+<span id="cb12-195"><a href="#cb12-195" aria-hidden="true" tabindex="-1"></a>    pre <span class="op">=</span> restriction(ancestors, keys)</span>
+<span id="cb12-196"><a href="#cb12-196" aria-hidden="true" tabindex="-1"></a>    post <span class="op">=</span> restriction(descendents, keys)</span>
+<span id="cb12-197"><a href="#cb12-197" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> keys:</span>
+<span id="cb12-198"><a href="#cb12-198" aria-hidden="true" tabindex="-1"></a>        current <span class="op">=</span> keys.pop(<span class="dv">0</span>)</span>
+<span id="cb12-199"><a href="#cb12-199" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> pre[current]:</span>
+<span id="cb12-200"><a href="#cb12-200" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="va">False</span></span>
+<span id="cb12-201"><a href="#cb12-201" aria-hidden="true" tabindex="-1"></a>        <span class="kw">del</span> pre[current]</span>
+<span id="cb12-202"><a href="#cb12-202" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> item <span class="kw">in</span> post[current]:</span>
+<span id="cb12-203"><a href="#cb12-203" aria-hidden="true" tabindex="-1"></a>            pre[item] <span class="op">=</span> [x <span class="cf">for</span> x <span class="kw">in</span> pre[item] <span class="cf">if</span> x <span class="op">!=</span> current]</span>
+<span id="cb12-204"><a href="#cb12-204" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">True</span></span>
+<span id="cb12-205"><a href="#cb12-205" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-206"><a href="#cb12-206" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-207"><a href="#cb12-207" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(update[<span class="bu">len</span>(update) <span class="op">//</span> <span class="dv">2</span>] <span class="cf">for</span> update <span class="kw">in</span> updates <span class="cf">if</span> is_sorted(update))</span>
+<span id="cb12-208"><a href="#cb12-208" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb12-209"><a href="#cb12-209" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-210"><a href="#cb12-210" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
+<span id="cb12-211"><a href="#cb12-211" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-212"><a href="#cb12-212" aria-hidden="true" tabindex="-1"></a>For part 2 we'll actually implement the topological sort. I vaguely remembered how to do this, but it took a couple of iterations to get right.</span>
+<span id="cb12-213"><a href="#cb12-213" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-214"><a href="#cb12-214" aria-hidden="true" tabindex="-1"></a>The idea is that we start by scanning the rules dictionary for items which are eligible for immediate placement, and remove them from the list.</span>
+<span id="cb12-215"><a href="#cb12-215" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-216"><a href="#cb12-216" aria-hidden="true" tabindex="-1"></a>We then iteratively place these items, and for each item we place, we remove any blocks that they might have placed on later items. That might mean that new items are eligible for placement, and in this way we iterate through the entire list and output an order compatible with the rules.</span>
+<span id="cb12-217"><a href="#cb12-217" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-220"><a href="#cb12-220" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb12-221"><a href="#cb12-221" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> topological_sort(keys):</span>
+<span id="cb12-222"><a href="#cb12-222" aria-hidden="true" tabindex="-1"></a>    pre <span class="op">=</span> restriction(ancestors, keys)</span>
+<span id="cb12-223"><a href="#cb12-223" aria-hidden="true" tabindex="-1"></a>    post <span class="op">=</span> restriction(descendents, keys)</span>
+<span id="cb12-224"><a href="#cb12-224" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> []</span>
+<span id="cb12-225"><a href="#cb12-225" aria-hidden="true" tabindex="-1"></a>    to_delete <span class="op">=</span> [key <span class="cf">for</span> key <span class="kw">in</span> pre <span class="cf">if</span> <span class="kw">not</span> pre[key]]</span>
+<span id="cb12-226"><a href="#cb12-226" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> key <span class="kw">in</span> to_delete:</span>
+<span id="cb12-227"><a href="#cb12-227" aria-hidden="true" tabindex="-1"></a>        <span class="kw">del</span> pre[key]</span>
+<span id="cb12-228"><a href="#cb12-228" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> to_delete:</span>
+<span id="cb12-229"><a href="#cb12-229" aria-hidden="true" tabindex="-1"></a>        n <span class="op">=</span> to_delete.pop()</span>
+<span id="cb12-230"><a href="#cb12-230" aria-hidden="true" tabindex="-1"></a>        result.append(n)</span>
+<span id="cb12-231"><a href="#cb12-231" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> item <span class="kw">in</span> post[n]:</span>
+<span id="cb12-232"><a href="#cb12-232" aria-hidden="true" tabindex="-1"></a>            pre[item] <span class="op">=</span> [x <span class="cf">for</span> x <span class="kw">in</span> pre[item] <span class="cf">if</span> x <span class="op">!=</span> n]</span>
+<span id="cb12-233"><a href="#cb12-233" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="kw">not</span> pre[item]:</span>
+<span id="cb12-234"><a href="#cb12-234" aria-hidden="true" tabindex="-1"></a>                to_delete.append(item)</span>
+<span id="cb12-235"><a href="#cb12-235" aria-hidden="true" tabindex="-1"></a>                <span class="kw">del</span> pre[item]</span>
+<span id="cb12-236"><a href="#cb12-236" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> result</span>
+<span id="cb12-237"><a href="#cb12-237" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-238"><a href="#cb12-238" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-239"><a href="#cb12-239" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(topological_sort(line)[<span class="bu">len</span>(line) <span class="op">//</span> <span class="dv">2</span>] <span class="cf">for</span> line <span class="kw">in</span> updates <span class="cf">if</span> <span class="kw">not</span> is_sorted(line))</span>
+<span id="cb12-240"><a href="#cb12-240" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

@@ -1463,6 +1463,20 @@
     "text": "Part 2\n\n\nCode\nmasks = [\"MMASS\", \"SMASM\", \"MSAMS\", \"SSAMM\"]\nencoded_masks = [np.array([ord(char) for char in mask]) for mask in masks]\nfootprint = [[1, 0, 1], [0, 1, 0], [1, 0, 1]]\ndef x_mas(chararray):\n    for mask in encoded_masks:\n        if (chararray == mask).all():\n            return 1\n    return 0\nscipy.ndimage.generic_filter(data, x_mas, footprint=footprint, mode=\"constant\").sum()"
   },
   {
+    "objectID": "qmd/2024.html#part-1-4",
+    "href": "qmd/2024.html#part-1-4",
+    "title": "2024 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\n\n\nCode\nrules, updates = [x.split(\"\\n\") for x in load(5, \"raw\").split(\"\\n\\n\")]\nupdates = [[int(x) for x in line.split(\",\")] for line in updates]\nancestors = defaultdict(list)\ndescendents = defaultdict(list)\nfor rule in rules:\n    first, last = map(int, rule.split(\"|\"))\n    ancestors[last].append(first)\n    descendents[first].append(last)\n\n\ndef restriction(rules, keys):\n    return {key: [x for x in rules[key] if x in keys] for key in keys}\n\n\ndef is_sorted(keys):\n    keys = keys.copy()\n    pre = restriction(ancestors, keys)\n    post = restriction(descendents, keys)\n    while keys:\n        current = keys.pop(0)\n        if pre[current]:\n            return False\n        del pre[current]\n        for item in post[current]:\n            pre[item] = [x for x in pre[item] if x != current]\n    return True\n\n\nsum(update[len(update) // 2] for update in updates if is_sorted(update))"
+  },
+  {
+    "objectID": "qmd/2024.html#part-2-4",
+    "href": "qmd/2024.html#part-2-4",
+    "title": "2024 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\nFor part 2 we’ll actually implement the topological sort. I vaguely remembered how to do this, but it took a couple of iterations to get right.\nThe idea is that we start by scanning the rules dictionary for items which are eligible for immediate placement, and remove them from the list.\nWe then iteratively place these items, and for each item we place, we remove any blocks that they might have placed on later items. That might mean that new items are eligible for placement, and in this way we iterate through the entire list and output an order compatible with the rules.\n\n\nCode\ndef topological_sort(keys):\n    pre = restriction(ancestors, keys)\n    post = restriction(descendents, keys)\n    result = []\n    to_delete = [key for key in pre if not pre[key]]\n    for key in to_delete:\n        del pre[key]\n    while to_delete:\n        n = to_delete.pop()\n        result.append(n)\n        for item in post[n]:\n            pre[item] = [x for x in pre[item] if x != n]\n            if not pre[item]:\n                to_delete.append(item)\n                del pre[item]\n    return result\n\n\nsum(topological_sort(line)[len(line) // 2] for line in updates if not is_sorted(line))"
+  },
+  {
     "objectID": "qmd/2019.html",
     "href": "qmd/2019.html",
     "title": "2019 Solutions",
