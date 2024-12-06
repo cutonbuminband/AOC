@@ -512,7 +512,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> is_valid(position):</span>
 <span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    x, y <span class="op">=</span> position.real, position.imag</span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> y <span class="op">&gt;</span> <span class="dv">0</span> <span class="kw">and</span> x <span class="op">&gt;</span> <span class="dv">0</span> <span class="kw">and</span> y <span class="op">&lt;</span> ymax <span class="kw">and</span> x <span class="op">&lt;</span> xmax</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">0</span> <span class="op">&lt;</span> y <span class="op">&lt;</span> ymax <span class="kw">and</span> <span class="dv">0</span> <span class="op">&lt;</span> x <span class="op">&lt;</span> xmax</span>
 <span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>direction <span class="op">=</span> <span class="op">-</span><span class="ot">1j</span></span>
 <span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>path <span class="op">=</span> [(position, direction)]</span>
@@ -1198,7 +1198,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb14-258"><a href="#cb14-258" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-259"><a href="#cb14-259" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> is_valid(position):</span>
 <span id="cb14-260"><a href="#cb14-260" aria-hidden="true" tabindex="-1"></a>    x, y <span class="op">=</span> position.real, position.imag</span>
-<span id="cb14-261"><a href="#cb14-261" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> y <span class="op">&gt;</span> <span class="dv">0</span> <span class="kw">and</span> x <span class="op">&gt;</span> <span class="dv">0</span> <span class="kw">and</span> y <span class="op">&lt;</span> ymax <span class="kw">and</span> x <span class="op">&lt;</span> xmax</span>
+<span id="cb14-261"><a href="#cb14-261" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">0</span> <span class="op">&lt;</span> y <span class="op">&lt;</span> ymax <span class="kw">and</span> <span class="dv">0</span> <span class="op">&lt;</span> x <span class="op">&lt;</span> xmax</span>
 <span id="cb14-262"><a href="#cb14-262" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-263"><a href="#cb14-263" aria-hidden="true" tabindex="-1"></a>direction <span class="op">=</span> <span class="op">-</span><span class="ot">1j</span></span>
 <span id="cb14-264"><a href="#cb14-264" aria-hidden="true" tabindex="-1"></a>path <span class="op">=</span> [(position, direction)]</span>

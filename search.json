@@ -1481,7 +1481,7 @@
     "href": "qmd/2024.html#part-1-5",
     "title": "2024 Solutions",
     "section": "Part 1",
-    "text": "Part 1\n\n\nCode\nobstacles = set()\nfor y, line in enumerate(load(6)):\n    for x, char in enumerate(line.strip()):\n        if char == \"^\":\n            position = x + 1j * y\n        if char == \"#\":\n            obstacles.add(x + 1j * y)\nymax, xmax = y, x\n\n\ndef is_valid(position):\n    x, y = position.real, position.imag\n    return y &gt; 0 and x &gt; 0 and y &lt; ymax and x &lt; xmax\n\ndirection = -1j\npath = [(position, direction)]\nwhile is_valid(position):\n    while position + direction in obstacles:\n        direction *= 1j\n    position += direction\n    path.append((position, direction))\nlen(set(x[0] for x in path))"
+    "text": "Part 1\n\n\nCode\nobstacles = set()\nfor y, line in enumerate(load(6)):\n    for x, char in enumerate(line.strip()):\n        if char == \"^\":\n            position = x + 1j * y\n        if char == \"#\":\n            obstacles.add(x + 1j * y)\nymax, xmax = y, x\n\n\ndef is_valid(position):\n    x, y = position.real, position.imag\n    return 0 &lt; y &lt; ymax and 0 &lt; x &lt; xmax\n\ndirection = -1j\npath = [(position, direction)]\nwhile is_valid(position):\n    while position + direction in obstacles:\n        direction *= 1j\n    position += direction\n    path.append((position, direction))\nlen(set(x[0] for x in path))"
   },
   {
     "objectID": "qmd/2024.html#part-2-5",
