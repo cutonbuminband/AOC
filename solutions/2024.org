@@ -194,51 +194,54 @@ sum(topological_sort(line)[len(line) // 2] for line in updates if not is_sorted(
 
 ** Part 1
 #+begin_src jupyter-python
-data = np.array(
-    [
-        [0 if char == "." else 1 if char == "#" else 2 for char in line]
-        for line in load(6)
-    ]
-)
-dy, dx = [-1, 0]
-y, x = [int(x) for x in np.array(np.where(data == 2)).ravel()]
-ymax, xmax = data.shape
+obstacles = set()
+for y, line in enumerate(load(6)):
+    for x, char in enumerate(line.strip()):
+        if char == "^":
+            position = x + 1j * y
+        if char == "#":
+            obstacles.add(x + 1j * y)
+ymax, xmax = y, x
 
-def is_valid(y, x):
-    return y > 0 and x > 0 and y < ymax - 1 and x < xmax - 1
 
-path = [(y, x, dy, dx)]
-while is_valid(y, x):
-    while data[y + dy, x + dx] % 2:
-        dy, dx = [dy, dx] @ np.array([[0, -1], [1, 0]])
-    y, x = y + dy, x + dx
-    path.append((y, x, dy, dx))
-len(set((x[0], x[1]) for x in path))
+def is_valid(position):
+    x, y = position.real, position.imag
+    return 0 < y < ymax and 0 < x < xmax
+
+direction = -1j
+path = [(position, direction)]
+while is_valid(position):
+    while position + direction in obstacles:
+        direction *= 1j
+    position += direction
+    path.append((position, direction))
+len(set(x[0] for x in path))
 #+end_src
 
 ** Part 2
 For part two, we should realise that only obstacles placed on the path have any chance of affecting what the guard does, so the relevant search space is significantly smaller than "every vacant square on the board". There's also no need to start the guard from the initial position for every new obstacle; we can just start her on the path right in front of the new obstacle. Similarly, if she ever gets back on her original path before the obstacle, we know she must be in a loop, so we can start with a visited set that covers the whole pwth right up to the new obstruction.
 #+begin_src jupyter-python
-attempted_positions = set([path[0][:2]])
+attempted_positions = set([path[0][0]])
 total = 0
 for idx in range(1, len(path)):
-    obstacle_y, obstacle_x, _, _ = path[idx]
-    if (obstacle_y, obstacle_x) in attempted_positions:
+    obstacle, _ = path[idx]
+    if obstacle in attempted_positions:
         continue
-    y, x, dy, dx = path[idx - 1]
-    data[obstacle_y, obstacle_x] = 1
+    position, direction = path[idx - 1]
+
+    obstacles.add(obstacle)
     seen = set(path[:idx - 1])
-    while is_valid(y, x):
-        seen.add((y, x, dy, dx))
-        while data[y + dy, x + dx] % 2:
-            dy, dx = [dy, dx] @ np.array([[0, -1], [1, 0]])
-        while is_valid(y, x) and data[y + dy, x + dx] % 2 == 0:
-            y, x = y + dy, x + dx
-        if (y, x, dy, dx) in seen:
+    while is_valid(position):
+        seen.add((position, direction))
+        while position + direction in obstacles:
+            direction *= 1j
+        while is_valid(position) and position + direction not in obstacles:
+            position += direction
+        if (position, direction) in seen:
             total += 1
             break
-    attempted_positions.add((obstacle_y, obstacle_x))
-    data[obstacle_y, obstacle_x] = 0
+    attempted_positions.add(obstacle)
+    obstacles.remove(obstacle)
 total
 #+end_src
 
