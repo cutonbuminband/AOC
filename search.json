@@ -1477,6 +1477,20 @@
     "text": "Part 2\nFor part 2 we’ll actually implement the topological sort. I vaguely remembered how to do this, but it took a couple of iterations to get right.\nThe idea is that we start by scanning the rules dictionary for items which are eligible for immediate placement, and remove them from the list.\nWe then iteratively place these items, and for each item we place, we remove any blocks that they might have placed on later items. That might mean that new items are eligible for placement, and in this way we iterate through the entire list and output an order compatible with the rules.\n\n\nCode\ndef topological_sort(keys):\n    pre = restriction(ancestors, keys)\n    post = restriction(descendents, keys)\n    result = []\n    to_delete = [key for key in pre if not pre[key]]\n    for key in to_delete:\n        del pre[key]\n    while to_delete:\n        n = to_delete.pop()\n        result.append(n)\n        for item in post[n]:\n            pre[item] = [x for x in pre[item] if x != n]\n            if not pre[item]:\n                to_delete.append(item)\n                del pre[item]\n    return result\n\n\nsum(topological_sort(line)[len(line) // 2] for line in updates if not is_sorted(line))"
   },
   {
+    "objectID": "qmd/2024.html#part-1-5",
+    "href": "qmd/2024.html#part-1-5",
+    "title": "2024 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\n\n\nCode\ndata = np.array(\n    [\n        [0 if char == \".\" else 1 if char == \"#\" else 2 for char in line]\n        for line in load(6)\n    ]\n)\ndy, dx = [-1, 0]\ny, x = [int(x) for x in np.array(np.where(data == 2)).ravel()]\nymax, xmax = data.shape\n\ndef is_valid(y, x):\n    return y &gt; 0 and x &gt; 0 and y &lt; ymax - 1 and x &lt; xmax - 1\n\npath = [((y, x), (dy, dx))]\nwhile is_valid(y, x):\n    while data[y + dy, x + dx] % 2:\n        dy, dx = [dy, dx] @ np.array([[0, -1], [1, 0]])\n    y, x = y + dy, x + dx\n    path.append(((y, x), (dy, dx)))\nlen(set(x[0] for x in path))"
+  },
+  {
+    "objectID": "qmd/2024.html#part-2-5",
+    "href": "qmd/2024.html#part-2-5",
+    "title": "2024 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\nFor part two, we should realise that only obstacles placed on the path have any chance of affecting what the guard does, so the relevant search space is significantly smaller than “every vacant square on the board”. There’s also no need to start the guard from the initial position for every new obstacle; we can just start him on the path right in front of the new obstacle\n\n\nCode\nattempted_positions = set([path[0][0]])\ntotal = 0\nfor idx in range(1, len(path)):\n    (obstacle_y, obstacle_x), _ = path[idx]\n    if (obstacle_y, obstacle_x) in attempted_positions:\n        continue\n    (y, x), (dy, dx) = path[idx - 1]\n    data[obstacle_y, obstacle_x] = 1\n    seen = set()\n    while is_valid(y, x):\n        if (y, x, dy, dx) in seen:\n            total += 1\n            break\n        seen.add((y, x, dy, dx))\n        while data[y + dy, x + dx] % 2:\n            dy, dx = [dy, dx] @ np.array([[0, -1], [1, 0]])\n        while is_valid(y, x) and data[y + dy, x + dx] % 2 == 0:\n            y, x = y + dy, x + dx\n    attempted_positions.add((obstacle_y, obstacle_x))\n    data[obstacle_y, obstacle_x] = 0\ntotal"
+  },
+  {
     "objectID": "qmd/2019.html",
     "href": "qmd/2019.html",
     "title": "2019 Solutions",
