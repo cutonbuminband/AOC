@@ -513,40 +513,40 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> is_valid(y, x):</span>
 <span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> y <span class="op">&gt;</span> <span class="dv">0</span> <span class="kw">and</span> x <span class="op">&gt;</span> <span class="dv">0</span> <span class="kw">and</span> y <span class="op">&lt;</span> ymax <span class="op">-</span> <span class="dv">1</span> <span class="kw">and</span> x <span class="op">&lt;</span> xmax <span class="op">-</span> <span class="dv">1</span></span>
 <span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>path <span class="op">=</span> [((y, x), (dy, dx))]</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>path <span class="op">=</span> [(y, x, dy, dx)]</span>
 <span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> is_valid(y, x):</span>
 <span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> data[y <span class="op">+</span> dy, x <span class="op">+</span> dx] <span class="op">%</span> <span class="dv">2</span>:</span>
 <span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>        dy, dx <span class="op">=</span> [dy, dx] <span class="op">@</span> np.array([[<span class="dv">0</span>, <span class="op">-</span><span class="dv">1</span>], [<span class="dv">1</span>, <span class="dv">0</span>]])</span>
 <span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    y, x <span class="op">=</span> y <span class="op">+</span> dy, x <span class="op">+</span> dx</span>
-<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    path.append(((y, x), (dy, dx)))</span>
-<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a><span class="bu">len</span>(<span class="bu">set</span>(x[<span class="dv">0</span>] <span class="cf">for</span> x <span class="kw">in</span> path))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    path.append((y, x, dy, dx))</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a><span class="bu">len</span>(<span class="bu">set</span>((x[<span class="dv">0</span>], x[<span class="dv">1</span>]) <span class="cf">for</span> x <span class="kw">in</span> path))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
 <section id="part-2-5" class="level2">
 <h2 class="anchored" data-anchor-id="part-2-5">Part 2</h2>
-<p>For part two, we should realise that only obstacles placed on the path have any chance of affecting what the guard does, so the relevant search space is significantly smaller than “every vacant square on the board”. There’s also no need to start the guard from the initial position for every new obstacle; we can just start him on the path right in front of the new obstacle</p>
+<p>For part two, we should realise that only obstacles placed on the path have any chance of affecting what the guard does, so the relevant search space is significantly smaller than “every vacant square on the board”. There’s also no need to start the guard from the initial position for every new obstacle; we can just start her on the path right in front of the new obstacle. Similarly, if she ever gets back on her original path before the obstacle, we know she must be in a loop, so we can start with a visited set that covers the whole pwth right up to the new obstruction.</p>
 <div class="cell" data-execution_count="13">
 <details open="">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>attempted_positions <span class="op">=</span> <span class="bu">set</span>([path[<span class="dv">0</span>][<span class="dv">0</span>]])</span>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>attempted_positions <span class="op">=</span> <span class="bu">set</span>([path[<span class="dv">0</span>][:<span class="dv">2</span>]])</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>total <span class="op">=</span> <span class="dv">0</span></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> idx <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, <span class="bu">len</span>(path)):</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    (obstacle_y, obstacle_x), _ <span class="op">=</span> path[idx]</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    obstacle_y, obstacle_x, _, _ <span class="op">=</span> path[idx]</span>
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (obstacle_y, obstacle_x) <span class="kw">in</span> attempted_positions:</span>
 <span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">continue</span></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    (y, x), (dy, dx) <span class="op">=</span> path[idx <span class="op">-</span> <span class="dv">1</span>]</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    y, x, dy, dx <span class="op">=</span> path[idx <span class="op">-</span> <span class="dv">1</span>]</span>
 <span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    data[obstacle_y, obstacle_x] <span class="op">=</span> <span class="dv">1</span></span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    seen <span class="op">=</span> <span class="bu">set</span>()</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    seen <span class="op">=</span> <span class="bu">set</span>(path[:idx <span class="op">-</span> <span class="dv">1</span>])</span>
 <span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> is_valid(y, x):</span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (y, x, dy, dx) <span class="kw">in</span> seen:</span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>            total <span class="op">+=</span> <span class="dv">1</span></span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>        seen.add((y, x, dy, dx))</span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> data[y <span class="op">+</span> dy, x <span class="op">+</span> dx] <span class="op">%</span> <span class="dv">2</span>:</span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>            dy, dx <span class="op">=</span> [dy, dx] <span class="op">@</span> np.array([[<span class="dv">0</span>, <span class="op">-</span><span class="dv">1</span>], [<span class="dv">1</span>, <span class="dv">0</span>]])</span>
-<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> is_valid(y, x) <span class="kw">and</span> data[y <span class="op">+</span> dy, x <span class="op">+</span> dx] <span class="op">%</span> <span class="dv">2</span> <span class="op">==</span> <span class="dv">0</span>:</span>
-<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>            y, x <span class="op">=</span> y <span class="op">+</span> dy, x <span class="op">+</span> dx</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>        seen.add((y, x, dy, dx))</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> data[y <span class="op">+</span> dy, x <span class="op">+</span> dx] <span class="op">%</span> <span class="dv">2</span>:</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>            dy, dx <span class="op">=</span> [dy, dx] <span class="op">@</span> np.array([[<span class="dv">0</span>, <span class="op">-</span><span class="dv">1</span>], [<span class="dv">1</span>, <span class="dv">0</span>]])</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> is_valid(y, x) <span class="kw">and</span> data[y <span class="op">+</span> dy, x <span class="op">+</span> dx] <span class="op">%</span> <span class="dv">2</span> <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>            y, x <span class="op">=</span> y <span class="op">+</span> dy, x <span class="op">+</span> dx</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (y, x, dy, dx) <span class="kw">in</span> seen:</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>            total <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
 <span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    attempted_positions.add((obstacle_y, obstacle_x))</span>
 <span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>    data[obstacle_y, obstacle_x] <span class="op">=</span> <span class="dv">0</span></span>
 <span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>total</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1196,38 +1196,38 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb14-259"><a href="#cb14-259" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> is_valid(y, x):</span>
 <span id="cb14-260"><a href="#cb14-260" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> y <span class="op">&gt;</span> <span class="dv">0</span> <span class="kw">and</span> x <span class="op">&gt;</span> <span class="dv">0</span> <span class="kw">and</span> y <span class="op">&lt;</span> ymax <span class="op">-</span> <span class="dv">1</span> <span class="kw">and</span> x <span class="op">&lt;</span> xmax <span class="op">-</span> <span class="dv">1</span></span>
 <span id="cb14-261"><a href="#cb14-261" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-262"><a href="#cb14-262" aria-hidden="true" tabindex="-1"></a>path <span class="op">=</span> [((y, x), (dy, dx))]</span>
+<span id="cb14-262"><a href="#cb14-262" aria-hidden="true" tabindex="-1"></a>path <span class="op">=</span> [(y, x, dy, dx)]</span>
 <span id="cb14-263"><a href="#cb14-263" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> is_valid(y, x):</span>
 <span id="cb14-264"><a href="#cb14-264" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> data[y <span class="op">+</span> dy, x <span class="op">+</span> dx] <span class="op">%</span> <span class="dv">2</span>:</span>
 <span id="cb14-265"><a href="#cb14-265" aria-hidden="true" tabindex="-1"></a>        dy, dx <span class="op">=</span> [dy, dx] <span class="op">@</span> np.array([[<span class="dv">0</span>, <span class="op">-</span><span class="dv">1</span>], [<span class="dv">1</span>, <span class="dv">0</span>]])</span>
 <span id="cb14-266"><a href="#cb14-266" aria-hidden="true" tabindex="-1"></a>    y, x <span class="op">=</span> y <span class="op">+</span> dy, x <span class="op">+</span> dx</span>
-<span id="cb14-267"><a href="#cb14-267" aria-hidden="true" tabindex="-1"></a>    path.append(((y, x), (dy, dx)))</span>
-<span id="cb14-268"><a href="#cb14-268" aria-hidden="true" tabindex="-1"></a><span class="bu">len</span>(<span class="bu">set</span>(x[<span class="dv">0</span>] <span class="cf">for</span> x <span class="kw">in</span> path))</span>
+<span id="cb14-267"><a href="#cb14-267" aria-hidden="true" tabindex="-1"></a>    path.append((y, x, dy, dx))</span>
+<span id="cb14-268"><a href="#cb14-268" aria-hidden="true" tabindex="-1"></a><span class="bu">len</span>(<span class="bu">set</span>((x[<span class="dv">0</span>], x[<span class="dv">1</span>]) <span class="cf">for</span> x <span class="kw">in</span> path))</span>
 <span id="cb14-269"><a href="#cb14-269" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb14-270"><a href="#cb14-270" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-271"><a href="#cb14-271" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
 <span id="cb14-272"><a href="#cb14-272" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-273"><a href="#cb14-273" aria-hidden="true" tabindex="-1"></a>For part two, we should realise that only obstacles placed on the path have any chance of affecting what the guard does, so the relevant search space is significantly smaller than "every vacant square on the board". There's also no need to start the guard from the initial position for every new obstacle; we can just start him on the path right in front of the new obstacle</span>
+<span id="cb14-273"><a href="#cb14-273" aria-hidden="true" tabindex="-1"></a>For part two, we should realise that only obstacles placed on the path have any chance of affecting what the guard does, so the relevant search space is significantly smaller than "every vacant square on the board". There's also no need to start the guard from the initial position for every new obstacle; we can just start her on the path right in front of the new obstacle. Similarly, if she ever gets back on her original path before the obstacle, we know she must be in a loop, so we can start with a visited set that covers the whole pwth right up to the new obstruction.</span>
 <span id="cb14-274"><a href="#cb14-274" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-277"><a href="#cb14-277" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb14-278"><a href="#cb14-278" aria-hidden="true" tabindex="-1"></a>attempted_positions <span class="op">=</span> <span class="bu">set</span>([path[<span class="dv">0</span>][<span class="dv">0</span>]])</span>
+<span id="cb14-278"><a href="#cb14-278" aria-hidden="true" tabindex="-1"></a>attempted_positions <span class="op">=</span> <span class="bu">set</span>([path[<span class="dv">0</span>][:<span class="dv">2</span>]])</span>
 <span id="cb14-279"><a href="#cb14-279" aria-hidden="true" tabindex="-1"></a>total <span class="op">=</span> <span class="dv">0</span></span>
 <span id="cb14-280"><a href="#cb14-280" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> idx <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, <span class="bu">len</span>(path)):</span>
-<span id="cb14-281"><a href="#cb14-281" aria-hidden="true" tabindex="-1"></a>    (obstacle_y, obstacle_x), _ <span class="op">=</span> path[idx]</span>
+<span id="cb14-281"><a href="#cb14-281" aria-hidden="true" tabindex="-1"></a>    obstacle_y, obstacle_x, _, _ <span class="op">=</span> path[idx]</span>
 <span id="cb14-282"><a href="#cb14-282" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (obstacle_y, obstacle_x) <span class="kw">in</span> attempted_positions:</span>
 <span id="cb14-283"><a href="#cb14-283" aria-hidden="true" tabindex="-1"></a>        <span class="cf">continue</span></span>
-<span id="cb14-284"><a href="#cb14-284" aria-hidden="true" tabindex="-1"></a>    (y, x), (dy, dx) <span class="op">=</span> path[idx <span class="op">-</span> <span class="dv">1</span>]</span>
+<span id="cb14-284"><a href="#cb14-284" aria-hidden="true" tabindex="-1"></a>    y, x, dy, dx <span class="op">=</span> path[idx <span class="op">-</span> <span class="dv">1</span>]</span>
 <span id="cb14-285"><a href="#cb14-285" aria-hidden="true" tabindex="-1"></a>    data[obstacle_y, obstacle_x] <span class="op">=</span> <span class="dv">1</span></span>
-<span id="cb14-286"><a href="#cb14-286" aria-hidden="true" tabindex="-1"></a>    seen <span class="op">=</span> <span class="bu">set</span>()</span>
+<span id="cb14-286"><a href="#cb14-286" aria-hidden="true" tabindex="-1"></a>    seen <span class="op">=</span> <span class="bu">set</span>(path[:idx <span class="op">-</span> <span class="dv">1</span>])</span>
 <span id="cb14-287"><a href="#cb14-287" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> is_valid(y, x):</span>
-<span id="cb14-288"><a href="#cb14-288" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (y, x, dy, dx) <span class="kw">in</span> seen:</span>
-<span id="cb14-289"><a href="#cb14-289" aria-hidden="true" tabindex="-1"></a>            total <span class="op">+=</span> <span class="dv">1</span></span>
-<span id="cb14-290"><a href="#cb14-290" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
-<span id="cb14-291"><a href="#cb14-291" aria-hidden="true" tabindex="-1"></a>        seen.add((y, x, dy, dx))</span>
-<span id="cb14-292"><a href="#cb14-292" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> data[y <span class="op">+</span> dy, x <span class="op">+</span> dx] <span class="op">%</span> <span class="dv">2</span>:</span>
-<span id="cb14-293"><a href="#cb14-293" aria-hidden="true" tabindex="-1"></a>            dy, dx <span class="op">=</span> [dy, dx] <span class="op">@</span> np.array([[<span class="dv">0</span>, <span class="op">-</span><span class="dv">1</span>], [<span class="dv">1</span>, <span class="dv">0</span>]])</span>
-<span id="cb14-294"><a href="#cb14-294" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> is_valid(y, x) <span class="kw">and</span> data[y <span class="op">+</span> dy, x <span class="op">+</span> dx] <span class="op">%</span> <span class="dv">2</span> <span class="op">==</span> <span class="dv">0</span>:</span>
-<span id="cb14-295"><a href="#cb14-295" aria-hidden="true" tabindex="-1"></a>            y, x <span class="op">=</span> y <span class="op">+</span> dy, x <span class="op">+</span> dx</span>
+<span id="cb14-288"><a href="#cb14-288" aria-hidden="true" tabindex="-1"></a>        seen.add((y, x, dy, dx))</span>
+<span id="cb14-289"><a href="#cb14-289" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> data[y <span class="op">+</span> dy, x <span class="op">+</span> dx] <span class="op">%</span> <span class="dv">2</span>:</span>
+<span id="cb14-290"><a href="#cb14-290" aria-hidden="true" tabindex="-1"></a>            dy, dx <span class="op">=</span> [dy, dx] <span class="op">@</span> np.array([[<span class="dv">0</span>, <span class="op">-</span><span class="dv">1</span>], [<span class="dv">1</span>, <span class="dv">0</span>]])</span>
+<span id="cb14-291"><a href="#cb14-291" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> is_valid(y, x) <span class="kw">and</span> data[y <span class="op">+</span> dy, x <span class="op">+</span> dx] <span class="op">%</span> <span class="dv">2</span> <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb14-292"><a href="#cb14-292" aria-hidden="true" tabindex="-1"></a>            y, x <span class="op">=</span> y <span class="op">+</span> dy, x <span class="op">+</span> dx</span>
+<span id="cb14-293"><a href="#cb14-293" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (y, x, dy, dx) <span class="kw">in</span> seen:</span>
+<span id="cb14-294"><a href="#cb14-294" aria-hidden="true" tabindex="-1"></a>            total <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb14-295"><a href="#cb14-295" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
 <span id="cb14-296"><a href="#cb14-296" aria-hidden="true" tabindex="-1"></a>    attempted_positions.add((obstacle_y, obstacle_x))</span>
 <span id="cb14-297"><a href="#cb14-297" aria-hidden="true" tabindex="-1"></a>    data[obstacle_y, obstacle_x] <span class="op">=</span> <span class="dv">0</span></span>
 <span id="cb14-298"><a href="#cb14-298" aria-hidden="true" tabindex="-1"></a>total</span>
