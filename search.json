@@ -1491,6 +1491,20 @@
     "text": "Part 2\nFor part two, we should realise that only obstacles placed on the path have any chance of affecting what the guard does, so the relevant search space is significantly smaller than “every vacant square on the board”. There’s also no need to start the guard from the initial position for every new obstacle; we can just start her on the path right in front of the new obstacle. Similarly, if she ever gets back on her original path before the obstacle, we know she must be in a loop, so we can start with a visited set that covers the whole pwth right up to the new obstruction.\n\n\nCode\nattempted_positions = set([path[0][0]])\ntotal = 0\nfor idx in range(1, len(path)):\n    obstacle, _ = path[idx]\n    if obstacle in attempted_positions:\n        continue\n    position, direction = path[idx - 1]\n\n    obstacles.add(obstacle)\n    seen = set(path[:idx - 1])\n    while is_valid(position):\n        seen.add((position, direction))\n        while position + direction in obstacles:\n            direction *= 1j\n        while is_valid(position) and position + direction not in obstacles:\n            position += direction\n        if (position, direction) in seen:\n            total += 1\n            break\n    attempted_positions.add(obstacle)\n    obstacles.remove(obstacle)\ntotal"
   },
   {
+    "objectID": "qmd/2024.html#part-1-6",
+    "href": "qmd/2024.html#part-1-6",
+    "title": "2024 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\n\n\nCode\ndata = np.array([[int(char) for char in line] for line in load(10)])\n\n\ndef neighbors(y, x):\n    result = []\n    val = data[y, x]\n    for dy, dx in [[0, 1], [0, -1], [1, 0], [-1, 0]]:\n        new_y, new_x = y + dy, x + dx\n        if (\n            0 &lt;= new_y &lt; data.shape[0]\n            and 0 &lt;= new_x &lt; data.shape[1]\n            and data[new_y, new_x] == val + 1\n        ):\n            result.append((new_y, new_x))\n    return result\n\n\n@functools.cache\ndef p1(y, x):\n    r = set()\n    if data[y, x] == 9:\n        return set([(y, x)])\n    return r.union(*[p1(*neighbor) for neighbor in neighbors(y, x)])\n\n\nstarts = np.array(np.where(data == 0)).T\nsum(len(p1(y, x)) for y, x in starts)"
+  },
+  {
+    "objectID": "qmd/2024.html#part-2-6",
+    "href": "qmd/2024.html#part-2-6",
+    "title": "2024 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\n\n\nCode\ndef p2(y, x):\n    if data[y, x] == 9:\n        return 1\n    return sum(p2(*neighbor) for neighbor in neighbors(y, x))\n\n\nsum(p2(y, x) for y, x in starts)"
+  },
+  {
     "objectID": "qmd/2019.html",
     "href": "qmd/2019.html",
     "title": "2019 Solutions",
