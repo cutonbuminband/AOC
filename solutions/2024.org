@@ -17,6 +17,7 @@ from queue import PriorityQueue
 
 import more_itertools
 import numpy as np
+import operator
 import pandas as pd
 import scipy
 
@@ -243,6 +244,49 @@ for idx in range(1, len(path)):
     attempted_positions.add(obstacle)
     obstacles.remove(obstacle)
 total
+#+end_src
+
+* [[https://adventofcode.com/2024/day/7][Day 7: Bridge Repair]]
+
+** Part 1
+#+begin_src jupyter-python
+data = load(7)
+data = [
+    [int((parts := line.split(":"))[0]), [int(i) for i in parts[1].split()]]
+    for line in data
+]
+operators = [operator.mul, operator.add]
+
+
+def possible_values(operands, current=None, ops=operators):
+    if current is None:
+        current = operands[0]
+        operands = operands[1:]
+    if not operands:
+        yield current
+    else:
+        for op in ops:
+            yield from possible_values(operands[1:], op(current, operands[0]), ops)
+
+
+sum(
+    result
+    for result, operands in data
+    if any(value == result for value in possible_values(operands))
+)
+#+end_src
+
+** Part 2
+This is horribly slow, but has the advantage of being an incredibly fast modification of part 1. A bit of thought shows that backtracking would make things run much faster, since it would let us prune the state space much faster, so that's one easy option for speeding things up.
+#+begin_src jupyter-python
+def concat(x, y):
+    return int(str(x) + str(y))
+ops = [operator.mul, operator.add, concat]
+sum(
+    result
+    for result, operands in data
+    if any(value == result for value in possible_values(operands, ops=ops))
+)
 #+end_src
 
 * [[https://adventofcode.com/2024/day/10][Day 10: Hoof It]]
