@@ -1404,7 +1404,7 @@
     "href": "qmd/2024.html",
     "title": "2024 Solutions",
     "section": "",
-    "text": "Code\nimport dataclasses\nimport functools\nimport itertools\nimport os\nimport re\nimport sys\nfrom collections import defaultdict, deque, namedtuple\nfrom queue import PriorityQueue\n\nimport more_itertools\nimport numpy as np\nimport pandas as pd\nimport scipy\n\nsys.path.insert(1, \"..\")\n\nimport utils\n\nload = utils.year_load(2024)"
+    "text": "Code\nimport dataclasses\nimport functools\nimport itertools\nimport os\nimport re\nimport sys\nfrom collections import defaultdict, deque, namedtuple\nfrom queue import PriorityQueue\n\nimport more_itertools\nimport numpy as np\nimport operator\nimport pandas as pd\nimport scipy\n\nsys.path.insert(1, \"..\")\n\nimport utils\n\nload = utils.year_load(2024)"
   },
   {
     "objectID": "qmd/2024.html#part-1",
@@ -1495,14 +1495,42 @@
     "href": "qmd/2024.html#part-1-6",
     "title": "2024 Solutions",
     "section": "Part 1",
-    "text": "Part 1\n\n\nCode\ndata = np.array([[int(char) for char in line] for line in load(10)])\n\n\ndef neighbors(y, x):\n    result = []\n    val = data[y, x]\n    for dy, dx in [[0, 1], [0, -1], [1, 0], [-1, 0]]:\n        new_y, new_x = y + dy, x + dx\n        if (\n            0 &lt;= new_y &lt; data.shape[0]\n            and 0 &lt;= new_x &lt; data.shape[1]\n            and data[new_y, new_x] == val + 1\n        ):\n            result.append((new_y, new_x))\n    return result\n\n\n@functools.cache\ndef p1(y, x):\n    r = set()\n    if data[y, x] == 9:\n        return set([(y, x)])\n    return r.union(*[p1(*neighbor) for neighbor in neighbors(y, x)])\n\n\nstarts = np.array(np.where(data == 0)).T\nsum(len(p1(y, x)) for y, x in starts)"
+    "text": "Part 1\n\n\nCode\ndata = load(7)\ndata = [\n    [int((parts := line.split(\":\"))[0]), [int(i) for i in parts[1].split()]]\n    for line in data\n]\noperators = [operator.mul, operator.add]\n\n\ndef possible_values(operands, current=None, ops=operators):\n    if current is None:\n        current = operands[0]\n        operands = operands[1:]\n    if not operands:\n        yield current\n    else:\n        for op in ops:\n            yield from possible_values(operands[1:], op(current, operands[0]), ops)\n\n\nsum(\n    result\n    for result, operands in data\n    if any(value == result for value in possible_values(operands))\n)"
   },
   {
     "objectID": "qmd/2024.html#part-2-6",
     "href": "qmd/2024.html#part-2-6",
     "title": "2024 Solutions",
     "section": "Part 2",
-    "text": "Part 2\n\n\nCode\ndef p2(y, x):\n    if data[y, x] == 9:\n        return 1\n    return sum(p2(*neighbor) for neighbor in neighbors(y, x))\n\n\nsum(p2(y, x) for y, x in starts)"
+    "text": "Part 2\nThis is horribly slow, but has the advantage of being an incredibly fast modification of part 1. A bit of thought shows that backtracking would make things run much faster, since it would let us prune the state space much faster, so that’s one easy option for speeding things up.\n\n\nCode\ndef concat(x, y):\n    return int(str(x) + str(y))\nops = [operator.mul, operator.add, concat]\nsum(\n    result\n    for result, operands in data\n    if any(value == result for value in possible_values(operands, ops=ops))\n)"
+  },
+  {
+    "objectID": "qmd/2024.html#part-1-7",
+    "href": "qmd/2024.html#part-1-7",
+    "title": "2024 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\nNothing too complicated going on here. For every symbol on the map that’s not a ., we find all its locations, and then we use itertools.combinations to loop over all pairs of symbols.\n\n\nCode\ndata = load(8, \"chararray\")\nresult = set()\nfor value in np.unique(data):\n    if value == \".\":\n        continue\n    points = np.array(np.where(data == value)).T\n    for p1, p2 in itertools.combinations(points, 2):\n        result.add(tuple(2 * p1 - p2))\n        result.add(tuple(2 * p2 - p1))\nsum(1 for x in result if 0 &lt;= x[0] &lt; data.shape[0] and 0 &lt;= x[1] &lt; data.shape[1])"
+  },
+  {
+    "objectID": "qmd/2024.html#part-2-7",
+    "href": "qmd/2024.html#part-2-7",
+    "title": "2024 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\nIn python, the int function automatically rounds towards zero, so we can explicitly work out the number of steps we can take in the x and y directions before going off the map.\n\n\nCode\nresult = set()\nfor value in np.unique(data):\n    if value == \".\":\n        continue\n    points = np.array(np.where(data == value)).T\n    for p1, p2 in itertools.combinations(points, 2):\n        dx = (p2 - p1)[1]\n        dy = (p2 - p1)[0]\n        Δ = np.array([dy, dx])\n        ymin, ymax = -np.inf, np.inf\n        xmin, xmax = -np.inf, np.inf\n        if dy != 0:\n            ymin, ymax = sorted([int((y - p1[0]) / dy) for y in [0, data.shape[0] - 1]])\n        if dx != 0:\n            xmin, xmax = sorted([int((x - p1[1]) / dx) for x in [0, data.shape[1] - 1]])\n        minval = max(ymin, xmin)\n        maxval = min(ymax, xmax)\n        points = [tuple(p1 + k * Δ) for k in range(minval, maxval + 1)]\n        result |= set(points)\nlen(result)"
+  },
+  {
+    "objectID": "qmd/2024.html#part-1-8",
+    "href": "qmd/2024.html#part-1-8",
+    "title": "2024 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\n\n\nCode\ndata = np.array([[int(char) for char in line] for line in load(10)])\n\n\ndef neighbors(y, x):\n    result = []\n    val = data[y, x]\n    for dy, dx in [[0, 1], [0, -1], [1, 0], [-1, 0]]:\n        new_y, new_x = y + dy, x + dx\n        if (\n            0 &lt;= new_y &lt; data.shape[0]\n            and 0 &lt;= new_x &lt; data.shape[1]\n            and data[new_y, new_x] == val + 1\n        ):\n            result.append((new_y, new_x))\n    return result\n\n\n@functools.cache\ndef p1(y, x):\n    r = set()\n    if data[y, x] == 9:\n        return set([(y, x)])\n    return r.union(*[p1(*neighbor) for neighbor in neighbors(y, x)])\n\n\nstarts = np.array(np.where(data == 0)).T\nsum(len(p1(y, x)) for y, x in starts)"
+  },
+  {
+    "objectID": "qmd/2024.html#part-2-8",
+    "href": "qmd/2024.html#part-2-8",
+    "title": "2024 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\n\n\nCode\n@functools.cache\ndef p2(y, x):\n    if data[y, x] == 9:\n        return 1\n    return sum(p2(*neighbor) for neighbor in neighbors(y, x))\n\n\nsum(p2(y, x) for y, x in starts)"
   },
   {
     "objectID": "qmd/2019.html",
