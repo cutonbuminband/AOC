@@ -245,3 +245,47 @@ for idx in range(1, len(path)):
 total
 #+end_src
 
+* [[https://adventofcode.com/2024/day/10][Day 10: Hoof It]]
+
+** Part 1
+#+begin_src jupyter-python
+data = np.array([[int(char) for char in line] for line in load(10)])
+
+
+def neighbors(y, x):
+    result = []
+    val = data[y, x]
+    for dy, dx in [[0, 1], [0, -1], [1, 0], [-1, 0]]:
+        new_y, new_x = y + dy, x + dx
+        if (
+            0 <= new_y < data.shape[0]
+            and 0 <= new_x < data.shape[1]
+            and data[new_y, new_x] == val + 1
+        ):
+            result.append((new_y, new_x))
+    return result
+
+
+@functools.cache
+def p1(y, x):
+    r = set()
+    if data[y, x] == 9:
+        return set([(y, x)])
+    return r.union(*[p1(*neighbor) for neighbor in neighbors(y, x)])
+
+
+starts = np.array(np.where(data == 0)).T
+sum(len(p1(y, x)) for y, x in starts)
+#+end_src
+
+** Part 2
+#+begin_src jupyter-python
+@functools.cache
+def p2(y, x):
+    if data[y, x] == 9:
+        return 1
+    return sum(p2(*neighbor) for neighbor in neighbors(y, x))
+
+
+sum(p2(y, x) for y, x in starts)
+#+end_src
