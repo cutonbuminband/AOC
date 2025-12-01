@@ -3208,21 +3208,21 @@
   {
     "objectID": "qmd/2025.html",
     "href": "qmd/2025.html",
-    "title": "2024 Solutions",
+    "title": "2025 Solutions",
     "section": "",
     "text": "Code\nimport dataclasses\nimport functools\nimport itertools\nimport os\nimport re\nimport sys\nfrom collections import defaultdict, deque, namedtuple\nfrom queue import PriorityQueue\n\nimport more_itertools\nimport numpy as np\nimport operator\nimport pandas as pd\nimport scipy\n\nsys.path.insert(1, \"..\")\n\nimport utils\n\nload = utils.year_load(2025)"
   },
   {
     "objectID": "qmd/2025.html#part-1",
     "href": "qmd/2025.html#part-1",
-    "title": "2024 Solutions",
+    "title": "2025 Solutions",
     "section": "Part 1",
     "text": "Part 1\nWe’re working in numbers mod 100. Left turns correspond to subtraction, and right turns correspond to addition. To find the position of the dial after a set of turns we just take the cumulative sum of the additions and subtractions (mod 100). Then we just check how many times this position is zero\n\n\nCode\ndata = np.array([50] + [int(x.replace(\"L\", \"-\").replace(\"R\", \"\")) for x in load(1)])\n(np.cumsum(data) % 100 == 0).sum()"
   },
   {
     "objectID": "qmd/2025.html#part-2",
     "href": "qmd/2025.html#part-2",
-    "title": "2024 Solutions",
+    "title": "2025 Solutions",
     "section": "Part 2",
     "text": "Part 2\nTo find the number of times we’ve crossed zero, we can just look at how many times the hundreds place of the running sum has changed - every time that happens, we’ve crossed the value 0 on the dial. This is almost the right answer but needs to be corrected for the fact that sometimes we just kiss zero and don’t cross it. For example, if the dial went 10 -&gt; 0 -&gt; 10, the divisor test wouldn’t show a zero crossing. Similarly, if we went 90 -&gt; 0 -&gt; 90, the divisor test would show two crossings instead of one.\nA bit of thinking shows that the relevant points are those where\n\nThe total sum is zero after a move\nThe dial moves in the opposite way in the next move.\n\nWe can find both of those cases using numpy magic, and the necessary expression then becomes\n\n\nCode\nsum(\n    abs(np.diff(np.cumsum(data) // 100))\n    + ((np.cumsum(data) % 100 == 0)[:-1] * np.diff(np.sign(data)) // 2)\n)"
   }
