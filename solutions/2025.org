@@ -1,0 +1,55 @@
+#+PROPERTY: header-args:jupyter-python  :session aoc-2025 :kernel aoc
+#+PROPERTY: header-args    :pandoc t
+#+TITLE: 2025 Solutions
+
+* Imports
+#+begin_src jupyter-python
+# | eval: true
+# | output: false
+import dataclasses
+import functools
+import itertools
+import os
+import re
+import sys
+from collections import defaultdict, deque, namedtuple
+from queue import PriorityQueue
+
+import more_itertools
+import numpy as np
+import operator
+import pandas as pd
+import scipy
+
+sys.path.insert(1, "..")
+
+import utils
+
+load = utils.year_load(2025)
+#+end_src
+
+* [[https://adventofcode.com/2025/day/1][Day 1: Secret Entrance]]
+
+** Part 1
+We're working in numbers mod 100. Left turns correspond to subtraction, and right turns correspond to addition. To find the position of the dial after a set of turns we just take the cumulative sum of the additions and subtractions (mod 100). Then we just check how many times this position is zero
+#+begin_src jupyter-python
+data = np.array([50] + [int(x.replace("L", "-").replace("R", "")) for x in load(1)])
+(np.cumsum(data) % 100 == 0).sum()
+#+end_src
+
+** Part 2
+To find the number of times we've crossed zero, we can just look at how many times the hundreds place of the running sum has changed - every time that happens, we've crossed the value 0 on the dial. This is almost the right answer but needs to be corrected for the fact that sometimes we just kiss zero and don't cross it. For example, if the dial went ~10 -> 0 -> 10~, the divisor test wouldn't show a zero crossing. Similarly, if we went ~90 -> 0 -> 90~, the divisor test would show two crossings instead of one.
+
+A bit of thinking shows that the relevant points are those where
+
+1. The total sum is zero after a move
+2. The dial moves in the opposite way in the next move.
+
+We can find both of those cases using numpy magic, and the necessary expression then becomes
+#+begin_src jupyter-python
+sum(
+    abs(np.diff(np.cumsum(data) // 100))
+    + ((np.cumsum(data) % 100 == 0)[:-1] * np.diff(np.sign(data)) // 2)
+)
+#+end_src
+
