@@ -9,6 +9,8 @@
 import dataclasses
 import functools
 import itertools
+import math
+import operator
 import os
 import re
 import sys
@@ -17,7 +19,6 @@ from queue import PriorityQueue
 
 import more_itertools
 import numpy as np
-import operator
 import pandas as pd
 import scipy
 
@@ -51,5 +52,38 @@ sum(
     abs(np.diff(np.cumsum(data) // 100))
     + ((np.cumsum(data) % 100 == 0)[:-1] * np.diff(np.sign(data)) // 2)
 )
+#+end_src
+
+* [[https://adventofcode.com/2025/day/2][Day 2: Gift Shop]]
+
+** Part 1
+:PROPERTIES:
+:ID:       243d6f36-f834-4365-988d-96eb25722e56
+:END:
+There's probably a clever approach here, but I'm not seeing it right now -- I'm guessing that comes with adventing at 9pm after a long day at work. I'll just iterate over the ranges, and for each range, iterate over the numbers in the range. For every number in the range, I'll check whether ~str(number) == str(number)[:length//2] * 2~. It's slow, but it works
+#+begin_src jupyter-python
+ranges = [[int(y) for y in x.split("-")] for x in load(2)[0].split(",")]
+
+def invalid_ids(part=1):
+    total = 0
+    for val in itertools.chain(*[range(start, end + 1) for start, end in ranges]):
+        length = len(str(val))
+        repeats = [2] if part == 1 else proper_factors(length)
+        if any(str(val)[: length // repeat] * repeat == str(val) for repeat in repeats):
+            total += val
+    return total
+
+invalid_ids()
+#+end_src
+
+** Part 2
+The advantage of organising part 1 like that is that part 2 can be included in the same function with a small flag to switch between the two code paths. The only thing that's left to do is to implement a factorisation function and we are done.
+#+begin_src jupyter-python
+@functools.cache
+def proper_factors(n):
+    f = [list(set((i, n // i))) for i in range(2, int(math.sqrt(n)) + 1) if n % i == 0]
+    return sorted([x for pair in f for x in pair] + ([n] if n != 1 else []))
+
+invalid_ids(part=2)
 #+end_src
 
