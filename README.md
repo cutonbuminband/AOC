@@ -17,3 +17,9 @@ Here's a table with my solutions for each year. The links take you to the render
 | [2017](https://cutonbuminband.github.io/AOC/qmd/2017.html) | 50/50⭐ |
 | [2016](https://cutonbuminband.github.io/AOC/qmd/2016.html) | 50/50⭐ |
 | [2015](https://cutonbuminband.github.io/AOC/qmd/2015.html) | 50/50⭐ |
+
+## License
+
+This work is dual-licensed under [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/) and the MIT License. You can choose between one of them if you use this work.
+
+    `SPDX-License-Identifier: CC-BY-4.0 OR MIT`
