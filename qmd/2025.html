@@ -216,6 +216,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#243d6f36-f834-4365-988d-96eb25722e56" id="toc-243d6f36-f834-4365-988d-96eb25722e56" class="nav-link" data-scroll-target="#243d6f36-f834-4365-988d-96eb25722e56">Part 1</a></li>
   <li><a href="#part-2-1" id="toc-part-2-1" class="nav-link" data-scroll-target="#part-2-1">Part 2</a></li>
   </ul></li>
+  <li><a href="#day-3-lobby" id="toc-day-3-lobby" class="nav-link" data-scroll-target="#day-3-lobby">Day 3: Lobby</a>
+  <ul class="collapse">
+  <li><a href="#part-1-1" id="toc-part-1-1" class="nav-link" data-scroll-target="#part-1-1">Part 1</a></li>
+  <li><a href="#part-2-2" id="toc-part-2-2" class="nav-link" data-scroll-target="#part-2-2">Part 2</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -338,6 +343,45 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>invalid_ids(part<span class="op">=</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
+</section>
+</section>
+<section id="day-3-lobby" class="level1">
+<h1><a href="https://adventofcode.com/2025/day/3">Day 3: Lobby</a></h1>
+<section id="part-1-1" class="level2">
+<h2 class="anchored" data-anchor-id="part-1-1">Part 1</h2>
+<p>Once the data is loaded into an array, part 1 can be solved using an ugly one-liner. The idea is to take the largest number in each line, multiply by ten and add the largest number occuring after the first one. This needs to be corrected to account for those cases when the last digit of a line is the largest one - in those cases, we need to take the largest digit occuring before the last slot, multiply by ten and add the last digit.</p>
+<div class="cell" data-execution_count="6">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> load(<span class="dv">3</span>, <span class="st">"intarray"</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    line[firstmax] <span class="op">*</span> <span class="dv">10</span> <span class="op">+</span> <span class="bu">max</span>(line[firstmax <span class="op">+</span> <span class="dv">1</span> :])</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> ((firstmax <span class="op">:=</span> np.argmax(line)) <span class="op">!=</span> <span class="bu">len</span>(line) <span class="op">-</span> <span class="dv">1</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> line[firstmax] <span class="op">+</span> <span class="dv">10</span> <span class="op">*</span> <span class="bu">max</span>(line[:<span class="op">-</span><span class="dv">1</span>])</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> line <span class="kw">in</span> data</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="part-2-2" class="level2">
+<h2 class="anchored" data-anchor-id="part-2-2">Part 2</h2>
+<p>For part 2, we need to be a bit cleverer, but the core of the logic from before still applies. We know that we need to pick 12 digits out of n.&nbsp;This means that out of the first (n-11) digits, we need to pick at least one – otherwise we’ll run out of digits. And which of those digits is the best one to pick? The largest one. If we pick the ith digit, we now need to pick exactly 11 digits from position i+1 to n, which leads us nicely to the following recursive solution</p>
+<div class="cell" data-execution_count="7">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> optimal_selection(array, count):</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> count <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> []</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span>(array) <span class="op">==</span> count:</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">list</span>(array)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    argmax <span class="op">=</span> np.argmax(array[: <span class="bu">len</span>(array) <span class="op">-</span>count <span class="op">+</span> <span class="dv">1</span>])</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> [array[argmax]] <span class="op">+</span> optimal_selection(array[argmax <span class="op">+</span> <span class="dv">1</span> :], count <span class="op">-</span> <span class="dv">1</span>)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(functools.<span class="bu">reduce</span>(<span class="kw">lambda</span> x, y: <span class="dv">10</span><span class="op">*</span>x <span class="op">+</span> y, optimal_selection(line, <span class="dv">12</span>)) <span class="cf">for</span> line <span class="kw">in</span> data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Once we have that, part 1 could have been expressed as just <code>sum(functools.reduce(lambda x, y: 10*x + y, optimal_selection(line, 2)) for line in data)</code>, but I liked the original one-liner</p>
 
 
 <!-- -->
@@ -745,100 +789,135 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="sourceCode" id="cb6" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> 2025 Solutions</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu"># Imports</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co"># | eval: true</span></span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co"># | output: false</span></span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> dataclasses</span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> functools</span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> itertools</span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> math</span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> operator</span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sys</span>
-<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> defaultdict, deque, namedtuple</span>
-<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> queue <span class="im">import</span> PriorityQueue</span>
-<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> more_itertools</span>
-<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> scipy</span>
-<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>sys.path.insert(<span class="dv">1</span>, <span class="st">".."</span>)</span>
-<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> utils</span>
-<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>load <span class="op">=</span> utils.year_load(<span class="dv">2025</span>)</span>
-<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a><span class="fu"># [Day 1: Secret Entrance](https://adventofcode.com/2025/day/1)</span></span>
-<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1</span></span>
-<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>We're working in numbers mod 100. Left turns correspond to subtraction, and right turns correspond to addition. To find the position of the dial after a set of turns we just take the cumulative sum of the additions and subtractions (mod 100). Then we just check how many times this position is zero</span>
-<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> np.array([<span class="dv">50</span>] <span class="op">+</span> [<span class="bu">int</span>(x.replace(<span class="st">"L"</span>, <span class="st">"-"</span>).replace(<span class="st">"R"</span>, <span class="st">""</span>)) <span class="cf">for</span> x <span class="kw">in</span> load(<span class="dv">1</span>)])</span>
-<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>(np.cumsum(data) <span class="op">%</span> <span class="dv">100</span> <span class="op">==</span> <span class="dv">0</span>).<span class="bu">sum</span>()</span>
-<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
-<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>To find the number of times we've crossed zero, we can just look at how many times the hundreds place of the running sum has changed - every time that happens, we've crossed the value 0 on the dial. This is almost the right answer but needs to be corrected for the fact that sometimes we just kiss zero and don't cross it. For example, if the dial went <span class="in">`10 -&gt; 0 -&gt; 10`</span>, the divisor test wouldn't show a zero crossing. Similarly, if we went <span class="in">`90 -&gt; 0 -&gt; 90`</span>, the divisor test would show two crossings instead of one.</span>
-<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a>A bit of thinking shows that the relevant points are those where</span>
-<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a><span class="ss">1.  </span>The total sum is zero after a move</span>
-<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a><span class="ss">2.  </span>The dial moves in the opposite way in the next move.</span>
-<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a>We can find both of those cases using numpy magic, and the necessary expression then becomes</span>
-<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(</span>
-<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a>    <span class="bu">abs</span>(np.diff(np.cumsum(data) <span class="op">//</span> <span class="dv">100</span>))</span>
-<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> ((np.cumsum(data) <span class="op">%</span> <span class="dv">100</span> <span class="op">==</span> <span class="dv">0</span>)[:<span class="op">-</span><span class="dv">1</span>] <span class="op">*</span> np.diff(np.sign(data)) <span class="op">//</span> <span class="dv">2</span>)</span>
-<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a><span class="fu"># [Day 2: Gift Shop](https://adventofcode.com/2025/day/2)</span></span>
-<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1 {#part-1-1 id="243d6f36-f834-4365-988d-96eb25722e56"}</span></span>
-<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a>There's probably a clever approach here, but I'm not seeing it right now – I'm guessing that comes with adventing at 9pm after a long day at work. I'll just iterate over the ranges, and for each range, iterate over the numbers in the range. For every number in the range, I'll check whether <span class="in">`str(number) == str(number)[:length//2] * 2`</span>. It's slow, but it works</span>
-<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb6-77"><a href="#cb6-77" aria-hidden="true" tabindex="-1"></a>ranges <span class="op">=</span> [[<span class="bu">int</span>(y) <span class="cf">for</span> y <span class="kw">in</span> x.split(<span class="st">"-"</span>)] <span class="cf">for</span> x <span class="kw">in</span> load(<span class="dv">2</span>)[<span class="dv">0</span>].split(<span class="st">","</span>)]</span>
-<span id="cb6-78"><a href="#cb6-78" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-79"><a href="#cb6-79" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> invalid_ids(part<span class="op">=</span><span class="dv">1</span>):</span>
-<span id="cb6-80"><a href="#cb6-80" aria-hidden="true" tabindex="-1"></a>    total <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb6-81"><a href="#cb6-81" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> val <span class="kw">in</span> itertools.chain(<span class="op">*</span>[<span class="bu">range</span>(start, end <span class="op">+</span> <span class="dv">1</span>) <span class="cf">for</span> start, end <span class="kw">in</span> ranges]):</span>
-<span id="cb6-82"><a href="#cb6-82" aria-hidden="true" tabindex="-1"></a>        length <span class="op">=</span> <span class="bu">len</span>(<span class="bu">str</span>(val))</span>
-<span id="cb6-83"><a href="#cb6-83" aria-hidden="true" tabindex="-1"></a>        repeats <span class="op">=</span> [<span class="dv">2</span>] <span class="cf">if</span> part <span class="op">==</span> <span class="dv">1</span> <span class="cf">else</span> proper_factors(length)</span>
-<span id="cb6-84"><a href="#cb6-84" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">any</span>(<span class="bu">str</span>(val)[: length <span class="op">//</span> repeat] <span class="op">*</span> repeat <span class="op">==</span> <span class="bu">str</span>(val) <span class="cf">for</span> repeat <span class="kw">in</span> repeats):</span>
-<span id="cb6-85"><a href="#cb6-85" aria-hidden="true" tabindex="-1"></a>            total <span class="op">+=</span> val</span>
-<span id="cb6-86"><a href="#cb6-86" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> total</span>
-<span id="cb6-87"><a href="#cb6-87" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-88"><a href="#cb6-88" aria-hidden="true" tabindex="-1"></a>invalid_ids()</span>
-<span id="cb6-89"><a href="#cb6-89" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb6-90"><a href="#cb6-90" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-91"><a href="#cb6-91" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
-<span id="cb6-92"><a href="#cb6-92" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-93"><a href="#cb6-93" aria-hidden="true" tabindex="-1"></a>The advantage of organising part 1 like that is that part 2 can be included in the same function with a small flag to switch between the two code paths. The only thing that's left to do is to implement a factorisation function and we are done.</span>
-<span id="cb6-94"><a href="#cb6-94" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-97"><a href="#cb6-97" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb6-98"><a href="#cb6-98" aria-hidden="true" tabindex="-1"></a><span class="at">@functools.cache</span></span>
-<span id="cb6-99"><a href="#cb6-99" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> proper_factors(n):</span>
-<span id="cb6-100"><a href="#cb6-100" aria-hidden="true" tabindex="-1"></a>    f <span class="op">=</span> [<span class="bu">list</span>(<span class="bu">set</span>((i, n <span class="op">//</span> i))) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2</span>, <span class="bu">int</span>(math.sqrt(n)) <span class="op">+</span> <span class="dv">1</span>) <span class="cf">if</span> n <span class="op">%</span> i <span class="op">==</span> <span class="dv">0</span>]</span>
-<span id="cb6-101"><a href="#cb6-101" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">sorted</span>([x <span class="cf">for</span> pair <span class="kw">in</span> f <span class="cf">for</span> x <span class="kw">in</span> pair] <span class="op">+</span> ([n] <span class="cf">if</span> n <span class="op">!=</span> <span class="dv">1</span> <span class="cf">else</span> []))</span>
-<span id="cb6-102"><a href="#cb6-102" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-103"><a href="#cb6-103" aria-hidden="true" tabindex="-1"></a>invalid_ids(part<span class="op">=</span><span class="dv">2</span>)</span>
-<span id="cb6-104"><a href="#cb6-104" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<div class="sourceCode" id="cb8" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> 2025 Solutions</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="fu"># Imports</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co"># | eval: true</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co"># | output: false</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> dataclasses</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> functools</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> itertools</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> math</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> operator</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sys</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> defaultdict, deque, namedtuple</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> queue <span class="im">import</span> PriorityQueue</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> more_itertools</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> scipy</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>sys.path.insert(<span class="dv">1</span>, <span class="st">".."</span>)</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> utils</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>load <span class="op">=</span> utils.year_load(<span class="dv">2025</span>)</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a><span class="fu"># [Day 1: Secret Entrance](https://adventofcode.com/2025/day/1)</span></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1</span></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>We're working in numbers mod 100. Left turns correspond to subtraction, and right turns correspond to addition. To find the position of the dial after a set of turns we just take the cumulative sum of the additions and subtractions (mod 100). Then we just check how many times this position is zero</span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> np.array([<span class="dv">50</span>] <span class="op">+</span> [<span class="bu">int</span>(x.replace(<span class="st">"L"</span>, <span class="st">"-"</span>).replace(<span class="st">"R"</span>, <span class="st">""</span>)) <span class="cf">for</span> x <span class="kw">in</span> load(<span class="dv">1</span>)])</span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>(np.cumsum(data) <span class="op">%</span> <span class="dv">100</span> <span class="op">==</span> <span class="dv">0</span>).<span class="bu">sum</span>()</span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>To find the number of times we've crossed zero, we can just look at how many times the hundreds place of the running sum has changed - every time that happens, we've crossed the value 0 on the dial. This is almost the right answer but needs to be corrected for the fact that sometimes we just kiss zero and don't cross it. For example, if the dial went <span class="in">`10 -&gt; 0 -&gt; 10`</span>, the divisor test wouldn't show a zero crossing. Similarly, if we went <span class="in">`90 -&gt; 0 -&gt; 90`</span>, the divisor test would show two crossings instead of one.</span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>A bit of thinking shows that the relevant points are those where</span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a><span class="ss">1.  </span>The total sum is zero after a move</span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a><span class="ss">2.  </span>The dial moves in the opposite way in the next move.</span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a>We can find both of those cases using numpy magic, and the necessary expression then becomes</span>
+<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb8-62"><a href="#cb8-62" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(</span>
+<span id="cb8-63"><a href="#cb8-63" aria-hidden="true" tabindex="-1"></a>    <span class="bu">abs</span>(np.diff(np.cumsum(data) <span class="op">//</span> <span class="dv">100</span>))</span>
+<span id="cb8-64"><a href="#cb8-64" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> ((np.cumsum(data) <span class="op">%</span> <span class="dv">100</span> <span class="op">==</span> <span class="dv">0</span>)[:<span class="op">-</span><span class="dv">1</span>] <span class="op">*</span> np.diff(np.sign(data)) <span class="op">//</span> <span class="dv">2</span>)</span>
+<span id="cb8-65"><a href="#cb8-65" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-66"><a href="#cb8-66" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-67"><a href="#cb8-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-68"><a href="#cb8-68" aria-hidden="true" tabindex="-1"></a><span class="fu"># [Day 2: Gift Shop](https://adventofcode.com/2025/day/2)</span></span>
+<span id="cb8-69"><a href="#cb8-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-70"><a href="#cb8-70" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1 {#part-1-1 id="243d6f36-f834-4365-988d-96eb25722e56"}</span></span>
+<span id="cb8-71"><a href="#cb8-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-72"><a href="#cb8-72" aria-hidden="true" tabindex="-1"></a>There's probably a clever approach here, but I'm not seeing it right now – I'm guessing that comes with adventing at 9pm after a long day at work. I'll just iterate over the ranges, and for each range, iterate over the numbers in the range. For every number in the range, I'll check whether <span class="in">`str(number) == str(number)[:length//2] * 2`</span>. It's slow, but it works</span>
+<span id="cb8-73"><a href="#cb8-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-76"><a href="#cb8-76" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb8-77"><a href="#cb8-77" aria-hidden="true" tabindex="-1"></a>ranges <span class="op">=</span> [[<span class="bu">int</span>(y) <span class="cf">for</span> y <span class="kw">in</span> x.split(<span class="st">"-"</span>)] <span class="cf">for</span> x <span class="kw">in</span> load(<span class="dv">2</span>)[<span class="dv">0</span>].split(<span class="st">","</span>)]</span>
+<span id="cb8-78"><a href="#cb8-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-79"><a href="#cb8-79" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> invalid_ids(part<span class="op">=</span><span class="dv">1</span>):</span>
+<span id="cb8-80"><a href="#cb8-80" aria-hidden="true" tabindex="-1"></a>    total <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb8-81"><a href="#cb8-81" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> val <span class="kw">in</span> itertools.chain(<span class="op">*</span>[<span class="bu">range</span>(start, end <span class="op">+</span> <span class="dv">1</span>) <span class="cf">for</span> start, end <span class="kw">in</span> ranges]):</span>
+<span id="cb8-82"><a href="#cb8-82" aria-hidden="true" tabindex="-1"></a>        length <span class="op">=</span> <span class="bu">len</span>(<span class="bu">str</span>(val))</span>
+<span id="cb8-83"><a href="#cb8-83" aria-hidden="true" tabindex="-1"></a>        repeats <span class="op">=</span> [<span class="dv">2</span>] <span class="cf">if</span> part <span class="op">==</span> <span class="dv">1</span> <span class="cf">else</span> proper_factors(length)</span>
+<span id="cb8-84"><a href="#cb8-84" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">any</span>(<span class="bu">str</span>(val)[: length <span class="op">//</span> repeat] <span class="op">*</span> repeat <span class="op">==</span> <span class="bu">str</span>(val) <span class="cf">for</span> repeat <span class="kw">in</span> repeats):</span>
+<span id="cb8-85"><a href="#cb8-85" aria-hidden="true" tabindex="-1"></a>            total <span class="op">+=</span> val</span>
+<span id="cb8-86"><a href="#cb8-86" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> total</span>
+<span id="cb8-87"><a href="#cb8-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-88"><a href="#cb8-88" aria-hidden="true" tabindex="-1"></a>invalid_ids()</span>
+<span id="cb8-89"><a href="#cb8-89" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-90"><a href="#cb8-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-91"><a href="#cb8-91" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
+<span id="cb8-92"><a href="#cb8-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-93"><a href="#cb8-93" aria-hidden="true" tabindex="-1"></a>The advantage of organising part 1 like that is that part 2 can be included in the same function with a small flag to switch between the two code paths. The only thing that's left to do is to implement a factorisation function and we are done.</span>
+<span id="cb8-94"><a href="#cb8-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-97"><a href="#cb8-97" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb8-98"><a href="#cb8-98" aria-hidden="true" tabindex="-1"></a><span class="at">@functools.cache</span></span>
+<span id="cb8-99"><a href="#cb8-99" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> proper_factors(n):</span>
+<span id="cb8-100"><a href="#cb8-100" aria-hidden="true" tabindex="-1"></a>    f <span class="op">=</span> [<span class="bu">list</span>(<span class="bu">set</span>((i, n <span class="op">//</span> i))) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2</span>, <span class="bu">int</span>(math.sqrt(n)) <span class="op">+</span> <span class="dv">1</span>) <span class="cf">if</span> n <span class="op">%</span> i <span class="op">==</span> <span class="dv">0</span>]</span>
+<span id="cb8-101"><a href="#cb8-101" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">sorted</span>([x <span class="cf">for</span> pair <span class="kw">in</span> f <span class="cf">for</span> x <span class="kw">in</span> pair] <span class="op">+</span> ([n] <span class="cf">if</span> n <span class="op">!=</span> <span class="dv">1</span> <span class="cf">else</span> []))</span>
+<span id="cb8-102"><a href="#cb8-102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-103"><a href="#cb8-103" aria-hidden="true" tabindex="-1"></a>invalid_ids(part<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb8-104"><a href="#cb8-104" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-105"><a href="#cb8-105" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-106"><a href="#cb8-106" aria-hidden="true" tabindex="-1"></a><span class="fu"># [Day 3: Lobby](https://adventofcode.com/2025/day/3)</span></span>
+<span id="cb8-107"><a href="#cb8-107" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-108"><a href="#cb8-108" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1</span></span>
+<span id="cb8-109"><a href="#cb8-109" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-110"><a href="#cb8-110" aria-hidden="true" tabindex="-1"></a>Once the data is loaded into an array, part 1 can be solved using an ugly one-liner. The idea is to take the largest number in each line, multiply by ten and add the largest number occuring after the first one. This needs to be corrected to account for those cases when the last digit of a line is the largest one - in those cases, we need to take the largest digit occuring before the last slot, multiply by ten and add the last digit.</span>
+<span id="cb8-111"><a href="#cb8-111" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-114"><a href="#cb8-114" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb8-115"><a href="#cb8-115" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> load(<span class="dv">3</span>, <span class="st">"intarray"</span>)</span>
+<span id="cb8-116"><a href="#cb8-116" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(</span>
+<span id="cb8-117"><a href="#cb8-117" aria-hidden="true" tabindex="-1"></a>    line[firstmax] <span class="op">*</span> <span class="dv">10</span> <span class="op">+</span> <span class="bu">max</span>(line[firstmax <span class="op">+</span> <span class="dv">1</span> :])</span>
+<span id="cb8-118"><a href="#cb8-118" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> ((firstmax <span class="op">:=</span> np.argmax(line)) <span class="op">!=</span> <span class="bu">len</span>(line) <span class="op">-</span> <span class="dv">1</span>)</span>
+<span id="cb8-119"><a href="#cb8-119" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> line[firstmax] <span class="op">+</span> <span class="dv">10</span> <span class="op">*</span> <span class="bu">max</span>(line[:<span class="op">-</span><span class="dv">1</span>])</span>
+<span id="cb8-120"><a href="#cb8-120" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> line <span class="kw">in</span> data</span>
+<span id="cb8-121"><a href="#cb8-121" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-122"><a href="#cb8-122" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-123"><a href="#cb8-123" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-124"><a href="#cb8-124" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
+<span id="cb8-125"><a href="#cb8-125" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-126"><a href="#cb8-126" aria-hidden="true" tabindex="-1"></a>For part 2, we need to be a bit cleverer, but the core of the logic from before still applies. We know that we need to pick 12 digits out of n. This means that out of the first (n-11) digits, we need to pick at least one – otherwise we'll run out of digits. And which of those digits is the best one to pick? The largest one. If we pick the ith digit, we now need to pick exactly 11 digits from position i+1 to n, which leads us nicely to the following recursive solution</span>
+<span id="cb8-127"><a href="#cb8-127" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-130"><a href="#cb8-130" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb8-131"><a href="#cb8-131" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> optimal_selection(array, count):</span>
+<span id="cb8-132"><a href="#cb8-132" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> count <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb8-133"><a href="#cb8-133" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> []</span>
+<span id="cb8-134"><a href="#cb8-134" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span>(array) <span class="op">==</span> count:</span>
+<span id="cb8-135"><a href="#cb8-135" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">list</span>(array)</span>
+<span id="cb8-136"><a href="#cb8-136" aria-hidden="true" tabindex="-1"></a>    argmax <span class="op">=</span> np.argmax(array[: <span class="bu">len</span>(array) <span class="op">-</span>count <span class="op">+</span> <span class="dv">1</span>])</span>
+<span id="cb8-137"><a href="#cb8-137" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> [array[argmax]] <span class="op">+</span> optimal_selection(array[argmax <span class="op">+</span> <span class="dv">1</span> :], count <span class="op">-</span> <span class="dv">1</span>)</span>
+<span id="cb8-138"><a href="#cb8-138" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-139"><a href="#cb8-139" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-140"><a href="#cb8-140" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(functools.<span class="bu">reduce</span>(<span class="kw">lambda</span> x, y: <span class="dv">10</span><span class="op">*</span>x <span class="op">+</span> y, optimal_selection(line, <span class="dv">12</span>)) <span class="cf">for</span> line <span class="kw">in</span> data)</span>
+<span id="cb8-141"><a href="#cb8-141" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb8-142"><a href="#cb8-142" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-143"><a href="#cb8-143" aria-hidden="true" tabindex="-1"></a>Once we have that, part 1 could have been expressed as just <span class="in">`sum(functools.reduce(lambda x, y: 10*x + y, optimal_selection(line, 2)) for line in data)`</span>, but I liked the original one-liner</span>
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

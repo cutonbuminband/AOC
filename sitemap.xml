@@ -1,55 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://cutonbuminband.github.io/AOC/LICENSE.html</loc>
-    <lastmod>2025-12-02T21:05:03.543Z</lastmod>
-  </url>
-  <url>
-    <loc>https://cutonbuminband.github.io/AOC/qmd/2025.html</loc>
-    <lastmod>2025-12-02T21:04:59.297Z</lastmod>
-  </url>
-  <url>
-    <loc>https://cutonbuminband.github.io/AOC/qmd/2020.html</loc>
-    <lastmod>2025-12-02T21:04:31.752Z</lastmod>
-  </url>
-  <url>
-    <loc>https://cutonbuminband.github.io/AOC/qmd/2022.html</loc>
-    <lastmod>2025-12-02T21:04:11.222Z</lastmod>
-  </url>
-  <url>
-    <loc>https://cutonbuminband.github.io/AOC/qmd/2018.html</loc>
-    <lastmod>2025-12-02T21:03:31.836Z</lastmod>
-  </url>
-  <url>
-    <loc>https://cutonbuminband.github.io/AOC/qmd/2015.html</loc>
-    <lastmod>2025-12-02T21:03:06.084Z</lastmod>
-  </url>
-  <url>
-    <loc>https://cutonbuminband.github.io/AOC/qmd/2024.html</loc>
-    <lastmod>2025-12-02T21:02:51.775Z</lastmod>
-  </url>
-  <url>
-    <loc>https://cutonbuminband.github.io/AOC/qmd/2019.html</loc>
-    <lastmod>2025-12-02T21:03:00.704Z</lastmod>
-  </url>
-  <url>
-    <loc>https://cutonbuminband.github.io/AOC/qmd/2017.html</loc>
-    <lastmod>2025-12-02T21:03:11.587Z</lastmod>
-  </url>
-  <url>
-    <loc>https://cutonbuminband.github.io/AOC/qmd/2023.html</loc>
-    <lastmod>2025-12-02T21:03:58.680Z</lastmod>
-  </url>
-  <url>
-    <loc>https://cutonbuminband.github.io/AOC/qmd/2016.html</loc>
-    <lastmod>2025-12-02T21:04:20.833Z</lastmod>
+    <loc>https://cutonbuminband.github.io/AOC/index.html</loc>
+    <lastmod>2025-12-03T17:07:36.152Z</lastmod>
   </url>
   <url>
     <loc>https://cutonbuminband.github.io/AOC/qmd/2021.html</loc>
-    <lastmod>2025-12-02T21:04:45.280Z</lastmod>
+    <lastmod>2025-12-03T17:07:24.196Z</lastmod>
   </url>
   <url>
-    <loc>https://cutonbuminband.github.io/AOC/index.html</loc>
-    <lastmod>2025-12-02T21:05:01.216Z</lastmod>
+    <loc>https://cutonbuminband.github.io/AOC/qmd/2016.html</loc>
+    <lastmod>2025-12-03T17:07:04.846Z</lastmod>
+  </url>
+  <url>
+    <loc>https://cutonbuminband.github.io/AOC/qmd/2023.html</loc>
+    <lastmod>2025-12-03T17:06:41.855Z</lastmod>
+  </url>
+  <url>
+    <loc>https://cutonbuminband.github.io/AOC/qmd/2017.html</loc>
+    <lastmod>2025-12-03T17:06:13.155Z</lastmod>
+  </url>
+  <url>
+    <loc>https://cutonbuminband.github.io/AOC/qmd/2019.html</loc>
+    <lastmod>2025-12-03T17:06:02.374Z</lastmod>
+  </url>
+  <url>
+    <loc>https://cutonbuminband.github.io/AOC/qmd/2024.html</loc>
+    <lastmod>2025-12-03T17:05:53.818Z</lastmod>
+  </url>
+  <url>
+    <loc>https://cutonbuminband.github.io/AOC/qmd/2015.html</loc>
+    <lastmod>2025-12-03T17:06:08.061Z</lastmod>
+  </url>
+  <url>
+    <loc>https://cutonbuminband.github.io/AOC/qmd/2018.html</loc>
+    <lastmod>2025-12-03T17:06:29.855Z</lastmod>
+  </url>
+  <url>
+    <loc>https://cutonbuminband.github.io/AOC/qmd/2022.html</loc>
+    <lastmod>2025-12-03T17:06:54.711Z</lastmod>
+  </url>
+  <url>
+    <loc>https://cutonbuminband.github.io/AOC/qmd/2020.html</loc>
+    <lastmod>2025-12-03T17:07:14.627Z</lastmod>
+  </url>
+  <url>
+    <loc>https://cutonbuminband.github.io/AOC/qmd/2025.html</loc>
+    <lastmod>2025-12-03T17:07:34.982Z</lastmod>
   </url>
 </urlset>
