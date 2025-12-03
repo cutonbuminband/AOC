@@ -29,6 +29,8 @@ import utils
 load = utils.year_load(2025)
 #+end_src
 
+#+RESULTS:
+
 * [[https://adventofcode.com/2025/day/1][Day 1: Secret Entrance]]
 
 ** Part 1
@@ -87,3 +89,31 @@ def proper_factors(n):
 invalid_ids(part=2)
 #+end_src
 
+* [[https://adventofcode.com/2025/day/3][Day 3: Lobby]]
+** Part 1
+Once the data is loaded into an array, part 1 can be solved using an ugly one-liner. The idea is to take the largest number in each line, multiply by ten and add the largest number occuring after the first one. This needs to be corrected to account for those cases when the last digit of a line is the largest one - in those cases, we need to take the largest digit occuring before the last slot, multiply by ten and add the last digit.
+#+begin_src jupyter-python
+data = load(3, "intarray")
+sum(
+    line[firstmax] * 10 + max(line[firstmax + 1 :])
+    if ((firstmax := np.argmax(line)) != len(line) - 1)
+    else line[firstmax] + 10 * max(line[:-1])
+    for line in data
+)
+#+end_src
+
+** Part 2
+For part 2, we need to be a bit cleverer, but the core of the logic from before still applies. We know that we need to pick 12 digits out of n. This means that out of the first (n-11) digits, we need to pick at least one -- otherwise we'll run out of digits. And which of those digits is the best one to pick? The largest one. If we pick the ith digit, we now need to pick exactly 11 digits from position i+1 to n, which leads us nicely to the following recursive solution
+#+begin_src jupyter-python
+def optimal_selection(array, count):
+    if count == 0:
+        return []
+    if len(array) == count:
+        return list(array)
+    argmax = np.argmax(array[: len(array) -count + 1])
+    return [array[argmax]] + optimal_selection(array[argmax + 1 :], count - 1)
+
+
+sum(functools.reduce(lambda x, y: 10*x + y, optimal_selection(line, 12)) for line in data)
+#+end_src
+Once we have that, part 1 could have been expressed as just ~sum(functools.reduce(lambda x, y: 10*x + y, optimal_selection(line, 2)) for line in data)~, but I liked the original one-liner

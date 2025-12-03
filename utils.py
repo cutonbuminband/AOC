@@ -138,5 +138,7 @@ def year_load(year):
             return np.loadtxt(filename, dtype=int, **kwargs)
         if output == "chararray":
             return np.array([[char for char in line.strip()] for line in lines])
+        if output == "intarray":
+            return np.array([[int(char) for char in line.strip()] for line in lines])
 
     return load
