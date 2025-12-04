@@ -3259,13 +3259,13 @@
     "href": "qmd/2025.html#part-1-2",
     "title": "2025 Solutions",
     "section": "Part 1",
-    "text": "Part 1\nThis definitely feels like a job that calls for numpy/scipy’s convolution functions. And maybe that library is such a good fit for the task that using it is a bit like cheating.\n\n\nCode\ndata = load(4, \"chararray\")\nweights = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]])\ncount = scipy.ndimage.convolve(1 * (data == \"@\"), weights, mode=\"constant\")\nchanged = ((data == \"@\") & (count &lt; 4)).sum()\nchanged.sum()"
+    "text": "Part 1\nThis definitely feels like a job that calls for numpy/scipy’s convolution functions. And maybe that library is such a good fit for the task that using it is a bit like cheating.\n\n\nCode\ndata = load(4, \"chararray\")\ncount = scipy.ndimage.convolve(1 * (data == \"@\"), np.ones((3, 3)), mode=\"constant\")\nchanged = (data == \"@\") & (count &lt; 5)\nchanged.sum()"
   },
   {
     "objectID": "qmd/2025.html#part-2-3",
     "href": "qmd/2025.html#part-2-3",
     "title": "2025 Solutions",
     "section": "Part 2",
-    "text": "Part 2\nFor part two, we can take the results from part one and put into a while loop\n\n\nCode\nnew_data = data.copy()\nwhile changed.sum() &gt; 0:\n    count = scipy.ndimage.convolve(1 * (new_data == \"@\"), weights, mode=\"constant\")\n    changed = 1 * ((new_data == \"@\") & (count &lt; 4))\n    new_data[np.where(changed)] = \".\"\n(new_data != data).sum()"
+    "text": "Part 2\nFor part two, we can take the results from part one and put into a while loop\n\n\nCode\nnew_data = data.copy()\nwhile changed.sum() &gt; 0:\n    count = scipy.ndimage.convolve(1 * (new_data == \"@\"), np.ones((3, 3)), mode=\"constant\")\n    changed = 1 * ((new_data == \"@\") & (count &lt; 5))\n    new_data[np.where(changed)] = \".\"\n(new_data != data).sum()\n\n\n&gt;"
   }
 ]

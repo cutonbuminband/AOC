@@ -398,10 +398,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <details open="">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> load(<span class="dv">4</span>, <span class="st">"chararray"</span>)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>weights <span class="op">=</span> np.array([[<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>], [<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>], [<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>]])</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>count <span class="op">=</span> scipy.ndimage.convolve(<span class="dv">1</span> <span class="op">*</span> (data <span class="op">==</span> <span class="st">"@"</span>), weights, mode<span class="op">=</span><span class="st">"constant"</span>)</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>changed <span class="op">=</span> ((data <span class="op">==</span> <span class="st">"@"</span>) <span class="op">&amp;</span> (count <span class="op">&lt;</span> <span class="dv">4</span>)).<span class="bu">sum</span>()</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>changed.<span class="bu">sum</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>count <span class="op">=</span> scipy.ndimage.convolve(<span class="dv">1</span> <span class="op">*</span> (data <span class="op">==</span> <span class="st">"@"</span>), np.ones((<span class="dv">3</span>, <span class="dv">3</span>)), mode<span class="op">=</span><span class="st">"constant"</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>changed <span class="op">=</span> (data <span class="op">==</span> <span class="st">"@"</span>) <span class="op">&amp;</span> (count <span class="op">&lt;</span> <span class="dv">5</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>changed.<span class="bu">sum</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -413,12 +412,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>new_data <span class="op">=</span> data.copy()</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> changed.<span class="bu">sum</span>() <span class="op">&gt;</span> <span class="dv">0</span>:</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    count <span class="op">=</span> scipy.ndimage.convolve(<span class="dv">1</span> <span class="op">*</span> (new_data <span class="op">==</span> <span class="st">"@"</span>), weights, mode<span class="op">=</span><span class="st">"constant"</span>)</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    changed <span class="op">=</span> <span class="dv">1</span> <span class="op">*</span> ((new_data <span class="op">==</span> <span class="st">"@"</span>) <span class="op">&amp;</span> (count <span class="op">&lt;</span> <span class="dv">4</span>))</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    count <span class="op">=</span> scipy.ndimage.convolve(<span class="dv">1</span> <span class="op">*</span> (new_data <span class="op">==</span> <span class="st">"@"</span>), np.ones((<span class="dv">3</span>, <span class="dv">3</span>)), mode<span class="op">=</span><span class="st">"constant"</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    changed <span class="op">=</span> <span class="dv">1</span> <span class="op">*</span> ((new_data <span class="op">==</span> <span class="st">"@"</span>) <span class="op">&amp;</span> (count <span class="op">&lt;</span> <span class="dv">5</span>))</span>
 <span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    new_data[np.where(changed)] <span class="op">=</span> <span class="st">"."</span></span>
 <span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>(new_data <span class="op">!=</span> data).<span class="bu">sum</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
+<p>&gt;</p>
 
 
 <!-- -->
@@ -964,24 +964,25 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb10-150"><a href="#cb10-150" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-153"><a href="#cb10-153" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
 <span id="cb10-154"><a href="#cb10-154" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> load(<span class="dv">4</span>, <span class="st">"chararray"</span>)</span>
-<span id="cb10-155"><a href="#cb10-155" aria-hidden="true" tabindex="-1"></a>weights <span class="op">=</span> np.array([[<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>], [<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>], [<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>]])</span>
-<span id="cb10-156"><a href="#cb10-156" aria-hidden="true" tabindex="-1"></a>count <span class="op">=</span> scipy.ndimage.convolve(<span class="dv">1</span> <span class="op">*</span> (data <span class="op">==</span> <span class="st">"@"</span>), weights, mode<span class="op">=</span><span class="st">"constant"</span>)</span>
-<span id="cb10-157"><a href="#cb10-157" aria-hidden="true" tabindex="-1"></a>changed <span class="op">=</span> ((data <span class="op">==</span> <span class="st">"@"</span>) <span class="op">&amp;</span> (count <span class="op">&lt;</span> <span class="dv">4</span>)).<span class="bu">sum</span>()</span>
-<span id="cb10-158"><a href="#cb10-158" aria-hidden="true" tabindex="-1"></a>changed.<span class="bu">sum</span>()</span>
-<span id="cb10-159"><a href="#cb10-159" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb10-160"><a href="#cb10-160" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-161"><a href="#cb10-161" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
-<span id="cb10-162"><a href="#cb10-162" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-163"><a href="#cb10-163" aria-hidden="true" tabindex="-1"></a>For part two, we can take the results from part one and put into a while loop</span>
-<span id="cb10-164"><a href="#cb10-164" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-167"><a href="#cb10-167" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb10-168"><a href="#cb10-168" aria-hidden="true" tabindex="-1"></a>new_data <span class="op">=</span> data.copy()</span>
-<span id="cb10-169"><a href="#cb10-169" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> changed.<span class="bu">sum</span>() <span class="op">&gt;</span> <span class="dv">0</span>:</span>
-<span id="cb10-170"><a href="#cb10-170" aria-hidden="true" tabindex="-1"></a>    count <span class="op">=</span> scipy.ndimage.convolve(<span class="dv">1</span> <span class="op">*</span> (new_data <span class="op">==</span> <span class="st">"@"</span>), weights, mode<span class="op">=</span><span class="st">"constant"</span>)</span>
-<span id="cb10-171"><a href="#cb10-171" aria-hidden="true" tabindex="-1"></a>    changed <span class="op">=</span> <span class="dv">1</span> <span class="op">*</span> ((new_data <span class="op">==</span> <span class="st">"@"</span>) <span class="op">&amp;</span> (count <span class="op">&lt;</span> <span class="dv">4</span>))</span>
-<span id="cb10-172"><a href="#cb10-172" aria-hidden="true" tabindex="-1"></a>    new_data[np.where(changed)] <span class="op">=</span> <span class="st">"."</span></span>
-<span id="cb10-173"><a href="#cb10-173" aria-hidden="true" tabindex="-1"></a>(new_data <span class="op">!=</span> data).<span class="bu">sum</span>()</span>
-<span id="cb10-174"><a href="#cb10-174" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb10-155"><a href="#cb10-155" aria-hidden="true" tabindex="-1"></a>count <span class="op">=</span> scipy.ndimage.convolve(<span class="dv">1</span> <span class="op">*</span> (data <span class="op">==</span> <span class="st">"@"</span>), np.ones((<span class="dv">3</span>, <span class="dv">3</span>)), mode<span class="op">=</span><span class="st">"constant"</span>)</span>
+<span id="cb10-156"><a href="#cb10-156" aria-hidden="true" tabindex="-1"></a>changed <span class="op">=</span> (data <span class="op">==</span> <span class="st">"@"</span>) <span class="op">&amp;</span> (count <span class="op">&lt;</span> <span class="dv">5</span>)</span>
+<span id="cb10-157"><a href="#cb10-157" aria-hidden="true" tabindex="-1"></a>changed.<span class="bu">sum</span>()</span>
+<span id="cb10-158"><a href="#cb10-158" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb10-159"><a href="#cb10-159" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-160"><a href="#cb10-160" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
+<span id="cb10-161"><a href="#cb10-161" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-162"><a href="#cb10-162" aria-hidden="true" tabindex="-1"></a>For part two, we can take the results from part one and put into a while loop</span>
+<span id="cb10-163"><a href="#cb10-163" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-166"><a href="#cb10-166" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb10-167"><a href="#cb10-167" aria-hidden="true" tabindex="-1"></a>new_data <span class="op">=</span> data.copy()</span>
+<span id="cb10-168"><a href="#cb10-168" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> changed.<span class="bu">sum</span>() <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb10-169"><a href="#cb10-169" aria-hidden="true" tabindex="-1"></a>    count <span class="op">=</span> scipy.ndimage.convolve(<span class="dv">1</span> <span class="op">*</span> (new_data <span class="op">==</span> <span class="st">"@"</span>), np.ones((<span class="dv">3</span>, <span class="dv">3</span>)), mode<span class="op">=</span><span class="st">"constant"</span>)</span>
+<span id="cb10-170"><a href="#cb10-170" aria-hidden="true" tabindex="-1"></a>    changed <span class="op">=</span> <span class="dv">1</span> <span class="op">*</span> ((new_data <span class="op">==</span> <span class="st">"@"</span>) <span class="op">&amp;</span> (count <span class="op">&lt;</span> <span class="dv">5</span>))</span>
+<span id="cb10-171"><a href="#cb10-171" aria-hidden="true" tabindex="-1"></a>    new_data[np.where(changed)] <span class="op">=</span> <span class="st">"."</span></span>
+<span id="cb10-172"><a href="#cb10-172" aria-hidden="true" tabindex="-1"></a>(new_data <span class="op">!=</span> data).<span class="bu">sum</span>()</span>
+<span id="cb10-173"><a href="#cb10-173" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb10-174"><a href="#cb10-174" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-175"><a href="#cb10-175" aria-hidden="true" tabindex="-1"></a><span class="sc">\&gt;</span></span>
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
