@@ -29,8 +29,6 @@ import utils
 load = utils.year_load(2025)
 #+end_src
 
-#+RESULTS:
-
 * [[https://adventofcode.com/2025/day/1][Day 1: Secret Entrance]]
 
 ** Part 1
@@ -117,3 +115,26 @@ def optimal_selection(array, count):
 sum(functools.reduce(lambda x, y: 10*x + y, optimal_selection(line, 12)) for line in data)
 #+end_src
 Once we have that, part 1 could have been expressed as just ~sum(functools.reduce(lambda x, y: 10*x + y, optimal_selection(line, 2)) for line in data)~, but I liked the original one-liner
+
+* [[https://adventofcode.com/2025/day/4][Day 4: Printing Department]]
+
+** Part 1
+This definitely feels like a job that calls for ~numpy/scipy~'s convolution functions. And maybe that library is such a good fit for the task that using it is a bit like cheating.
+#+begin_src jupyter-python
+data = load(4, "chararray")
+count = scipy.ndimage.convolve(1 * (data == "@"), np.ones((3, 3)), mode="constant")
+changed = (data == "@") & (count < 5)
+changed.sum()
+#+end_src
+
+** Part 2
+For part two, we can take the results from part one and put into a while loop
+#+begin_src jupyter-python
+new_data = data.copy()
+while changed.sum() > 0:
+    count = scipy.ndimage.convolve(1 * (new_data == "@"), np.ones((3, 3)), mode="constant")
+    changed = 1 * ((new_data == "@") & (count < 5))
+    new_data[np.where(changed)] = "."
+(new_data != data).sum()
+#+end_src
+ >
