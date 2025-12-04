@@ -3253,5 +3253,19 @@
     "title": "2025 Solutions",
     "section": "Part 2",
     "text": "Part 2\nFor part 2, we need to be a bit cleverer, but the core of the logic from before still applies. We know that we need to pick 12 digits out of n. This means that out of the first (n-11) digits, we need to pick at least one – otherwise we’ll run out of digits. And which of those digits is the best one to pick? The largest one. If we pick the ith digit, we now need to pick exactly 11 digits from position i+1 to n, which leads us nicely to the following recursive solution\n\n\nCode\ndef optimal_selection(array, count):\n    if count == 0:\n        return []\n    if len(array) == count:\n        return list(array)\n    argmax = np.argmax(array[: len(array) -count + 1])\n    return [array[argmax]] + optimal_selection(array[argmax + 1 :], count - 1)\n\n\nsum(functools.reduce(lambda x, y: 10*x + y, optimal_selection(line, 12)) for line in data)\n\n\nOnce we have that, part 1 could have been expressed as just sum(functools.reduce(lambda x, y: 10*x + y, optimal_selection(line, 2)) for line in data), but I liked the original one-liner"
+  },
+  {
+    "objectID": "qmd/2025.html#part-1-2",
+    "href": "qmd/2025.html#part-1-2",
+    "title": "2025 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\nThis definitely feels like a job that calls for numpy/scipy’s convolution functions. And maybe that library is such a good fit for the task that using it is a bit like cheating.\n\n\nCode\ndata = load(4, \"chararray\")\nweights = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]])\ncount = scipy.ndimage.convolve(1 * (data == \"@\"), weights, mode=\"constant\")\nchanged = ((data == \"@\") & (count &lt; 4)).sum()\nchanged.sum()"
+  },
+  {
+    "objectID": "qmd/2025.html#part-2-3",
+    "href": "qmd/2025.html#part-2-3",
+    "title": "2025 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\nFor part two, we can take the results from part one and put into a while loop\n\n\nCode\nnew_data = data.copy()\nwhile changed.sum() &gt; 0:\n    count = scipy.ndimage.convolve(1 * (new_data == \"@\"), weights, mode=\"constant\")\n    changed = 1 * ((new_data == \"@\") & (count &lt; 4))\n    new_data[np.where(changed)] = \".\"\n(new_data != data).sum()"
   }
 ]
