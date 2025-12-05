@@ -446,7 +446,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="part-2-4" class="level2">
 <h2 class="anchored" data-anchor-id="part-2-4">Part 2</h2>
-<p>For part 2, I didn’t even bother checking if the above approach would have been fast enough. since that’s obviously not the intended path. Instead, we should focus on the ranges themselves. The length of a range <span class="math inline">\(r = (\mathrm{start}, \mathrm{end}\)</span> is just <span class="math inline">\(\mathrm{end} - \mathrm{start} + 1\)</span>. The only tricky thing is what to do when to ranges overlap – how to detect it, and how to correct for it.</p>
+<p>For part 2, I didn’t even bother checking if the above approach would have been fast enough. since that’s obviously not the intended path. Instead, we should focus on the ranges themselves. The length of a range <span class="math inline">\(r = (\mathrm{start}, \mathrm{end})\)</span> is just <span class="math inline">\(\mathrm{end} - \mathrm{start} + 1\)</span>. The only tricky thing is what to do when to ranges overlap – how to detect it, and how to correct for it.</p>
 <p>If we sort the ranges by <code>start</code>, then one of the folowing is true:</p>
 <ol type="1">
 <li>The first two ranges overlap</li>
@@ -1051,7 +1051,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb12-192"><a href="#cb12-192" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-193"><a href="#cb12-193" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
 <span id="cb12-194"><a href="#cb12-194" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-195"><a href="#cb12-195" aria-hidden="true" tabindex="-1"></a>For part 2, I didn't even bother checking if the above approach would have been fast enough. since that's obviously not the intended path. Instead, we should focus on the ranges themselves. The length of a range $r = (\mathrm{start}, \mathrm{end}$ is just $\mathrm{end} - \mathrm{start} + 1$. The only tricky thing is what to do when to ranges overlap – how to detect it, and how to correct for it.</span>
+<span id="cb12-195"><a href="#cb12-195" aria-hidden="true" tabindex="-1"></a>For part 2, I didn't even bother checking if the above approach would have been fast enough. since that's obviously not the intended path. Instead, we should focus on the ranges themselves. The length of a range $r = (\mathrm{start}, \mathrm{end})$ is just $\mathrm{end} - \mathrm{start} + 1$. The only tricky thing is what to do when to ranges overlap – how to detect it, and how to correct for it.</span>
 <span id="cb12-196"><a href="#cb12-196" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-197"><a href="#cb12-197" aria-hidden="true" tabindex="-1"></a>If we sort the ranges by <span class="in">`start`</span>, then one of the folowing is true:</span>
 <span id="cb12-198"><a href="#cb12-198" aria-hidden="true" tabindex="-1"></a></span>
