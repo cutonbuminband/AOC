@@ -138,3 +138,38 @@ while changed.sum() > 0:
 (new_data != data).sum()
 #+end_src
  >
+
+* [[https://adventofcode.com/2025/day/5][Day 5: Cafeteria]]
+
+** Part 1
+For part 1, we can just loop over the values and for every value $v$ ask if there is some range $r = (\mathrm{start}, \mathrm{end})$ such that $\mathrm{start} \leq v \leq \mathrm{end}$. The number of values that we have to check is small enough that this runs plenty fast
+#+begin_src jupyter-python
+ranges, values = load(5, "raw").split("\n\n")
+ranges = [[int(x) for x in r.split("-")] for r in ranges.split("\n")]
+values = [int(x) for x in values.split("\n")]
+
+sum(any(start <= value <= end for start, end in ranges) for value in values)
+#+end_src
+
+** Part 2
+For part 2, I didn't even bother checking if the above approach would have been fast enough. since that's obviously not the intended path. Instead, we should focus on the ranges themselves. The length of a range $r = (\mathrm{start}, \mathrm{end})$ is just $\mathrm{end} - \mathrm{start} + 1$. The only tricky thing is what to do when to ranges overlap -- how to detect it, and how to correct for it.
+
+If we sort the ranges by ~start~, then one of the folowing is true:
+
+1. The first two ranges overlap
+2. No range can overlap with the first range
+
+So we can just sort the ranges by first coordinate, loop over them and check the first two ranges in each loop iteration. If they overlap, we put the merged range back into the list of ranges, and if they don't we are done merging the first range and can just add it to the total length   
+#+begin_src jupyter-python
+ranges = sorted(ranges, key=lambda x: x[0])
+total = 0
+
+while (r1 := ranges.pop(0)) and ranges:
+    r2 = ranges[0]
+    if r1[1] + 1 >= r2[0]:
+        ranges = [[r1[0], max(r2[1], r1[1])]] + ranges[1:]
+    else:
+        total += r1[1] - r1[0] + 1
+total + r1[1] - r1[0] + 1
+#+end_src
+
