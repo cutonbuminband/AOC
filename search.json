@@ -3267,5 +3267,19 @@
     "title": "2025 Solutions",
     "section": "Part 2",
     "text": "Part 2\nFor part two, we can take the results from part one and put into a while loop\n\n\nCode\nnew_data = data.copy()\nwhile changed.sum() &gt; 0:\n    count = scipy.ndimage.convolve(1 * (new_data == \"@\"), np.ones((3, 3)), mode=\"constant\")\n    changed = 1 * ((new_data == \"@\") & (count &lt; 5))\n    new_data[np.where(changed)] = \".\"\n(new_data != data).sum()\n\n\n&gt;"
+  },
+  {
+    "objectID": "qmd/2025.html#part-1-3",
+    "href": "qmd/2025.html#part-1-3",
+    "title": "2025 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\nFor part 1, we can just loop over the values and for every value \\(v\\) ask if there is some range \\(r = (\\mathrm{start}, \\mathrm{end})\\) such that $start &lt;= v &lt;= . The number of values that we have to check is small enough that this runs plenty fast\n\n\nCode\nranges, values = load(5, \"raw\").split(\"\\n\\n\")\nranges = [[int(x) for x in r.split(\"-\")] for r in ranges.split(\"\\n\")]\nvalues = [int(x) for x in values.split(\"\\n\")]\n\nsum(any(start &lt;= value &lt;= end for start, end in ranges) for value in values)"
+  },
+  {
+    "objectID": "qmd/2025.html#part-2-4",
+    "href": "qmd/2025.html#part-2-4",
+    "title": "2025 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\nFor part 2, I didn’t even bother checking if the above approach would have been fast enough. since that’s obviously not the intended path. Instead, we should focus on the ranges themselves. The length of a range \\(r = (\\mathrm{start}, \\mathrm{end}\\) is just \\(\\mathrm{end} - \\mathrm{start} + 1\\). The only tricky thing is what to do when to ranges overlap – how to detect it, and how to correct for it.\nIf we sort the ranges by start, then one of the folowing is true:\n\nThe first two ranges overlap\nNo range can overlap with the first range\n\nSo we can just sort the ranges by first coordinate, loop over them and check the first two ranges in each loop iteration. If they overlap, we put the merged range back into the list of ranges, and if they don’t we are done merging the first range and can just add it to the total length\n\n\nCode\nranges = sorted(ranges, key=lambda x: x[0])\nmerged_ranges = []\n\nwhile len(ranges) &gt; 1:\n    r1, r2 = ranges[0], ranges[1]\n    if r1[1] + 1 &gt;= r2[0]:\n        ranges = [r1[0], max(r2[1], r1[1])] + ranges[2:]\n    else:\n        ranges = ranges[1:]\n        merged_ranges.append(r1)\nmerged_ranges.append(ranges[0])\nsum(end - start + 1 for start, end in merged_ranges)"
   }
 ]
