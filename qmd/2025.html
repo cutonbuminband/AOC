@@ -457,16 +457,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <details open="">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>ranges <span class="op">=</span> <span class="bu">sorted</span>(ranges, key<span class="op">=</span><span class="kw">lambda</span> x: x[<span class="dv">0</span>])</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>merged_ranges <span class="op">=</span> []</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>total <span class="op">=</span> <span class="dv">0</span></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> <span class="bu">len</span>(ranges) <span class="op">&gt;</span> <span class="dv">1</span>:</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    r1, r2 <span class="op">=</span> ranges.pop(<span class="dv">0</span>), ranges[<span class="dv">0</span>]</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> (r1 <span class="op">:=</span> ranges.pop(<span class="dv">0</span>)) <span class="kw">and</span> ranges:</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    r2 <span class="op">=</span> ranges[<span class="dv">0</span>]</span>
 <span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> r1[<span class="dv">1</span>] <span class="op">+</span> <span class="dv">1</span> <span class="op">&gt;=</span> r2[<span class="dv">0</span>]:</span>
 <span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>        ranges <span class="op">=</span> [[r1[<span class="dv">0</span>], <span class="bu">max</span>(r2[<span class="dv">1</span>], r1[<span class="dv">1</span>])]] <span class="op">+</span> ranges[<span class="dv">1</span>:]</span>
 <span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>        merged_ranges.append(r1)</span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>merged_ranges.append(ranges[<span class="dv">0</span>])</span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(end <span class="op">-</span> start <span class="op">+</span> <span class="dv">1</span> <span class="cf">for</span> start, end <span class="kw">in</span> merged_ranges)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>        total <span class="op">+=</span> r1[<span class="dv">1</span>] <span class="op">-</span> r1[<span class="dv">0</span>] <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>total <span class="op">+</span> r1[<span class="dv">1</span>] <span class="op">-</span> r1[<span class="dv">0</span>] <span class="op">+</span> <span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 
@@ -1061,17 +1060,16 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb12-203"><a href="#cb12-203" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-206"><a href="#cb12-206" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
 <span id="cb12-207"><a href="#cb12-207" aria-hidden="true" tabindex="-1"></a>ranges <span class="op">=</span> <span class="bu">sorted</span>(ranges, key<span class="op">=</span><span class="kw">lambda</span> x: x[<span class="dv">0</span>])</span>
-<span id="cb12-208"><a href="#cb12-208" aria-hidden="true" tabindex="-1"></a>merged_ranges <span class="op">=</span> []</span>
+<span id="cb12-208"><a href="#cb12-208" aria-hidden="true" tabindex="-1"></a>total <span class="op">=</span> <span class="dv">0</span></span>
 <span id="cb12-209"><a href="#cb12-209" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-210"><a href="#cb12-210" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> <span class="bu">len</span>(ranges) <span class="op">&gt;</span> <span class="dv">1</span>:</span>
-<span id="cb12-211"><a href="#cb12-211" aria-hidden="true" tabindex="-1"></a>    r1, r2 <span class="op">=</span> ranges.pop(<span class="dv">0</span>), ranges[<span class="dv">0</span>]</span>
+<span id="cb12-210"><a href="#cb12-210" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> (r1 <span class="op">:=</span> ranges.pop(<span class="dv">0</span>)) <span class="kw">and</span> ranges:</span>
+<span id="cb12-211"><a href="#cb12-211" aria-hidden="true" tabindex="-1"></a>    r2 <span class="op">=</span> ranges[<span class="dv">0</span>]</span>
 <span id="cb12-212"><a href="#cb12-212" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> r1[<span class="dv">1</span>] <span class="op">+</span> <span class="dv">1</span> <span class="op">&gt;=</span> r2[<span class="dv">0</span>]:</span>
 <span id="cb12-213"><a href="#cb12-213" aria-hidden="true" tabindex="-1"></a>        ranges <span class="op">=</span> [[r1[<span class="dv">0</span>], <span class="bu">max</span>(r2[<span class="dv">1</span>], r1[<span class="dv">1</span>])]] <span class="op">+</span> ranges[<span class="dv">1</span>:]</span>
 <span id="cb12-214"><a href="#cb12-214" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
-<span id="cb12-215"><a href="#cb12-215" aria-hidden="true" tabindex="-1"></a>        merged_ranges.append(r1)</span>
-<span id="cb12-216"><a href="#cb12-216" aria-hidden="true" tabindex="-1"></a>merged_ranges.append(ranges[<span class="dv">0</span>])</span>
-<span id="cb12-217"><a href="#cb12-217" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(end <span class="op">-</span> start <span class="op">+</span> <span class="dv">1</span> <span class="cf">for</span> start, end <span class="kw">in</span> merged_ranges)</span>
-<span id="cb12-218"><a href="#cb12-218" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb12-215"><a href="#cb12-215" aria-hidden="true" tabindex="-1"></a>        total <span class="op">+=</span> r1[<span class="dv">1</span>] <span class="op">-</span> r1[<span class="dv">0</span>] <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb12-216"><a href="#cb12-216" aria-hidden="true" tabindex="-1"></a>total <span class="op">+</span> r1[<span class="dv">1</span>] <span class="op">-</span> r1[<span class="dv">0</span>] <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb12-217"><a href="#cb12-217" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
