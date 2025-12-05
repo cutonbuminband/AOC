@@ -4,35 +4,36 @@
 
 * Imports
 #+begin_src jupyter-python
-  # | eval: true
-  # | output: false
-  import dataclasses
-  import functools
-  import itertools
-  import os
-  import re
-  import sys
-  from collections import defaultdict, deque, namedtuple
-  from queue import PriorityQueue
+# | eval: true
+# | output: false
+import dataclasses
+import functools
+import itertools
+import os
+import re
+import sys
+from collections import defaultdict, deque, namedtuple
+from queue import PriorityQueue
 
-  import more_itertools
-  import numpy as np
-  import pandas as pd
-  import scipy
+import more_itertools
+import networkx as nx
+import numpy as np
+import pandas as pd
+import scipy
 
-  sys.path.insert(1, os.path.join(sys.path[0], ".."))
+sys.path.insert(1, "..")
 
-  import utils
+import utils
 
-  load = utils.year_load(2023)
+load = utils.year_load(2023)
 #+end_src
 
 * [[https://adventofcode.com/2023/day/1][Day 1: Trebuchet?!]]
 ** Part 1
 Not much going on in part one. We need to extract the digits in each line and then add together $10\times$ all the first digits and all the last digits.
 #+begin_src jupyter-python
-  data = [[int(char) for char in line if char in "0123456879"] for line in load(1)]
-  10 * sum(x[0] for x in data) + sum(x[-1] for x in data)
+data = [[int(char) for char in line if char in "0123456879"] for line in load(1)]
+10 * sum(x[0] for x in data) + sum(x[-1] for x in data)
 #+end_src
 
 ** Part 2
@@ -40,24 +41,24 @@ For part two, we need to work with the string representation of the numbers. The
 
 We are only interested in the first and last digits of the string, so this could be done using a sliding window. Or we could hack it by padding the string representation of the number and doing a search and replace:
 #+begin_src jupyter-python
-  number_names = [
-      ("one", "one1one"),
-      ("two", "two2two"),
-      ("three", "three3three"),
-      ("four", "four4four"),
-      ("five", "five5five"),
-      ("six", "six6six"),
-      ("seven", "seven7seven"),
-      ("eight", "eight8eight"),
-      ("nine", "nine9nine"),
-  ]
-  data = load(1, "raw")
-  for pair in number_names:
-      data = data.replace(pair[0], pair[1])
+number_names = [
+    ("one", "one1one"),
+    ("two", "two2two"),
+    ("three", "three3three"),
+    ("four", "four4four"),
+    ("five", "five5five"),
+    ("six", "six6six"),
+    ("seven", "seven7seven"),
+    ("eight", "eight8eight"),
+    ("nine", "nine9nine"),
+]
+data = load(1, "raw")
+for pair in number_names:
+    data = data.replace(pair[0], pair[1])
 
-  data = data.split("\n")[:-1]
-  data = [[int(char) for char in line if char in "0123456879"] for line in data]
-  10 * sum(x[0] for x in data) + sum(x[-1] for x in data)
+data = data.split("\n")[:-1]
+data = [[int(char) for char in line if char in "0123456879"] for line in data]
+10 * sum(x[0] for x in data) + sum(x[-1] for x in data)
 #+end_src
 
 * [[https://adventofcode.com/2023/day/2][Day 2: Cube Conundrum]]
@@ -69,25 +70,25 @@ So we split on the colon to separate the game id from the outcome, then split th
 
 Once we have that, we can compare each round in a game with the maximum number of =[red, green, blue]= cubes available and see if it is possible. A game fails if any single round is impossible.
 #+begin_src jupyter-python
-  def parse_game_round(game_round):
-      colormap = {"red": 0, "green": 1, "blue": 2}
-      regex = r"([0-9]*) (red|green|blue)"
-      result = [0, 0, 0]
-      for v, c in [re.search(regex, entry).groups() for entry in game_round.split(",")]:
-          result[colormap[c]] = int(v)
-      return result
+def parse_game_round(game_round):
+    colormap = {"red": 0, "green": 1, "blue": 2}
+    regex = r"([0-9]*) (red|green|blue)"
+    result = [0, 0, 0]
+    for v, c in [re.search(regex, entry).groups() for entry in game_round.split(",")]:
+        result[colormap[c]] = int(v)
+    return result
 
 
-  total = 0
-  games = [
-      np.array([parse_game_round(x) for x in line.split(":")[1].split(";")])
-      for line in load(2)
-  ]
+total = 0
+games = [
+    np.array([parse_game_round(x) for x in line.split(":")[1].split(";")])
+    for line in load(2)
+]
 
-  for idx, game in enumerate(games):
-      if ((game - [12, 13, 14]) <= 0).all():
-          total += idx + 1
-  total
+for idx, game in enumerate(games):
+    if ((game - [12, 13, 14]) <= 0).all():
+        total += idx + 1
+total
 #+end_src
 
 ** Part 2
@@ -105,28 +106,28 @@ We'll need to extract the values and locations of all the numbers in the grid, a
 
 Once we have that, we can find the desired value by finding the set intersetion of the number-coordinates and the neighbor coordinates; if that's non-empty, we add the number to a running total.
 #+begin_src jupyter-python
-  data = load(3)
-  symbols = np.array([[(c not in "0123456789") and c != "." for c in l] for l in data])
-  w = [[1, 1, 1], [1, 0, 1], [1, 1, 1]]
-  neighbors = scipy.ndimage.convolve(symbols, w, mode="constant")
-  neighbors = set(zip(*np.where(neighbors)))
-  numbers = {}
-  for i, row in enumerate(data):
-      for n in re.finditer("\d+", row):
-          numbers[frozenset((i, j) for j in range(*n.span()))] = int(n.group())
-  sum(numbers[key] if key & neighbors else 0 for key in numbers)
+data = load(3)
+symbols = np.array([[(c not in "0123456789") and c != "." for c in l] for l in data])
+w = [[1, 1, 1], [1, 0, 1], [1, 1, 1]]
+neighbors = scipy.ndimage.convolve(symbols, w, mode="constant")
+neighbors = set(zip(*np.where(neighbors)))
+numbers = {}
+for i, row in enumerate(data):
+    for n in re.finditer("\d+", row):
+        numbers[frozenset((i, j) for j in range(*n.span()))] = int(n.group())
+sum(numbers[key] if key & neighbors else 0 for key in numbers)
 #+end_src
 
 ** Part 2
 After part 1, part 2 is pretty simple. We can use the same (coordinates) -> number mapping as before, and then just loop over all locations in the grid that have a value of "*". We find the neighbors of each star, intersect with all the numbers coordinates, and only use the ones that intersect exactly two numbers
 #+begin_src jupyter-python
-  total = 0
-  offsets = np.array(list(zip(*np.where(w)))) - 1
-  for star in zip(*np.where(np.array([[c for c in l] for l in data]) == "*")):
-      neighbors = set([tuple(x) for x in star + offsets])
-      values = [numbers[key] for key in numbers if key & neighbors]
-      total += values[0] * values[1] if len(values) == 2 else 0
-  total
+total = 0
+offsets = np.array(list(zip(*np.where(w)))) - 1
+for star in zip(*np.where(np.array([[c for c in l] for l in data]) == "*")):
+    neighbors = set([tuple(x) for x in star + offsets])
+    values = [numbers[key] for key in numbers if key & neighbors]
+    total += values[0] * values[1] if len(values) == 2 else 0
+total
 #+end_src
 
 * [[https://adventofcode.com/2023/day/4][Day 4: Scratchcards]]
@@ -134,18 +135,18 @@ After part 1, part 2 is pretty simple. We can use the same (coordinates) -> numb
 ** Part 1
 After the interesting parsing tasks of the last few days, today was straightforward. Part one can be boiled down to this oneliner, which I don't even think is completely illegible
 #+begin_src jupyter-python
-  sum(int(2 ** (len(set(row[1:11]) & set(row[11:])) - 1)) for row in load(4, "int"))
+sum(int(2 ** (len(set(row[1:11]) & set(row[11:])) - 1)) for row in load(4, "int"))
 #+end_src
 
 ** Part 2
 I could have found some way of saving the intersections from part 1 so that I didn't have to recalculate in part two, but it's not that complicated.
 #+begin_src jupyter-python
-  data = load(4, "int")
-  counts = np.ones(len(data), dtype=int)
-  for i, row in enumerate(data):
-      wins = len(set(row[1:11]) & set(row[11:]))
-      counts[i+1:i+wins+1] += counts[i]
-  sum(counts)
+data = load(4, "int")
+counts = np.ones(len(data), dtype=int)
+for i, row in enumerate(data):
+    wins = len(set(row[1:11]) & set(row[11:]))
+    counts[i + 1 : i + wins + 1] += counts[i]
+sum(counts)
 #+end_src
 
 * [[https://adventofcode.com/2023/day/5][Day 5: If You Give A Seed A Fertilizer]]
@@ -157,26 +158,26 @@ To parse the file, we first split on "\n\n" to get each of the sections separate
 
 After that it's just a question of following through what happens to each initial value: for each one we scan through the rulesets in order, and when we find a rule in a ruleset that matches we convert it to the new value and move on. If we don't find a rule that matches we're told that the converted value is the same as the original one.
 #+begin_src jupyter-python
-  [seeds], *rules = [
-      [
-          [int(x) for x in ints]
-          for line in groups.split("\n")
-          if (ints := re.findall("(\d+)", line))
-      ]
-      for groups in load(5, "raw").split("\n\n")
-  ]
+[seeds], *rules = [
+    [
+        [int(x) for x in ints]
+        for line in groups.split("\n")
+        if (ints := re.findall("(\d+)", line))
+    ]
+    for groups in load(5, "raw").split("\n\n")
+]
 
-  minval = np.inf
-  for seed in seeds:
-      current = seed
-      for ruleset in rules:
-          for destination, source, length in ruleset:
-              if source <= current < source + length:
-                  current = current + destination - source
-                  break
-      if current < minval:
-          minval = current
-  minval
+minval = np.inf
+for seed in seeds:
+    current = seed
+    for ruleset in rules:
+        for destination, source, length in ruleset:
+            if source <= current < source + length:
+                current = current + destination - source
+                break
+    if current < minval:
+        minval = current
+minval
 #+end_src
 
 ** Part 2
@@ -184,36 +185,36 @@ For part two we need to be a bit cleverer. We know that each rule converts a spe
 
 From there, building a routine to iteratively apply each ruleset to the original ranges is not too tricky.
 #+begin_src jupyter-python
-  def split_range(r, rule):
-      return [
-          x if x[0] < x[1] else []
-          for x in [
-              (r[0], min(rule[0], r[1])),
-              (max(r[0], rule[0]), min(r[1], rule[1])),
-              (max(rule[1], r[0]), r[1]),
-          ]
-      ]
+def split_range(r, rule):
+    return [
+        x if x[0] < x[1] else []
+        for x in [
+            (r[0], min(rule[0], r[1])),
+            (max(r[0], rule[0]), min(r[1], rule[1])),
+            (max(rule[1], r[0]), r[1]),
+        ]
+    ]
 
 
-  def split_ranges(ranges, rule):
-      dest, src, length = rule
-      done, todo = [], []
-      for l, m, r in [split_range(r, [src, src + length]) for r in ranges]:
-          todo += [l] if l else []
-          todo += [r] if r else []
-          done += [(m[0] + dest - src, m[1] + dest - src)] if m else []
-      return done, todo
+def split_ranges(ranges, rule):
+    dest, src, length = rule
+    done, todo = [], []
+    for l, m, r in [split_range(r, [src, src + length]) for r in ranges]:
+        todo += [l] if l else []
+        todo += [r] if r else []
+        done += [(m[0] + dest - src, m[1] + dest - src)] if m else []
+    return done, todo
 
 
-  ranges = [(start, start + l) for start, l in more_itertools.chunked(seeds, 2)]
-  for ruleset in rules:
-      todo = ranges
-      ranges = []
-      for rule in ruleset:
-          new_ranges, todo = split_ranges(todo, rule)
-          ranges += new_ranges
-      ranges += todo
-  min(x[0] for x in ranges)
+ranges = [(start, start + l) for start, l in more_itertools.chunked(seeds, 2)]
+for ruleset in rules:
+    todo = ranges
+    ranges = []
+    for rule in ruleset:
+        new_ranges, todo = split_ranges(todo, rule)
+        ranges += new_ranges
+    ranges += todo
+min(x[0] for x in ranges)
 #+end_src
 
 * [[https://adventofcode.com/2023/day/6][Day 6: Wait For It]]
@@ -231,18 +232,18 @@ $$
 
 and for each $(d_0, t_0)$ pair we are interested in how many integers lie in the open interval $(w_1, w_2)$
 #+begin_src jupyter-python
-  ts, ds = np.array(load(6, "int"))
-  Δs = np.sqrt(ts**2 - 4 * ds)
-  np.prod(np.floor(ts / 2 + Δs / 2 - 1e-10) - np.ceil(ts / 2 - Δs / 2 + 1e-10) + 1)
+ts, ds = np.array(load(6, "int"))
+Δs = np.sqrt(ts**2 - 4 * ds)
+np.prod(np.floor(ts / 2 + Δs / 2 - 1e-10) - np.ceil(ts / 2 - Δs / 2 + 1e-10) + 1)
 #+end_src
 
 ** Part 2
 For part 2, we don't need to change anything.
 #+begin_src jupyter-python
-  t = int("".join([str(x) for x in ts]))
-  d = int("".join([str(x) for x in ds]))
-  Δ = np.sqrt(t**2 - 4 * d)
-  np.floor(t / 2 + Δ / 2 - 1e-10) - np.ceil(t / 2 - Δ / 2 + 1e-10) + 1
+t = int("".join([str(x) for x in ts]))
+d = int("".join([str(x) for x in ds]))
+Δ = np.sqrt(t**2 - 4 * d)
+np.floor(t / 2 + Δ / 2 - 1e-10) - np.ceil(t / 2 - Δ / 2 + 1e-10) + 1
 #+end_src
 
 * [[https://adventofcode.com/2023/day/7][Day 7: Camel Cards]]
@@ -250,92 +251,102 @@ For part 2, we don't need to change anything.
 ** Part 1
 This feels doable. The key is to find a method to compare two hands of cards. We can use =np.unique= to get the count of how many times each unique value appears in the hand, which is almost exactly what we need. If we sort this count, then two hands will compare correctly if we compare their count tuples, since tuples sort lexicographically. The final comparator is =[counts, [card_value for card in hand]]=, to correctly sort hands of the same type but with different values. 
 #+begin_src jupyter-python
-  def counts(hand, part=1):
-      hand = [x for x in hand if x != "J"] if part == 2 else hand
-      _, counts = np.unique([x for x in hand], return_counts=True)
-      counts = sorted(counts, reverse=True) if hand else [0]
-      counts[0] += 5 - len(hand)
-      return counts
+def counts(hand, part=1):
+    hand = [x for x in hand if x != "J"] if part == 2 else hand
+    _, counts = np.unique([x for x in hand], return_counts=True)
+    counts = sorted(counts, reverse=True) if hand else [0]
+    counts[0] += 5 - len(hand)
+    return counts
 
 
-  data = [x.strip().split() for x in load(7)]
-  order = sorted(
-      data, key=lambda row: [counts(row[0]), ["23456789TJQKA".index(c) for c in row[0]]]
-  )
+data = [x.strip().split() for x in load(7)]
+order = sorted(
+    data, key=lambda row: [counts(row[0]), ["23456789TJQKA".index(c) for c in row[0]]]
+)
 
-  sum([int(x[1]) for x in order] * np.arange(1, 1 + len(order)))
+sum([int(x[1]) for x in order] * np.arange(1, 1 + len(order)))
 #+end_src
 
 ** Part 2
 Part 2 was similar enough to part 1 that I just made a flag in the =counts= function and changed the order of the card values
 #+begin_src jupyter-python
-  order = sorted(
-      data,
-      key=lambda row: [counts(row[0], part=2), ["J23456789TQKA".index(c) for c in row[0]]],
-  )
+order = sorted(
+    data,
+    key=lambda row: [
+        counts(row[0], part=2),
+        ["J23456789TQKA".index(c) for c in row[0]],
+    ],
+)
 
-  sum([int(x[1]) for x in order] * np.arange(1, 1 + len(order)))
+sum([int(x[1]) for x in order] * np.arange(1, 1 + len(order)))
 #+end_src
 
 * [[https://adventofcode.com/2023/day/8][Day 8: Haunted Wasteland]]
 ** Part 1
 For part 1 we build a dictionary of left, right instructions for each node, which makes following a path from start to end easy.
 #+begin_src jupyter-python
-  instructions, lines = load(8, "raw").split("\n\n")
-  instructions = instructions.strip()
-  data = [words for line in lines.split("\n") if (words := re.findall("[A-Z]+", line))]
-  nodes = {node: {"L": left, "R": right} for node, left, right in data}
-  node = "AAA"
-  i = 0
-  while node != "ZZZ":
-      node = nodes[node][instructions[i % len(instructions)]]
-      i += 1
-  i
+instructions, lines = load(8, "raw").split("\n\n")
+instructions = instructions.strip()
+data = [words for line in lines.split("\n") if (words := re.findall("[A-Z]+", line))]
+nodes = {node: {"L": left, "R": right} for node, left, right in data}
+node = "AAA"
+i = 0
+while node != "ZZZ":
+    node = nodes[node][instructions[i % len(instructions)]]
+    i += 1
+i
 #+end_src
 
 ** Part 2
 Part 2 screams cycle checking, and indeed it is. The state at any given time is given by the current node and the index of the instruction list. If we ever see the same state twice, we know we're in a cycle, and can figure out the period. All of the cycles turn out to have periods that match the offset from the start, so we can just use the =lcm= to find the common period. If some of the cycles had had a different offset, we would have need the full chinese remainder theorem.
 #+begin_src jupyter-python
-  import math
-  i = 0
-  periods = []
-  def find_cycle(node):
-      seen = {}
-      i = 0
-      z = None
-      while (node, i % len(instructions)) not in seen:
-          seen[node, i % len(instructions)] = i
-          node = nodes[node][instructions[i % len(instructions)]]
-          i += 1
-          if node[-1] == "Z":
-              z = i
-      period = i - seen[(node, i % len(instructions))]
-      return period, z % period
-  periods, congruences = list(zip(*[find_cycle(node) for node in nodes if node[-1] == "A"]))
-  math.lcm(*periods)
+import math
+
+i = 0
+periods = []
+
+
+def find_cycle(node):
+    seen = {}
+    i = 0
+    z = None
+    while (node, i % len(instructions)) not in seen:
+        seen[node, i % len(instructions)] = i
+        node = nodes[node][instructions[i % len(instructions)]]
+        i += 1
+        if node[-1] == "Z":
+            z = i
+    period = i - seen[(node, i % len(instructions))]
+    return period, z % period
+
+
+periods, congruences = list(
+    zip(*[find_cycle(node) for node in nodes if node[-1] == "A"])
+)
+math.lcm(*periods)
 #+end_src
 
 * [[https://adventofcode.com/2023/day/9][Day 9: Mirage Maintenance]]
 ** Part 1
 This one's pretty straightforward: calculate all the needed differences; add the last element of each difference to the calculation.
 #+begin_src jupyter-python
-  def score(line, part=1):
-      total = 0
-      if part == 2:
-          line = line[::-1]
-      while any(line):
-          total += line[-1]
-          line = [line[i] - line[i - 1] for i in range(1, len(line))]
-      return total
+def score(line, part=1):
+    total = 0
+    if part == 2:
+        line = line[::-1]
+    while any(line):
+        total += line[-1]
+        line = [line[i] - line[i - 1] for i in range(1, len(line))]
+    return total
 
 
-  sum(score(line) for line in load(9, "int"))
+sum(score(line) for line in load(9, "int"))
 #+end_src
 
 ** Part 2
 ...and part 2 is simple enough that it can be included in part 1 with a flag
 #+begin_src jupyter-python
-  sum(score(line, part=2) for line in load(9, "int"))
+sum(score(line, part=2) for line in load(9, "int"))
 #+end_src
 
 * [[https://adventofcode.com/2023/day/10][Day 10: Pipe Maze]]
@@ -343,45 +354,45 @@ This one's pretty straightforward: calculate all the needed differences; add the
 ** Part 1
 For part 1 we find the two directions leading away from the starting point, and follow the path along each one at the same pace. The point where they overlap is the point furthest away from the start, so we return that.
 #+begin_src jupyter-python
-  data = np.pad(
-      np.array([[char for char in line.strip()] for line in load(10)]),
-      1,
-      constant_values=".",
-  )
-  connections = {
-      "-": [(0, -1), (0, 1)],
-      "|": [(-1, 0), (1, 0)],
-      "L": [(-1, 0), (0, 1)],
-      "J": [(-1, 0), (0, -1)],
-      "7": [(1, 0), (0, -1)],
-      "F": [(1, 0), (0, 1)],
-      ".": [],
-  }
-  Δs = np.array([[1, 0], [0, 1], [-1, 0], [0, -1]])
-  point = np.array(next(zip(*np.where(data == "S"))))
-  (lx, lv), (rx, rv) = [
-      (point + Δ, Δ) for Δ in Δs if tuple(-Δ) in connections[data[tuple(point + Δ)]]
-  ]
+data = np.pad(
+    np.array([[char for char in line.strip()] for line in load(10)]),
+    1,
+    constant_values=".",
+)
+connections = {
+    "-": [(0, -1), (0, 1)],
+    "|": [(-1, 0), (1, 0)],
+    "L": [(-1, 0), (0, 1)],
+    "J": [(-1, 0), (0, -1)],
+    "7": [(1, 0), (0, -1)],
+    "F": [(1, 0), (0, 1)],
+    ".": [],
+}
+Δs = np.array([[1, 0], [0, 1], [-1, 0], [0, -1]])
+point = np.array(next(zip(*np.where(data == "S"))))
+(lx, lv), (rx, rv) = [
+    (point + Δ, Δ) for Δ in Δs if tuple(-Δ) in connections[data[tuple(point + Δ)]]
+]
 
 
-  def update(point, direction):
-      options = connections[data[tuple(point)]]
-      new_direction = np.array(
-          options[1] if tuple(-direction) == options[0] else options[0]
-      )
-      return point + new_direction, new_direction
+def update(point, direction):
+    options = connections[data[tuple(point)]]
+    new_direction = np.array(
+        options[1] if tuple(-direction) == options[0] else options[0]
+    )
+    return point + new_direction, new_direction
 
 
-  i = 1
-  left_path = [point, lx]
-  right_path = [rx]
-  while not np.allclose(lx, rx):
-      lx, lv = update(lx, lv)
-      left_path.append(lx)
-      rx, rv = update(rx, rv)
-      right_path.append(rx)
-      i += 1
-  i
+i = 1
+left_path = [point, lx]
+right_path = [rx]
+while not np.allclose(lx, rx):
+    lx, lv = update(lx, lv)
+    left_path.append(lx)
+    rx, rv = update(rx, rv)
+    right_path.append(rx)
+    i += 1
+i
 #+end_src
 
 ** Part 2
@@ -389,25 +400,25 @@ For part 2, we need some way of distinguishing points inside from outside the ci
 
 Ultimately, what I ended up doing was just blowing up the grid to double size, flood filling the outside and looking at the even coordinate values of whatever was left. It's stupid, but it works.
 #+begin_src jupyter-python
-  ys, xs = zip(*(left_path + right_path[:-1][::-1]))
-  dy, dx = np.diff([ys + (ys[0],), xs + (xs[0],)], axis=1)
-  board = np.ones((data.shape[0] * 2, data.shape[1] * 2))
-  ys, xs = map(np.array, [ys, xs])
-  board[2 * ys, 2 * xs] = 0
+ys, xs = zip(*(left_path + right_path[:-1][::-1]))
+dy, dx = np.diff([ys + (ys[0],), xs + (xs[0],)], axis=1)
+board = np.ones((data.shape[0] * 2, data.shape[1] * 2))
+ys, xs = map(np.array, [ys, xs])
+board[2 * ys, 2 * xs] = 0
 
-  board[2 * ys + dy, 2 * xs + dx] = 0
-  board = np.pad(board[1:-1, 1:-1], 1, constant_values=0)
-  points = deque([(1, 1)])
-  while points:
-      point = points.popleft()
-      if board[point] == 0:
-          continue
-      board[point] = 0
-      for Δ in Δs:
-          nb = tuple(Δ + point)
-          if board[nb]:
-              points.append(nb)
-  int(board[::2, ::2].sum())
+board[2 * ys + dy, 2 * xs + dx] = 0
+board = np.pad(board[1:-1, 1:-1], 1, constant_values=0)
+points = deque([(1, 1)])
+while points:
+    point = points.popleft()
+    if board[point] == 0:
+        continue
+    board[point] = 0
+    for Δ in Δs:
+        nb = tuple(Δ + point)
+        if board[nb]:
+            points.append(nb)
+int(board[::2, ::2].sum())
 #+end_src
 
 * [[https://adventofcode.com/2023/day/11][Day 11: Cosmic Expansion]]
@@ -417,20 +428,20 @@ I liked this puzzle, and I feel that I managed to come up with an OK slick array
 
 That gives us a set of new coordinates, and we need to find the sum of all the manhattan distances from one point to the others. for any pair of points $i, j$, that's $\left|x_i - x_j\right| +\left|y_i - y_j\right|$; we can construct the entire matrix by taking the row vector of coordinates, and subtracting from it the column vector of the same coordinates and relying on =numpy='s broadcasting magic.
 #+begin_src jupyter-python
-  def solve(s=1):
-      y, x = np.where(data == "#")
+def solve(s=1):
+    y, x = np.where(data == "#")
 
-      empty_r = [i for i in range(len(data)) if all(data[i] == ".")]
-      empty_c = [i for i in range(len(data)) if all(data[:, i] == ".")]
-      new_y = y + s * np.array([y > empty_r[i] for i in range(len(empty_r))]).sum(axis=0)
-      new_x = x + s * np.array([x > empty_c[i] for i in range(len(empty_c))]).sum(axis=0)
-      return (
-          abs(new_y - new_y.reshape(-1, 1)) + abs(new_x - new_x.reshape(-1, 1))
-      ).sum() // 2
+    empty_r = [i for i in range(len(data)) if all(data[i] == ".")]
+    empty_c = [i for i in range(len(data)) if all(data[:, i] == ".")]
+    new_y = y + s * np.array([y > empty_r[i] for i in range(len(empty_r))]).sum(axis=0)
+    new_x = x + s * np.array([x > empty_c[i] for i in range(len(empty_c))]).sum(axis=0)
+    return (
+        abs(new_y - new_y.reshape(-1, 1)) + abs(new_x - new_x.reshape(-1, 1))
+    ).sum() // 2
 
 
-  data = load(11, "chararray")
-  solve()
+data = load(11, "chararray")
+solve()
 #+end_src
 
 ** Part 2
@@ -456,43 +467,43 @@ If the first character is on, we can check whether the first =l= characters woul
 
 Finally, if the first character is ambiguous, the count is the sum of the counts for the two possible assignments of the character, and we can recurse.
 #+begin_src jupyter-python
-  def parse(line):
-      s, groups = line.strip().split(" ")
-      lookup = {"#": 2, "?": 1, ".": 0}
-      return tuple(lookup[char] for char in s), tuple(int(g) for g in groups.split(","))
+def parse(line):
+    s, groups = line.strip().split(" ")
+    lookup = {"#": 2, "?": 1, ".": 0}
+    return tuple(lookup[char] for char in s), tuple(int(g) for g in groups.split(","))
 
 
-  data = [parse(x) for x in load(12)]
+data = [parse(x) for x in load(12)]
 
 
-  def match_beginning(data, length):
-      return all(x > 0 for x in data[:length]) and (
-          (len(data) == length) or data[length] < 2
-      )
+def match_beginning(data, length):
+    return all(x > 0 for x in data[:length]) and (
+        (len(data) == length) or data[length] < 2
+    )
 
 
-  @functools.cache
-  def count(data, blocks):
-      total = sum(blocks)
-      minimum = sum(x == 2 for x in data)
-      maximum = sum(x > 0 for x in data)
-      if minimum > total or maximum < total:
-          return 0
-      if total == 0:
-          return 1
-      if data[0] == 0:
-          return count(data[1:], blocks)
-      if data[0] == 2:
-          l = blocks[0]
-          if match_beginning(data, l):
-              if l == len(data):
-                  return 1
-              return count(data[l + 1 :], blocks[1:])
-          return 0
-      return count(data[1:], blocks) + count((2,) + data[1:], blocks)
+@functools.cache
+def count(data, blocks):
+    total = sum(blocks)
+    minimum = sum(x == 2 for x in data)
+    maximum = sum(x > 0 for x in data)
+    if minimum > total or maximum < total:
+        return 0
+    if total == 0:
+        return 1
+    if data[0] == 0:
+        return count(data[1:], blocks)
+    if data[0] == 2:
+        l = blocks[0]
+        if match_beginning(data, l):
+            if l == len(data):
+                return 1
+            return count(data[l + 1 :], blocks[1:])
+        return 0
+    return count(data[1:], blocks) + count((2,) + data[1:], blocks)
 
 
-  sum(count(*line) for line in data)
+sum(count(*line) for line in data)
 #+end_src
 
 ** Part 2
@@ -508,40 +519,40 @@ This wasn't too tricky. The idea is that we test all horizontal lines of reflect
 
 The only bit that requires some thought is how to account for the points beyond the top/bottom edge. We do that by saying that the number of lines on either side of the mirror line is the shortest distance to the top/bottom edge, so that only relevant lines are compared. 
 #+begin_src jupyter-python
-  def find_reflection(array, part=1):
-      if part == 1:
-          test = lambda a, b: (a == b[::-1]).all()
-      else:
-          test = lambda a, b: (a != b[::-1]).sum() == 1
-      for i in range(1, len(array)):
-          l = min(len(array) - i, i)
-          if test(array[i - l : i], array[i : i + l]):
-              return i
-      return None
+def find_reflection(array, part=1):
+    if part == 1:
+        test = lambda a, b: (a == b[::-1]).all()
+    else:
+        test = lambda a, b: (a != b[::-1]).sum() == 1
+    for i in range(1, len(array)):
+        l = min(len(array) - i, i)
+        if test(array[i - l : i], array[i : i + l]):
+            return i
+    return None
 
 
-  arrays = [
-      np.array([[char for char in line.strip()] for line in array.split("\n")])
-      for array in load(13, "raw").split("\n\n")
-  ]
+arrays = [
+    np.array([[char for char in line.strip()] for line in array.split("\n")])
+    for array in load(13, "raw").split("\n\n")
+]
 
-  sum(
-      100 * y
-      if (y := find_reflection(array)) is not None
-      else find_reflection(np.rot90(array, -1))
-      for array in arrays
-  )
+sum(
+    100 * y
+    if (y := find_reflection(array)) is not None
+    else find_reflection(np.rot90(array, -1))
+    for array in arrays
+)
 #+end_src
 
 ** Part 2
 Part 2 is so similar to part 1 that we can include it as a flag there; instead of a perfect match, the test is that exactly one pair of elements should be different on the two sides of the mirror line. Conceptually, that means that the sum of the differences should be exactly 1.
 #+begin_src jupyter-python
-  sum(
-      100 * y
-      if (y := find_reflection(array, part=2)) is not None
-      else find_reflection(np.rot90(array, -1), part=2)
-      for array in arrays
-  )
+sum(
+    100 * y
+    if (y := find_reflection(array, part=2)) is not None
+    else find_reflection(np.rot90(array, -1), part=2)
+    for array in arrays
+)
 #+end_src
 
 * [[https://adventofcode.com/2023/day/14][Day 14: Parabolic Reflector Dish]]
@@ -551,54 +562,54 @@ Part 1 needs a bit of thought. I'll represent the data as a =numpy= array, with 
 
 Once that's done, we can just score the whole array
 #+begin_src jupyter-python
-  map_ = {"#": -1, "O": 0, ".": 1}
-  array = np.array([[map_[char] for char in line] for line in load(14)])
-  nrows, ncols = array.shape
+map_ = {"#": -1, "O": 0, ".": 1}
+array = np.array([[map_[char] for char in line] for line in load(14)])
+nrows, ncols = array.shape
 
 
-  def score(array):
-      rolls = np.where(array == 0)[0]
-      return (nrows - rolls).sum()
+def score(array):
+    rolls = np.where(array == 0)[0]
+    return (nrows - rolls).sum()
 
 
-  def roll(array):
-      for i in range(ncols):
-          rocks = [-1] + list(np.where(array[:, i] == -1)[0]) + [None]
-          for j in range(len(rocks) - 1):
-              left, right = rocks[j] + 1, rocks[j + 1]
-              array[left:right, i] = np.sort(array[left:right, i])
-      return array
+def roll(array):
+    for i in range(ncols):
+        rocks = [-1] + list(np.where(array[:, i] == -1)[0]) + [None]
+        for j in range(len(rocks) - 1):
+            left, right = rocks[j] + 1, rocks[j + 1]
+            array[left:right, i] = np.sort(array[left:right, i])
+    return array
 
 
-  score(roll(array))
+score(roll(array))
 #+end_src
 
 ** Part 2
 The numbers in part 2 are ridiculous enough that we obviously have to hope for some pattern in how the rocks move. We'll store a fingerprint of the current state, and after each cycle, check if we're in a state we've seen before. If we are, we've found a cycle and can skip straight to the end.
 #+begin_src jupyter-python
-  def cycle(array):
-      for i in range(4):
-          array = roll(array)
-          array = np.rot90(array, -1)
-      return array
+def cycle(array):
+    for i in range(4):
+        array = roll(array)
+        array = np.rot90(array, -1)
+    return array
 
 
-  def hash_(array):
-      return tuple(array.ravel())
+def hash_(array):
+    return tuple(array.ravel())
 
 
-  seen, scores = {}, {}
-  maxval = 1_000_000_000
-  for i in range(maxval):
-      h = hash_(array)
-      if h in seen:
-          break
-      seen[h] = i
-      scores[i] = score(array)
-      array = cycle(array)
-  cycle_length = i - seen[h]
-  index = seen[h] + (maxval - seen[h]) % cycle_length
-  scores[index]
+seen, scores = {}, {}
+maxval = 1_000_000_000
+for i in range(maxval):
+    h = hash_(array)
+    if h in seen:
+        break
+    seen[h] = i
+    scores[i] = score(array)
+    array = cycle(array)
+cycle_length = i - seen[h]
+index = seen[h] + (maxval - seen[h]) % cycle_length
+scores[index]
 #+end_src
 
 * [[https://adventofcode.com/2023/day/15][Day 15: Lens Library]]
@@ -606,32 +617,32 @@ The numbers in part 2 are ridiculous enough that we obviously have to hope for s
 ** Part 1
 Part 1 can be done with a single expression. Always nice when that happens. I originally had both the hash function and the data loading directly in the sum generator expression, but I needed them for part two so I pulled them out to their own lines.
 #+begin_src jupyter-python
-  def hash_(s):
-      return functools.reduce(lambda x, y: (17 * (x + ord(y))) % 256, s, 0)
+def hash_(s):
+    return functools.reduce(lambda x, y: (17 * (x + ord(y))) % 256, s, 0)
 
 
-  instructions = load(15, "raw").split(",")
-  sum(hash_(i) for i in instructions)
+instructions = load(15, "raw").split(",")
+sum(hash_(i) for i in instructions)
 #+end_src
 
 ** Part 2
 Part 2 is fiddly and less fun. We need to run through each of the instructions and apply the procedure described. There might be better ways than this, but the below works:
 #+begin_src jupyter-python
-  boxes = [{} for i in range(256)]
-  for instruction in instructions:
-      label, f = instruction.replace("-", "=").split("=")
-      destination = hash_(label)
-      if "=" in instruction:
-          boxes[destination][label] = int(f)
-      elif label in boxes[destination]:
-          del boxes[destination][label]
+boxes = [{} for i in range(256)]
+for instruction in instructions:
+    label, f = instruction.replace("-", "=").split("=")
+    destination = hash_(label)
+    if "=" in instruction:
+        boxes[destination][label] = int(f)
+    elif label in boxes[destination]:
+        del boxes[destination][label]
 
 
-  def score(box):
-      return (list(box.values()) * np.arange(1, len(box) + 1)).sum()
+def score(box):
+    return (list(box.values()) * np.arange(1, len(box) + 1)).sum()
 
 
-  int(sum(np.arange(1, 257) * [score(box) for box in boxes]))
+int(sum(np.arange(1, 257) * [score(box) for box in boxes]))
 #+end_src
 
 * [[https://adventofcode.com/2023/day/16][Day 16: The Floor Will Be Lava]]
@@ -643,34 +654,36 @@ We'll store the grid as a dictionary of coordinates -> value, with the x and y c
 
 The diagonal mirrors transpose the coordinates of our direction, so that horizontal movement becomes vertical and vice versa. The beam splitters force us into vertical/horizontal movement and make us add an extra beam to the queue we're going through.
 #+begin_src jupyter-python
-  data = load(16, "chararray")
-  grid = {
-      1j * y + x: data[y, x] for x in range(data.shape[1]) for y in range(data.shape[0])
-  }
+data = load(16, "chararray")
+grid = {
+    1j * y + x: data[y, x] for x in range(data.shape[1]) for y in range(data.shape[0])
+}
 
-  def count_points(position, direction):
-      positions = deque([(position, direction)])
-      seen = set()
-      while positions:
-          position, direction = positions.popleft()
-          while position in grid:
-              if (position, direction) in seen:
-                  break
-              seen.add((position, direction))
-              char = grid[position]
-              if char in "/\\":
-                  direction = int(direction.imag) + 1j * int(direction.real)
-                  direction *= -1 if char == "/" else 1
-              elif char == "-" and direction.imag:
-                  positions.append((position - 1, -1))
-                  direction = 1
-              elif char == "|" and direction.real:
-                  positions.append((position - 1j, -1j))
-                  direction = 1j
-              position += direction
-      return len(set(x[0] for x in seen))
 
-  count_points(0, 1)
+def count_points(position, direction):
+    positions = deque([(position, direction)])
+    seen = set()
+    while positions:
+        position, direction = positions.popleft()
+        while position in grid:
+            if (position, direction) in seen:
+                break
+            seen.add((position, direction))
+            char = grid[position]
+            if char in "/\\":
+                direction = int(direction.imag) + 1j * int(direction.real)
+                direction *= -1 if char == "/" else 1
+            elif char == "-" and direction.imag:
+                positions.append((position - 1, -1))
+                direction = 1
+            elif char == "|" and direction.real:
+                positions.append((position - 1j, -1j))
+                direction = 1j
+            position += direction
+    return len(set(x[0] for x in seen))
+
+
+count_points(0, 1)
 #+end_src
 
 ** Part 2
@@ -680,17 +693,17 @@ One potential disadvantage of that is that the input might contain infinite loop
 
 Finally, brute force runs in an acceptable amount of time:
 #+begin_src jupyter-python
-  def starting_position(direction, length):
-      offset = data.shape[0] if (direction.imag + direction.real) < 0 else 0
-      offset *= 1j if direction.imag else 1
-      return offset + (1j if direction.real else 1) * length
+def starting_position(direction, length):
+    offset = data.shape[0] if (direction.imag + direction.real) < 0 else 0
+    offset *= 1j if direction.imag else 1
+    return offset + (1j if direction.real else 1) * length
 
 
-  max(
-      count_points(starting_position(direction, x), direction)
-      for x in range(data.shape[0])
-      for direction in (-1, 1, -1j, 1j)
-  )
+max(
+    count_points(starting_position(direction, x), direction)
+    for x in range(data.shape[0])
+    for direction in (-1, 1, -1j, 1j)
+)
 #+end_src
 
 * [[https://adventofcode.com/2023/day/17][Day 17: Clumsy Crucible]]
@@ -704,48 +717,48 @@ With the turning restriction, it makes sense to focus on where the cart turns, r
 
 Implementing it looks like this:
 #+begin_src jupyter-python
-  def navigate(grid, minval=1, maxval=3):
-      q = PriorityQueue()
-      max_y, max_x = (v - 1 for v in grid.shape)
-      goal = max_y, max_x
-      q.put((0, (0, 0, 0)))
-      q.put((0, (0, 0, 1)))
-      seen = set()
+def navigate(grid, minval=1, maxval=3):
+    q = PriorityQueue()
+    max_y, max_x = (v - 1 for v in grid.shape)
+    goal = max_y, max_x
+    q.put((0, (0, 0, 0)))
+    q.put((0, (0, 0, 1)))
+    seen = set()
 
-      while q:
-          cost, (y, x, direction) = q.get()
-          if (y, x) == goal:
-              break
-          if (y, x, direction) in seen:
-              continue
-          seen.add((y, x, direction))
-          original_cost = cost
-          for s in [-1, 1]:
-              cost = original_cost
-              new_y, new_x = y, x
-              for i in range(1, maxval + 1):
-                  if direction == 1:
-                      new_x = x + i * s
-                  else:
-                      new_y = y + i * s
-                  if new_x < 0 or new_y < 0 or new_x > max_x or new_y > max_y:
-                      break
-                  cost += grid[new_y, new_x]
-                  if ((new_y, new_x, 1 - direction)) in seen:
-                      continue
-                  if i >= minval:
-                      q.put((cost, (new_y, new_x, 1 - direction)))
-      return cost
+    while q:
+        cost, (y, x, direction) = q.get()
+        if (y, x) == goal:
+            break
+        if (y, x, direction) in seen:
+            continue
+        seen.add((y, x, direction))
+        original_cost = cost
+        for s in [-1, 1]:
+            cost = original_cost
+            new_y, new_x = y, x
+            for i in range(1, maxval + 1):
+                if direction == 1:
+                    new_x = x + i * s
+                else:
+                    new_y = y + i * s
+                if new_x < 0 or new_y < 0 or new_x > max_x or new_y > max_y:
+                    break
+                cost += grid[new_y, new_x]
+                if ((new_y, new_x, 1 - direction)) in seen:
+                    continue
+                if i >= minval:
+                    q.put((cost, (new_y, new_x, 1 - direction)))
+    return cost
 
 
-  grid = np.array([[int(char) for char in line.strip()] for line in load(17)])
-  navigate(grid)
+grid = np.array([[int(char) for char in line.strip()] for line in load(17)])
+navigate(grid)
 #+end_src
 
 ** Part 2
 Part 2 can be incorporated into the above code by changing the maximum number of allowed moves before a turn, and by only allowing turns after the crucible has moved at least =minval= steps. That's easy to incorporate into the function for part 1, so the code just looks like:
 #+begin_src jupyter-python
-  navigate(grid, 4, 10)
+navigate(grid, 4, 10)
 #+end_src
 
 * [[https://adventofcode.com/2023/day/18][Day 18: Lavaduct Lagoon]]
@@ -753,71 +766,71 @@ Part 2 can be incorporated into the above code by changing the maximum number of
 ** Part 1
 We'll run through the list of instructions and make a list of the coordinates of all the vertices. Then we'll use the shoelace formula to calculate the area of the described polygon. To account for the line of paint at the edge of the polygon, we'll add half the perimeter of the polygon (which corresponds to increasing the total thickness of the polygon by 1 everywhere), and finally add one to correct for the missing paint in the exterior corners. There will always be four more exterior corners than interior corners, since going all the way around the polygon once is a 360 degree rotation.
 #+begin_src jupyter-python
-  ys, xs = [0], [0]
-  position = np.array([0, 0])
-  directions = {"U": [0, 1], "R": [1, 0], "D": [0, -1], "L": [-1, 0]}
-  for direction, count, _ in map(str.split, load(18)):
-      position += np.array(directions[direction]) * (int(count))
-      xs.append(position[0])
-      ys.append(position[1])
-  int(
-      ((xs * (np.roll(ys, 1) - np.roll(ys, -1))).sum()) / 2
-      + sum(abs(np.diff(ys)) + abs(np.diff(xs))) / 2
-      + 1
-  )
+ys, xs = [0], [0]
+position = np.array([0, 0])
+directions = {"U": [0, 1], "R": [1, 0], "D": [0, -1], "L": [-1, 0]}
+for direction, count, _ in map(str.split, load(18)):
+    position += np.array(directions[direction]) * (int(count))
+    xs.append(position[0])
+    ys.append(position[1])
+int(
+    ((xs * (np.roll(ys, 1) - np.roll(ys, -1))).sum()) / 2
+    + sum(abs(np.diff(ys)) + abs(np.diff(xs))) / 2
+    + 1
+)
 #+end_src
 
 ** Part 2
 I was not expecting part 2 to go there! Luckily, nothing changes with respect to what we did above apart from how we build the path around the polygon
 #+begin_src jupyter-python
-  ys, xs = [0], [0]
-  position = np.array([0, 0])
-  order = "RDLU"
-  for real_instruction in map(lambda x: x.split()[-1][2:-1], load(18)):
-      count, direction = real_instruction[:-1], real_instruction[-1]
-      position += np.array(directions[order[int(direction)]]) * int(count, 16)
-      xs.append(position[0])
-      ys.append(position[1])
-  int(
-      ((xs * (np.roll(ys, 1) - np.roll(ys, -1))).sum()) / 2
-      + sum(abs(np.diff(ys)) + abs(np.diff(xs))) / 2
-      + 1
-  )
+ys, xs = [0], [0]
+position = np.array([0, 0])
+order = "RDLU"
+for real_instruction in map(lambda x: x.split()[-1][2:-1], load(18)):
+    count, direction = real_instruction[:-1], real_instruction[-1]
+    position += np.array(directions[order[int(direction)]]) * int(count, 16)
+    xs.append(position[0])
+    ys.append(position[1])
+int(
+    ((xs * (np.roll(ys, 1) - np.roll(ys, -1))).sum()) / 2
+    + sum(abs(np.diff(ys)) + abs(np.diff(xs))) / 2
+    + 1
+)
 #+end_src
 
 * [[https://adventofcode.com/2023/day/19][Day 19: Aplenty]]
 
 ** Part 1
 #+begin_src jupyter-python
-  workflows, parts = [x.split("\n") for x in load(19, "raw").split("\n\n")]
-  Part = namedtuple("Part", "x m a s")
-  parts = [Part(*[int(x) for x in re.findall(r"\+?-?\d+", part)]) for part in parts]
-  name, instructions = workflows[0][:-1].split("{")
-  instruction_map = {}
-  for name, instructions in map(lambda x: x[:-1].split("{"), workflows):
-      rules = [
-          rule.split(":") if ":" in rule else [lambda y: True, rule]
-          for rule in instructions.split(",")
-      ]
-      rules = [
-          (eval("lambda y: y." + rule[0]), rule[1]) if isinstance(rule[0], str) else rule
-          for rule in rules
-      ]
-      instruction_map[name] = instructions, rules
+workflows, parts = [x.split("\n") for x in load(19, "raw").split("\n\n")]
+Part = namedtuple("Part", "x m a s")
+parts = [Part(*[int(x) for x in re.findall(r"\+?-?\d+", part)]) for part in parts]
+name, instructions = workflows[0][:-1].split("{")
+instruction_map = {}
+for name, instructions in map(lambda x: x[:-1].split("{"), workflows):
+    rules = [
+        rule.split(":") if ":" in rule else [lambda y: True, rule]
+        for rule in instructions.split(",")
+    ]
+    rules = [
+        (eval("lambda y: y." + rule[0]), rule[1]) if isinstance(rule[0], str) else rule
+        for rule in rules
+    ]
+    instruction_map[name] = instructions, rules
 
 
-  def follow(part, state):
-      s, tests = instruction_map[state]
-      for test, output in tests:
-          if test(part):
-              if output == "A":
-                  return True
-              if output == "R":
-                  return False
-              return follow(part, output)
+def follow(part, state):
+    s, tests = instruction_map[state]
+    for test, output in tests:
+        if test(part):
+            if output == "A":
+                return True
+            if output == "R":
+                return False
+            return follow(part, output)
 
 
-  sum(x.x + x.m + x.a + x.s for x in parts if follow(x, "in"))
+sum(x.x + x.m + x.a + x.s for x in parts if follow(x, "in"))
 #+end_src
 
 ** Part 2
@@ -825,233 +838,475 @@ So, I thought I was being clever above by =eval='ing the instructions to convert
 
 I'll store each range as a dataclass of tuples, and each filter splits a range into at most two parts. The are half-open on the left, so that x = tuple(0, 5) represents the values [1, 2, 3, 4, 5]. The fact that they're half-open lets us find the size of a range by just subtracting the endpoints, without having to fiddle with off-by one errors, and I chose to do it on the left so that the inital range can be represented by the pair of numbers (0, 4000) rather than the more ugly (1, 4001).
 #+begin_src jupyter-python
-  @dataclasses.dataclass
-  class PartRange:
-      x: tuple[int]
-      m: tuple[int]
-      a: tuple[int]
-      s: tuple[int]
+@dataclasses.dataclass
+class PartRange:
+    x: tuple[int]
+    m: tuple[int]
+    a: tuple[int]
+    s: tuple[int]
 
 
-  def is_valid(interval):
-      return interval[1] > interval[0]
+def is_valid(interval):
+    return interval[1] > interval[0]
 
 
-  def split_coords(part_range, coordinate, cutoff, test):
-      coord_range = getattr(part_range, coordinate)
-      if test == ">":
-          new_coords = ((cutoff, coord_range[1]), (coord_range[0], cutoff))
-      elif test == "<":
-          new_coords = ((coord_range[0], cutoff - 1), (cutoff - 1, coord_range[1]))
-      else:
-          raise ValueError("This shouldn't be possible")
-      result = []
-      for interval in new_coords:
-          if not is_valid(interval):
-              result.append(None)
-          else:
-              result.append(dataclasses.replace(part_range, **{coordinate: interval}))
-      return result
+def split_coords(part_range, coordinate, cutoff, test):
+    coord_range = getattr(part_range, coordinate)
+    if test == ">":
+        new_coords = ((cutoff, coord_range[1]), (coord_range[0], cutoff))
+    elif test == "<":
+        new_coords = ((coord_range[0], cutoff - 1), (cutoff - 1, coord_range[1]))
+    else:
+        raise ValueError("This shouldn't be possible")
+    result = []
+    for interval in new_coords:
+        if not is_valid(interval):
+            result.append(None)
+        else:
+            result.append(dataclasses.replace(part_range, **{coordinate: interval}))
+    return result
 
 
-  def size(part_range):
-      return np.product([np.diff(getattr(part_range, i)) for i in "xmas"])
+def size(part_range):
+    return np.product([np.diff(getattr(part_range, i)) for i in "xmas"])
 
 
-  def parse_rule_string(rule):
-      if ":" not in rule:
-          return rule
-      coordinate = rule[0]
-      test = rule[1]
-      cutoff, destination = rule[2:].split(":")
-      return coordinate, int(cutoff), test, destination
+def parse_rule_string(rule):
+    if ":" not in rule:
+        return rule
+    coordinate = rule[0]
+    test = rule[1]
+    cutoff, destination = rule[2:].split(":")
+    return coordinate, int(cutoff), test, destination
 
 
-  instructions = {}
-  for name, rules in map(lambda x: x[:-1].split("{"), workflows):
-      instructions[name] = [parse_rule_string(rule) for rule in rules.split(",")]
+instructions = {}
+for name, rules in map(lambda x: x[:-1].split("{"), workflows):
+    instructions[name] = [parse_rule_string(rule) for rule in rules.split(",")]
 
 
-  def follow(instructions):
-      def inner(part_range, state):
-          if state == "R":
-              return 0
-          if state == "A":
-              return size(part_range)
-          rules = instructions[state]
-          result = 0
-          remainder = part_range
-          for rule in rules:
-              if remainder is None:
-                  break
-              if isinstance(rule, str):
-                  result += inner(remainder, rule)
-                  break
-              else:
-                  coordinate, cutoff, test, destination = rule
-                  passed, remainder = split_coords(remainder, coordinate, cutoff, test)
-                  result += inner(passed, destination) if passed is not None else 0
-          return result
+def follow(instructions):
+    def inner(part_range, state):
+        if state == "R":
+            return 0
+        if state == "A":
+            return size(part_range)
+        rules = instructions[state]
+        result = 0
+        remainder = part_range
+        for rule in rules:
+            if remainder is None:
+                break
+            if isinstance(rule, str):
+                result += inner(remainder, rule)
+                break
+            else:
+                coordinate, cutoff, test, destination = rule
+                passed, remainder = split_coords(remainder, coordinate, cutoff, test)
+                result += inner(passed, destination) if passed is not None else 0
+        return result
 
-      initial = PartRange((0, 4000), (0, 4000), (0, 4000), (0, 4000))
-      return inner(initial, "in")
+    initial = PartRange((0, 4000), (0, 4000), (0, 4000), (0, 4000))
+    return inner(initial, "in")
 
 
-  follow(instructions)
+follow(instructions)
 #+end_src
 
 * [[https://adventofcode.com/2023/day/20][Day 20: Pulse Propagation]]
 #+begin_src jupyter-python
-  data = load(20)
-  bus = []
+data = load(20)
+bus = []
 
 
-  class Module:
-      def __init__(self, name, destinations):
-          self.name = name
-          self.destinations = destinations
+class Module:
+    def __init__(self, name, destinations):
+        self.name = name
+        self.destinations = destinations
 
-      def send(self):
-          for destination in self.destinations:
-              bus.append((self.name, destination, self.state))
+    def send(self):
+        for destination in self.destinations:
+            bus.append((self.name, destination, self.state))
 
-      def instantiate_destinations(self):
-          destinations = []
-          for dest in self.destinations:
-              if isinstance(dest, str):
-                  try:
-                      dest = modules[dest]
-                  except KeyError:
-                      dest = Module(dest, [])
-              destinations.append(dest)
-          self.destinations = destinations
+    def instantiate_destinations(self):
+        destinations = []
+        for dest in self.destinations:
+            if isinstance(dest, str):
+                try:
+                    dest = modules[dest]
+                except KeyError:
+                    dest = Module(dest, [])
+            destinations.append(dest)
+        self.destinations = destinations
 
-      def recv(self, source, signal):
-          pass
+    def recv(self, source, signal):
+        pass
 
-      def reset(self):
-          pass
-
-
-  class FlipFlop(Module):
-      def __init__(self, name, destinations):
-          super().__init__(name, destinations)
-          self.state = 0
-
-      def recv(self, source, signal):
-          if signal == 1:
-              pass
-          else:
-              self.state ^= 1
-              self.send()
-
-      def reset(self):
-          self.state = 0
+    def reset(self):
+        pass
 
 
-  class Conjunction(Module):
-      def __init__(self, name, destinations, sources):
-          super().__init__(name, destinations)
-          self.signals = {x: 0 for x in sources}
+class FlipFlop(Module):
+    def __init__(self, name, destinations):
+        super().__init__(name, destinations)
+        self.state = 0
 
-      @property
-      def state(self):
-          return int(not all(self.signals.values()))
+    def recv(self, source, signal):
+        if signal == 1:
+            pass
+        else:
+            self.state ^= 1
+            self.send()
 
-      def recv(self, source, signal):
-          self.signals[source] = signal
-          self.send()
-
-      def reset(self):
-          self.signals = {x: 0 for x in self.signals}
-
-
-  class Broadcaster(Module):
-      def recv(self, source, signal):
-          self.state = signal
-          self.send()
+    def reset(self):
+        self.state = 0
 
 
-  def strip_prefix(name):
-      return name[1:] if name[0] in "%&" else name
+class Conjunction(Module):
+    def __init__(self, name, destinations, sources):
+        super().__init__(name, destinations)
+        self.signals = {x: 0 for x in sources}
+
+    @property
+    def state(self):
+        return int(not all(self.signals.values()))
+
+    def recv(self, source, signal):
+        self.signals[source] = signal
+        self.send()
+
+    def reset(self):
+        self.signals = {x: 0 for x in self.signals}
 
 
-  network = {}
-  modules = {}
-  for source, destinations in map(lambda x: x.split(" -> "), data):
-      network[source] = destinations.split(", ")
-  for key in network.keys():
-      if key[0] == "%":
-          modules[key[1:]] = FlipFlop(key[1:], network[key])
-      elif key[0] == "&":
-          sources = [strip_prefix(k) for k in network if key[1:] in network[k]]
-          modules[key[1:]] = Conjunction(key[1:], network[key], sources)
-      elif key == "broadcaster":
-          modules[key] = Broadcaster(key, network[key])
-  for key in modules:
-      modules[key].instantiate_destinations()
+class Broadcaster(Module):
+    def recv(self, source, signal):
+        self.state = signal
+        self.send()
+
+
+def strip_prefix(name):
+    return name[1:] if name[0] in "%&" else name
+
+
+network = {}
+modules = {}
+for source, destinations in map(lambda x: x.split(" -> "), data):
+    network[source] = destinations.split(", ")
+for key in network.keys():
+    if key[0] == "%":
+        modules[key[1:]] = FlipFlop(key[1:], network[key])
+    elif key[0] == "&":
+        sources = [strip_prefix(k) for k in network if key[1:] in network[k]]
+        modules[key[1:]] = Conjunction(key[1:], network[key], sources)
+    elif key == "broadcaster":
+        modules[key] = Broadcaster(key, network[key])
+for key in modules:
+    modules[key].instantiate_destinations()
 #+end_src
 
 #+begin_src jupyter-python
-  counts = [0, 0]
-  for _ in range(1000):
-      bus = [("button", modules["broadcaster"], 0)]
-      while bus:
-          source, destination, signal = bus.pop(0)
-          counts[signal] += 1
-          destination.recv(source, signal)
-  counts[0] * counts[1]
+counts = [0, 0]
+for _ in range(1000):
+    bus = [("button", modules["broadcaster"], 0)]
+    while bus:
+        source, destination, signal = bus.pop(0)
+        counts[signal] += 1
+        destination.recv(source, signal)
+counts[0] * counts[1]
 #+end_src
 
 
 ** Part 2
 #+begin_src jupyter-python
-  # for module in modules:
-  #     modules[module].reset()
-  bus = [("button", modules["broadcaster"], 0)]
-  while bus:
-      source, destination, signal = bus.pop(0)
-      print(source, destination.name, signal, "conjunction" if hasattr(destination, "signals") else "flipflop")
-      destination.recv(source, signal)
+# for module in modules:
+#     modules[module].reset()
+bus = [("button", modules["broadcaster"], 0)]
+while bus:
+    source, destination, signal = bus.pop(0)
+    print(
+        source,
+        destination.name,
+        signal,
+        "conjunction" if hasattr(destination, "signals") else "flipflop",
+    )
+    destination.recv(source, signal)
 #+end_src
 
 #+begin_src jupyter-python
-  import matplotlib.pyplot as plt
-  G = nx.from_dict_of_lists({strip_prefix(k) : v for k, v in network.items()}, create_using=nx.DiGraph)
-  nodes, prefices = zip(*([(strip_prefix(k), k[0]) for k in network] + [("rx", "d")]))
-  colormap = {"%": "#1f77b4", "&": "#ff7f0e", "b": "#2ca02c", "d": "#d62728"}
-  colors = [colormap[prefix] for prefix in prefices]
-  nx.draw_networkx(G, nodelist=nodes, node_color=colors, arrows=True, pos=nx.bfs_layout(G))
-  plt.tight_layout()
-  plt.axis("off")
+import matplotlib.pyplot as plt
+
+G = nx.from_dict_of_lists(
+    {strip_prefix(k): v for k, v in network.items()}, create_using=nx.DiGraph
+)
+nodes, prefices = zip(*([(strip_prefix(k), k[0]) for k in network] + [("rx", "d")]))
+colormap = {"%": "#1f77b4", "&": "#ff7f0e", "b": "#2ca02c", "d": "#d62728"}
+colors = [colormap[prefix] for prefix in prefices]
+nx.draw_networkx(
+    G, nodelist=nodes, node_color=colors, arrows=True, pos=nx.bfs_layout(G)
+)
+plt.tight_layout()
+plt.axis("off")
   #+end_src
 
 #+begin_src jupyter-python
-  import matplotlib
-  for c in plt.cm.tab10.colors: print(matplotlib.colors.to_hex(c))
+import matplotlib
+for c in plt.cm.tab10.colors: print(matplotlib.colors.to_hex(c))
 #+end_src
 
 * [[https://adventofcode.com/2023/day/21][Day 21: Step Counter]]
 
 ** Part 1
 #+begin_src jupyter-python
-  data = np.array([list(line) for line in load(21)])
-  data = np.pad(data, 1, constant_values = "#")
-  y, x = [x[0] for x in np.where(data == "S")]
-  data[y, x] = "."
-  def step(positions):
-      result = set()
-      for y, x in positions:
-          for dy in [-1, 1]:
-              if data[y + dy, x] == ".":
-                  result.add((y + dy, x))
-          for dx in [-1, 1]:
-              if data[y, x + dx] == ".":
-                  result.add((y, x + dx))
-      return result
-  positions = [(y, x)]
-  for _ in range(64):
-      positions = step(positions)
-  len(positions)
+data = np.array([list(line) for line in load(21)])
+data = np.pad(data, 1, constant_values="#")
+y, x = [x[0] for x in np.where(data == "S")]
+data[y, x] = "."
+
+
+def step(positions):
+    result = set()
+    for y, x in positions:
+        for dy in [-1, 1]:
+            if data[y + dy, x] == ".":
+                result.add((y + dy, x))
+        for dx in [-1, 1]:
+            if data[y, x + dx] == ".":
+                result.add((y, x + dx))
+    return result
+
+
+positions = [(y, x)]
+for _ in range(64):
+    positions = step(positions)
+len(positions)
 #+end_src
 
+* [[https://adventofcode.com/2023/day/25][Day 25: Snowverload]]
+** Part 1
+This one stumped me for way too long. Or rather, finding a computational solution to it did. The first thing I tried to do to get a handle on what the problem was about was to plot the graph. And when I did that, it was immediately clear which three edges should be cut, and the problem was solved. That's a perfectely reasonable solution plan -- nowhere in the rules of AOC does it say that you have to run an algorithm on a computer to find the answer -- but it felt a little unsatisfying.
+
+So down into the rabbit hole we go.
+
+The first thing I did was to load the data, and calculate the adjacency matrix of the graph
+#+begin_src jupyter-python
+# | eval: true
+# | output: false
+data = load(25)
+network = defaultdict(list)
+for line in data:
+    key, values = line.split(":")
+    values = values.split()
+    for value in values:
+        network[key].append(value)
+        network[value].append(key)
+
+nodes = list(network.keys())
+adjacency_matrix = np.zeros((len(nodes), len(nodes)), dtype=int)
+node_numbers = {k : v for v, k in enumerate(nodes)}
+for node in nodes:
+    for neighbor in network[node]:
+        adjacency_matrix[node_numbers[node], node_numbers[neighbor]] = 1
+G = nx.from_dict_of_lists(network)
+#+end_src
+
+I know enough about graph theory to know that what the problem is asking for is the min-cut of the graph, and I even remembered that there are a bunch of standard approaches to solving this problem. I've never implemented any of them myself. The ~networkx~ library implements the Stoer Wagner algorithm for doing this, so that might be a good place to start -- if only to see how long I can expect things to actually take.
+
+If I let myself use the library, the problem is as simple as
+
+#+begin_src jupyter-python
+value, partition = nx.stoer_wagner(G)
+len(partition[0] * len(partition[1])
+#+end_src
+
+Note that this takes 15s on my old laptop. So I don't have high hopes that my implementation is going to run in any reasonable amount of time!
+
+I can look at the [[https://en.wikipedia.org/wiki/Stoer%E2%80%93Wagner_algorithm][wikipedia page]] for the algorithm, and read the original paper, and the algorithm itself is as straightforward as
+#+begin_src jupyter-python
+def merge_indices(indices: list[int] | int, a):
+    if not isinstance(indices, list):
+        indices = [0, indices]
+    smallest_index = min(indices)
+    good_indices = np.setdiff1d(range(len(a)), indices)
+    good_mask = np.ix_(good_indices, good_indices)
+    bad_mask = np.ix_(indices, good_indices)
+    row = a[bad_mask].sum(axis=0)
+    new_a = a[good_mask].copy()
+    new_a = np.insert(new_a, smallest_index, row, axis=0)
+    row = np.insert(row, min(indices), 0)
+    return np.insert(new_a, smallest_index, row, axis=1)
+
+
+def minimum_cut_phase(adjacency_matrix, node_labels):
+    assert len(node_labels) == len(adjacency_matrix)
+    labels = node_labels.copy()
+    while len(adjacency_matrix) >= 2:
+        cut_value = adjacency_matrix[1, 0]
+        node_index = adjacency_matrix[0].argmax()
+        try:
+            t = labels.pop(node_index)
+        except:
+            print(labels, adjacency_matrix)
+            raise
+        adjacency_matrix = merge_indices(node_index, adjacency_matrix)
+    node_index = adjacency_matrix[-1].argmax()
+    s = labels.pop(node_index)
+    return s, t, cut_value
+
+
+def minimum_cut(adjacency_matrix, node_labels, target=0):
+    min_cut_weight = np.inf
+    while len(adjacency_matrix) > 1:
+        s, t, cut_weight = minimum_cut_phase(adjacency_matrix, node_labels)
+        if cut_weight < min_cut_weight:
+            min_cut_weight = cut_weight
+            min_cut = s
+            if min_cut_weight <= target:
+                break
+        new_label = f"{s}/{t}"
+        s_idx = node_labels.index(s)
+        t_idx = node_labels.index(t)
+        first, second = sorted([s_idx, t_idx])
+        node_labels[first] = new_label
+        del node_labels[second]
+        adjacency_matrix = merge_indices([first, second], adjacency_matrix)
+    return min_cut_weight, min_cut
+#+end_src
+Unfortunately, this runs much too slowly to be of any use at all. That's probably because I should be using a heap to store the closest neighbors to my active set. I'm fairly sure the implementation is correct; based on the various tests I've done with smaller graphs. Since that was my main goal with this implementation, I'm not going optimize it.
+
+Another approach is to just pick edges at random and merge the nodes connecting them, and keep going until there are only two nodes left -- this represents a cut in the original graph. The idea is that there are many more edges that are not part of a minimum cut than there are edges which are, so the chances of selecting a bad edge is low. You run this algorithm a bunch of times and pick the partition that leads to the lowest cut weight.
+
+#+begin_src jupyter-python
+def pick_edge(adjacency_matrix, rng=None):
+    """
+    Pick an edge uniformly at random from an adjacency matrix representation of a graph.
+    """
+    if rng is None:
+        rng = np.random.default_rng()
+    n_edges = (adjacency_matrix > 0).sum()
+    idx = rng.integers(n_edges)
+    totals = (adjacency_matrix > 0).sum(axis=1).cumsum()
+    row = (totals > idx).argmax()
+    previous = totals[row - 1] if row else 0
+    return sorted([row, np.where(adjacency_matrix[row])[0][idx - previous]])
+
+
+rng = np.random.default_rng()
+pick_edge(adjacency_matrix, rng)
+
+def contract(adjacency_matrix, labels, limit):
+    labels = labels.copy()
+    while len(adjacency_matrix) > limit:
+        n1, n2 = pick_edge(adjacency_matrix)
+        l1, l2 = labels[n1], labels[n2]
+        labels[n1] = f"{l1}/{l2}"
+        del labels[n2]
+        adjacency_matrix = merge_indices([n1, n2], adjacency_matrix)
+    return adjacency_matrix, labels
+
+def fastmincut(adjacency_matrix, labels):
+    if len(adjacency_matrix) <= 6:
+        return contract(adjacency_matrix, labels, 2)
+    t = int(np.ceil(1 + len(adjacency_matrix) / np.sqrt(2)))
+    c1, l1 = contract(adjacency_matrix, labels, t)
+    c2, l2 = contract(adjacency_matrix, labels, t)
+    return min(fastmincut(c1, l1), fastmincut(c2, l2), key=lambda x:x[0][0, 1])
+
+#+end_src
+
+Again, I was unable to get this to run in a reasonable amount of time.
+
+Finally, (based on having plotted the graph), spectral clustering seems like a nice approach to assign each node to one of two groups. Sklearn [[https://scikit-learn.org/stable/modules/generated/sklearn.cluster.SpectralClustering.html][implements this]] for us, so we don't even need to do anthing, or something.
+#+begin_src jupyter-python
+from sklearn.cluster import SpectralClustering
+sc = SpectralClustering(2, affinity='precomputed', n_init=100,
+                        assign_labels='discretize')
+fit = sc.fit_predict(adjacency_matrix)
+c1 = np.where(fit == 0)[0]
+c2 = np.where(fit == 1)[0]
+len(c1) * len(c2)
+#+end_src
+
+With all that meandering out of the way, here's my graph visualized, 
+
+#+begin_src jupyter-python
+# | eval: true
+import matplotlib.pyplot as plt
+centrality = nx.betweenness_centrality(G)
+nx.set_node_attributes(G, centrality, name="centrality")
+pos = nx.spring_layout(G)
+nx.set_node_attributes(G, pos, name="pos")
+#+end_src
+
+
+#+begin_src jupyter-python
+# | eval: true
+#| code-fold: true
+#| code-summary: "A lot of plotly code"
+import plotly.graph_objects as go
+
+edge_x = []
+edge_y = []
+for edge in G.edges():
+    x0, y0 = G.nodes[edge[0]]["pos"]
+    x1, y1 = G.nodes[edge[1]]["pos"]
+    edge_x.append(x0)
+    edge_x.append(x1)
+    edge_x.append(None)
+    edge_y.append(y0)
+    edge_y.append(y1)
+    edge_y.append(None)
+
+edge_trace = go.Scatter(
+    x=edge_x,
+    y=edge_y,
+    line=dict(width=0.5, color="#888"),
+    hoverinfo="none",
+    mode="lines",
+)
+
+node_x = []
+node_y = []
+colors = []
+for label in G.nodes():
+    node = G.nodes[label]
+    x, y = node["pos"]
+    node_x.append(x)
+    node_y.append(y)
+    colors.append(node["centrality"])
+
+node_trace = go.Scatter(
+    x=node_x,
+    y=node_y,
+    mode="markers",
+    hoverinfo="text",
+    text= list(G.nodes()),
+    marker=dict(
+        showscale=True,
+        reversescale=True,
+        colorscale="magma",
+        color=colors,
+        size=10,
+        colorbar=dict(
+            thickness=15,
+            title=dict(text="Betweenness Centrality", side="right"),
+            xanchor="left",
+        ),
+        line_width=2,
+    ),
+)
+
+fig = go.Figure(data=[edge_trace, node_trace],
+             layout=go.Layout(
+                showlegend=False,
+                hovermode='closest',
+                margin=dict(b=20,l=5,r=5,t=40),
+                xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+                yaxis=dict(showgrid=False, zeroline=False, showticklabels=False))
+                )
+fig.show(renderer="notebook")
+#+end_src
+
+I've coloured the nodes according to their betweenness centrality, which is a measure of how often a node appears on the shortest path between two other nodes. You can hover over the nodes of the graph to get their labels. That also shows how silly doing all the calculations and coding was -- this visualization shows the answer directly.
+
+Oh well, at least I learnt something.
