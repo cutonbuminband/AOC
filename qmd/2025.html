@@ -432,7 +432,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h1><a href="https://adventofcode.com/2025/day/5">Day 5: Cafeteria</a></h1>
 <section id="part-1-3" class="level2">
 <h2 class="anchored" data-anchor-id="part-1-3">Part 1</h2>
-<p>For part 1, we can just loop over the values and for every value <span class="math inline">\(v\)</span> ask if there is some range <span class="math inline">\(r = (\mathrm{start}, \mathrm{end})\)</span> such that <span class="math inline">\(\mathrm{start} &lt;= v &lt;= \mathrm{end}\)</span>. The number of values that we have to check is small enough that this runs plenty fast</p>
+<p>For part 1, we can just loop over the values and for every value <span class="math inline">\(v\)</span> ask if there is some range <span class="math inline">\(r = (\mathrm{start}, \mathrm{end})\)</span> such that <span class="math inline">\(\mathrm{start} \leq v \leq \mathrm{end}\)</span>. The number of values that we have to check is small enough that this runs plenty fast</p>
 <div class="cell" data-execution_count="10">
 <details open="">
 <summary>Code</summary>
@@ -1039,7 +1039,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb12-178"><a href="#cb12-178" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-179"><a href="#cb12-179" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1</span></span>
 <span id="cb12-180"><a href="#cb12-180" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-181"><a href="#cb12-181" aria-hidden="true" tabindex="-1"></a>For part 1, we can just loop over the values and for every value $v$ ask if there is some range $r = (\mathrm{start}, \mathrm{end})$ such that $\mathrm{start} &lt;= v &lt;= \mathrm{end}$. The number of values that we have to check is small enough that this runs plenty fast</span>
+<span id="cb12-181"><a href="#cb12-181" aria-hidden="true" tabindex="-1"></a>For part 1, we can just loop over the values and for every value $v$ ask if there is some range $r = (\mathrm{start}, \mathrm{end})$ such that $\mathrm{start} \leq v \leq \mathrm{end}$. The number of values that we have to check is small enough that this runs plenty fast</span>
 <span id="cb12-182"><a href="#cb12-182" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-185"><a href="#cb12-185" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
 <span id="cb12-186"><a href="#cb12-186" aria-hidden="true" tabindex="-1"></a>ranges, values <span class="op">=</span> load(<span class="dv">5</span>, <span class="st">"raw"</span>).split(<span class="st">"</span><span class="ch">\n\n</span><span class="st">"</span>)</span>
