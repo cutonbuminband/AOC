@@ -3273,7 +3273,7 @@
     "href": "qmd/2025.html#part-1-3",
     "title": "2025 Solutions",
     "section": "Part 1",
-    "text": "Part 1\nFor part 1, we can just loop over the values and for every value \\(v\\) ask if there is some range \\(r = (\\mathrm{start}, \\mathrm{end})\\) such that $start &lt;= v &lt;= . The number of values that we have to check is small enough that this runs plenty fast\n\n\nCode\nranges, values = load(5, \"raw\").split(\"\\n\\n\")\nranges = [[int(x) for x in r.split(\"-\")] for r in ranges.split(\"\\n\")]\nvalues = [int(x) for x in values.split(\"\\n\")]\n\nsum(any(start &lt;= value &lt;= end for start, end in ranges) for value in values)"
+    "text": "Part 1\nFor part 1, we can just loop over the values and for every value \\(v\\) ask if there is some range \\(r = (\\mathrm{start}, \\mathrm{end})\\) such that \\(\\mathrm{start} &lt;= v &lt;= \\mathrm{end}\\). The number of values that we have to check is small enough that this runs plenty fast\n\n\nCode\nranges, values = load(5, \"raw\").split(\"\\n\\n\")\nranges = [[int(x) for x in r.split(\"-\")] for r in ranges.split(\"\\n\")]\nvalues = [int(x) for x in values.split(\"\\n\")]\n\nsum(any(start &lt;= value &lt;= end for start, end in ranges) for value in values)"
   },
   {
     "objectID": "qmd/2025.html#part-2-4",
