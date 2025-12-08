@@ -207,4 +207,25 @@ for operator, current_operands in zip(operators, operands):
 total
 #+end_src
 
+* [[https://adventofcode.com/2025/day/7][Day 7: Laboratories]]
 
+** Part 1
+Each row of splitters is a linear transformation of the incoming beam: a beam which doesn't hit a splitter continues unchanged, while a beam that hits a splitter continues as a beam one slot to the left, and a beam one slot to the right. For me, the most natural way of representing this linear transformation is using a matrix, and applying the transformation is then just a matrix multiplication. Going through all the rows is just a matter of repeated matrix multiplication
+#+begin_src jupyter-python
+data = 1 * (load(7, "chararray") != ".")[::2]
+def generate_matrix(indices, length=len(data[0])):
+    m = np.eye(length)
+    for idx in indices: m[idx] = scipy.ndimage.convolve(m[idx], [1, 0, 1])
+    return m
+total, v = 0, data[0]
+for row in data[1:]:
+    total += sum((v * row != 0))
+    v = v @ generate_matrix(np.where(row)[0])
+total
+#+end_src
+
+** Part 2
+I wasn't planning on it, but with part one solved as I did there, part two just becomes
+#+begin_src jupyter-python
+sum(v)
+#+end_src
