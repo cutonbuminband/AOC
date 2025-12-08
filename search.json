@@ -3301,7 +3301,7 @@
     "href": "qmd/2025.html#part-1-5",
     "title": "2025 Solutions",
     "section": "Part 1",
-    "text": "Part 1\n\n\nCode\ndata = 1 * (load(7, \"chararray\") != \".\")[::2]\ndef generate_matrix(indices, length=len(data[0])):\n    m = np.eye(length)\n    for idx in indices: m[idx] = scipy.ndimage.convolve(m[idx], [1, 0, 1])\n    return m\ntotal, v = 0, data[0]\nfor row in data[1:]:\n    total += sum((v * row != 0))\n    v = v @ generate_matrix(np.where(row)[0])\ntotal"
+    "text": "Part 1\nEach row of splitters is a linear transformation of the incoming beam: a beam which doesn’t hit a splitter continues unchanged, while a beam that hits a splitter continues as a beam one slot to the left, and a beam one slot to the right. For me, the most natural way of representing this linear transformation is using a matrix, and applying the transformation is then just a matrix multiplication. Going through all the rows is just a matter of repeated matrix multiplication\n\n\nCode\ndata = 1 * (load(7, \"chararray\") != \".\")[::2]\ndef generate_matrix(indices, length=len(data[0])):\n    m = np.eye(length)\n    for idx in indices: m[idx] = scipy.ndimage.convolve(m[idx], [1, 0, 1])\n    return m\ntotal, v = 0, data[0]\nfor row in data[1:]:\n    total += sum((v * row != 0))\n    v = v @ generate_matrix(np.where(row)[0])\ntotal"
   },
   {
     "objectID": "qmd/2025.html#part-2-6",

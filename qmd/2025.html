@@ -527,6 +527,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h1><a href="https://adventofcode.com/2025/day/7">Day 7: Laboratories</a></h1>
 <section id="part-1-5" class="level2">
 <h2 class="anchored" data-anchor-id="part-1-5">Part 1</h2>
+<p>Each row of splitters is a linear transformation of the incoming beam: a beam which doesn’t hit a splitter continues unchanged, while a beam that hits a splitter continues as a beam one slot to the left, and a beam one slot to the right. For me, the most natural way of representing this linear transformation is using a matrix, and applying the transformation is then just a matrix multiplication. Going through all the rows is just a matter of repeated matrix multiplication</p>
 <div class="cell" data-execution_count="14">
 <details open="">
 <summary>Code</summary>
@@ -1197,26 +1198,28 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb16-262"><a href="#cb16-262" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb16-263"><a href="#cb16-263" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1</span></span>
 <span id="cb16-264"><a href="#cb16-264" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-267"><a href="#cb16-267" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb16-268"><a href="#cb16-268" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> <span class="dv">1</span> <span class="op">*</span> (load(<span class="dv">7</span>, <span class="st">"chararray"</span>) <span class="op">!=</span> <span class="st">"."</span>)[::<span class="dv">2</span>]</span>
-<span id="cb16-269"><a href="#cb16-269" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_matrix(indices, length<span class="op">=</span><span class="bu">len</span>(data[<span class="dv">0</span>])):</span>
-<span id="cb16-270"><a href="#cb16-270" aria-hidden="true" tabindex="-1"></a>    m <span class="op">=</span> np.eye(length)</span>
-<span id="cb16-271"><a href="#cb16-271" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> idx <span class="kw">in</span> indices: m[idx] <span class="op">=</span> scipy.ndimage.convolve(m[idx], [<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>])</span>
-<span id="cb16-272"><a href="#cb16-272" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> m</span>
-<span id="cb16-273"><a href="#cb16-273" aria-hidden="true" tabindex="-1"></a>total, v <span class="op">=</span> <span class="dv">0</span>, data[<span class="dv">0</span>]</span>
-<span id="cb16-274"><a href="#cb16-274" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> row <span class="kw">in</span> data[<span class="dv">1</span>:]:</span>
-<span id="cb16-275"><a href="#cb16-275" aria-hidden="true" tabindex="-1"></a>    total <span class="op">+=</span> <span class="bu">sum</span>((v <span class="op">*</span> row <span class="op">!=</span> <span class="dv">0</span>))</span>
-<span id="cb16-276"><a href="#cb16-276" aria-hidden="true" tabindex="-1"></a>    v <span class="op">=</span> v <span class="op">@</span> generate_matrix(np.where(row)[<span class="dv">0</span>])</span>
-<span id="cb16-277"><a href="#cb16-277" aria-hidden="true" tabindex="-1"></a>total</span>
-<span id="cb16-278"><a href="#cb16-278" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb16-279"><a href="#cb16-279" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-280"><a href="#cb16-280" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
+<span id="cb16-265"><a href="#cb16-265" aria-hidden="true" tabindex="-1"></a>Each row of splitters is a linear transformation of the incoming beam: a beam which doesn't hit a splitter continues unchanged, while a beam that hits a splitter continues as a beam one slot to the left, and a beam one slot to the right. For me, the most natural way of representing this linear transformation is using a matrix, and applying the transformation is then just a matrix multiplication. Going through all the rows is just a matter of repeated matrix multiplication</span>
+<span id="cb16-266"><a href="#cb16-266" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-269"><a href="#cb16-269" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb16-270"><a href="#cb16-270" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> <span class="dv">1</span> <span class="op">*</span> (load(<span class="dv">7</span>, <span class="st">"chararray"</span>) <span class="op">!=</span> <span class="st">"."</span>)[::<span class="dv">2</span>]</span>
+<span id="cb16-271"><a href="#cb16-271" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_matrix(indices, length<span class="op">=</span><span class="bu">len</span>(data[<span class="dv">0</span>])):</span>
+<span id="cb16-272"><a href="#cb16-272" aria-hidden="true" tabindex="-1"></a>    m <span class="op">=</span> np.eye(length)</span>
+<span id="cb16-273"><a href="#cb16-273" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> idx <span class="kw">in</span> indices: m[idx] <span class="op">=</span> scipy.ndimage.convolve(m[idx], [<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>])</span>
+<span id="cb16-274"><a href="#cb16-274" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> m</span>
+<span id="cb16-275"><a href="#cb16-275" aria-hidden="true" tabindex="-1"></a>total, v <span class="op">=</span> <span class="dv">0</span>, data[<span class="dv">0</span>]</span>
+<span id="cb16-276"><a href="#cb16-276" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> row <span class="kw">in</span> data[<span class="dv">1</span>:]:</span>
+<span id="cb16-277"><a href="#cb16-277" aria-hidden="true" tabindex="-1"></a>    total <span class="op">+=</span> <span class="bu">sum</span>((v <span class="op">*</span> row <span class="op">!=</span> <span class="dv">0</span>))</span>
+<span id="cb16-278"><a href="#cb16-278" aria-hidden="true" tabindex="-1"></a>    v <span class="op">=</span> v <span class="op">@</span> generate_matrix(np.where(row)[<span class="dv">0</span>])</span>
+<span id="cb16-279"><a href="#cb16-279" aria-hidden="true" tabindex="-1"></a>total</span>
+<span id="cb16-280"><a href="#cb16-280" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb16-281"><a href="#cb16-281" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-282"><a href="#cb16-282" aria-hidden="true" tabindex="-1"></a>I wasn't planning on it, but with part one solved as I did there, part two just becomes</span>
+<span id="cb16-282"><a href="#cb16-282" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
 <span id="cb16-283"><a href="#cb16-283" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-286"><a href="#cb16-286" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb16-287"><a href="#cb16-287" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(v)</span>
-<span id="cb16-288"><a href="#cb16-288" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-284"><a href="#cb16-284" aria-hidden="true" tabindex="-1"></a>I wasn't planning on it, but with part one solved as I did there, part two just becomes</span>
+<span id="cb16-285"><a href="#cb16-285" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-288"><a href="#cb16-288" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb16-289"><a href="#cb16-289" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(v)</span>
+<span id="cb16-290"><a href="#cb16-290" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
