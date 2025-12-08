@@ -3281,5 +3281,19 @@
     "title": "2025 Solutions",
     "section": "Part 2",
     "text": "Part 2\nFor part 2, I didn’t even bother checking if the above approach would have been fast enough. since that’s obviously not the intended path. Instead, we should focus on the ranges themselves. The length of a range \\(r = (\\mathrm{start}, \\mathrm{end})\\) is just \\(\\mathrm{end} - \\mathrm{start} + 1\\). The only tricky thing is what to do when to ranges overlap – how to detect it, and how to correct for it.\nIf we sort the ranges by start, then one of the folowing is true:\n\nThe first two ranges overlap\nNo range can overlap with the first range\n\nSo we can just sort the ranges by first coordinate, loop over them and check the first two ranges in each loop iteration. If they overlap, we put the merged range back into the list of ranges, and if they don’t we are done merging the first range and can just add it to the total length\n\n\nCode\nranges = sorted(ranges, key=lambda x: x[0])\ntotal = 0\n\nwhile (r1 := ranges.pop(0)) and ranges:\n    r2 = ranges[0]\n    if r1[1] + 1 &gt;= r2[0]:\n        ranges = [[r1[0], max(r2[1], r1[1])]] + ranges[1:]\n    else:\n        total += r1[1] - r1[0] + 1\ntotal + r1[1] - r1[0] + 1"
+  },
+  {
+    "objectID": "qmd/2025.html#part-1-4",
+    "href": "qmd/2025.html#part-1-4",
+    "title": "2025 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\nThere’s nothing particularly tricky to do for part one - load the data, sanitise the white space, and then for each set of integers, either add them all together or multiply them, and finally take the sum of the result\n\n\nCode\nfrom operator import add, mul\n\ndata = [re.sub(r\"\\s+\", \" \", line).split(\" \") for line in load(6)]\nops = {\"*\": mul, \"+\": add}\nsum(\n    functools.reduce(ops[problem[-1]], [int(x) for x in problem[:-1]])\n    for problem in zip(*data)\n)"
+  },
+  {
+    "objectID": "qmd/2025.html#part-2-5",
+    "href": "qmd/2025.html#part-2-5",
+    "title": "2025 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\nPart two is more interesting, since we’ll be needing the whitespace that we just got rid of – time to reload the data. Then, we can just use numpy’s transpose function to flip the data, join the individual digits into one string, and separate the groups of digits using itertools.groupby\n\n\nCode\ndata = load(6)\noperands, operators = data[:-1], data[-1]\noperators = re.sub(r\"\\s+\", \" \", operators).split(\" \")\noperands = [\n    \"\".join(row)\n    for row in np.array([[char for char in line] for line in my_operands]).T\n]\noperands = [\n    list(element)\n    for key, element in itertools.groupby(operands, lambda x: not re.match(r\"^\\s+$\", x))\n    if key\n]\ntotal = 0\nfor operator, current_operands in zip(my_operators, operands):\n    total += functools.reduce(operators[operator], [int(x) for x in current_operands])\ntotal"
   }
 ]
