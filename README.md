@@ -6,7 +6,7 @@ Here's a table with my solutions for each year. The links take you to the render
 
 | Year                                                       |   Stars |
 |:----------------------------------------------------------:|--------:|
-| [2025](https://cutonbuminband.github.io/AOC/qmd/2025.html) | 14/24⭐ |
+| [2025](https://cutonbuminband.github.io/AOC/qmd/2025.html) | 16/24⭐ |
 | [2024](https://cutonbuminband.github.io/AOC/qmd/2024.html) | 18/50⭐ |
 | [2023](https://cutonbuminband.github.io/AOC/qmd/2023.html) | 41/50⭐ |
 | [2022](https://cutonbuminband.github.io/AOC/qmd/2022.html) | 50/50⭐ |
