@@ -173,3 +173,38 @@ while (r1 := ranges.pop(0)) and ranges:
 total + r1[1] - r1[0] + 1
 #+end_src
 
+* [[https://adventofcode.com/2025/day/6][Day 6: Trash Compactor]]
+
+** Part 1
+There's nothing particularly tricky to do for part one - load the data, sanitise the white space, and then for each set of integers, either add them all together or multiply them, and finally take the sum of the result
+#+begin_src jupyter-python
+from operator import add, mul
+
+data = [re.sub(r"\s+", " ", line).split(" ") for line in load(6)]
+ops = {"*": mul, "+": add}
+sum(
+    functools.reduce(ops[problem[-1]], [int(x) for x in problem[:-1]])
+    for problem in zip(*data)
+)
+#+end_src
+
+** Part 2
+Part two is more interesting, since we'll be needing the whitespace that we just got rid of -- time to reload the data. Then, we can just use ~numpy~'s transpose function to flip the data, join the individual digits into one string, and separate the groups of digits using ~itertools.groupby~
+#+begin_src jupyter-python
+data = load(6)
+operators = re.sub(r"\s+", " ", data[-1]).split(" ")
+operands = [
+    "".join(row) for row in np.array([[char for char in line] for line in data[:-1]]).T
+]
+operands = [
+    list(element)
+    for key, element in itertools.groupby(operands, lambda x: not re.match(r"^\s+$", x))
+    if key
+]
+total = 0
+for operator, current_operands in zip(operators, operands):
+    total += functools.reduce(ops[operator], [int(x) for x in current_operands])
+total
+#+end_src
+
+
