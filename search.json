@@ -3295,5 +3295,19 @@
     "title": "2025 Solutions",
     "section": "Part 2",
     "text": "Part 2\nPart two is more interesting, since we’ll be needing the whitespace that we just got rid of – time to reload the data. Then, we can just use numpy’s transpose function to flip the data, join the individual digits into one string, and separate the groups of digits using itertools.groupby\n\n\nCode\ndata = load(6)\noperators = re.sub(r\"\\s+\", \" \", data[-1]).split(\" \")\noperands = [\n    \"\".join(row) for row in np.array([[char for char in line] for line in data[:-1]]).T\n]\noperands = [\n    list(element)\n    for key, element in itertools.groupby(operands, lambda x: not re.match(r\"^\\s+$\", x))\n    if key\n]\ntotal = 0\nfor operator, current_operands in zip(operators, operands):\n    total += functools.reduce(ops[operator], [int(x) for x in current_operands])\ntotal"
+  },
+  {
+    "objectID": "qmd/2025.html#part-1-5",
+    "href": "qmd/2025.html#part-1-5",
+    "title": "2025 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\n\n\nCode\ndata = 1 * (load(7, \"chararray\") != \".\")[::2]\ndef generate_matrix(indices, length=len(data[0])):\n    m = np.eye(length)\n    for idx in indices: m[idx] = scipy.ndimage.convolve(m[idx], [1, 0, 1])\n    return m\ntotal, v = 0, data[0]\nfor row in data[1:]:\n    total += sum((v * row != 0))\n    v = v @ generate_matrix(np.where(row)[0])\ntotal"
+  },
+  {
+    "objectID": "qmd/2025.html#part-2-6",
+    "href": "qmd/2025.html#part-2-6",
+    "title": "2025 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\nI wasn’t planning on it, but with part one solved as I did there, part two just becomes\n\n\nCode\nsum(v)"
   }
 ]
