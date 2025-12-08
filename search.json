@@ -3309,5 +3309,19 @@
     "title": "2025 Solutions",
     "section": "Part 2",
     "text": "Part 2\nI wasn’t planning on it, but with part one solved as I did there, part two just becomes\n\n\nCode\nsum(v)"
+  },
+  {
+    "objectID": "qmd/2025.html#part-1-6",
+    "href": "qmd/2025.html#part-1-6",
+    "title": "2025 Solutions",
+    "section": "Part 1",
+    "text": "Part 1\nThis is a fairly straightforward implementation of the problem statement. We build an array of all the pairwise (squared) distances, use argsort to find which items they correspond to. We successively merge items based on this order, using a forward and a reverse dictionary to keep track of where each item is\n\n\nCode\narr = np.array(load(8, \"int\"))\nsets = {idx: set([idx]) for idx in range(len(arr))}\npositions = {idx: idx for idx in range(len(arr))}\nsquares = np.triu(\n    (np.diagonal(np.subtract.outer(arr, arr), axis1=1, axis2=3) ** 2).sum(axis=2)\n)\norder = squares.ravel().argsort()[(1001 * 1000) // 2 :]\n\n\ndef merge_index(idx):\n    p1, p2 = [positions[x] for x in np.unravel_index(idx, squares.shape)]\n    if p1 != p2:\n        sets[p1] |= sets[p2]\n        for label in sets[p2]:\n            positions[label] = p1\n        del sets[p2]\n\n\nfor idx in order[:1000]:\n    merge_index(idx)\nfunctools.reduce(lambda x, y: x * y, sorted([len(x) for x in sets.values()])[-3:])"
+  },
+  {
+    "objectID": "qmd/2025.html#part-2-7",
+    "href": "qmd/2025.html#part-2-7",
+    "title": "2025 Solutions",
+    "section": "Part 2",
+    "text": "Part 2\nFor part 2, we continue merging until there’s only one group left. The last pairwise distance we considered must be between the two items we are interested in\n\n\nCode\nfor idx in order[1000:]:\n    merge_index(idx)\n    if len(sets) == 1:\n        break\np1, p2 = np.unravel_index(idx, squares.shape)\narr[p1, 0] * arr[p2, 0]"
   }
 ]
