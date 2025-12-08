@@ -501,21 +501,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <details open="">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> load(<span class="dv">6</span>)</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>operands, operators <span class="op">=</span> data[:<span class="op">-</span><span class="dv">1</span>], data[<span class="op">-</span><span class="dv">1</span>]</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>operators <span class="op">=</span> re.sub(<span class="vs">r"\s+"</span>, <span class="st">" "</span>, operators).split(<span class="st">" "</span>)</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>operands <span class="op">=</span> [</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">""</span>.join(row)</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> row <span class="kw">in</span> np.array([[char <span class="cf">for</span> char <span class="kw">in</span> line] <span class="cf">for</span> line <span class="kw">in</span> my_operands]).T</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>]</span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>operands <span class="op">=</span> [</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">list</span>(element)</span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> key, element <span class="kw">in</span> itertools.groupby(operands, <span class="kw">lambda</span> x: <span class="kw">not</span> re.match(<span class="vs">r"^\s+$"</span>, x))</span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> key</span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>]</span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>total <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> operator, current_operands <span class="kw">in</span> <span class="bu">zip</span>(my_operators, operands):</span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    total <span class="op">+=</span> functools.<span class="bu">reduce</span>(operators[operator], [<span class="bu">int</span>(x) <span class="cf">for</span> x <span class="kw">in</span> current_operands])</span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>total</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>operators <span class="op">=</span> re.sub(<span class="vs">r"\s+"</span>, <span class="st">" "</span>, data[<span class="op">-</span><span class="dv">1</span>]).split(<span class="st">" "</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>operands <span class="op">=</span> [</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">""</span>.join(row) <span class="cf">for</span> row <span class="kw">in</span> np.array([[char <span class="cf">for</span> char <span class="kw">in</span> line] <span class="cf">for</span> line <span class="kw">in</span> data[:<span class="op">-</span><span class="dv">1</span>]]).T</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>operands <span class="op">=</span> [</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">list</span>(element)</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> key, element <span class="kw">in</span> itertools.groupby(operands, <span class="kw">lambda</span> x: <span class="kw">not</span> re.match(<span class="vs">r"^\s+$"</span>, x))</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> key</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>total <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> operator, current_operands <span class="kw">in</span> <span class="bu">zip</span>(operators, operands):</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    total <span class="op">+=</span> functools.<span class="bu">reduce</span>(ops[operator], [<span class="bu">int</span>(x) <span class="cf">for</span> x <span class="kw">in</span> current_operands])</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>total</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 
@@ -1144,22 +1142,20 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb14-241"><a href="#cb14-241" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-244"><a href="#cb14-244" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
 <span id="cb14-245"><a href="#cb14-245" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> load(<span class="dv">6</span>)</span>
-<span id="cb14-246"><a href="#cb14-246" aria-hidden="true" tabindex="-1"></a>operands, operators <span class="op">=</span> data[:<span class="op">-</span><span class="dv">1</span>], data[<span class="op">-</span><span class="dv">1</span>]</span>
-<span id="cb14-247"><a href="#cb14-247" aria-hidden="true" tabindex="-1"></a>operators <span class="op">=</span> re.sub(<span class="vs">r"\s+"</span>, <span class="st">" "</span>, operators).split(<span class="st">" "</span>)</span>
-<span id="cb14-248"><a href="#cb14-248" aria-hidden="true" tabindex="-1"></a>operands <span class="op">=</span> [</span>
-<span id="cb14-249"><a href="#cb14-249" aria-hidden="true" tabindex="-1"></a>    <span class="st">""</span>.join(row)</span>
-<span id="cb14-250"><a href="#cb14-250" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> row <span class="kw">in</span> np.array([[char <span class="cf">for</span> char <span class="kw">in</span> line] <span class="cf">for</span> line <span class="kw">in</span> my_operands]).T</span>
-<span id="cb14-251"><a href="#cb14-251" aria-hidden="true" tabindex="-1"></a>]</span>
-<span id="cb14-252"><a href="#cb14-252" aria-hidden="true" tabindex="-1"></a>operands <span class="op">=</span> [</span>
-<span id="cb14-253"><a href="#cb14-253" aria-hidden="true" tabindex="-1"></a>    <span class="bu">list</span>(element)</span>
-<span id="cb14-254"><a href="#cb14-254" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> key, element <span class="kw">in</span> itertools.groupby(operands, <span class="kw">lambda</span> x: <span class="kw">not</span> re.match(<span class="vs">r"^\s+$"</span>, x))</span>
-<span id="cb14-255"><a href="#cb14-255" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> key</span>
-<span id="cb14-256"><a href="#cb14-256" aria-hidden="true" tabindex="-1"></a>]</span>
-<span id="cb14-257"><a href="#cb14-257" aria-hidden="true" tabindex="-1"></a>total <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb14-258"><a href="#cb14-258" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> operator, current_operands <span class="kw">in</span> <span class="bu">zip</span>(my_operators, operands):</span>
-<span id="cb14-259"><a href="#cb14-259" aria-hidden="true" tabindex="-1"></a>    total <span class="op">+=</span> functools.<span class="bu">reduce</span>(operators[operator], [<span class="bu">int</span>(x) <span class="cf">for</span> x <span class="kw">in</span> current_operands])</span>
-<span id="cb14-260"><a href="#cb14-260" aria-hidden="true" tabindex="-1"></a>total</span>
-<span id="cb14-261"><a href="#cb14-261" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb14-246"><a href="#cb14-246" aria-hidden="true" tabindex="-1"></a>operators <span class="op">=</span> re.sub(<span class="vs">r"\s+"</span>, <span class="st">" "</span>, data[<span class="op">-</span><span class="dv">1</span>]).split(<span class="st">" "</span>)</span>
+<span id="cb14-247"><a href="#cb14-247" aria-hidden="true" tabindex="-1"></a>operands <span class="op">=</span> [</span>
+<span id="cb14-248"><a href="#cb14-248" aria-hidden="true" tabindex="-1"></a>    <span class="st">""</span>.join(row) <span class="cf">for</span> row <span class="kw">in</span> np.array([[char <span class="cf">for</span> char <span class="kw">in</span> line] <span class="cf">for</span> line <span class="kw">in</span> data[:<span class="op">-</span><span class="dv">1</span>]]).T</span>
+<span id="cb14-249"><a href="#cb14-249" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb14-250"><a href="#cb14-250" aria-hidden="true" tabindex="-1"></a>operands <span class="op">=</span> [</span>
+<span id="cb14-251"><a href="#cb14-251" aria-hidden="true" tabindex="-1"></a>    <span class="bu">list</span>(element)</span>
+<span id="cb14-252"><a href="#cb14-252" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> key, element <span class="kw">in</span> itertools.groupby(operands, <span class="kw">lambda</span> x: <span class="kw">not</span> re.match(<span class="vs">r"^\s+$"</span>, x))</span>
+<span id="cb14-253"><a href="#cb14-253" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> key</span>
+<span id="cb14-254"><a href="#cb14-254" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb14-255"><a href="#cb14-255" aria-hidden="true" tabindex="-1"></a>total <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb14-256"><a href="#cb14-256" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> operator, current_operands <span class="kw">in</span> <span class="bu">zip</span>(operators, operands):</span>
+<span id="cb14-257"><a href="#cb14-257" aria-hidden="true" tabindex="-1"></a>    total <span class="op">+=</span> functools.<span class="bu">reduce</span>(ops[operator], [<span class="bu">int</span>(x) <span class="cf">for</span> x <span class="kw">in</span> current_operands])</span>
+<span id="cb14-258"><a href="#cb14-258" aria-hidden="true" tabindex="-1"></a>total</span>
+<span id="cb14-259"><a href="#cb14-259" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
