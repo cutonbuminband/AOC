@@ -3322,7 +3322,7 @@
     "href": "qmd/2025.html#part-2-7",
     "title": "2025 Solutions",
     "section": "Part 2",
-    "text": "Part 2\nFor part 2, we continue merging until there’s only one group left. The last pairwise distance we considered must be between the two items we are interested in\n\n\nCode\nfor idx in order[1000:]:\n    merge_index(idx)\n    if len(sets) == 1:\n        break\np1, p2 = np.unravel_index(idx, squares.shape)\narr[p1, 0] * arr[p2, 0]\n\n\n*"
+    "text": "Part 2\nFor part 2, we continue merging until there’s only one group left. The last pairwise distance we considered must be between the two items we are interested in\n\n\nCode\nfor idx in order[1000:]:\n    merge_index(idx)\n    if len(sets) == 1:\n        break\np1, p2 = np.unravel_index(idx, squares.shape)\narr[p1, 0] * arr[p2, 0]"
   },
   {
     "objectID": "qmd/2025.html#part-1-7",
