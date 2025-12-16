@@ -15,15 +15,17 @@ import os
 import re
 import sys
 from collections import defaultdict, deque, namedtuple
+from dataclasses import dataclass
 from queue import PriorityQueue
+from typing import Literal, Tuple
 
+import matplotlib.pyplot as plt
 import more_itertools
 import numpy as np
 import pandas as pd
 import scipy
 
 sys.path.insert(1, "..")
-
 import utils
 
 load = utils.year_load(2025)
@@ -269,3 +271,146 @@ p1, p2 = np.unravel_index(idx, squares.shape)
 arr[p1, 0] * arr[p2, 0]
 #+end_src
 
+* [[https://adventofcode.com/2025/day/9][Day 9: Movie Theater]]
+
+** Part 1
+#+begin_src jupyter-python
+data = load("9", "int")
+areas = np.prod(abs(np.diagonal(np.subtract.outer(data, data), axis1=1, axis2=3)) + 1, axis=2)
+areas.max()
+#+end_src
+
+** Part 2
+To determine whether a rectangle defined by two corners lies entirely within the shape, we need to check the following:
+
+1. That the other two corners lie within the shape
+2. That none of the lines defining the rectangle cross the border of the shape
+3. If any of the the border lines of the rectangle coincide with a border line of the shape, the normal vectors of the line are oriented in the same way
+
+For the first one, we can use a raycasting algorithm and check how many times the ray $(x0 + t, y0),\ t\in[0,\inf)$ intersects with our shape. If the number is odd, the point is inside the shape; if it is even, the point is outside. Points on the edge are counted as being inside the polygon. To account for the edge case where the ray just touches the shape, we'll say that the tops of the edge line segments count for intersection purposes, while the bottom ones don't. That lets us distinguish between the following two cases:
+
+#+begin_src jupyter-python
+# | eval: true
+# | code-fold: true
+# | code-summary: "Code to generate the plot"
+# import plotly.express as px
+import seaborn as sns
+sns.set_theme()
+plt.plot([0, 0, 1, 1, 0], [0, 1, 1, 0, 0])
+ax = plt.gca()
+ax.set_xticks([])
+ax.set_yticks([])
+ax.annotate("$P_1$", [1.07, 1.03])
+ax.plot([1.1], [1], marker=".")
+ax.set_xlim(left=-0.05, right=2.3)
+ax.plot([1.2, 1.2, 2, 2, 2.2, 2.2, 1.2], [0, 1, 1, 1.2, 1.2, 0, 0])
+ax.annotate("$P_2$", [2.07, 1.03])
+ax.plot([2.1], [1], marker=".")
+ax.plot([1.1], [1], marker=".")
+#+end_src
+
+Both $P_1$ and $P_2$ have two vertical lines from their respective shapes to the left of them, and both lie exactly on the endpoint of either of the lines, yet $P_1$ is outside the shape while $P_2$ is inside. The difference between them is that the ray for $P_1$ touches the tops of two of the edges of the polygon, while the ray for $P_2$ touches the top of one and the bottom of the other.
+
+With the theory worked out, we can proceed to actually calculating the number we are looking for:
+#+begin_src jupyter-python
+@dataclass
+class LineSegment:
+    position: int
+    x0: int
+    x1: int
+    orientation: Literal["h"] | Literal["v"]
+
+    def __post_init__(self):
+        self.direction = 1
+        if self.x1 < self.x0:
+            self.x0, self.x1 = self.x1, self.x0
+            self.direction = -1
+
+    def contains_point(self, p, endpoints=False):
+        if not endpoints:
+            return self.x0 < p < self.x1
+        return self.x0 <= p <= self.x1
+
+    def intersects(self, other):
+        return (
+            self.orientation != other.orientation
+            and self.contains_point(other.position)
+            and other.contains_point(self.position)
+        )
+
+    def overlaps(self, other):
+        return (
+            self.orientation == other.orientation
+            and self.position == other.position
+            and self.x1 > other.x0
+            and other.x1 > self.x0
+        )
+
+
+def points_to_edges(data):
+    edges = []
+    for start, end in zip(data, data[1:]):
+        dx = end[0] - start[0]
+        dy = end[1] - start[1]
+        if dx == 0:
+            edges.append(LineSegment(start[0], start[1], end[1], "v"))
+        else:
+            edges.append(LineSegment(start[1], start[0], end[0], "h"))
+    return edges
+
+
+edges = points_to_edges(data)
+direction = np.sign(
+    sum(e.position * (e.x1 - e.x0) * e.direction for e in edges if e.orientation == "h")
+)
+vertical_edges = sorted(
+    [e for e in edges if e.orientation == "v"], key=lambda x: x.position
+)
+
+horizontal_edges = sorted(
+    [e for e in edges if e.orientation == "h"], key=lambda x: x.position
+)
+
+
+def point_in_polygon(point):
+    x, y = point
+    total = 0
+    for edge in horizontal_edges:
+        if edge.position > y:
+            break
+        if edge.position == y and edge.contains_point(x, endpoints=True):
+            return True
+    for edge in vertical_edges:
+        if edge.position > x:
+            break
+        if edge.position == x:
+            # print(edge, x, y)
+            if edge.contains_point(y, endpoints=True):
+                return True
+        elif edge.x0 <= y < edge.x1:
+            total += 1
+    return bool(total % 2)
+
+
+for idx in (-np.triu(areas)).ravel().argsort():
+    i1, i2 = np.unravel_index(idx, areas.shape)
+    p1 = data[i1]
+    p2 = data[i2]
+    if not point_in_polygon((p2[0], p1[1])) or not point_in_polygon((p1[0], p2[1])):
+        continue
+    xmin, xmax = sorted([p1[0], p2[0]])
+    ymin, ymax = sorted([p1[1], p2[1]])
+    if direction == 1:
+        points = [(xmax, ymax), (xmax, ymin), (xmin, ymin), (xmin, ymax), (xmax, ymax)]
+    else:
+        points = [(xmax, ymax), (xmin, ymax), (xmin, ymin), (xmax, ymin), (xmax, ymax)]
+    rect_edges = points_to_edges(points)
+    for e1, e2 in itertools.product(rect_edges, edges):
+        if e1.intersects(e2) or (e1.overlaps(e2) and e1.direction != e2.direction):
+            break
+    else:
+        break
+areas[i1, i2]
+#+end_src
+
+This could be made significantly faster by using a sweep line algorithm to identify the intersections instead of just trying all of them, but it runs fast enough as is.
