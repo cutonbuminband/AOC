@@ -247,6 +247,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
   <li><a href="#part-1-6" id="toc-part-1-6" class="nav-link" data-scroll-target="#part-1-6">Part 1</a></li>
   <li><a href="#part-2-7" id="toc-part-2-7" class="nav-link" data-scroll-target="#part-2-7">Part 2</a></li>
+  <li><a href="#part-1-7" id="toc-part-1-7" class="nav-link" data-scroll-target="#part-1-7">Part 1</a></li>
+  <li><a href="#part-2-8" id="toc-part-2-8" class="nav-link" data-scroll-target="#part-2-8">Part 2</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -285,18 +287,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sys</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> defaultdict, deque, namedtuple</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> queue <span class="im">import</span> PriorityQueue</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> more_itertools</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> scipy</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>sys.path.insert(<span class="dv">1</span>, <span class="st">".."</span>)</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> utils</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>load <span class="op">=</span> utils.year_load(<span class="dv">2025</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dataclasses <span class="im">import</span> dataclass</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> queue <span class="im">import</span> PriorityQueue</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Literal, Tuple</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> more_itertools</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> scipy</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>sys.path.insert(<span class="dv">1</span>, <span class="st">".."</span>)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> utils</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>load <span class="op">=</span> utils.year_load(<span class="dv">2025</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -606,6 +610,156 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>arr[p1, <span class="dv">0</span>] <span class="op">*</span> arr[p2, <span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
+<p>*</p>
+</section>
+<section id="part-1-7" class="level2">
+<h2 class="anchored" data-anchor-id="part-1-7">Part 1</h2>
+<div class="cell" data-execution_count="18">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> load(<span class="st">"9"</span>, <span class="st">"int"</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>areas <span class="op">=</span> np.prod(<span class="bu">abs</span>(np.diagonal(np.subtract.outer(data, data), axis1<span class="op">=</span><span class="dv">1</span>, axis2<span class="op">=</span><span class="dv">3</span>)) <span class="op">+</span> <span class="dv">1</span>, axis<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>areas.<span class="bu">max</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="part-2-8" class="level2">
+<h2 class="anchored" data-anchor-id="part-2-8">Part 2</h2>
+<p>To determine whether a rectangle defined by two corners lies entirely within the shape, we need to check the following:</p>
+<ol type="1">
+<li>That the other two corners lie within the shape</li>
+<li>That none of the lines defining the rectangle cross the border of the shape</li>
+<li>If any of the the border lines of the rectangle coincide with a border line of the shape, the normal vectors of the line are oriented in the same way</li>
+</ol>
+<p>For the first one, we can use a raycasting algorithm and check how many times the ray <span class="math inline">\((x0 + t, y0),\ t\in[0,\inf)\)</span> intersects with our shape. If the number is odd, the point is inside the shape; if it is even, the point is outside. Points on the edge are counted as being inside the polygon. To account for the edge case where the ray just touches the shape, we’ll say that the tops of the edge line segments count for intersection purposes, while the bottom ones don’t. That lets us distinguish between the following two cases:</p>
+<div class="cell" data-execution_count="19">
+<details>
+<summary>Code to generate the plot</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># import plotly.express as px</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>sns.set_theme()</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>plt.plot([<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>], [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>])</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> plt.gca()</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>ax.set_xticks([])</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>ax.set_yticks([])</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>ax.annotate(<span class="st">"$P_1$"</span>, [<span class="fl">1.07</span>, <span class="fl">1.03</span>])</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>ax.plot([<span class="fl">1.1</span>], [<span class="dv">1</span>], marker<span class="op">=</span><span class="st">"."</span>)</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>ax.set_xlim(left<span class="op">=</span><span class="dv">0</span>, right<span class="op">=</span><span class="fl">2.5</span>)</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>ax.plot([<span class="fl">1.2</span>, <span class="fl">1.2</span>, <span class="fl">2.2</span>, <span class="fl">2.2</span>, <span class="fl">2.4</span>, <span class="fl">2.4</span>, <span class="fl">1.2</span>], [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="fl">1.2</span>, <span class="fl">1.2</span>, <span class="dv">0</span>, <span class="dv">0</span>])</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>ax.annotate(<span class="st">"$P_2$"</span>, [<span class="fl">2.27</span>, <span class="fl">1.03</span>])</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>ax.plot([<span class="fl">2.3</span>], [<span class="dv">1</span>], marker<span class="op">=</span><span class="st">"."</span>)</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>ax.plot([<span class="fl">1.1</span>], [<span class="dv">1</span>], marker<span class="op">=</span><span class="st">"."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="2025_files/figure-html/cell-20-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Both <span class="math inline">\(P_1\)</span> and <span class="math inline">\(P_2\)</span> have two vertical lines from their respective shapes to the left of them, and both lie exactly on the endpoint of either of the lines, yet <span class="math inline">\(P_1\)</span> is outside the shape while <span class="math inline">\(P_2\)</span> is inside. The difference between them is that the ray for <span class="math inline">\(P_1\)</span> touches the tops of two of the edges of the polygon, while the ray for <span class="math inline">\(P_2\)</span> touches the top of one and the bottom of the other.</p>
+<p>With the theory worked out, we can proceed to actually calculating the number we are looking for:</p>
+<div class="cell" data-execution_count="20">
+<details open="">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> LineSegment:</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    position: <span class="bu">int</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    x0: <span class="bu">int</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    x1: <span class="bu">int</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    orientation: Literal[<span class="st">"h"</span>] <span class="op">|</span> Literal[<span class="st">"v"</span>]</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> __post_init__(<span class="va">self</span>):</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.direction <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.x1 <span class="op">&lt;</span> <span class="va">self</span>.x0:</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.x0, <span class="va">self</span>.x1 <span class="op">=</span> <span class="va">self</span>.x1, <span class="va">self</span>.x0</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.direction <span class="op">=</span> <span class="op">-</span><span class="dv">1</span></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> contains_point(<span class="va">self</span>, p, endpoints<span class="op">=</span><span class="va">False</span>):</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> endpoints:</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="va">self</span>.x0 <span class="op">&lt;</span> p <span class="op">&lt;</span> <span class="va">self</span>.x1</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.x0 <span class="op">&lt;=</span> p <span class="op">&lt;=</span> <span class="va">self</span>.x1</span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> intersects(<span class="va">self</span>, other):</span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> (</span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.orientation <span class="op">!=</span> other.orientation</span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>            <span class="kw">and</span> <span class="va">self</span>.contains_point(other.position)</span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>            <span class="kw">and</span> other.contains_point(<span class="va">self</span>.position)</span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> overlaps(<span class="va">self</span>, other):</span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> (</span>
+<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.orientation <span class="op">==</span> other.orientation</span>
+<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a>            <span class="kw">and</span> <span class="va">self</span>.position <span class="op">==</span> other.position</span>
+<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a>            <span class="kw">and</span> <span class="va">self</span>.x1 <span class="op">&gt;</span> other.x0</span>
+<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a>            <span class="kw">and</span> other.x1 <span class="op">&gt;</span> <span class="va">self</span>.x0</span>
+<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb20-33"><a href="#cb20-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-34"><a href="#cb20-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-35"><a href="#cb20-35" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> points_to_edges(data):</span>
+<span id="cb20-36"><a href="#cb20-36" aria-hidden="true" tabindex="-1"></a>    edges <span class="op">=</span> []</span>
+<span id="cb20-37"><a href="#cb20-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> start, end <span class="kw">in</span> <span class="bu">zip</span>(data, data[<span class="dv">1</span>:]):</span>
+<span id="cb20-38"><a href="#cb20-38" aria-hidden="true" tabindex="-1"></a>        dx <span class="op">=</span> end[<span class="dv">0</span>] <span class="op">-</span> start[<span class="dv">0</span>]</span>
+<span id="cb20-39"><a href="#cb20-39" aria-hidden="true" tabindex="-1"></a>        dy <span class="op">=</span> end[<span class="dv">1</span>] <span class="op">-</span> start[<span class="dv">1</span>]</span>
+<span id="cb20-40"><a href="#cb20-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> dx <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb20-41"><a href="#cb20-41" aria-hidden="true" tabindex="-1"></a>            edges.append(LineSegment(start[<span class="dv">0</span>], start[<span class="dv">1</span>], end[<span class="dv">1</span>], <span class="st">"v"</span>))</span>
+<span id="cb20-42"><a href="#cb20-42" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb20-43"><a href="#cb20-43" aria-hidden="true" tabindex="-1"></a>            edges.append(LineSegment(start[<span class="dv">1</span>], start[<span class="dv">0</span>], end[<span class="dv">0</span>], <span class="st">"h"</span>))</span>
+<span id="cb20-44"><a href="#cb20-44" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> edges</span>
+<span id="cb20-45"><a href="#cb20-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-46"><a href="#cb20-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-47"><a href="#cb20-47" aria-hidden="true" tabindex="-1"></a>edges <span class="op">=</span> points_to_edges(data)</span>
+<span id="cb20-48"><a href="#cb20-48" aria-hidden="true" tabindex="-1"></a>direction <span class="op">=</span> np.sign(</span>
+<span id="cb20-49"><a href="#cb20-49" aria-hidden="true" tabindex="-1"></a>    <span class="bu">sum</span>(e.position <span class="op">*</span> (e.x1 <span class="op">-</span> e.x0) <span class="op">*</span> e.direction <span class="cf">for</span> e <span class="kw">in</span> edges <span class="cf">if</span> e.orientation <span class="op">==</span> <span class="st">"h"</span>)</span>
+<span id="cb20-50"><a href="#cb20-50" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-51"><a href="#cb20-51" aria-hidden="true" tabindex="-1"></a>vertical_edges <span class="op">=</span> <span class="bu">sorted</span>(</span>
+<span id="cb20-52"><a href="#cb20-52" aria-hidden="true" tabindex="-1"></a>    [e <span class="cf">for</span> e <span class="kw">in</span> edges <span class="cf">if</span> e.orientation <span class="op">==</span> <span class="st">"v"</span>], key<span class="op">=</span><span class="kw">lambda</span> x: x.position</span>
+<span id="cb20-53"><a href="#cb20-53" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-54"><a href="#cb20-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-55"><a href="#cb20-55" aria-hidden="true" tabindex="-1"></a>horizontal_edges <span class="op">=</span> <span class="bu">sorted</span>(</span>
+<span id="cb20-56"><a href="#cb20-56" aria-hidden="true" tabindex="-1"></a>    [e <span class="cf">for</span> e <span class="kw">in</span> edges <span class="cf">if</span> e.orientation <span class="op">==</span> <span class="st">"h"</span>], key<span class="op">=</span><span class="kw">lambda</span> x: x.position</span>
+<span id="cb20-57"><a href="#cb20-57" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-58"><a href="#cb20-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-59"><a href="#cb20-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-60"><a href="#cb20-60" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> point_in_polygon(point):</span>
+<span id="cb20-61"><a href="#cb20-61" aria-hidden="true" tabindex="-1"></a>    x, y <span class="op">=</span> point</span>
+<span id="cb20-62"><a href="#cb20-62" aria-hidden="true" tabindex="-1"></a>    total <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb20-63"><a href="#cb20-63" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> edge <span class="kw">in</span> horizontal_edges:</span>
+<span id="cb20-64"><a href="#cb20-64" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> edge.position <span class="op">&gt;</span> y:</span>
+<span id="cb20-65"><a href="#cb20-65" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
+<span id="cb20-66"><a href="#cb20-66" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> edge.position <span class="op">==</span> y <span class="kw">and</span> edge.contains_point(x, endpoints<span class="op">=</span><span class="va">True</span>):</span>
+<span id="cb20-67"><a href="#cb20-67" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="va">True</span></span>
+<span id="cb20-68"><a href="#cb20-68" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> edge <span class="kw">in</span> vertical_edges:</span>
+<span id="cb20-69"><a href="#cb20-69" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> edge.position <span class="op">&gt;</span> x:</span>
+<span id="cb20-70"><a href="#cb20-70" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
+<span id="cb20-71"><a href="#cb20-71" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> edge.position <span class="op">==</span> x:</span>
+<span id="cb20-72"><a href="#cb20-72" aria-hidden="true" tabindex="-1"></a>            <span class="co"># print(edge, x, y)</span></span>
+<span id="cb20-73"><a href="#cb20-73" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> edge.contains_point(y, endpoints<span class="op">=</span><span class="va">True</span>):</span>
+<span id="cb20-74"><a href="#cb20-74" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> <span class="va">True</span></span>
+<span id="cb20-75"><a href="#cb20-75" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> edge.x0 <span class="op">&lt;=</span> y <span class="op">&lt;</span> edge.x1:</span>
+<span id="cb20-76"><a href="#cb20-76" aria-hidden="true" tabindex="-1"></a>            total <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb20-77"><a href="#cb20-77" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">bool</span>(total <span class="op">%</span> <span class="dv">2</span>)</span>
+<span id="cb20-78"><a href="#cb20-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-79"><a href="#cb20-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-80"><a href="#cb20-80" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> idx <span class="kw">in</span> (<span class="op">-</span>np.triu(areas)).ravel().argsort():</span>
+<span id="cb20-81"><a href="#cb20-81" aria-hidden="true" tabindex="-1"></a>    i1, i2 <span class="op">=</span> np.unravel_index(idx, areas.shape)</span>
+<span id="cb20-82"><a href="#cb20-82" aria-hidden="true" tabindex="-1"></a>    p1 <span class="op">=</span> data[i1]</span>
+<span id="cb20-83"><a href="#cb20-83" aria-hidden="true" tabindex="-1"></a>    p2 <span class="op">=</span> data[i2]</span>
+<span id="cb20-84"><a href="#cb20-84" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> point_in_polygon((p2[<span class="dv">0</span>], p1[<span class="dv">1</span>])) <span class="kw">or</span> <span class="kw">not</span> point_in_polygon((p1[<span class="dv">0</span>], p2[<span class="dv">1</span>])):</span>
+<span id="cb20-85"><a href="#cb20-85" aria-hidden="true" tabindex="-1"></a>        <span class="cf">continue</span></span>
+<span id="cb20-86"><a href="#cb20-86" aria-hidden="true" tabindex="-1"></a>    xmin, xmax <span class="op">=</span> <span class="bu">sorted</span>([p1[<span class="dv">0</span>], p2[<span class="dv">0</span>]])</span>
+<span id="cb20-87"><a href="#cb20-87" aria-hidden="true" tabindex="-1"></a>    ymin, ymax <span class="op">=</span> <span class="bu">sorted</span>([p1[<span class="dv">1</span>], p2[<span class="dv">1</span>]])</span>
+<span id="cb20-88"><a href="#cb20-88" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> direction <span class="op">==</span> <span class="dv">1</span>:</span>
+<span id="cb20-89"><a href="#cb20-89" aria-hidden="true" tabindex="-1"></a>        points <span class="op">=</span> [(xmax, ymax), (xmax, ymin), (xmin, ymin), (xmin, ymax), (xmax, ymax)]</span>
+<span id="cb20-90"><a href="#cb20-90" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb20-91"><a href="#cb20-91" aria-hidden="true" tabindex="-1"></a>        points <span class="op">=</span> [(xmax, ymax), (xmin, ymax), (xmin, ymin), (xmax, ymin), (xmax, ymax)]</span>
+<span id="cb20-92"><a href="#cb20-92" aria-hidden="true" tabindex="-1"></a>    rect_edges <span class="op">=</span> points_to_edges(points)</span>
+<span id="cb20-93"><a href="#cb20-93" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> e1, e2 <span class="kw">in</span> itertools.product(rect_edges, edges):</span>
+<span id="cb20-94"><a href="#cb20-94" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> e1.intersects(e2) <span class="kw">or</span> (e1.overlaps(e2) <span class="kw">and</span> e1.direction <span class="op">!=</span> e2.direction):</span>
+<span id="cb20-95"><a href="#cb20-95" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
+<span id="cb20-96"><a href="#cb20-96" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb20-97"><a href="#cb20-97" aria-hidden="true" tabindex="-1"></a>        <span class="cf">break</span></span>
+<span id="cb20-98"><a href="#cb20-98" aria-hidden="true" tabindex="-1"></a>areas[i1, i2]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>This could be made significantly faster by using a sweep line algorithm to identify the intersections instead of just trying all of them, but it runs fast enough as is.</p>
 
 
 <!-- -->
@@ -1013,309 +1167,458 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="sourceCode" id="cb18" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> 2025 Solutions</span></span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="fu"># Imports</span></span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="co"># | eval: true</span></span>
-<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a><span class="co"># | output: false</span></span>
-<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> dataclasses</span>
-<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> functools</span>
-<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> itertools</span>
-<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> math</span>
-<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> operator</span>
-<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
-<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
-<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sys</span>
-<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> defaultdict, deque, namedtuple</span>
-<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> queue <span class="im">import</span> PriorityQueue</span>
-<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> more_itertools</span>
-<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> scipy</span>
-<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>sys.path.insert(<span class="dv">1</span>, <span class="st">".."</span>)</span>
-<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> utils</span>
-<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a>load <span class="op">=</span> utils.year_load(<span class="dv">2025</span>)</span>
-<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a><span class="fu"># [Day 1: Secret Entrance](https://adventofcode.com/2025/day/1)</span></span>
-<span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1</span></span>
-<span id="cb18-38"><a href="#cb18-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-39"><a href="#cb18-39" aria-hidden="true" tabindex="-1"></a>We're working in numbers mod 100. Left turns correspond to subtraction, and right turns correspond to addition. To find the position of the dial after a set of turns we just take the cumulative sum of the additions and subtractions (mod 100). Then we just check how many times this position is zero</span>
-<span id="cb18-40"><a href="#cb18-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-43"><a href="#cb18-43" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb18-44"><a href="#cb18-44" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> np.array([<span class="dv">50</span>] <span class="op">+</span> [<span class="bu">int</span>(x.replace(<span class="st">"L"</span>, <span class="st">"-"</span>).replace(<span class="st">"R"</span>, <span class="st">""</span>)) <span class="cf">for</span> x <span class="kw">in</span> load(<span class="dv">1</span>)])</span>
-<span id="cb18-45"><a href="#cb18-45" aria-hidden="true" tabindex="-1"></a>(np.cumsum(data) <span class="op">%</span> <span class="dv">100</span> <span class="op">==</span> <span class="dv">0</span>).<span class="bu">sum</span>()</span>
-<span id="cb18-46"><a href="#cb18-46" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb18-47"><a href="#cb18-47" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-48"><a href="#cb18-48" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
-<span id="cb18-49"><a href="#cb18-49" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-50"><a href="#cb18-50" aria-hidden="true" tabindex="-1"></a>To find the number of times we've crossed zero, we can just look at how many times the hundreds place of the running sum has changed - every time that happens, we've crossed the value 0 on the dial. This is almost the right answer but needs to be corrected for the fact that sometimes we just kiss zero and don't cross it. For example, if the dial went <span class="in">`10 -&gt; 0 -&gt; 10`</span>, the divisor test wouldn't show a zero crossing. Similarly, if we went <span class="in">`90 -&gt; 0 -&gt; 90`</span>, the divisor test would show two crossings instead of one.</span>
-<span id="cb18-51"><a href="#cb18-51" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-52"><a href="#cb18-52" aria-hidden="true" tabindex="-1"></a>A bit of thinking shows that the relevant points are those where</span>
-<span id="cb18-53"><a href="#cb18-53" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-54"><a href="#cb18-54" aria-hidden="true" tabindex="-1"></a><span class="ss">1.  </span>The total sum is zero after a move</span>
-<span id="cb18-55"><a href="#cb18-55" aria-hidden="true" tabindex="-1"></a><span class="ss">2.  </span>The dial moves in the opposite way in the next move.</span>
-<span id="cb18-56"><a href="#cb18-56" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-57"><a href="#cb18-57" aria-hidden="true" tabindex="-1"></a>We can find both of those cases using numpy magic, and the necessary expression then becomes</span>
-<span id="cb18-58"><a href="#cb18-58" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-61"><a href="#cb18-61" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb18-62"><a href="#cb18-62" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(</span>
-<span id="cb18-63"><a href="#cb18-63" aria-hidden="true" tabindex="-1"></a>    <span class="bu">abs</span>(np.diff(np.cumsum(data) <span class="op">//</span> <span class="dv">100</span>))</span>
-<span id="cb18-64"><a href="#cb18-64" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> ((np.cumsum(data) <span class="op">%</span> <span class="dv">100</span> <span class="op">==</span> <span class="dv">0</span>)[:<span class="op">-</span><span class="dv">1</span>] <span class="op">*</span> np.diff(np.sign(data)) <span class="op">//</span> <span class="dv">2</span>)</span>
-<span id="cb18-65"><a href="#cb18-65" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb18-66"><a href="#cb18-66" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb18-67"><a href="#cb18-67" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-68"><a href="#cb18-68" aria-hidden="true" tabindex="-1"></a><span class="fu"># [Day 2: Gift Shop](https://adventofcode.com/2025/day/2)</span></span>
-<span id="cb18-69"><a href="#cb18-69" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-70"><a href="#cb18-70" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1 {#part-1-1 id="243d6f36-f834-4365-988d-96eb25722e56"}</span></span>
-<span id="cb18-71"><a href="#cb18-71" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-72"><a href="#cb18-72" aria-hidden="true" tabindex="-1"></a>There's probably a clever approach here, but I'm not seeing it right now – I'm guessing that comes with adventing at 9pm after a long day at work. I'll just iterate over the ranges, and for each range, iterate over the numbers in the range. For every number in the range, I'll check whether <span class="in">`str(number) == str(number)[:length//2] * 2`</span>. It's slow, but it works</span>
-<span id="cb18-73"><a href="#cb18-73" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-76"><a href="#cb18-76" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb18-77"><a href="#cb18-77" aria-hidden="true" tabindex="-1"></a>ranges <span class="op">=</span> [[<span class="bu">int</span>(y) <span class="cf">for</span> y <span class="kw">in</span> x.split(<span class="st">"-"</span>)] <span class="cf">for</span> x <span class="kw">in</span> load(<span class="dv">2</span>)[<span class="dv">0</span>].split(<span class="st">","</span>)]</span>
-<span id="cb18-78"><a href="#cb18-78" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-79"><a href="#cb18-79" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> invalid_ids(part<span class="op">=</span><span class="dv">1</span>):</span>
-<span id="cb18-80"><a href="#cb18-80" aria-hidden="true" tabindex="-1"></a>    total <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb18-81"><a href="#cb18-81" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> val <span class="kw">in</span> itertools.chain(<span class="op">*</span>[<span class="bu">range</span>(start, end <span class="op">+</span> <span class="dv">1</span>) <span class="cf">for</span> start, end <span class="kw">in</span> ranges]):</span>
-<span id="cb18-82"><a href="#cb18-82" aria-hidden="true" tabindex="-1"></a>        length <span class="op">=</span> <span class="bu">len</span>(<span class="bu">str</span>(val))</span>
-<span id="cb18-83"><a href="#cb18-83" aria-hidden="true" tabindex="-1"></a>        repeats <span class="op">=</span> [<span class="dv">2</span>] <span class="cf">if</span> part <span class="op">==</span> <span class="dv">1</span> <span class="cf">else</span> proper_factors(length)</span>
-<span id="cb18-84"><a href="#cb18-84" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">any</span>(<span class="bu">str</span>(val)[: length <span class="op">//</span> repeat] <span class="op">*</span> repeat <span class="op">==</span> <span class="bu">str</span>(val) <span class="cf">for</span> repeat <span class="kw">in</span> repeats):</span>
-<span id="cb18-85"><a href="#cb18-85" aria-hidden="true" tabindex="-1"></a>            total <span class="op">+=</span> val</span>
-<span id="cb18-86"><a href="#cb18-86" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> total</span>
-<span id="cb18-87"><a href="#cb18-87" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-88"><a href="#cb18-88" aria-hidden="true" tabindex="-1"></a>invalid_ids()</span>
-<span id="cb18-89"><a href="#cb18-89" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb18-90"><a href="#cb18-90" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-91"><a href="#cb18-91" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
-<span id="cb18-92"><a href="#cb18-92" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-93"><a href="#cb18-93" aria-hidden="true" tabindex="-1"></a>The advantage of organising part 1 like that is that part 2 can be included in the same function with a small flag to switch between the two code paths. The only thing that's left to do is to implement a factorisation function and we are done.</span>
-<span id="cb18-94"><a href="#cb18-94" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-97"><a href="#cb18-97" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb18-98"><a href="#cb18-98" aria-hidden="true" tabindex="-1"></a><span class="at">@functools.cache</span></span>
-<span id="cb18-99"><a href="#cb18-99" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> proper_factors(n):</span>
-<span id="cb18-100"><a href="#cb18-100" aria-hidden="true" tabindex="-1"></a>    f <span class="op">=</span> [<span class="bu">list</span>(<span class="bu">set</span>((i, n <span class="op">//</span> i))) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2</span>, <span class="bu">int</span>(math.sqrt(n)) <span class="op">+</span> <span class="dv">1</span>) <span class="cf">if</span> n <span class="op">%</span> i <span class="op">==</span> <span class="dv">0</span>]</span>
-<span id="cb18-101"><a href="#cb18-101" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">sorted</span>([x <span class="cf">for</span> pair <span class="kw">in</span> f <span class="cf">for</span> x <span class="kw">in</span> pair] <span class="op">+</span> ([n] <span class="cf">if</span> n <span class="op">!=</span> <span class="dv">1</span> <span class="cf">else</span> []))</span>
-<span id="cb18-102"><a href="#cb18-102" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-103"><a href="#cb18-103" aria-hidden="true" tabindex="-1"></a>invalid_ids(part<span class="op">=</span><span class="dv">2</span>)</span>
-<span id="cb18-104"><a href="#cb18-104" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb18-105"><a href="#cb18-105" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-106"><a href="#cb18-106" aria-hidden="true" tabindex="-1"></a><span class="fu"># [Day 3: Lobby](https://adventofcode.com/2025/day/3)</span></span>
-<span id="cb18-107"><a href="#cb18-107" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-108"><a href="#cb18-108" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1</span></span>
-<span id="cb18-109"><a href="#cb18-109" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-110"><a href="#cb18-110" aria-hidden="true" tabindex="-1"></a>Once the data is loaded into an array, part 1 can be solved using an ugly one-liner. The idea is to take the largest number in each line, multiply by ten and add the largest number occuring after the first one. This needs to be corrected to account for those cases when the last digit of a line is the largest one - in those cases, we need to take the largest digit occuring before the last slot, multiply by ten and add the last digit.</span>
-<span id="cb18-111"><a href="#cb18-111" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-114"><a href="#cb18-114" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb18-115"><a href="#cb18-115" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> load(<span class="dv">3</span>, <span class="st">"intarray"</span>)</span>
-<span id="cb18-116"><a href="#cb18-116" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(</span>
-<span id="cb18-117"><a href="#cb18-117" aria-hidden="true" tabindex="-1"></a>    line[firstmax] <span class="op">*</span> <span class="dv">10</span> <span class="op">+</span> <span class="bu">max</span>(line[firstmax <span class="op">+</span> <span class="dv">1</span> :])</span>
-<span id="cb18-118"><a href="#cb18-118" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> ((firstmax <span class="op">:=</span> np.argmax(line)) <span class="op">!=</span> <span class="bu">len</span>(line) <span class="op">-</span> <span class="dv">1</span>)</span>
-<span id="cb18-119"><a href="#cb18-119" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> line[firstmax] <span class="op">+</span> <span class="dv">10</span> <span class="op">*</span> <span class="bu">max</span>(line[:<span class="op">-</span><span class="dv">1</span>])</span>
-<span id="cb18-120"><a href="#cb18-120" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> line <span class="kw">in</span> data</span>
-<span id="cb18-121"><a href="#cb18-121" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb18-122"><a href="#cb18-122" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb18-123"><a href="#cb18-123" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-124"><a href="#cb18-124" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
-<span id="cb18-125"><a href="#cb18-125" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-126"><a href="#cb18-126" aria-hidden="true" tabindex="-1"></a>For part 2, we need to be a bit cleverer, but the core of the logic from before still applies. We know that we need to pick 12 digits out of n. This means that out of the first (n-11) digits, we need to pick at least one – otherwise we'll run out of digits. And which of those digits is the best one to pick? The largest one. If we pick the ith digit, we now need to pick exactly 11 digits from position i+1 to n, which leads us nicely to the following recursive solution</span>
-<span id="cb18-127"><a href="#cb18-127" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-130"><a href="#cb18-130" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb18-131"><a href="#cb18-131" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> optimal_selection(array, count):</span>
-<span id="cb18-132"><a href="#cb18-132" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> count <span class="op">==</span> <span class="dv">0</span>:</span>
-<span id="cb18-133"><a href="#cb18-133" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> []</span>
-<span id="cb18-134"><a href="#cb18-134" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span>(array) <span class="op">==</span> count:</span>
-<span id="cb18-135"><a href="#cb18-135" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">list</span>(array)</span>
-<span id="cb18-136"><a href="#cb18-136" aria-hidden="true" tabindex="-1"></a>    argmax <span class="op">=</span> np.argmax(array[: <span class="bu">len</span>(array) <span class="op">-</span>count <span class="op">+</span> <span class="dv">1</span>])</span>
-<span id="cb18-137"><a href="#cb18-137" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> [array[argmax]] <span class="op">+</span> optimal_selection(array[argmax <span class="op">+</span> <span class="dv">1</span> :], count <span class="op">-</span> <span class="dv">1</span>)</span>
-<span id="cb18-138"><a href="#cb18-138" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-139"><a href="#cb18-139" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-140"><a href="#cb18-140" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(functools.<span class="bu">reduce</span>(<span class="kw">lambda</span> x, y: <span class="dv">10</span><span class="op">*</span>x <span class="op">+</span> y, optimal_selection(line, <span class="dv">12</span>)) <span class="cf">for</span> line <span class="kw">in</span> data)</span>
-<span id="cb18-141"><a href="#cb18-141" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb18-142"><a href="#cb18-142" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-143"><a href="#cb18-143" aria-hidden="true" tabindex="-1"></a>Once we have that, part 1 could have been expressed as just <span class="in">`sum(functools.reduce(lambda x, y: 10*x + y, optimal_selection(line, 2)) for line in data)`</span>, but I liked the original one-liner</span>
-<span id="cb18-144"><a href="#cb18-144" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-145"><a href="#cb18-145" aria-hidden="true" tabindex="-1"></a><span class="fu"># [Day 4: Printing Department](https://adventofcode.com/2025/day/4)</span></span>
-<span id="cb18-146"><a href="#cb18-146" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-147"><a href="#cb18-147" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1</span></span>
-<span id="cb18-148"><a href="#cb18-148" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-149"><a href="#cb18-149" aria-hidden="true" tabindex="-1"></a>This definitely feels like a job that calls for <span class="in">`numpy/scipy`</span>'s convolution functions. And maybe that library is such a good fit for the task that using it is a bit like cheating.</span>
-<span id="cb18-150"><a href="#cb18-150" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-153"><a href="#cb18-153" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb18-154"><a href="#cb18-154" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> load(<span class="dv">4</span>, <span class="st">"chararray"</span>)</span>
-<span id="cb18-155"><a href="#cb18-155" aria-hidden="true" tabindex="-1"></a>count <span class="op">=</span> scipy.ndimage.convolve(<span class="dv">1</span> <span class="op">*</span> (data <span class="op">==</span> <span class="st">"@"</span>), np.ones((<span class="dv">3</span>, <span class="dv">3</span>)), mode<span class="op">=</span><span class="st">"constant"</span>)</span>
-<span id="cb18-156"><a href="#cb18-156" aria-hidden="true" tabindex="-1"></a>changed <span class="op">=</span> (data <span class="op">==</span> <span class="st">"@"</span>) <span class="op">&amp;</span> (count <span class="op">&lt;</span> <span class="dv">5</span>)</span>
-<span id="cb18-157"><a href="#cb18-157" aria-hidden="true" tabindex="-1"></a>changed.<span class="bu">sum</span>()</span>
-<span id="cb18-158"><a href="#cb18-158" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb18-159"><a href="#cb18-159" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-160"><a href="#cb18-160" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
-<span id="cb18-161"><a href="#cb18-161" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-162"><a href="#cb18-162" aria-hidden="true" tabindex="-1"></a>For part two, we can take the results from part one and put into a while loop</span>
-<span id="cb18-163"><a href="#cb18-163" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-166"><a href="#cb18-166" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb18-167"><a href="#cb18-167" aria-hidden="true" tabindex="-1"></a>new_data <span class="op">=</span> data.copy()</span>
-<span id="cb18-168"><a href="#cb18-168" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> changed.<span class="bu">sum</span>() <span class="op">&gt;</span> <span class="dv">0</span>:</span>
-<span id="cb18-169"><a href="#cb18-169" aria-hidden="true" tabindex="-1"></a>    count <span class="op">=</span> scipy.ndimage.convolve(<span class="dv">1</span> <span class="op">*</span> (new_data <span class="op">==</span> <span class="st">"@"</span>), np.ones((<span class="dv">3</span>, <span class="dv">3</span>)), mode<span class="op">=</span><span class="st">"constant"</span>)</span>
-<span id="cb18-170"><a href="#cb18-170" aria-hidden="true" tabindex="-1"></a>    changed <span class="op">=</span> <span class="dv">1</span> <span class="op">*</span> ((new_data <span class="op">==</span> <span class="st">"@"</span>) <span class="op">&amp;</span> (count <span class="op">&lt;</span> <span class="dv">5</span>))</span>
-<span id="cb18-171"><a href="#cb18-171" aria-hidden="true" tabindex="-1"></a>    new_data[np.where(changed)] <span class="op">=</span> <span class="st">"."</span></span>
-<span id="cb18-172"><a href="#cb18-172" aria-hidden="true" tabindex="-1"></a>(new_data <span class="op">!=</span> data).<span class="bu">sum</span>()</span>
-<span id="cb18-173"><a href="#cb18-173" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb18-174"><a href="#cb18-174" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-175"><a href="#cb18-175" aria-hidden="true" tabindex="-1"></a><span class="sc">\&gt;</span></span>
-<span id="cb18-176"><a href="#cb18-176" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-177"><a href="#cb18-177" aria-hidden="true" tabindex="-1"></a><span class="fu"># [Day 5: Cafeteria](https://adventofcode.com/2025/day/5)</span></span>
-<span id="cb18-178"><a href="#cb18-178" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-179"><a href="#cb18-179" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1</span></span>
-<span id="cb18-180"><a href="#cb18-180" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-181"><a href="#cb18-181" aria-hidden="true" tabindex="-1"></a>For part 1, we can just loop over the values and for every value $v$ ask if there is some range $r = (\mathrm{start}, \mathrm{end})$ such that $\mathrm{start} \leq v \leq \mathrm{end}$. The number of values that we have to check is small enough that this runs plenty fast</span>
-<span id="cb18-182"><a href="#cb18-182" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-185"><a href="#cb18-185" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb18-186"><a href="#cb18-186" aria-hidden="true" tabindex="-1"></a>ranges, values <span class="op">=</span> load(<span class="dv">5</span>, <span class="st">"raw"</span>).split(<span class="st">"</span><span class="ch">\n\n</span><span class="st">"</span>)</span>
-<span id="cb18-187"><a href="#cb18-187" aria-hidden="true" tabindex="-1"></a>ranges <span class="op">=</span> [[<span class="bu">int</span>(x) <span class="cf">for</span> x <span class="kw">in</span> r.split(<span class="st">"-"</span>)] <span class="cf">for</span> r <span class="kw">in</span> ranges.split(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span>)]</span>
-<span id="cb18-188"><a href="#cb18-188" aria-hidden="true" tabindex="-1"></a>values <span class="op">=</span> [<span class="bu">int</span>(x) <span class="cf">for</span> x <span class="kw">in</span> values.split(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span>)]</span>
-<span id="cb18-189"><a href="#cb18-189" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-190"><a href="#cb18-190" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(<span class="bu">any</span>(start <span class="op">&lt;=</span> value <span class="op">&lt;=</span> end <span class="cf">for</span> start, end <span class="kw">in</span> ranges) <span class="cf">for</span> value <span class="kw">in</span> values)</span>
-<span id="cb18-191"><a href="#cb18-191" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb18-192"><a href="#cb18-192" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-193"><a href="#cb18-193" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
-<span id="cb18-194"><a href="#cb18-194" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-195"><a href="#cb18-195" aria-hidden="true" tabindex="-1"></a>For part 2, I didn't even bother checking if the above approach would have been fast enough. since that's obviously not the intended path. Instead, we should focus on the ranges themselves. The length of a range $r = (\mathrm{start}, \mathrm{end})$ is just $\mathrm{end} - \mathrm{start} + 1$. The only tricky thing is what to do when to ranges overlap – how to detect it, and how to correct for it.</span>
-<span id="cb18-196"><a href="#cb18-196" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-197"><a href="#cb18-197" aria-hidden="true" tabindex="-1"></a>If we sort the ranges by <span class="in">`start`</span>, then one of the folowing is true:</span>
-<span id="cb18-198"><a href="#cb18-198" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-199"><a href="#cb18-199" aria-hidden="true" tabindex="-1"></a><span class="ss">1.  </span>The first two ranges overlap</span>
-<span id="cb18-200"><a href="#cb18-200" aria-hidden="true" tabindex="-1"></a><span class="ss">2.  </span>No range can overlap with the first range</span>
-<span id="cb18-201"><a href="#cb18-201" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-202"><a href="#cb18-202" aria-hidden="true" tabindex="-1"></a>So we can just sort the ranges by first coordinate, loop over them and check the first two ranges in each loop iteration. If they overlap, we put the merged range back into the list of ranges, and if they don't we are done merging the first range and can just add it to the total length</span>
-<span id="cb18-203"><a href="#cb18-203" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-206"><a href="#cb18-206" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb18-207"><a href="#cb18-207" aria-hidden="true" tabindex="-1"></a>ranges <span class="op">=</span> <span class="bu">sorted</span>(ranges, key<span class="op">=</span><span class="kw">lambda</span> x: x[<span class="dv">0</span>])</span>
-<span id="cb18-208"><a href="#cb18-208" aria-hidden="true" tabindex="-1"></a>total <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb18-209"><a href="#cb18-209" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-210"><a href="#cb18-210" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> (r1 <span class="op">:=</span> ranges.pop(<span class="dv">0</span>)) <span class="kw">and</span> ranges:</span>
-<span id="cb18-211"><a href="#cb18-211" aria-hidden="true" tabindex="-1"></a>    r2 <span class="op">=</span> ranges[<span class="dv">0</span>]</span>
-<span id="cb18-212"><a href="#cb18-212" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> r1[<span class="dv">1</span>] <span class="op">+</span> <span class="dv">1</span> <span class="op">&gt;=</span> r2[<span class="dv">0</span>]:</span>
-<span id="cb18-213"><a href="#cb18-213" aria-hidden="true" tabindex="-1"></a>        ranges <span class="op">=</span> [[r1[<span class="dv">0</span>], <span class="bu">max</span>(r2[<span class="dv">1</span>], r1[<span class="dv">1</span>])]] <span class="op">+</span> ranges[<span class="dv">1</span>:]</span>
-<span id="cb18-214"><a href="#cb18-214" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
-<span id="cb18-215"><a href="#cb18-215" aria-hidden="true" tabindex="-1"></a>        total <span class="op">+=</span> r1[<span class="dv">1</span>] <span class="op">-</span> r1[<span class="dv">0</span>] <span class="op">+</span> <span class="dv">1</span></span>
-<span id="cb18-216"><a href="#cb18-216" aria-hidden="true" tabindex="-1"></a>total <span class="op">+</span> r1[<span class="dv">1</span>] <span class="op">-</span> r1[<span class="dv">0</span>] <span class="op">+</span> <span class="dv">1</span></span>
-<span id="cb18-217"><a href="#cb18-217" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb18-218"><a href="#cb18-218" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-219"><a href="#cb18-219" aria-hidden="true" tabindex="-1"></a><span class="fu"># [Day 6: Trash Compactor](https://adventofcode.com/2025/day/6)</span></span>
-<span id="cb18-220"><a href="#cb18-220" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-221"><a href="#cb18-221" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1</span></span>
-<span id="cb18-222"><a href="#cb18-222" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-223"><a href="#cb18-223" aria-hidden="true" tabindex="-1"></a>There's nothing particularly tricky to do for part one - load the data, sanitise the white space, and then for each set of integers, either add them all together or multiply them, and finally take the sum of the result</span>
-<span id="cb18-224"><a href="#cb18-224" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-227"><a href="#cb18-227" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb18-228"><a href="#cb18-228" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> operator <span class="im">import</span> add, mul</span>
-<span id="cb18-229"><a href="#cb18-229" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-230"><a href="#cb18-230" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> [re.sub(<span class="vs">r"\s+"</span>, <span class="st">" "</span>, line).split(<span class="st">" "</span>) <span class="cf">for</span> line <span class="kw">in</span> load(<span class="dv">6</span>)]</span>
-<span id="cb18-231"><a href="#cb18-231" aria-hidden="true" tabindex="-1"></a>ops <span class="op">=</span> {<span class="st">"*"</span>: mul, <span class="st">"+"</span>: add}</span>
-<span id="cb18-232"><a href="#cb18-232" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(</span>
-<span id="cb18-233"><a href="#cb18-233" aria-hidden="true" tabindex="-1"></a>    functools.<span class="bu">reduce</span>(ops[problem[<span class="op">-</span><span class="dv">1</span>]], [<span class="bu">int</span>(x) <span class="cf">for</span> x <span class="kw">in</span> problem[:<span class="op">-</span><span class="dv">1</span>]])</span>
-<span id="cb18-234"><a href="#cb18-234" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> problem <span class="kw">in</span> <span class="bu">zip</span>(<span class="op">*</span>data)</span>
-<span id="cb18-235"><a href="#cb18-235" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb18-236"><a href="#cb18-236" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb18-237"><a href="#cb18-237" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-238"><a href="#cb18-238" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
-<span id="cb18-239"><a href="#cb18-239" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-240"><a href="#cb18-240" aria-hidden="true" tabindex="-1"></a>Part two is more interesting, since we'll be needing the whitespace that we just got rid of – time to reload the data. Then, we can just use <span class="in">`numpy`</span>'s transpose function to flip the data, join the individual digits into one string, and separate the groups of digits using <span class="in">`itertools.groupby`</span></span>
-<span id="cb18-241"><a href="#cb18-241" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-244"><a href="#cb18-244" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb18-245"><a href="#cb18-245" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> load(<span class="dv">6</span>)</span>
-<span id="cb18-246"><a href="#cb18-246" aria-hidden="true" tabindex="-1"></a>operators <span class="op">=</span> re.sub(<span class="vs">r"\s+"</span>, <span class="st">" "</span>, data[<span class="op">-</span><span class="dv">1</span>]).split(<span class="st">" "</span>)</span>
-<span id="cb18-247"><a href="#cb18-247" aria-hidden="true" tabindex="-1"></a>operands <span class="op">=</span> [</span>
-<span id="cb18-248"><a href="#cb18-248" aria-hidden="true" tabindex="-1"></a>    <span class="st">""</span>.join(row) <span class="cf">for</span> row <span class="kw">in</span> np.array([[char <span class="cf">for</span> char <span class="kw">in</span> line] <span class="cf">for</span> line <span class="kw">in</span> data[:<span class="op">-</span><span class="dv">1</span>]]).T</span>
-<span id="cb18-249"><a href="#cb18-249" aria-hidden="true" tabindex="-1"></a>]</span>
-<span id="cb18-250"><a href="#cb18-250" aria-hidden="true" tabindex="-1"></a>operands <span class="op">=</span> [</span>
-<span id="cb18-251"><a href="#cb18-251" aria-hidden="true" tabindex="-1"></a>    <span class="bu">list</span>(element)</span>
-<span id="cb18-252"><a href="#cb18-252" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> key, element <span class="kw">in</span> itertools.groupby(operands, <span class="kw">lambda</span> x: <span class="kw">not</span> re.match(<span class="vs">r"^\s+$"</span>, x))</span>
-<span id="cb18-253"><a href="#cb18-253" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> key</span>
-<span id="cb18-254"><a href="#cb18-254" aria-hidden="true" tabindex="-1"></a>]</span>
-<span id="cb18-255"><a href="#cb18-255" aria-hidden="true" tabindex="-1"></a>total <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb18-256"><a href="#cb18-256" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> operator, current_operands <span class="kw">in</span> <span class="bu">zip</span>(operators, operands):</span>
-<span id="cb18-257"><a href="#cb18-257" aria-hidden="true" tabindex="-1"></a>    total <span class="op">+=</span> functools.<span class="bu">reduce</span>(ops[operator], [<span class="bu">int</span>(x) <span class="cf">for</span> x <span class="kw">in</span> current_operands])</span>
-<span id="cb18-258"><a href="#cb18-258" aria-hidden="true" tabindex="-1"></a>total</span>
-<span id="cb18-259"><a href="#cb18-259" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb18-260"><a href="#cb18-260" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-261"><a href="#cb18-261" aria-hidden="true" tabindex="-1"></a><span class="fu"># [Day 7: Laboratories](https://adventofcode.com/2025/day/7)</span></span>
-<span id="cb18-262"><a href="#cb18-262" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-263"><a href="#cb18-263" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1</span></span>
-<span id="cb18-264"><a href="#cb18-264" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-265"><a href="#cb18-265" aria-hidden="true" tabindex="-1"></a>Each row of splitters is a linear transformation of the incoming beam: a beam which doesn't hit a splitter continues unchanged, while a beam that hits a splitter continues as a beam one slot to the left, and a beam one slot to the right. For me, the most natural way of representing this linear transformation is using a matrix, and applying the transformation is then just a matrix multiplication. Going through all the rows is just a matter of repeated matrix multiplication</span>
-<span id="cb18-266"><a href="#cb18-266" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-269"><a href="#cb18-269" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb18-270"><a href="#cb18-270" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> <span class="dv">1</span> <span class="op">*</span> (load(<span class="dv">7</span>, <span class="st">"chararray"</span>) <span class="op">!=</span> <span class="st">"."</span>)[::<span class="dv">2</span>]</span>
-<span id="cb18-271"><a href="#cb18-271" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_matrix(indices, length<span class="op">=</span><span class="bu">len</span>(data[<span class="dv">0</span>])):</span>
-<span id="cb18-272"><a href="#cb18-272" aria-hidden="true" tabindex="-1"></a>    m <span class="op">=</span> np.eye(length)</span>
-<span id="cb18-273"><a href="#cb18-273" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> idx <span class="kw">in</span> indices: m[idx] <span class="op">=</span> scipy.ndimage.convolve(m[idx], [<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>])</span>
-<span id="cb18-274"><a href="#cb18-274" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> m</span>
-<span id="cb18-275"><a href="#cb18-275" aria-hidden="true" tabindex="-1"></a>total, v <span class="op">=</span> <span class="dv">0</span>, data[<span class="dv">0</span>]</span>
-<span id="cb18-276"><a href="#cb18-276" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> row <span class="kw">in</span> data[<span class="dv">1</span>:]:</span>
-<span id="cb18-277"><a href="#cb18-277" aria-hidden="true" tabindex="-1"></a>    total <span class="op">+=</span> <span class="bu">sum</span>((v <span class="op">*</span> row <span class="op">!=</span> <span class="dv">0</span>))</span>
-<span id="cb18-278"><a href="#cb18-278" aria-hidden="true" tabindex="-1"></a>    v <span class="op">=</span> v <span class="op">@</span> generate_matrix(np.where(row)[<span class="dv">0</span>])</span>
-<span id="cb18-279"><a href="#cb18-279" aria-hidden="true" tabindex="-1"></a>total</span>
-<span id="cb18-280"><a href="#cb18-280" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb18-281"><a href="#cb18-281" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-282"><a href="#cb18-282" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
-<span id="cb18-283"><a href="#cb18-283" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-284"><a href="#cb18-284" aria-hidden="true" tabindex="-1"></a>I wasn't planning on it, but with part one solved as I did there, part two just becomes</span>
-<span id="cb18-285"><a href="#cb18-285" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-288"><a href="#cb18-288" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb18-289"><a href="#cb18-289" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(v)</span>
-<span id="cb18-290"><a href="#cb18-290" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb18-291"><a href="#cb18-291" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-292"><a href="#cb18-292" aria-hidden="true" tabindex="-1"></a><span class="fu"># [Day 8: Playground](https://adventofcode.com/2025/day/8)</span></span>
-<span id="cb18-293"><a href="#cb18-293" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-294"><a href="#cb18-294" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1</span></span>
-<span id="cb18-295"><a href="#cb18-295" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-296"><a href="#cb18-296" aria-hidden="true" tabindex="-1"></a>This is a fairly straightforward implementation of the problem statement. We build an array of all the pairwise (squared) distances, use <span class="in">`argsort`</span> to find which items they correspond to. We successively merge items based on this order, using a forward and a reverse dictionary to keep track of where each item is</span>
-<span id="cb18-297"><a href="#cb18-297" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-300"><a href="#cb18-300" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb18-301"><a href="#cb18-301" aria-hidden="true" tabindex="-1"></a>arr <span class="op">=</span> np.array(load(<span class="dv">8</span>, <span class="st">"int"</span>))</span>
-<span id="cb18-302"><a href="#cb18-302" aria-hidden="true" tabindex="-1"></a>sets <span class="op">=</span> {idx: <span class="bu">set</span>([idx]) <span class="cf">for</span> idx <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(arr))}</span>
-<span id="cb18-303"><a href="#cb18-303" aria-hidden="true" tabindex="-1"></a>positions <span class="op">=</span> {idx: idx <span class="cf">for</span> idx <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(arr))}</span>
-<span id="cb18-304"><a href="#cb18-304" aria-hidden="true" tabindex="-1"></a>squares <span class="op">=</span> np.triu(</span>
-<span id="cb18-305"><a href="#cb18-305" aria-hidden="true" tabindex="-1"></a>    (np.diagonal(np.subtract.outer(arr, arr), axis1<span class="op">=</span><span class="dv">1</span>, axis2<span class="op">=</span><span class="dv">3</span>) <span class="op">**</span> <span class="dv">2</span>).<span class="bu">sum</span>(axis<span class="op">=</span><span class="dv">2</span>)</span>
-<span id="cb18-306"><a href="#cb18-306" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb18-307"><a href="#cb18-307" aria-hidden="true" tabindex="-1"></a>order <span class="op">=</span> squares.ravel().argsort()[(<span class="dv">1001</span> <span class="op">*</span> <span class="dv">1000</span>) <span class="op">//</span> <span class="dv">2</span> :]</span>
-<span id="cb18-308"><a href="#cb18-308" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-309"><a href="#cb18-309" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-310"><a href="#cb18-310" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> merge_index(idx):</span>
-<span id="cb18-311"><a href="#cb18-311" aria-hidden="true" tabindex="-1"></a>    p1, p2 <span class="op">=</span> [positions[x] <span class="cf">for</span> x <span class="kw">in</span> np.unravel_index(idx, squares.shape)]</span>
-<span id="cb18-312"><a href="#cb18-312" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> p1 <span class="op">!=</span> p2:</span>
-<span id="cb18-313"><a href="#cb18-313" aria-hidden="true" tabindex="-1"></a>        sets[p1] <span class="op">|=</span> sets[p2]</span>
-<span id="cb18-314"><a href="#cb18-314" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> label <span class="kw">in</span> sets[p2]:</span>
-<span id="cb18-315"><a href="#cb18-315" aria-hidden="true" tabindex="-1"></a>            positions[label] <span class="op">=</span> p1</span>
-<span id="cb18-316"><a href="#cb18-316" aria-hidden="true" tabindex="-1"></a>        <span class="kw">del</span> sets[p2]</span>
-<span id="cb18-317"><a href="#cb18-317" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-318"><a href="#cb18-318" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-319"><a href="#cb18-319" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> idx <span class="kw">in</span> order[:<span class="dv">1000</span>]:</span>
-<span id="cb18-320"><a href="#cb18-320" aria-hidden="true" tabindex="-1"></a>    merge_index(idx)</span>
-<span id="cb18-321"><a href="#cb18-321" aria-hidden="true" tabindex="-1"></a>functools.<span class="bu">reduce</span>(<span class="kw">lambda</span> x, y: x <span class="op">*</span> y, <span class="bu">sorted</span>([<span class="bu">len</span>(x) <span class="cf">for</span> x <span class="kw">in</span> sets.values()])[<span class="op">-</span><span class="dv">3</span>:])</span>
-<span id="cb18-322"><a href="#cb18-322" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb18-323"><a href="#cb18-323" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-324"><a href="#cb18-324" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
-<span id="cb18-325"><a href="#cb18-325" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-326"><a href="#cb18-326" aria-hidden="true" tabindex="-1"></a>For part 2, we continue merging until there's only one group left. The last pairwise distance we considered must be between the two items we are interested in</span>
-<span id="cb18-327"><a href="#cb18-327" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-330"><a href="#cb18-330" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb18-331"><a href="#cb18-331" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> idx <span class="kw">in</span> order[<span class="dv">1000</span>:]:</span>
-<span id="cb18-332"><a href="#cb18-332" aria-hidden="true" tabindex="-1"></a>    merge_index(idx)</span>
-<span id="cb18-333"><a href="#cb18-333" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span>(sets) <span class="op">==</span> <span class="dv">1</span>:</span>
-<span id="cb18-334"><a href="#cb18-334" aria-hidden="true" tabindex="-1"></a>        <span class="cf">break</span></span>
-<span id="cb18-335"><a href="#cb18-335" aria-hidden="true" tabindex="-1"></a>p1, p2 <span class="op">=</span> np.unravel_index(idx, squares.shape)</span>
-<span id="cb18-336"><a href="#cb18-336" aria-hidden="true" tabindex="-1"></a>arr[p1, <span class="dv">0</span>] <span class="op">*</span> arr[p2, <span class="dv">0</span>]</span>
-<span id="cb18-337"><a href="#cb18-337" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<div class="sourceCode" id="cb21" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> 2025 Solutions</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="fu"># Imports</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="co"># | eval: true</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a><span class="co"># | output: false</span></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> dataclasses</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> functools</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> itertools</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> math</span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> operator</span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sys</span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> defaultdict, deque, namedtuple</span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dataclasses <span class="im">import</span> dataclass</span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> queue <span class="im">import</span> PriorityQueue</span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Literal, Tuple</span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> more_itertools</span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> scipy</span>
+<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a>sys.path.insert(<span class="dv">1</span>, <span class="st">".."</span>)</span>
+<span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> utils</span>
+<span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-34"><a href="#cb21-34" aria-hidden="true" tabindex="-1"></a>load <span class="op">=</span> utils.year_load(<span class="dv">2025</span>)</span>
+<span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-36"><a href="#cb21-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-37"><a href="#cb21-37" aria-hidden="true" tabindex="-1"></a><span class="fu"># [Day 1: Secret Entrance](https://adventofcode.com/2025/day/1)</span></span>
+<span id="cb21-38"><a href="#cb21-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-39"><a href="#cb21-39" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1</span></span>
+<span id="cb21-40"><a href="#cb21-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-41"><a href="#cb21-41" aria-hidden="true" tabindex="-1"></a>We're working in numbers mod 100. Left turns correspond to subtraction, and right turns correspond to addition. To find the position of the dial after a set of turns we just take the cumulative sum of the additions and subtractions (mod 100). Then we just check how many times this position is zero</span>
+<span id="cb21-42"><a href="#cb21-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-45"><a href="#cb21-45" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-46"><a href="#cb21-46" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> np.array([<span class="dv">50</span>] <span class="op">+</span> [<span class="bu">int</span>(x.replace(<span class="st">"L"</span>, <span class="st">"-"</span>).replace(<span class="st">"R"</span>, <span class="st">""</span>)) <span class="cf">for</span> x <span class="kw">in</span> load(<span class="dv">1</span>)])</span>
+<span id="cb21-47"><a href="#cb21-47" aria-hidden="true" tabindex="-1"></a>(np.cumsum(data) <span class="op">%</span> <span class="dv">100</span> <span class="op">==</span> <span class="dv">0</span>).<span class="bu">sum</span>()</span>
+<span id="cb21-48"><a href="#cb21-48" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-49"><a href="#cb21-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-50"><a href="#cb21-50" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
+<span id="cb21-51"><a href="#cb21-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-52"><a href="#cb21-52" aria-hidden="true" tabindex="-1"></a>To find the number of times we've crossed zero, we can just look at how many times the hundreds place of the running sum has changed - every time that happens, we've crossed the value 0 on the dial. This is almost the right answer but needs to be corrected for the fact that sometimes we just kiss zero and don't cross it. For example, if the dial went <span class="in">`10 -&gt; 0 -&gt; 10`</span>, the divisor test wouldn't show a zero crossing. Similarly, if we went <span class="in">`90 -&gt; 0 -&gt; 90`</span>, the divisor test would show two crossings instead of one.</span>
+<span id="cb21-53"><a href="#cb21-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-54"><a href="#cb21-54" aria-hidden="true" tabindex="-1"></a>A bit of thinking shows that the relevant points are those where</span>
+<span id="cb21-55"><a href="#cb21-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-56"><a href="#cb21-56" aria-hidden="true" tabindex="-1"></a><span class="ss">1.  </span>The total sum is zero after a move</span>
+<span id="cb21-57"><a href="#cb21-57" aria-hidden="true" tabindex="-1"></a><span class="ss">2.  </span>The dial moves in the opposite way in the next move.</span>
+<span id="cb21-58"><a href="#cb21-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-59"><a href="#cb21-59" aria-hidden="true" tabindex="-1"></a>We can find both of those cases using numpy magic, and the necessary expression then becomes</span>
+<span id="cb21-60"><a href="#cb21-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-63"><a href="#cb21-63" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-64"><a href="#cb21-64" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(</span>
+<span id="cb21-65"><a href="#cb21-65" aria-hidden="true" tabindex="-1"></a>    <span class="bu">abs</span>(np.diff(np.cumsum(data) <span class="op">//</span> <span class="dv">100</span>))</span>
+<span id="cb21-66"><a href="#cb21-66" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span> ((np.cumsum(data) <span class="op">%</span> <span class="dv">100</span> <span class="op">==</span> <span class="dv">0</span>)[:<span class="op">-</span><span class="dv">1</span>] <span class="op">*</span> np.diff(np.sign(data)) <span class="op">//</span> <span class="dv">2</span>)</span>
+<span id="cb21-67"><a href="#cb21-67" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-68"><a href="#cb21-68" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-69"><a href="#cb21-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-70"><a href="#cb21-70" aria-hidden="true" tabindex="-1"></a><span class="fu"># [Day 2: Gift Shop](https://adventofcode.com/2025/day/2)</span></span>
+<span id="cb21-71"><a href="#cb21-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-72"><a href="#cb21-72" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1 {#part-1-1 id="243d6f36-f834-4365-988d-96eb25722e56"}</span></span>
+<span id="cb21-73"><a href="#cb21-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-74"><a href="#cb21-74" aria-hidden="true" tabindex="-1"></a>There's probably a clever approach here, but I'm not seeing it right now – I'm guessing that comes with adventing at 9pm after a long day at work. I'll just iterate over the ranges, and for each range, iterate over the numbers in the range. For every number in the range, I'll check whether <span class="in">`str(number) == str(number)[:length//2] * 2`</span>. It's slow, but it works</span>
+<span id="cb21-75"><a href="#cb21-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-78"><a href="#cb21-78" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-79"><a href="#cb21-79" aria-hidden="true" tabindex="-1"></a>ranges <span class="op">=</span> [[<span class="bu">int</span>(y) <span class="cf">for</span> y <span class="kw">in</span> x.split(<span class="st">"-"</span>)] <span class="cf">for</span> x <span class="kw">in</span> load(<span class="dv">2</span>)[<span class="dv">0</span>].split(<span class="st">","</span>)]</span>
+<span id="cb21-80"><a href="#cb21-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-81"><a href="#cb21-81" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> invalid_ids(part<span class="op">=</span><span class="dv">1</span>):</span>
+<span id="cb21-82"><a href="#cb21-82" aria-hidden="true" tabindex="-1"></a>    total <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb21-83"><a href="#cb21-83" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> val <span class="kw">in</span> itertools.chain(<span class="op">*</span>[<span class="bu">range</span>(start, end <span class="op">+</span> <span class="dv">1</span>) <span class="cf">for</span> start, end <span class="kw">in</span> ranges]):</span>
+<span id="cb21-84"><a href="#cb21-84" aria-hidden="true" tabindex="-1"></a>        length <span class="op">=</span> <span class="bu">len</span>(<span class="bu">str</span>(val))</span>
+<span id="cb21-85"><a href="#cb21-85" aria-hidden="true" tabindex="-1"></a>        repeats <span class="op">=</span> [<span class="dv">2</span>] <span class="cf">if</span> part <span class="op">==</span> <span class="dv">1</span> <span class="cf">else</span> proper_factors(length)</span>
+<span id="cb21-86"><a href="#cb21-86" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">any</span>(<span class="bu">str</span>(val)[: length <span class="op">//</span> repeat] <span class="op">*</span> repeat <span class="op">==</span> <span class="bu">str</span>(val) <span class="cf">for</span> repeat <span class="kw">in</span> repeats):</span>
+<span id="cb21-87"><a href="#cb21-87" aria-hidden="true" tabindex="-1"></a>            total <span class="op">+=</span> val</span>
+<span id="cb21-88"><a href="#cb21-88" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> total</span>
+<span id="cb21-89"><a href="#cb21-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-90"><a href="#cb21-90" aria-hidden="true" tabindex="-1"></a>invalid_ids()</span>
+<span id="cb21-91"><a href="#cb21-91" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-92"><a href="#cb21-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-93"><a href="#cb21-93" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
+<span id="cb21-94"><a href="#cb21-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-95"><a href="#cb21-95" aria-hidden="true" tabindex="-1"></a>The advantage of organising part 1 like that is that part 2 can be included in the same function with a small flag to switch between the two code paths. The only thing that's left to do is to implement a factorisation function and we are done.</span>
+<span id="cb21-96"><a href="#cb21-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-99"><a href="#cb21-99" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-100"><a href="#cb21-100" aria-hidden="true" tabindex="-1"></a><span class="at">@functools.cache</span></span>
+<span id="cb21-101"><a href="#cb21-101" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> proper_factors(n):</span>
+<span id="cb21-102"><a href="#cb21-102" aria-hidden="true" tabindex="-1"></a>    f <span class="op">=</span> [<span class="bu">list</span>(<span class="bu">set</span>((i, n <span class="op">//</span> i))) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2</span>, <span class="bu">int</span>(math.sqrt(n)) <span class="op">+</span> <span class="dv">1</span>) <span class="cf">if</span> n <span class="op">%</span> i <span class="op">==</span> <span class="dv">0</span>]</span>
+<span id="cb21-103"><a href="#cb21-103" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">sorted</span>([x <span class="cf">for</span> pair <span class="kw">in</span> f <span class="cf">for</span> x <span class="kw">in</span> pair] <span class="op">+</span> ([n] <span class="cf">if</span> n <span class="op">!=</span> <span class="dv">1</span> <span class="cf">else</span> []))</span>
+<span id="cb21-104"><a href="#cb21-104" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-105"><a href="#cb21-105" aria-hidden="true" tabindex="-1"></a>invalid_ids(part<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb21-106"><a href="#cb21-106" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-107"><a href="#cb21-107" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-108"><a href="#cb21-108" aria-hidden="true" tabindex="-1"></a><span class="fu"># [Day 3: Lobby](https://adventofcode.com/2025/day/3)</span></span>
+<span id="cb21-109"><a href="#cb21-109" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-110"><a href="#cb21-110" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1</span></span>
+<span id="cb21-111"><a href="#cb21-111" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-112"><a href="#cb21-112" aria-hidden="true" tabindex="-1"></a>Once the data is loaded into an array, part 1 can be solved using an ugly one-liner. The idea is to take the largest number in each line, multiply by ten and add the largest number occuring after the first one. This needs to be corrected to account for those cases when the last digit of a line is the largest one - in those cases, we need to take the largest digit occuring before the last slot, multiply by ten and add the last digit.</span>
+<span id="cb21-113"><a href="#cb21-113" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-116"><a href="#cb21-116" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-117"><a href="#cb21-117" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> load(<span class="dv">3</span>, <span class="st">"intarray"</span>)</span>
+<span id="cb21-118"><a href="#cb21-118" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(</span>
+<span id="cb21-119"><a href="#cb21-119" aria-hidden="true" tabindex="-1"></a>    line[firstmax] <span class="op">*</span> <span class="dv">10</span> <span class="op">+</span> <span class="bu">max</span>(line[firstmax <span class="op">+</span> <span class="dv">1</span> :])</span>
+<span id="cb21-120"><a href="#cb21-120" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> ((firstmax <span class="op">:=</span> np.argmax(line)) <span class="op">!=</span> <span class="bu">len</span>(line) <span class="op">-</span> <span class="dv">1</span>)</span>
+<span id="cb21-121"><a href="#cb21-121" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span> line[firstmax] <span class="op">+</span> <span class="dv">10</span> <span class="op">*</span> <span class="bu">max</span>(line[:<span class="op">-</span><span class="dv">1</span>])</span>
+<span id="cb21-122"><a href="#cb21-122" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> line <span class="kw">in</span> data</span>
+<span id="cb21-123"><a href="#cb21-123" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-124"><a href="#cb21-124" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-125"><a href="#cb21-125" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-126"><a href="#cb21-126" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
+<span id="cb21-127"><a href="#cb21-127" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-128"><a href="#cb21-128" aria-hidden="true" tabindex="-1"></a>For part 2, we need to be a bit cleverer, but the core of the logic from before still applies. We know that we need to pick 12 digits out of n. This means that out of the first (n-11) digits, we need to pick at least one – otherwise we'll run out of digits. And which of those digits is the best one to pick? The largest one. If we pick the ith digit, we now need to pick exactly 11 digits from position i+1 to n, which leads us nicely to the following recursive solution</span>
+<span id="cb21-129"><a href="#cb21-129" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-132"><a href="#cb21-132" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-133"><a href="#cb21-133" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> optimal_selection(array, count):</span>
+<span id="cb21-134"><a href="#cb21-134" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> count <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb21-135"><a href="#cb21-135" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> []</span>
+<span id="cb21-136"><a href="#cb21-136" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span>(array) <span class="op">==</span> count:</span>
+<span id="cb21-137"><a href="#cb21-137" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">list</span>(array)</span>
+<span id="cb21-138"><a href="#cb21-138" aria-hidden="true" tabindex="-1"></a>    argmax <span class="op">=</span> np.argmax(array[: <span class="bu">len</span>(array) <span class="op">-</span>count <span class="op">+</span> <span class="dv">1</span>])</span>
+<span id="cb21-139"><a href="#cb21-139" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> [array[argmax]] <span class="op">+</span> optimal_selection(array[argmax <span class="op">+</span> <span class="dv">1</span> :], count <span class="op">-</span> <span class="dv">1</span>)</span>
+<span id="cb21-140"><a href="#cb21-140" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-141"><a href="#cb21-141" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-142"><a href="#cb21-142" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(functools.<span class="bu">reduce</span>(<span class="kw">lambda</span> x, y: <span class="dv">10</span><span class="op">*</span>x <span class="op">+</span> y, optimal_selection(line, <span class="dv">12</span>)) <span class="cf">for</span> line <span class="kw">in</span> data)</span>
+<span id="cb21-143"><a href="#cb21-143" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-144"><a href="#cb21-144" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-145"><a href="#cb21-145" aria-hidden="true" tabindex="-1"></a>Once we have that, part 1 could have been expressed as just <span class="in">`sum(functools.reduce(lambda x, y: 10*x + y, optimal_selection(line, 2)) for line in data)`</span>, but I liked the original one-liner</span>
+<span id="cb21-146"><a href="#cb21-146" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-147"><a href="#cb21-147" aria-hidden="true" tabindex="-1"></a><span class="fu"># [Day 4: Printing Department](https://adventofcode.com/2025/day/4)</span></span>
+<span id="cb21-148"><a href="#cb21-148" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-149"><a href="#cb21-149" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1</span></span>
+<span id="cb21-150"><a href="#cb21-150" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-151"><a href="#cb21-151" aria-hidden="true" tabindex="-1"></a>This definitely feels like a job that calls for <span class="in">`numpy/scipy`</span>'s convolution functions. And maybe that library is such a good fit for the task that using it is a bit like cheating.</span>
+<span id="cb21-152"><a href="#cb21-152" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-155"><a href="#cb21-155" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-156"><a href="#cb21-156" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> load(<span class="dv">4</span>, <span class="st">"chararray"</span>)</span>
+<span id="cb21-157"><a href="#cb21-157" aria-hidden="true" tabindex="-1"></a>count <span class="op">=</span> scipy.ndimage.convolve(<span class="dv">1</span> <span class="op">*</span> (data <span class="op">==</span> <span class="st">"@"</span>), np.ones((<span class="dv">3</span>, <span class="dv">3</span>)), mode<span class="op">=</span><span class="st">"constant"</span>)</span>
+<span id="cb21-158"><a href="#cb21-158" aria-hidden="true" tabindex="-1"></a>changed <span class="op">=</span> (data <span class="op">==</span> <span class="st">"@"</span>) <span class="op">&amp;</span> (count <span class="op">&lt;</span> <span class="dv">5</span>)</span>
+<span id="cb21-159"><a href="#cb21-159" aria-hidden="true" tabindex="-1"></a>changed.<span class="bu">sum</span>()</span>
+<span id="cb21-160"><a href="#cb21-160" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-161"><a href="#cb21-161" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-162"><a href="#cb21-162" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
+<span id="cb21-163"><a href="#cb21-163" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-164"><a href="#cb21-164" aria-hidden="true" tabindex="-1"></a>For part two, we can take the results from part one and put into a while loop</span>
+<span id="cb21-165"><a href="#cb21-165" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-168"><a href="#cb21-168" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-169"><a href="#cb21-169" aria-hidden="true" tabindex="-1"></a>new_data <span class="op">=</span> data.copy()</span>
+<span id="cb21-170"><a href="#cb21-170" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> changed.<span class="bu">sum</span>() <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb21-171"><a href="#cb21-171" aria-hidden="true" tabindex="-1"></a>    count <span class="op">=</span> scipy.ndimage.convolve(<span class="dv">1</span> <span class="op">*</span> (new_data <span class="op">==</span> <span class="st">"@"</span>), np.ones((<span class="dv">3</span>, <span class="dv">3</span>)), mode<span class="op">=</span><span class="st">"constant"</span>)</span>
+<span id="cb21-172"><a href="#cb21-172" aria-hidden="true" tabindex="-1"></a>    changed <span class="op">=</span> <span class="dv">1</span> <span class="op">*</span> ((new_data <span class="op">==</span> <span class="st">"@"</span>) <span class="op">&amp;</span> (count <span class="op">&lt;</span> <span class="dv">5</span>))</span>
+<span id="cb21-173"><a href="#cb21-173" aria-hidden="true" tabindex="-1"></a>    new_data[np.where(changed)] <span class="op">=</span> <span class="st">"."</span></span>
+<span id="cb21-174"><a href="#cb21-174" aria-hidden="true" tabindex="-1"></a>(new_data <span class="op">!=</span> data).<span class="bu">sum</span>()</span>
+<span id="cb21-175"><a href="#cb21-175" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-176"><a href="#cb21-176" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-177"><a href="#cb21-177" aria-hidden="true" tabindex="-1"></a><span class="sc">\&gt;</span></span>
+<span id="cb21-178"><a href="#cb21-178" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-179"><a href="#cb21-179" aria-hidden="true" tabindex="-1"></a><span class="fu"># [Day 5: Cafeteria](https://adventofcode.com/2025/day/5)</span></span>
+<span id="cb21-180"><a href="#cb21-180" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-181"><a href="#cb21-181" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1</span></span>
+<span id="cb21-182"><a href="#cb21-182" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-183"><a href="#cb21-183" aria-hidden="true" tabindex="-1"></a>For part 1, we can just loop over the values and for every value $v$ ask if there is some range $r = (\mathrm{start}, \mathrm{end})$ such that $\mathrm{start} \leq v \leq \mathrm{end}$. The number of values that we have to check is small enough that this runs plenty fast</span>
+<span id="cb21-184"><a href="#cb21-184" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-187"><a href="#cb21-187" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-188"><a href="#cb21-188" aria-hidden="true" tabindex="-1"></a>ranges, values <span class="op">=</span> load(<span class="dv">5</span>, <span class="st">"raw"</span>).split(<span class="st">"</span><span class="ch">\n\n</span><span class="st">"</span>)</span>
+<span id="cb21-189"><a href="#cb21-189" aria-hidden="true" tabindex="-1"></a>ranges <span class="op">=</span> [[<span class="bu">int</span>(x) <span class="cf">for</span> x <span class="kw">in</span> r.split(<span class="st">"-"</span>)] <span class="cf">for</span> r <span class="kw">in</span> ranges.split(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span>)]</span>
+<span id="cb21-190"><a href="#cb21-190" aria-hidden="true" tabindex="-1"></a>values <span class="op">=</span> [<span class="bu">int</span>(x) <span class="cf">for</span> x <span class="kw">in</span> values.split(<span class="st">"</span><span class="ch">\n</span><span class="st">"</span>)]</span>
+<span id="cb21-191"><a href="#cb21-191" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-192"><a href="#cb21-192" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(<span class="bu">any</span>(start <span class="op">&lt;=</span> value <span class="op">&lt;=</span> end <span class="cf">for</span> start, end <span class="kw">in</span> ranges) <span class="cf">for</span> value <span class="kw">in</span> values)</span>
+<span id="cb21-193"><a href="#cb21-193" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-194"><a href="#cb21-194" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-195"><a href="#cb21-195" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
+<span id="cb21-196"><a href="#cb21-196" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-197"><a href="#cb21-197" aria-hidden="true" tabindex="-1"></a>For part 2, I didn't even bother checking if the above approach would have been fast enough. since that's obviously not the intended path. Instead, we should focus on the ranges themselves. The length of a range $r = (\mathrm{start}, \mathrm{end})$ is just $\mathrm{end} - \mathrm{start} + 1$. The only tricky thing is what to do when to ranges overlap – how to detect it, and how to correct for it.</span>
+<span id="cb21-198"><a href="#cb21-198" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-199"><a href="#cb21-199" aria-hidden="true" tabindex="-1"></a>If we sort the ranges by <span class="in">`start`</span>, then one of the folowing is true:</span>
+<span id="cb21-200"><a href="#cb21-200" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-201"><a href="#cb21-201" aria-hidden="true" tabindex="-1"></a><span class="ss">1.  </span>The first two ranges overlap</span>
+<span id="cb21-202"><a href="#cb21-202" aria-hidden="true" tabindex="-1"></a><span class="ss">2.  </span>No range can overlap with the first range</span>
+<span id="cb21-203"><a href="#cb21-203" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-204"><a href="#cb21-204" aria-hidden="true" tabindex="-1"></a>So we can just sort the ranges by first coordinate, loop over them and check the first two ranges in each loop iteration. If they overlap, we put the merged range back into the list of ranges, and if they don't we are done merging the first range and can just add it to the total length</span>
+<span id="cb21-205"><a href="#cb21-205" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-208"><a href="#cb21-208" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-209"><a href="#cb21-209" aria-hidden="true" tabindex="-1"></a>ranges <span class="op">=</span> <span class="bu">sorted</span>(ranges, key<span class="op">=</span><span class="kw">lambda</span> x: x[<span class="dv">0</span>])</span>
+<span id="cb21-210"><a href="#cb21-210" aria-hidden="true" tabindex="-1"></a>total <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb21-211"><a href="#cb21-211" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-212"><a href="#cb21-212" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> (r1 <span class="op">:=</span> ranges.pop(<span class="dv">0</span>)) <span class="kw">and</span> ranges:</span>
+<span id="cb21-213"><a href="#cb21-213" aria-hidden="true" tabindex="-1"></a>    r2 <span class="op">=</span> ranges[<span class="dv">0</span>]</span>
+<span id="cb21-214"><a href="#cb21-214" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> r1[<span class="dv">1</span>] <span class="op">+</span> <span class="dv">1</span> <span class="op">&gt;=</span> r2[<span class="dv">0</span>]:</span>
+<span id="cb21-215"><a href="#cb21-215" aria-hidden="true" tabindex="-1"></a>        ranges <span class="op">=</span> [[r1[<span class="dv">0</span>], <span class="bu">max</span>(r2[<span class="dv">1</span>], r1[<span class="dv">1</span>])]] <span class="op">+</span> ranges[<span class="dv">1</span>:]</span>
+<span id="cb21-216"><a href="#cb21-216" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb21-217"><a href="#cb21-217" aria-hidden="true" tabindex="-1"></a>        total <span class="op">+=</span> r1[<span class="dv">1</span>] <span class="op">-</span> r1[<span class="dv">0</span>] <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb21-218"><a href="#cb21-218" aria-hidden="true" tabindex="-1"></a>total <span class="op">+</span> r1[<span class="dv">1</span>] <span class="op">-</span> r1[<span class="dv">0</span>] <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb21-219"><a href="#cb21-219" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-220"><a href="#cb21-220" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-221"><a href="#cb21-221" aria-hidden="true" tabindex="-1"></a><span class="fu"># [Day 6: Trash Compactor](https://adventofcode.com/2025/day/6)</span></span>
+<span id="cb21-222"><a href="#cb21-222" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-223"><a href="#cb21-223" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1</span></span>
+<span id="cb21-224"><a href="#cb21-224" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-225"><a href="#cb21-225" aria-hidden="true" tabindex="-1"></a>There's nothing particularly tricky to do for part one - load the data, sanitise the white space, and then for each set of integers, either add them all together or multiply them, and finally take the sum of the result</span>
+<span id="cb21-226"><a href="#cb21-226" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-229"><a href="#cb21-229" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-230"><a href="#cb21-230" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> operator <span class="im">import</span> add, mul</span>
+<span id="cb21-231"><a href="#cb21-231" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-232"><a href="#cb21-232" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> [re.sub(<span class="vs">r"\s+"</span>, <span class="st">" "</span>, line).split(<span class="st">" "</span>) <span class="cf">for</span> line <span class="kw">in</span> load(<span class="dv">6</span>)]</span>
+<span id="cb21-233"><a href="#cb21-233" aria-hidden="true" tabindex="-1"></a>ops <span class="op">=</span> {<span class="st">"*"</span>: mul, <span class="st">"+"</span>: add}</span>
+<span id="cb21-234"><a href="#cb21-234" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(</span>
+<span id="cb21-235"><a href="#cb21-235" aria-hidden="true" tabindex="-1"></a>    functools.<span class="bu">reduce</span>(ops[problem[<span class="op">-</span><span class="dv">1</span>]], [<span class="bu">int</span>(x) <span class="cf">for</span> x <span class="kw">in</span> problem[:<span class="op">-</span><span class="dv">1</span>]])</span>
+<span id="cb21-236"><a href="#cb21-236" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> problem <span class="kw">in</span> <span class="bu">zip</span>(<span class="op">*</span>data)</span>
+<span id="cb21-237"><a href="#cb21-237" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-238"><a href="#cb21-238" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-239"><a href="#cb21-239" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-240"><a href="#cb21-240" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
+<span id="cb21-241"><a href="#cb21-241" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-242"><a href="#cb21-242" aria-hidden="true" tabindex="-1"></a>Part two is more interesting, since we'll be needing the whitespace that we just got rid of – time to reload the data. Then, we can just use <span class="in">`numpy`</span>'s transpose function to flip the data, join the individual digits into one string, and separate the groups of digits using <span class="in">`itertools.groupby`</span></span>
+<span id="cb21-243"><a href="#cb21-243" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-246"><a href="#cb21-246" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-247"><a href="#cb21-247" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> load(<span class="dv">6</span>)</span>
+<span id="cb21-248"><a href="#cb21-248" aria-hidden="true" tabindex="-1"></a>operators <span class="op">=</span> re.sub(<span class="vs">r"\s+"</span>, <span class="st">" "</span>, data[<span class="op">-</span><span class="dv">1</span>]).split(<span class="st">" "</span>)</span>
+<span id="cb21-249"><a href="#cb21-249" aria-hidden="true" tabindex="-1"></a>operands <span class="op">=</span> [</span>
+<span id="cb21-250"><a href="#cb21-250" aria-hidden="true" tabindex="-1"></a>    <span class="st">""</span>.join(row) <span class="cf">for</span> row <span class="kw">in</span> np.array([[char <span class="cf">for</span> char <span class="kw">in</span> line] <span class="cf">for</span> line <span class="kw">in</span> data[:<span class="op">-</span><span class="dv">1</span>]]).T</span>
+<span id="cb21-251"><a href="#cb21-251" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb21-252"><a href="#cb21-252" aria-hidden="true" tabindex="-1"></a>operands <span class="op">=</span> [</span>
+<span id="cb21-253"><a href="#cb21-253" aria-hidden="true" tabindex="-1"></a>    <span class="bu">list</span>(element)</span>
+<span id="cb21-254"><a href="#cb21-254" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> key, element <span class="kw">in</span> itertools.groupby(operands, <span class="kw">lambda</span> x: <span class="kw">not</span> re.match(<span class="vs">r"^\s+$"</span>, x))</span>
+<span id="cb21-255"><a href="#cb21-255" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> key</span>
+<span id="cb21-256"><a href="#cb21-256" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb21-257"><a href="#cb21-257" aria-hidden="true" tabindex="-1"></a>total <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb21-258"><a href="#cb21-258" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> operator, current_operands <span class="kw">in</span> <span class="bu">zip</span>(operators, operands):</span>
+<span id="cb21-259"><a href="#cb21-259" aria-hidden="true" tabindex="-1"></a>    total <span class="op">+=</span> functools.<span class="bu">reduce</span>(ops[operator], [<span class="bu">int</span>(x) <span class="cf">for</span> x <span class="kw">in</span> current_operands])</span>
+<span id="cb21-260"><a href="#cb21-260" aria-hidden="true" tabindex="-1"></a>total</span>
+<span id="cb21-261"><a href="#cb21-261" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-262"><a href="#cb21-262" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-263"><a href="#cb21-263" aria-hidden="true" tabindex="-1"></a><span class="fu"># [Day 7: Laboratories](https://adventofcode.com/2025/day/7)</span></span>
+<span id="cb21-264"><a href="#cb21-264" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-265"><a href="#cb21-265" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1</span></span>
+<span id="cb21-266"><a href="#cb21-266" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-267"><a href="#cb21-267" aria-hidden="true" tabindex="-1"></a>Each row of splitters is a linear transformation of the incoming beam: a beam which doesn't hit a splitter continues unchanged, while a beam that hits a splitter continues as a beam one slot to the left, and a beam one slot to the right. For me, the most natural way of representing this linear transformation is using a matrix, and applying the transformation is then just a matrix multiplication. Going through all the rows is just a matter of repeated matrix multiplication</span>
+<span id="cb21-268"><a href="#cb21-268" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-271"><a href="#cb21-271" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-272"><a href="#cb21-272" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> <span class="dv">1</span> <span class="op">*</span> (load(<span class="dv">7</span>, <span class="st">"chararray"</span>) <span class="op">!=</span> <span class="st">"."</span>)[::<span class="dv">2</span>]</span>
+<span id="cb21-273"><a href="#cb21-273" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_matrix(indices, length<span class="op">=</span><span class="bu">len</span>(data[<span class="dv">0</span>])):</span>
+<span id="cb21-274"><a href="#cb21-274" aria-hidden="true" tabindex="-1"></a>    m <span class="op">=</span> np.eye(length)</span>
+<span id="cb21-275"><a href="#cb21-275" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> idx <span class="kw">in</span> indices: m[idx] <span class="op">=</span> scipy.ndimage.convolve(m[idx], [<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>])</span>
+<span id="cb21-276"><a href="#cb21-276" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> m</span>
+<span id="cb21-277"><a href="#cb21-277" aria-hidden="true" tabindex="-1"></a>total, v <span class="op">=</span> <span class="dv">0</span>, data[<span class="dv">0</span>]</span>
+<span id="cb21-278"><a href="#cb21-278" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> row <span class="kw">in</span> data[<span class="dv">1</span>:]:</span>
+<span id="cb21-279"><a href="#cb21-279" aria-hidden="true" tabindex="-1"></a>    total <span class="op">+=</span> <span class="bu">sum</span>((v <span class="op">*</span> row <span class="op">!=</span> <span class="dv">0</span>))</span>
+<span id="cb21-280"><a href="#cb21-280" aria-hidden="true" tabindex="-1"></a>    v <span class="op">=</span> v <span class="op">@</span> generate_matrix(np.where(row)[<span class="dv">0</span>])</span>
+<span id="cb21-281"><a href="#cb21-281" aria-hidden="true" tabindex="-1"></a>total</span>
+<span id="cb21-282"><a href="#cb21-282" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-283"><a href="#cb21-283" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-284"><a href="#cb21-284" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
+<span id="cb21-285"><a href="#cb21-285" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-286"><a href="#cb21-286" aria-hidden="true" tabindex="-1"></a>I wasn't planning on it, but with part one solved as I did there, part two just becomes</span>
+<span id="cb21-287"><a href="#cb21-287" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-290"><a href="#cb21-290" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-291"><a href="#cb21-291" aria-hidden="true" tabindex="-1"></a><span class="bu">sum</span>(v)</span>
+<span id="cb21-292"><a href="#cb21-292" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-293"><a href="#cb21-293" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-294"><a href="#cb21-294" aria-hidden="true" tabindex="-1"></a><span class="fu"># [Day 8: Playground](https://adventofcode.com/2025/day/8)</span></span>
+<span id="cb21-295"><a href="#cb21-295" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-296"><a href="#cb21-296" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1</span></span>
+<span id="cb21-297"><a href="#cb21-297" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-298"><a href="#cb21-298" aria-hidden="true" tabindex="-1"></a>This is a fairly straightforward implementation of the problem statement. We build an array of all the pairwise (squared) distances, use <span class="in">`argsort`</span> to find which items they correspond to. We successively merge items based on this order, using a forward and a reverse dictionary to keep track of where each item is</span>
+<span id="cb21-299"><a href="#cb21-299" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-302"><a href="#cb21-302" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-303"><a href="#cb21-303" aria-hidden="true" tabindex="-1"></a>arr <span class="op">=</span> np.array(load(<span class="dv">8</span>, <span class="st">"int"</span>))</span>
+<span id="cb21-304"><a href="#cb21-304" aria-hidden="true" tabindex="-1"></a>sets <span class="op">=</span> {idx: <span class="bu">set</span>([idx]) <span class="cf">for</span> idx <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(arr))}</span>
+<span id="cb21-305"><a href="#cb21-305" aria-hidden="true" tabindex="-1"></a>positions <span class="op">=</span> {idx: idx <span class="cf">for</span> idx <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(arr))}</span>
+<span id="cb21-306"><a href="#cb21-306" aria-hidden="true" tabindex="-1"></a>squares <span class="op">=</span> np.triu(</span>
+<span id="cb21-307"><a href="#cb21-307" aria-hidden="true" tabindex="-1"></a>    (np.diagonal(np.subtract.outer(arr, arr), axis1<span class="op">=</span><span class="dv">1</span>, axis2<span class="op">=</span><span class="dv">3</span>) <span class="op">**</span> <span class="dv">2</span>).<span class="bu">sum</span>(axis<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb21-308"><a href="#cb21-308" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-309"><a href="#cb21-309" aria-hidden="true" tabindex="-1"></a>order <span class="op">=</span> squares.ravel().argsort()[(<span class="dv">1001</span> <span class="op">*</span> <span class="dv">1000</span>) <span class="op">//</span> <span class="dv">2</span> :]</span>
+<span id="cb21-310"><a href="#cb21-310" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-311"><a href="#cb21-311" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-312"><a href="#cb21-312" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> merge_index(idx):</span>
+<span id="cb21-313"><a href="#cb21-313" aria-hidden="true" tabindex="-1"></a>    p1, p2 <span class="op">=</span> [positions[x] <span class="cf">for</span> x <span class="kw">in</span> np.unravel_index(idx, squares.shape)]</span>
+<span id="cb21-314"><a href="#cb21-314" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> p1 <span class="op">!=</span> p2:</span>
+<span id="cb21-315"><a href="#cb21-315" aria-hidden="true" tabindex="-1"></a>        sets[p1] <span class="op">|=</span> sets[p2]</span>
+<span id="cb21-316"><a href="#cb21-316" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> label <span class="kw">in</span> sets[p2]:</span>
+<span id="cb21-317"><a href="#cb21-317" aria-hidden="true" tabindex="-1"></a>            positions[label] <span class="op">=</span> p1</span>
+<span id="cb21-318"><a href="#cb21-318" aria-hidden="true" tabindex="-1"></a>        <span class="kw">del</span> sets[p2]</span>
+<span id="cb21-319"><a href="#cb21-319" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-320"><a href="#cb21-320" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-321"><a href="#cb21-321" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> idx <span class="kw">in</span> order[:<span class="dv">1000</span>]:</span>
+<span id="cb21-322"><a href="#cb21-322" aria-hidden="true" tabindex="-1"></a>    merge_index(idx)</span>
+<span id="cb21-323"><a href="#cb21-323" aria-hidden="true" tabindex="-1"></a>functools.<span class="bu">reduce</span>(<span class="kw">lambda</span> x, y: x <span class="op">*</span> y, <span class="bu">sorted</span>([<span class="bu">len</span>(x) <span class="cf">for</span> x <span class="kw">in</span> sets.values()])[<span class="op">-</span><span class="dv">3</span>:])</span>
+<span id="cb21-324"><a href="#cb21-324" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-325"><a href="#cb21-325" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-326"><a href="#cb21-326" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
+<span id="cb21-327"><a href="#cb21-327" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-328"><a href="#cb21-328" aria-hidden="true" tabindex="-1"></a>For part 2, we continue merging until there's only one group left. The last pairwise distance we considered must be between the two items we are interested in</span>
+<span id="cb21-329"><a href="#cb21-329" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-332"><a href="#cb21-332" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-333"><a href="#cb21-333" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> idx <span class="kw">in</span> order[<span class="dv">1000</span>:]:</span>
+<span id="cb21-334"><a href="#cb21-334" aria-hidden="true" tabindex="-1"></a>    merge_index(idx)</span>
+<span id="cb21-335"><a href="#cb21-335" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span>(sets) <span class="op">==</span> <span class="dv">1</span>:</span>
+<span id="cb21-336"><a href="#cb21-336" aria-hidden="true" tabindex="-1"></a>        <span class="cf">break</span></span>
+<span id="cb21-337"><a href="#cb21-337" aria-hidden="true" tabindex="-1"></a>p1, p2 <span class="op">=</span> np.unravel_index(idx, squares.shape)</span>
+<span id="cb21-338"><a href="#cb21-338" aria-hidden="true" tabindex="-1"></a>arr[p1, <span class="dv">0</span>] <span class="op">*</span> arr[p2, <span class="dv">0</span>]</span>
+<span id="cb21-339"><a href="#cb21-339" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-340"><a href="#cb21-340" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-341"><a href="#cb21-341" aria-hidden="true" tabindex="-1"></a><span class="sc">\*</span></span>
+<span id="cb21-342"><a href="#cb21-342" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-343"><a href="#cb21-343" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 1</span></span>
+<span id="cb21-344"><a href="#cb21-344" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-347"><a href="#cb21-347" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-348"><a href="#cb21-348" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> load(<span class="st">"9"</span>, <span class="st">"int"</span>)</span>
+<span id="cb21-349"><a href="#cb21-349" aria-hidden="true" tabindex="-1"></a>areas <span class="op">=</span> np.prod(<span class="bu">abs</span>(np.diagonal(np.subtract.outer(data, data), axis1<span class="op">=</span><span class="dv">1</span>, axis2<span class="op">=</span><span class="dv">3</span>)) <span class="op">+</span> <span class="dv">1</span>, axis<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb21-350"><a href="#cb21-350" aria-hidden="true" tabindex="-1"></a>areas.<span class="bu">max</span>()</span>
+<span id="cb21-351"><a href="#cb21-351" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-352"><a href="#cb21-352" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-353"><a href="#cb21-353" aria-hidden="true" tabindex="-1"></a><span class="fu">## Part 2</span></span>
+<span id="cb21-354"><a href="#cb21-354" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-355"><a href="#cb21-355" aria-hidden="true" tabindex="-1"></a>To determine whether a rectangle defined by two corners lies entirely within the shape, we need to check the following:</span>
+<span id="cb21-356"><a href="#cb21-356" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-357"><a href="#cb21-357" aria-hidden="true" tabindex="-1"></a><span class="ss">1.  </span>That the other two corners lie within the shape</span>
+<span id="cb21-358"><a href="#cb21-358" aria-hidden="true" tabindex="-1"></a><span class="ss">2.  </span>That none of the lines defining the rectangle cross the border of the shape</span>
+<span id="cb21-359"><a href="#cb21-359" aria-hidden="true" tabindex="-1"></a><span class="ss">3.  </span>If any of the the border lines of the rectangle coincide with a border line of the shape, the normal vectors of the line are oriented in the same way</span>
+<span id="cb21-360"><a href="#cb21-360" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-361"><a href="#cb21-361" aria-hidden="true" tabindex="-1"></a>For the first one, we can use a raycasting algorithm and check how many times the ray $(x0 + t, y0),\ t\in[0,\inf)$ intersects with our shape. If the number is odd, the point is inside the shape; if it is even, the point is outside. Points on the edge are counted as being inside the polygon. To account for the edge case where the ray just touches the shape, we'll say that the tops of the edge line segments count for intersection purposes, while the bottom ones don't. That lets us distinguish between the following two cases:</span>
+<span id="cb21-362"><a href="#cb21-362" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-365"><a href="#cb21-365" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-366"><a href="#cb21-366" aria-hidden="true" tabindex="-1"></a><span class="co"># | eval: true</span></span>
+<span id="cb21-367"><a href="#cb21-367" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-fold: true</span></span>
+<span id="cb21-368"><a href="#cb21-368" aria-hidden="true" tabindex="-1"></a><span class="co"># | code-summary: "Code to generate the plot"</span></span>
+<span id="cb21-369"><a href="#cb21-369" aria-hidden="true" tabindex="-1"></a><span class="co"># import plotly.express as px</span></span>
+<span id="cb21-370"><a href="#cb21-370" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb21-371"><a href="#cb21-371" aria-hidden="true" tabindex="-1"></a>sns.set_theme()</span>
+<span id="cb21-372"><a href="#cb21-372" aria-hidden="true" tabindex="-1"></a>plt.plot([<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>], [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>])</span>
+<span id="cb21-373"><a href="#cb21-373" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> plt.gca()</span>
+<span id="cb21-374"><a href="#cb21-374" aria-hidden="true" tabindex="-1"></a>ax.set_xticks([])</span>
+<span id="cb21-375"><a href="#cb21-375" aria-hidden="true" tabindex="-1"></a>ax.set_yticks([])</span>
+<span id="cb21-376"><a href="#cb21-376" aria-hidden="true" tabindex="-1"></a>ax.annotate(<span class="st">"$P_1$"</span>, [<span class="fl">1.07</span>, <span class="fl">1.03</span>])</span>
+<span id="cb21-377"><a href="#cb21-377" aria-hidden="true" tabindex="-1"></a>ax.plot([<span class="fl">1.1</span>], [<span class="dv">1</span>], marker<span class="op">=</span><span class="st">"."</span>)</span>
+<span id="cb21-378"><a href="#cb21-378" aria-hidden="true" tabindex="-1"></a>ax.set_xlim(left<span class="op">=</span><span class="dv">0</span>, right<span class="op">=</span><span class="fl">2.5</span>)</span>
+<span id="cb21-379"><a href="#cb21-379" aria-hidden="true" tabindex="-1"></a>ax.plot([<span class="fl">1.2</span>, <span class="fl">1.2</span>, <span class="fl">2.2</span>, <span class="fl">2.2</span>, <span class="fl">2.4</span>, <span class="fl">2.4</span>, <span class="fl">1.2</span>], [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="fl">1.2</span>, <span class="fl">1.2</span>, <span class="dv">0</span>, <span class="dv">0</span>])</span>
+<span id="cb21-380"><a href="#cb21-380" aria-hidden="true" tabindex="-1"></a>ax.annotate(<span class="st">"$P_2$"</span>, [<span class="fl">2.27</span>, <span class="fl">1.03</span>])</span>
+<span id="cb21-381"><a href="#cb21-381" aria-hidden="true" tabindex="-1"></a>ax.plot([<span class="fl">2.3</span>], [<span class="dv">1</span>], marker<span class="op">=</span><span class="st">"."</span>)</span>
+<span id="cb21-382"><a href="#cb21-382" aria-hidden="true" tabindex="-1"></a>ax.plot([<span class="fl">1.1</span>], [<span class="dv">1</span>], marker<span class="op">=</span><span class="st">"."</span>)</span>
+<span id="cb21-383"><a href="#cb21-383" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-384"><a href="#cb21-384" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-385"><a href="#cb21-385" aria-hidden="true" tabindex="-1"></a>Both $P_1$ and $P_2$ have two vertical lines from their respective shapes to the left of them, and both lie exactly on the endpoint of either of the lines, yet $P_1$ is outside the shape while $P_2$ is inside. The difference between them is that the ray for $P_1$ touches the tops of two of the edges of the polygon, while the ray for $P_2$ touches the top of one and the bottom of the other.</span>
+<span id="cb21-386"><a href="#cb21-386" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-387"><a href="#cb21-387" aria-hidden="true" tabindex="-1"></a>With the theory worked out, we can proceed to actually calculating the number we are looking for:</span>
+<span id="cb21-388"><a href="#cb21-388" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-391"><a href="#cb21-391" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb21-392"><a href="#cb21-392" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
+<span id="cb21-393"><a href="#cb21-393" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> LineSegment:</span>
+<span id="cb21-394"><a href="#cb21-394" aria-hidden="true" tabindex="-1"></a>    position: <span class="bu">int</span></span>
+<span id="cb21-395"><a href="#cb21-395" aria-hidden="true" tabindex="-1"></a>    x0: <span class="bu">int</span></span>
+<span id="cb21-396"><a href="#cb21-396" aria-hidden="true" tabindex="-1"></a>    x1: <span class="bu">int</span></span>
+<span id="cb21-397"><a href="#cb21-397" aria-hidden="true" tabindex="-1"></a>    orientation: Literal[<span class="st">"h"</span>] <span class="op">|</span> Literal[<span class="st">"v"</span>]</span>
+<span id="cb21-398"><a href="#cb21-398" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-399"><a href="#cb21-399" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> __post_init__(<span class="va">self</span>):</span>
+<span id="cb21-400"><a href="#cb21-400" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.direction <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb21-401"><a href="#cb21-401" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.x1 <span class="op">&lt;</span> <span class="va">self</span>.x0:</span>
+<span id="cb21-402"><a href="#cb21-402" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.x0, <span class="va">self</span>.x1 <span class="op">=</span> <span class="va">self</span>.x1, <span class="va">self</span>.x0</span>
+<span id="cb21-403"><a href="#cb21-403" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.direction <span class="op">=</span> <span class="op">-</span><span class="dv">1</span></span>
+<span id="cb21-404"><a href="#cb21-404" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-405"><a href="#cb21-405" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> contains_point(<span class="va">self</span>, p, endpoints<span class="op">=</span><span class="va">False</span>):</span>
+<span id="cb21-406"><a href="#cb21-406" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> endpoints:</span>
+<span id="cb21-407"><a href="#cb21-407" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="va">self</span>.x0 <span class="op">&lt;</span> p <span class="op">&lt;</span> <span class="va">self</span>.x1</span>
+<span id="cb21-408"><a href="#cb21-408" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.x0 <span class="op">&lt;=</span> p <span class="op">&lt;=</span> <span class="va">self</span>.x1</span>
+<span id="cb21-409"><a href="#cb21-409" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-410"><a href="#cb21-410" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> intersects(<span class="va">self</span>, other):</span>
+<span id="cb21-411"><a href="#cb21-411" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> (</span>
+<span id="cb21-412"><a href="#cb21-412" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.orientation <span class="op">!=</span> other.orientation</span>
+<span id="cb21-413"><a href="#cb21-413" aria-hidden="true" tabindex="-1"></a>            <span class="kw">and</span> <span class="va">self</span>.contains_point(other.position)</span>
+<span id="cb21-414"><a href="#cb21-414" aria-hidden="true" tabindex="-1"></a>            <span class="kw">and</span> other.contains_point(<span class="va">self</span>.position)</span>
+<span id="cb21-415"><a href="#cb21-415" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb21-416"><a href="#cb21-416" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-417"><a href="#cb21-417" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> overlaps(<span class="va">self</span>, other):</span>
+<span id="cb21-418"><a href="#cb21-418" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> (</span>
+<span id="cb21-419"><a href="#cb21-419" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.orientation <span class="op">==</span> other.orientation</span>
+<span id="cb21-420"><a href="#cb21-420" aria-hidden="true" tabindex="-1"></a>            <span class="kw">and</span> <span class="va">self</span>.position <span class="op">==</span> other.position</span>
+<span id="cb21-421"><a href="#cb21-421" aria-hidden="true" tabindex="-1"></a>            <span class="kw">and</span> <span class="va">self</span>.x1 <span class="op">&gt;</span> other.x0</span>
+<span id="cb21-422"><a href="#cb21-422" aria-hidden="true" tabindex="-1"></a>            <span class="kw">and</span> other.x1 <span class="op">&gt;</span> <span class="va">self</span>.x0</span>
+<span id="cb21-423"><a href="#cb21-423" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb21-424"><a href="#cb21-424" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-425"><a href="#cb21-425" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-426"><a href="#cb21-426" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> points_to_edges(data):</span>
+<span id="cb21-427"><a href="#cb21-427" aria-hidden="true" tabindex="-1"></a>    edges <span class="op">=</span> []</span>
+<span id="cb21-428"><a href="#cb21-428" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> start, end <span class="kw">in</span> <span class="bu">zip</span>(data, data[<span class="dv">1</span>:]):</span>
+<span id="cb21-429"><a href="#cb21-429" aria-hidden="true" tabindex="-1"></a>        dx <span class="op">=</span> end[<span class="dv">0</span>] <span class="op">-</span> start[<span class="dv">0</span>]</span>
+<span id="cb21-430"><a href="#cb21-430" aria-hidden="true" tabindex="-1"></a>        dy <span class="op">=</span> end[<span class="dv">1</span>] <span class="op">-</span> start[<span class="dv">1</span>]</span>
+<span id="cb21-431"><a href="#cb21-431" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> dx <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb21-432"><a href="#cb21-432" aria-hidden="true" tabindex="-1"></a>            edges.append(LineSegment(start[<span class="dv">0</span>], start[<span class="dv">1</span>], end[<span class="dv">1</span>], <span class="st">"v"</span>))</span>
+<span id="cb21-433"><a href="#cb21-433" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb21-434"><a href="#cb21-434" aria-hidden="true" tabindex="-1"></a>            edges.append(LineSegment(start[<span class="dv">1</span>], start[<span class="dv">0</span>], end[<span class="dv">0</span>], <span class="st">"h"</span>))</span>
+<span id="cb21-435"><a href="#cb21-435" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> edges</span>
+<span id="cb21-436"><a href="#cb21-436" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-437"><a href="#cb21-437" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-438"><a href="#cb21-438" aria-hidden="true" tabindex="-1"></a>edges <span class="op">=</span> points_to_edges(data)</span>
+<span id="cb21-439"><a href="#cb21-439" aria-hidden="true" tabindex="-1"></a>direction <span class="op">=</span> np.sign(</span>
+<span id="cb21-440"><a href="#cb21-440" aria-hidden="true" tabindex="-1"></a>    <span class="bu">sum</span>(e.position <span class="op">*</span> (e.x1 <span class="op">-</span> e.x0) <span class="op">*</span> e.direction <span class="cf">for</span> e <span class="kw">in</span> edges <span class="cf">if</span> e.orientation <span class="op">==</span> <span class="st">"h"</span>)</span>
+<span id="cb21-441"><a href="#cb21-441" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-442"><a href="#cb21-442" aria-hidden="true" tabindex="-1"></a>vertical_edges <span class="op">=</span> <span class="bu">sorted</span>(</span>
+<span id="cb21-443"><a href="#cb21-443" aria-hidden="true" tabindex="-1"></a>    [e <span class="cf">for</span> e <span class="kw">in</span> edges <span class="cf">if</span> e.orientation <span class="op">==</span> <span class="st">"v"</span>], key<span class="op">=</span><span class="kw">lambda</span> x: x.position</span>
+<span id="cb21-444"><a href="#cb21-444" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-445"><a href="#cb21-445" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-446"><a href="#cb21-446" aria-hidden="true" tabindex="-1"></a>horizontal_edges <span class="op">=</span> <span class="bu">sorted</span>(</span>
+<span id="cb21-447"><a href="#cb21-447" aria-hidden="true" tabindex="-1"></a>    [e <span class="cf">for</span> e <span class="kw">in</span> edges <span class="cf">if</span> e.orientation <span class="op">==</span> <span class="st">"h"</span>], key<span class="op">=</span><span class="kw">lambda</span> x: x.position</span>
+<span id="cb21-448"><a href="#cb21-448" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-449"><a href="#cb21-449" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-450"><a href="#cb21-450" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-451"><a href="#cb21-451" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> point_in_polygon(point):</span>
+<span id="cb21-452"><a href="#cb21-452" aria-hidden="true" tabindex="-1"></a>    x, y <span class="op">=</span> point</span>
+<span id="cb21-453"><a href="#cb21-453" aria-hidden="true" tabindex="-1"></a>    total <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb21-454"><a href="#cb21-454" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> edge <span class="kw">in</span> horizontal_edges:</span>
+<span id="cb21-455"><a href="#cb21-455" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> edge.position <span class="op">&gt;</span> y:</span>
+<span id="cb21-456"><a href="#cb21-456" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
+<span id="cb21-457"><a href="#cb21-457" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> edge.position <span class="op">==</span> y <span class="kw">and</span> edge.contains_point(x, endpoints<span class="op">=</span><span class="va">True</span>):</span>
+<span id="cb21-458"><a href="#cb21-458" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="va">True</span></span>
+<span id="cb21-459"><a href="#cb21-459" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> edge <span class="kw">in</span> vertical_edges:</span>
+<span id="cb21-460"><a href="#cb21-460" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> edge.position <span class="op">&gt;</span> x:</span>
+<span id="cb21-461"><a href="#cb21-461" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
+<span id="cb21-462"><a href="#cb21-462" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> edge.position <span class="op">==</span> x:</span>
+<span id="cb21-463"><a href="#cb21-463" aria-hidden="true" tabindex="-1"></a>            <span class="co"># print(edge, x, y)</span></span>
+<span id="cb21-464"><a href="#cb21-464" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> edge.contains_point(y, endpoints<span class="op">=</span><span class="va">True</span>):</span>
+<span id="cb21-465"><a href="#cb21-465" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> <span class="va">True</span></span>
+<span id="cb21-466"><a href="#cb21-466" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> edge.x0 <span class="op">&lt;=</span> y <span class="op">&lt;</span> edge.x1:</span>
+<span id="cb21-467"><a href="#cb21-467" aria-hidden="true" tabindex="-1"></a>            total <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb21-468"><a href="#cb21-468" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">bool</span>(total <span class="op">%</span> <span class="dv">2</span>)</span>
+<span id="cb21-469"><a href="#cb21-469" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-470"><a href="#cb21-470" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-471"><a href="#cb21-471" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> idx <span class="kw">in</span> (<span class="op">-</span>np.triu(areas)).ravel().argsort():</span>
+<span id="cb21-472"><a href="#cb21-472" aria-hidden="true" tabindex="-1"></a>    i1, i2 <span class="op">=</span> np.unravel_index(idx, areas.shape)</span>
+<span id="cb21-473"><a href="#cb21-473" aria-hidden="true" tabindex="-1"></a>    p1 <span class="op">=</span> data[i1]</span>
+<span id="cb21-474"><a href="#cb21-474" aria-hidden="true" tabindex="-1"></a>    p2 <span class="op">=</span> data[i2]</span>
+<span id="cb21-475"><a href="#cb21-475" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> point_in_polygon((p2[<span class="dv">0</span>], p1[<span class="dv">1</span>])) <span class="kw">or</span> <span class="kw">not</span> point_in_polygon((p1[<span class="dv">0</span>], p2[<span class="dv">1</span>])):</span>
+<span id="cb21-476"><a href="#cb21-476" aria-hidden="true" tabindex="-1"></a>        <span class="cf">continue</span></span>
+<span id="cb21-477"><a href="#cb21-477" aria-hidden="true" tabindex="-1"></a>    xmin, xmax <span class="op">=</span> <span class="bu">sorted</span>([p1[<span class="dv">0</span>], p2[<span class="dv">0</span>]])</span>
+<span id="cb21-478"><a href="#cb21-478" aria-hidden="true" tabindex="-1"></a>    ymin, ymax <span class="op">=</span> <span class="bu">sorted</span>([p1[<span class="dv">1</span>], p2[<span class="dv">1</span>]])</span>
+<span id="cb21-479"><a href="#cb21-479" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> direction <span class="op">==</span> <span class="dv">1</span>:</span>
+<span id="cb21-480"><a href="#cb21-480" aria-hidden="true" tabindex="-1"></a>        points <span class="op">=</span> [(xmax, ymax), (xmax, ymin), (xmin, ymin), (xmin, ymax), (xmax, ymax)]</span>
+<span id="cb21-481"><a href="#cb21-481" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb21-482"><a href="#cb21-482" aria-hidden="true" tabindex="-1"></a>        points <span class="op">=</span> [(xmax, ymax), (xmin, ymax), (xmin, ymin), (xmax, ymin), (xmax, ymax)]</span>
+<span id="cb21-483"><a href="#cb21-483" aria-hidden="true" tabindex="-1"></a>    rect_edges <span class="op">=</span> points_to_edges(points)</span>
+<span id="cb21-484"><a href="#cb21-484" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> e1, e2 <span class="kw">in</span> itertools.product(rect_edges, edges):</span>
+<span id="cb21-485"><a href="#cb21-485" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> e1.intersects(e2) <span class="kw">or</span> (e1.overlaps(e2) <span class="kw">and</span> e1.direction <span class="op">!=</span> e2.direction):</span>
+<span id="cb21-486"><a href="#cb21-486" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
+<span id="cb21-487"><a href="#cb21-487" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb21-488"><a href="#cb21-488" aria-hidden="true" tabindex="-1"></a>        <span class="cf">break</span></span>
+<span id="cb21-489"><a href="#cb21-489" aria-hidden="true" tabindex="-1"></a>areas[i1, i2]</span>
+<span id="cb21-490"><a href="#cb21-490" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb21-491"><a href="#cb21-491" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-492"><a href="#cb21-492" aria-hidden="true" tabindex="-1"></a>This could be made significantly faster by using a sweep line algorithm to identify the intersections instead of just trying all of them, but it runs fast enough as is.</span>
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
